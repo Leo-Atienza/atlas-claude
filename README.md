@@ -36,35 +36,35 @@ ATLAS isn't a CLAUDE.md with some rules. It's a **full infrastructure layer** th
 
 ```
        ┌──────────────────────────────────────────────┐
-       │                  A T L A S                    │
-       │     Autonomous Task, Learning & Agent System  │
+       │                  A T L A S                   │
+       │     Autonomous Task, Learning & Agent System │
        ├──────────────────────────────────────────────┤
        │                                              │
        │  /new  /resume  /task  /done  /ship          │  ← 5 Entry Points
        │         │                                    │
        │         ▼                                    │
-       │  ┌─────────────┐  ┌──────────────────────┐  │
-       │  │ Flow System  │  │  Smart Swarm (auto)  │  │  ← Task Routing
-       │  │ quick→epic   │  │  SOLO→DUO→TEAM→SWARM │  │
-       │  └──────┬──────┘  └──────────┬───────────┘  │
+       │  ┌─────────────┐  ┌───────────────────────┐  │
+       │  │ Flow System │  │  Smart Swarm (auto)   │  │  ← Task Routing
+       │  │ quick→epic  │  │  SOLO→DUO→TEAM→SWARM  │  │
+       │  └──────┬──────┘  └──────────┬────────────┘  │
        │         │                    │               │
        │         ▼                    ▼               │
-       │  ┌──────────┐  ┌────────┐  ┌────────────┐   │
-       │  │ 282      │  │ 72+    │  │ 8 Hooks    │   │  ← Execution
-       │  │ Skills   │  │ Agents │  │ (lifecycle)│   │
-       │  └──────────┘  └────────┘  └────────────┘   │
+       │  ┌──────────┐  ┌────────┐  ┌────────────┐    │
+       │  │ 282      │  │ 72+    │  │ 8 Hooks    │    │  ← Execution
+       │  │ Skills   │  │ Agents │  │ (lifecycle)│    │
+       │  └──────────┘  └────────┘  └────────────┘    │
        │         │                    │               │
        │         ▼                    ▼               │
-       │  ┌──────────────────────────────────────┐    │
+       │  ┌───────────────────────────────────────┐   │
        │  │  Self-Evolution  │  Mistake Learning  │   │  ← Growth
        │  │  (auto-create    │  (capture→pattern  │   │
        │  │   skills+MCPs)   │   →permanent rule) │   │
-       │  └──────────────────────────────────────┘    │
+       │  └───────────────────────────────────────┘   │
        │         │                                    │
        │         ▼                                    │
        │  ┌──────────────────────────────────────┐    │
-       │  │  Auto-Continuation (at 70% context)   │   │  ← Persistence
-       │  │  handoff → new session → --resume     │   │
+       │  │  Auto-Continuation (at 70% context)  │    │  ← Persistence
+       │  │  handoff → new session → --resume    │    │
        │  └──────────────────────────────────────┘    │
        └──────────────────────────────────────────────┘
 ```
