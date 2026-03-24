@@ -1,9 +1,10 @@
 #!/bin/bash
-# Leo's Claude System — Quick Install
+# ATLAS — Autonomous Task, Learning, and Agent System
+# Quick Install by Leo Atienza
 # Usage: bash install.sh
 #
-# This installs the core infrastructure (hooks, rules, scripts, key skills).
-# It does NOT overwrite existing files — safe to run on an existing setup.
+# Installs core infrastructure (hooks, rules, scripts, key skills).
+# Does NOT overwrite existing files — safe to run on an existing setup.
 
 set -euo pipefail
 
@@ -11,7 +12,14 @@ CLAUDE_DIR="$HOME/.claude"
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 EXAMPLES_DIR="$SCRIPT_DIR/examples"
 
-echo "=== Leo's Claude System Installer ==="
+echo ""
+echo "    ╔═══════════════════════════════════════════╗"
+echo "    ║              A T L A S                    ║"
+echo "    ║  Autonomous Task, Learning & Agent System ║"
+echo "    ║           by Leo Atienza                  ║"
+echo "    ╚═══════════════════════════════════════════╝"
+echo ""
+echo "=== Installing ATLAS ==="
 echo ""
 
 # Create directories
@@ -75,7 +83,7 @@ touch "$CLAUDE_DIR/logs/failures.jsonl"
 test -f "$CLAUDE_DIR/logs/error-patterns.json" || echo '{}' > "$CLAUDE_DIR/logs/error-patterns.json"
 
 echo ""
-echo "=== Installation Complete ==="
+echo "=== ATLAS Installation Complete ==="
 echo ""
 echo "Installed to: $CLAUDE_DIR"
 echo ""
@@ -83,6 +91,6 @@ echo "Next steps:"
 echo "  1. Review ~/.claude/CLAUDE.md and customize for your workflow"
 echo "  2. Review ~/.claude/settings.json and adjust hooks/permissions"
 echo "  3. Run: bash ~/.claude/scripts/smoke-test.sh"
-echo "  4. Start Claude Code and enjoy your new system"
+echo "  4. Start Claude Code — ATLAS takes over from there"
 echo ""
-echo "Full docs: https://github.com/Leo-Atienza/claude-system"
+echo "Docs: https://github.com/Leo-Atienza/atlas-claude"
