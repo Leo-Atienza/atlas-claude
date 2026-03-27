@@ -96,6 +96,20 @@ Auth/crypto → `trailofbits-security/insecure-defaults/`. Found vuln → `trail
 Context7 before recommending library patterns. DevOps generators always paired with validators.
 Knowledge compounding: after non-trivial solutions, offer `/flow:compound`.
 
+**Tier Routing (always)**: When spawning agents, apply `rules/tier-routing.md`:
+Tier 1 (Bash) for deterministic transforms, Tier 2 (`model: "haiku"`) for pattern tasks,
+Tier 3 (`model: "sonnet"`) for standard work, Tier 4 (Opus/default) for complex reasoning.
+Agent profiler (HK-010) tracks per-agent EMA reliability in `logs/agent-profiles-summary.json`.
+
+**Background Workers (deep/epic depth)**: During `/flow:go`, auto-spawn background quality agents
+per `flow/references/background-workers.md`. Never block execution on workers.
+
+**Truth Verification (flow:verify)**: Confidence scoring gate per `flow/references/truth-verification.md`.
+>=0.95 auto-pass, 0.80-0.94 auto-pass with advisory, <0.80 auto-trigger gap closure. All automatic — never blocks.
+
+**Project Init (on /new)**: Auto-generate project CLAUDE.md from stack-detected templates (SK-041).
+Detects Next.js, Python, Flutter, Go, Rust, Rails, Node, .NET. Never overwrites existing.
+
 Detailed activation tables (built-in skills, UI Design Stack layers, DevOps triggers): `skills/PLAYBOOK-QUALITY.md`
 
 ## MCP — Lazy via TOOL_SEARCH
@@ -104,13 +118,13 @@ Prefer MCP over CLI. TOOL_SEARCH active — discover tools on demand. One Contex
 
 ## Scratchpad Directory
 
-Use a dedicated scratchpad directory for ALL temporary file needs instead of `/tmp` or system temp dirs:
-- **Linux/macOS**: `/tmp/claude-scratchpad/`
-- **Windows (Git Bash)**: `/c/tmp/claude-scratchpad/` or `C:/tmp/claude-scratchpad/`
+Use `C:/tmp/claude-scratchpad/` for ALL temporary file needs instead of `/tmp` or system temp dirs:
+- Intermediate results during multi-step tasks
+- Temporary scripts, configs, or working files
+- Outputs that don't belong in the user's project
+- Analysis artifacts, diffs, or data processing
 
-Contents: intermediate results, temporary scripts, configs, working files, outputs that don't belong in the user's project, analysis artifacts.
-
-Create the directory on first use: `mkdir -p /tmp/claude-scratchpad/` (or the Windows equivalent). This is isolated from projects and can be used freely.
+Create the directory on first use: `mkdir -p /c/tmp/claude-scratchpad/`. This is isolated from projects and can be used freely.
 
 ## Auto Mode
 

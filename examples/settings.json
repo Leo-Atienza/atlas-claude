@@ -44,6 +44,16 @@
             "timeout": 5
           }
         ]
+      },
+      {
+        "matcher": "Agent",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 ~/.claude/hooks/agent-profiler.py",
+            "timeout": 5
+          }
+        ]
       }
     ],
     "PreToolUse": [

@@ -92,6 +92,25 @@ Write `synthesis.md` summarizing:
 - Archive swarm directory if fully successful
 - Leave it if there's remaining work for the user
 
+## Tier Routing Integration
+
+When spawning agents, apply `rules/tier-routing.md` model selection:
+
+| Swarm Mode | Agent Role | Model Tier |
+|------------|-----------|------------|
+| **SOLO** | Single executor | Tier 2 (haiku) if trivial, Tier 3 (sonnet) otherwise |
+| **DUO** | Test writer | Tier 2 (haiku) — pattern-based |
+| **DUO** | Implementer | Tier 3 (sonnet) |
+| **TEAM** | Coordinator | Tier 4 (opus) — needs reasoning |
+| **TEAM** | Executors | Tier 3 (sonnet) |
+| **TEAM** | Verifier | Tier 3 (sonnet) |
+| **SWARM** | Planner | Tier 4 (opus) |
+| **SWARM** | Executors | Tier 3 (sonnet) |
+| **SWARM** | Verifier/UAT | Tier 3 (sonnet) |
+
+Consult `logs/agent-profiles-summary.json` if available — prefer agents with reliability > 0.7.
+If an agent type consistently underperforms (reliability < 0.4), escalate to a higher tier.
+
 ## Cost Awareness
 
 Before spawning, estimate token usage:
