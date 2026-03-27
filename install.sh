@@ -23,7 +23,7 @@ echo "=== Installing ATLAS ==="
 echo ""
 
 # Create directories
-for dir in hooks scripts rules skills/self-evolve/templates skills/smart-swarm commands/flow agents logs sessions; do
+for dir in hooks scripts rules skills/self-evolve/templates skills/smart-swarm commands/flow agents logs sessions scheduled-tasks; do
   mkdir -p "$CLAUDE_DIR/$dir"
 done
 echo "Directories created."
@@ -72,6 +72,14 @@ copy_if_missing "$EXAMPLES_DIR/commands/flow/smart-swarm.md" "$CLAUDE_DIR/comman
 echo ""
 echo "Installing agents..."
 copy_if_missing "$EXAMPLES_DIR/agents/smart-swarm-coordinator.md" "$CLAUDE_DIR/agents/smart-swarm-coordinator.md"
+
+echo ""
+echo "Installing scheduled tasks..."
+for task_dir in "$EXAMPLES_DIR"/scheduled-tasks/*/; do
+  task_name="$(basename "$task_dir")"
+  mkdir -p "$CLAUDE_DIR/scheduled-tasks/$task_name"
+  copy_if_missing "$task_dir/SKILL.md" "$CLAUDE_DIR/scheduled-tasks/$task_name/SKILL.md"
+done
 
 echo ""
 echo "Installing config..."

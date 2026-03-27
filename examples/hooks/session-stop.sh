@@ -3,8 +3,15 @@
 # Combines: session-stop-flag.sh + claudio
 # The agent-type verification hook remains separate in settings.json.
 
-MEMORY_DIR="$HOME/.claude/projects/C--Users-leooa--claude/memory"
-SESSIONS_DIR="$MEMORY_DIR/sessions"
+# Derive memory directory dynamically (find first project with memory/)
+MEMORY_DIR=""
+for d in "$HOME/.claude/projects"/*/memory; do
+  if [ -d "$d" ]; then
+    MEMORY_DIR="$d"
+    break
+  fi
+done
+SESSIONS_DIR="${MEMORY_DIR:+$MEMORY_DIR/sessions}"
 FLAG_FILE="$HOME/.claude/.pending-reflection"
 HANDOFF_FILE="$HOME/.claude/.last-session-handoff"
 TODAY=$(date +%Y-%m-%d)
@@ -12,7 +19,7 @@ NOW=$(date +%H:%M:%S)
 
 # ─── 1. Reflection flag check ────────────────────────────────────────
 REFLECTED=false
-if [ -d "$SESSIONS_DIR" ]; then
+if [ -n "$SESSIONS_DIR" ] && [ -d "$SESSIONS_DIR" ]; then
   for f in "$SESSIONS_DIR"/${TODAY}*.md; do
     if [ -f "$f" ]; then
       REFLECTED=true

@@ -10,12 +10,13 @@
 
 <p align="center">
   A self-evolving AI operating system for Claude Code<br>
-  <sub>282 skills &bull; 72+ agents &bull; 176 resources &bull; 15+ languages &bull; 8 lifecycle hooks</sub>
+  <sub>282 skills &bull; 72+ agents &bull; 176 resources &bull; 15+ languages &bull; 9 lifecycle hooks</sub>
 </p>
 
 <p align="center">
   <a href="#quick-start">Quick Start</a> &bull;
   <a href="#the-7-autonomous-behaviors">7 Behaviors</a> &bull;
+  <a href="#the-6-entry-points">6 Entry Points</a> &bull;
   <a href="#the-flow-system">Flow System</a> &bull;
   <a href="#skill-domains">Skills</a> &bull;
   <a href="#hook-lifecycle">Hooks</a>
@@ -40,7 +41,7 @@ ATLAS isn't a CLAUDE.md with some rules. It's a **full infrastructure layer** th
        │     Autonomous Task, Learning & Agent System │
        ├──────────────────────────────────────────────┤
        │                                              │
-       │  /new  /resume  /task  /done  /ship          │  ← 5 Entry Points
+       │  /new  /resume  /task  /done  /ship  /dream   │  ← 6 Entry Points
        │         │                                    │
        │         ▼                                    │
        │  ┌─────────────┐  ┌───────────────────────┐  │
@@ -50,7 +51,7 @@ ATLAS isn't a CLAUDE.md with some rules. It's a **full infrastructure layer** th
        │         │                    │               │
        │         ▼                    ▼               │
        │  ┌──────────┐  ┌────────┐  ┌────────────┐    │
-       │  │ 282      │  │ 72+    │  │ 8 Hooks    │    │  ← Execution
+       │  │ 282      │  │ 72+    │  │ 9 Hooks    │    │  ← Execution
        │  │ Skills   │  │ Agents │  │ (lifecycle)│    │
        │  └──────────┘  └────────┘  └────────────┘    │
        │         │                    │               │
@@ -87,9 +88,9 @@ bash ~/.claude/scripts/smoke-test.sh
 
 The installer creates the full directory structure and copies core files to `~/.claude/`. Existing files are preserved.
 
-## The 5 Entry Points
+## The 6 Entry Points
 
-Everything funnels through 5 commands. You never need to think about the 282 skills, 72 agents, or 20 Flow commands underneath.
+Everything funnels through 6 commands. You never need to think about the 282 skills, 72 agents, or 20 Flow commands underneath.
 
 | Command | What You Say | What ATLAS Does |
 |---------|-------------|-----------------|
@@ -98,6 +99,7 @@ Everything funnels through 5 commands. You never need to think about the 282 ski
 | `/task` | "fix X", "add X" | One-off task → auto-routes by complexity scoring |
 | `/done` | "wrap up" | Reflects → captures knowledge → saves state → commits |
 | `/ship` | "push this" | Commits → pushes → opens PR → security scan |
+| `/dream` | "consolidate memories" | Deep memory consolidation → merge duplicates → prune stale → resolve conflicts |
 
 ## The 7 Autonomous Behaviors
 
@@ -246,6 +248,10 @@ Trivial ──→ Quick ──→ Standard ──→ Deep ──→ Epic
 │  precompact-reflect.sh → force reflection before cutoff    │
 └────────────────────────────────────────────────────────────┘
 
+┌─ PostCompact ─────────────────────────────────────────────┐
+│  post-compact-dream-check.sh → auto-dream if threshold    │
+└────────────────────────────────────────────────────────────┘
+
 ┌─ Stop ─────────────────────────────────────────────────────┐
 │  session-stop.sh → handoff, todos, auto-continuation       │
 │  verify-completion.py → task completion check               │
@@ -297,7 +303,9 @@ atlas-claude/
     │   ├── session-stop.sh        # Handoff + todos + auto-continuation
     │   ├── statusline.js          # Visual status bar
     │   ├── security-gate.sh       # Secrets/credentials blocking
-    │   └── mistake-capture.py     # Failure logging + pattern detection
+    │   ├── mistake-capture.py     # Failure logging + pattern detection
+    │   ├── verify-completion.py   # Task completion verification
+    │   └── post-compact-dream-check.sh  # Auto-dream after context compaction
     ├── rules/
     │   ├── general.md     # Platform, code quality, naming, workflow
     │   ├── git.md         # Branch naming, commits, PRs
@@ -312,31 +320,35 @@ atlas-claude/
     ├── commands/
     │   ├── continue.md            # Manual session continuation
     │   └── flow/smart-swarm.md    # Complexity-scored agent deployment
+    ├── scheduled-tasks/
+    │   ├── weekly-dream/           # Weekly memory consolidation (Mon 9:17am)
+    │   ├── weekly-maintenance/     # System health + mistake analysis (Mon 9:00am)
+    │   ├── weekly-cleanup-scan/    # Disk, hooks, stale files (Mon 9:30am)
+    │   ├── weekly-memory-maintenance/  # Session pruning, INDEX consistency (Mon 9:45am)
+    │   └── monthly-evolution-report/   # Knowledge growth + optimization (1st of month)
     └── agents/
         └── smart-swarm-coordinator.md  # Multi-agent team orchestrator
 ```
 
-## Compared to the Community
+## Optional Components
 
-| Setup | Skills | Agents | Auto-Continue | Self-Evolve | Smart Swarm |
-|-------|--------|--------|---------------|-------------|-------------|
-| **ATLAS** | **282** | **72+** | **Yes** | **Yes** | **Yes** |
-| Boris Cherny (CC creator) | ~5 | 2 | No | No | No |
-| Chris Wiles (enterprise) | ~20 | ~5 | No | No | No |
-| Shinpr (multi-agent) | ~10 | ~20 | No | No | Partial |
-| Community average | 2-5 | 0-2 | No | No | No |
+Some hooks in `settings.json` reference components **not included** in this repo. They degrade gracefully (silent no-op if missing):
 
-## What's Novel (Not Found Elsewhere)
+| Component | Referenced By | Purpose | How to Get |
+|-----------|--------------|---------|-----------|
+| `cctools-safety-hooks/` | PreToolUse hooks | Blocks dangerous bash commands, file length limits, env file protection | Install [cctools](https://github.com/anthropics/claude-code-community-tools) to `~/.claude/hooks/cctools-safety-hooks/` |
+| `progressive-learning/precompact-reflect.sh` | PreCompact hook | Forces reflection before context compaction | Create manually or remove the PreCompact hook entry |
+| `claudio` | Notification hook, session scripts | Audio notification on events | Optional binary at `~/.claude/bin/claudio` — remove the hook entry if not needed |
+
+If you don't need these, simply delete the corresponding entries from `settings.json` after installation.
+
+## What's Novel
 
 1. **Auto-continuation** — context-aware session chaining with structured handoff
 2. **5D complexity scoring** — automatic agent team deployment without asking
 3. **Self-evolution** — creates skills and adds MCP servers when gaps detected
 4. **Three-loop learning** — mistake capture → pattern detection → permanent rules
 5. **Context monitor** — real-time awareness with debounce and escalation
-
-## Research
-
-ATLAS was informed by deep research across X/Twitter, Reddit, GitHub, and blogs — covering 25+ contributors and their techniques. The full community intelligence report is available in the repo wiki.
 
 ## License
 

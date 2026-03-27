@@ -6,9 +6,20 @@
 HOME_DIR="$HOME"
 CLAUDE_DIR="$HOME_DIR/.claude"
 
+# Derive the project memory directory dynamically
+# Claude Code stores per-project memory in ~/.claude/projects/<encoded-path>/memory/
+# Find the first project directory that has a memory/ subdirectory
+MEMORY_DIR=""
+for d in "$CLAUDE_DIR/projects"/*/memory; do
+  if [ -d "$d" ]; then
+    MEMORY_DIR="$d"
+    break
+  fi
+done
+
 # ─── 1. Progressive Learning checks ───────────────────────────────────
 FLAG_FILE="$CLAUDE_DIR/.pending-reflection"
-CONFLICTS_FILE="$CLAUDE_DIR/projects/C--Users-leooa--claude/memory/conflicts.md"
+CONFLICTS_FILE="${MEMORY_DIR:+$MEMORY_DIR/conflicts.md}"
 HANDOFF_FILE="$CLAUDE_DIR/.last-session-handoff"
 
 if [ -f "$FLAG_FILE" ]; then
@@ -19,7 +30,7 @@ if [ -f "$FLAG_FILE" ]; then
   echo "Run /reflect if you can recall the session context."
 fi
 
-if [ -f "$CONFLICTS_FILE" ]; then
+if [ -n "$CONFLICTS_FILE" ] && [ -f "$CONFLICTS_FILE" ]; then
   CONFLICT_COUNT=$(grep -c "^## CONFLICT-[0-9]" "$CONFLICTS_FILE" 2>/dev/null || echo "0")
   if [ "$CONFLICT_COUNT" -gt 0 ]; then
     echo ""
@@ -148,8 +159,11 @@ if [ -n "$CURRENT_VER" ]; then
 fi
 
 # ─── 5. Lessons & error pattern summary ──────────────────────────────
-TOPICS_DIR="$CLAUDE_DIR/projects/C--Users-leooa--claude/memory/topics"
-ERR_COUNT=$(ls "$TOPICS_DIR"/G-ERR-*.md 2>/dev/null | wc -l)
+TOPICS_DIR="${MEMORY_DIR:+$MEMORY_DIR/topics}"
+ERR_COUNT=0
+if [ -n "$TOPICS_DIR" ] && [ -d "$TOPICS_DIR" ]; then
+  ERR_COUNT=$(ls "$TOPICS_DIR"/G-ERR-*.md 2>/dev/null | wc -l)
+fi
 
 FAILURES_LOG="$CLAUDE_DIR/logs/failures.jsonl"
 FAIL_COUNT=0
@@ -208,5 +222,48 @@ if [ -d "$LOGS_DIR" ]; then
   done
 fi
 
-# ─── 8. Claudio audio ────────────────────────────────────────────────
+# ─── 8. Dream memory consolidation check ─────────────────────────────
+DREAM_STATE_FILE="/tmp/claude-dream-last-run"
+DREAM_INTERVAL_DAYS=7
+# MEMORY_DIR already set dynamically above
+
+NEED_DREAM=false
+DREAM_REASON=""
+
+# Check time since last dream
+if [ -f "$DREAM_STATE_FILE" ]; then
+  LAST_DREAM=$(cat "$DREAM_STATE_FILE")
+  DREAM_ELAPSED=$(( (NOW - LAST_DREAM) / 86400 ))
+  if [ "$DREAM_ELAPSED" -ge "$DREAM_INTERVAL_DAYS" ]; then
+    NEED_DREAM=true
+    DREAM_REASON="Last memory consolidation was ${DREAM_ELAPSED} days ago."
+  fi
+else
+  NEED_DREAM=true
+  DREAM_REASON="No previous memory consolidation recorded."
+fi
+
+# Check memory file count (threshold: 50+)
+if [ "$NEED_DREAM" = false ] && [ -n "$MEMORY_DIR" ] && [ -d "$MEMORY_DIR" ]; then
+  MEM_FILE_COUNT=$(find "$MEMORY_DIR" -maxdepth 1 -name "*.md" 2>/dev/null | wc -l)
+  if [ "$MEM_FILE_COUNT" -gt 50 ]; then
+    NEED_DREAM=true
+    DREAM_REASON="Memory directory has ${MEM_FILE_COUNT} files (threshold: 50)."
+  fi
+fi
+
+# Check MEMORY.md line count (threshold: 150+)
+if [ "$NEED_DREAM" = false ] && [ -n "$MEMORY_DIR" ] && [ -f "$MEMORY_DIR/MEMORY.md" ]; then
+  MEM_LINES=$(wc -l < "$MEMORY_DIR/MEMORY.md" 2>/dev/null || echo "0")
+  if [ "$MEM_LINES" -gt 150 ]; then
+    NEED_DREAM=true
+    DREAM_REASON="MEMORY.md has ${MEM_LINES} lines (threshold: 150)."
+  fi
+fi
+
+if [ "$NEED_DREAM" = true ]; then
+  echo "DREAM NEEDED: ${DREAM_REASON} Run /dream to consolidate memories."
+fi
+
+# ─── 9. Claudio audio ────────────────────────────────────────────────
 "$CLAUDE_DIR/bin/claudio" 2>/dev/null || true

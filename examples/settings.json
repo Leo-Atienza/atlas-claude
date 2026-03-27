@@ -1,16 +1,28 @@
 {
+  "defaultMode": "bypassPermissions",
   "env": {
     "CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS": "1",
     "ENABLE_TOOL_SEARCH": "auto"
   },
   "hooks": {
+    "Notification": [
+      {
+        "matcher": ".*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "~/.claude/bin/claudio || true"
+          }
+        ]
+      }
+    ],
     "PostToolUse": [
       {
         "matcher": "Write|Edit|MultiEdit",
         "hooks": [
           {
             "type": "command",
-            "command": "(test -f package.json && npm run format 2>/dev/null) || true"
+            "command": "(test -f pubspec.yaml && dart format . 2>/dev/null) || (test -f package.json && (bun run format 2>/dev/null || npm run format 2>/dev/null)) || true"
           }
         ]
       },
@@ -44,6 +56,56 @@
             "statusMessage": "Security check..."
           }
         ]
+      },
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "CLAUDE_PLUGIN_ROOT=$HOME/.claude/hooks/cctools-safety-hooks python3 ~/.claude/hooks/cctools-safety-hooks/bash_hook.py",
+            "timeout": 5
+          }
+        ]
+      },
+      {
+        "matcher": "Write|Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "CLAUDE_PLUGIN_ROOT=$HOME/.claude/hooks/cctools-safety-hooks python3 ~/.claude/hooks/cctools-safety-hooks/file_length_limit_hook.py",
+            "timeout": 5
+          }
+        ]
+      },
+      {
+        "matcher": "Read",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "CLAUDE_PLUGIN_ROOT=$HOME/.claude/hooks/cctools-safety-hooks python3 ~/.claude/hooks/cctools-safety-hooks/read_env_protection_hook.py",
+            "timeout": 5
+          }
+        ]
+      }
+    ],
+    "PreCompact": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash ~/.claude/scripts/progressive-learning/precompact-reflect.sh"
+          }
+        ]
+      }
+    ],
+    "PostCompact": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash ~/.claude/hooks/post-compact-dream-check.sh"
+          }
+        ]
       }
     ],
     "SessionStart": [
@@ -64,11 +126,40 @@
             "command": "bash ~/.claude/hooks/session-stop.sh"
           }
         ]
+      },
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 ~/.claude/hooks/verify-completion.py",
+            "timeout": 10
+          }
+        ]
+      },
+      {
+        "hooks": [
+          {
+            "type": "agent",
+            "timeout": 120,
+            "statusMessage": "Verifying completion & running tests..."
+          }
+        ]
       }
     ]
   },
   "statusLine": {
     "type": "command",
     "command": "node ~/.claude/hooks/statusline.js"
+  },
+  "enabledPlugins": {
+    "agent-sdk-dev@claude-plugins-official": true,
+    "claude-code-setup@claude-plugins-official": true,
+    "claude-md-management@claude-plugins-official": true,
+    "code-review@claude-plugins-official": true,
+    "commit-commands@claude-plugins-official": true,
+    "feature-dev@claude-plugins-official": true,
+    "figma@claude-plugins-official": true,
+    "firebase@claude-plugins-official": true,
+    "github@claude-plugins-official": true
   }
 }
