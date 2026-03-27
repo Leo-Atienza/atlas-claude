@@ -10,12 +10,12 @@
 
 <p align="center">
   A self-evolving AI operating system for Claude Code<br>
-  <sub>282 skills &bull; 72+ agents &bull; 176 resources &bull; 15+ languages &bull; 9 lifecycle hooks</sub>
+  <sub>282 skills &bull; 72+ agents &bull; 176 resources &bull; 15+ languages &bull; 10 lifecycle hooks</sub>
 </p>
 
 <p align="center">
   <a href="#quick-start">Quick Start</a> &bull;
-  <a href="#the-7-autonomous-behaviors">7 Behaviors</a> &bull;
+  <a href="#the-8-autonomous-behaviors">8 Behaviors</a> &bull;
   <a href="#the-6-entry-points">6 Entry Points</a> &bull;
   <a href="#the-flow-system">Flow System</a> &bull;
   <a href="#skill-domains">Skills</a> &bull;
@@ -101,7 +101,7 @@ Everything funnels through 6 commands. You never need to think about the 282 ski
 | `/ship` | "push this" | Commits → pushes → opens PR → security scan |
 | `/dream` | "consolidate memories" | Deep memory consolidation → merge duplicates → prune stale → resolve conflicts |
 
-## The 7 Autonomous Behaviors
+## The 8 Autonomous Behaviors
 
 These happen **without user action**. ATLAS monitors, decides, and acts.
 
@@ -178,7 +178,24 @@ Loop 3: Claude Code update detected → changelog impact assessment
         → /system-update applies changes
 ```
 
-### 7. Defense-in-Depth Security
+### 7. Skill Archiving & Auto-Recovery
+
+Skills you don't currently use are archived — not deleted. When you start a project that needs them, they come back automatically.
+
+```
+SessionStart → skill-watcher.sh scans project files
+  → Dockerfile found? → AUTO-ACTIVATE: dockerfile-generator (DV-005)
+  → go.mod found? → AUTO-ACTIVATE: golang-pro (FS-004)
+  → *.sol found? → AUTO-ACTIVATE: building-secure-contracts (SC-013)
+
+Monthly (1st of month) → skill-usage-audit scheduled task
+  → Detected 1+ times → auto-unarchive to active in REGISTRY.md
+  → Not detected in 3+ months → auto-remove skill files
+```
+
+Detection patterns live in `archived-skills-manifest.json` — file globs, package names, and keywords for 60+ technologies. Zero manual maintenance.
+
+### 8. Defense-in-Depth Security
 
 ```
 Layer 1 (PreToolUse):  security-gate.sh — blocks 20+ secret patterns in ~10ms
@@ -229,6 +246,7 @@ Trivial ──→ Quick ──→ Standard ──→ Deep ──→ Epic
 │  Version staleness + Claude Code version detection         │
 │  Mistake pattern summary                                   │
 │  Stale plan cleanup + log rotation                         │
+│  skill-watcher.sh → auto-activate archived skills          │
 └────────────────────────────────────────────────────────────┘
 
 ┌─ PreToolUse ───────────────────────────────────────────────┐
@@ -242,6 +260,7 @@ Trivial ──→ Quick ──→ Standard ──→ Deep ──→ Epic
 │  Auto-formatter (prettier / dart format)                   │
 │  context-monitor.js → tracks usage, triggers continuation  │
 │  mistake-capture.py → logs failures, detects patterns      │
+│  agent-profiler.py → EMA reliability tracking per agent    │
 └────────────────────────────────────────────────────────────┘
 
 ┌─ PreCompact ───────────────────────────────────────────────┐
@@ -299,12 +318,14 @@ atlas-claude/
     ├── settings.json      # Hook configuration template
     ├── hooks/
     │   ├── context-monitor.js     # Real-time context tracking + auto-continuation
-    │   ├── session-start.sh       # 8-section session initialization
+    │   ├── session-start.sh       # 9-section session initialization
     │   ├── session-stop.sh        # Handoff + todos + auto-continuation
     │   ├── statusline.js          # Visual status bar
     │   ├── security-gate.sh       # Secrets/credentials blocking
     │   ├── mistake-capture.py     # Failure logging + pattern detection
     │   ├── verify-completion.py   # Task completion verification
+    │   ├── agent-profiler.py      # EMA reliability tracking per agent type
+    │   ├── skill-watcher.sh       # Auto-detect + activate archived skills
     │   └── post-compact-dream-check.sh  # Auto-dream after context compaction
     ├── rules/
     │   ├── general.md     # Platform, code quality, naming, workflow
@@ -316,7 +337,8 @@ atlas-claude/
     │   └── smoke-test.sh          # 27-check system validator
     ├── skills/
     │   ├── self-evolve/           # Meta-skill: autonomous capability growth
-    │   └── smart-swarm/           # Auto-deploy multi-agent teams
+    │   ├── smart-swarm/           # Auto-deploy multi-agent teams
+    │   └── archived-skills-manifest.json  # Detection patterns for 60+ technologies
     ├── commands/
     │   ├── continue.md            # Manual session continuation
     │   └── flow/smart-swarm.md    # Complexity-scored agent deployment
@@ -325,7 +347,8 @@ atlas-claude/
     │   ├── weekly-maintenance/     # System health + mistake analysis (Mon 9:00am)
     │   ├── weekly-cleanup-scan/    # Disk, hooks, stale files (Mon 9:30am)
     │   ├── weekly-memory-maintenance/  # Session pruning, INDEX consistency (Mon 9:45am)
-    │   └── monthly-evolution-report/   # Knowledge growth + optimization (1st of month)
+    │   ├── monthly-evolution-report/   # Knowledge growth + optimization (1st of month)
+    │   └── skill-usage-audit/      # Monthly auto-unarchive/remove unused skills (1st at 10am)
     └── agents/
         └── smart-swarm-coordinator.md  # Multi-agent team orchestrator
 ```
@@ -349,6 +372,7 @@ If you don't need these, simply delete the corresponding entries from `settings.
 3. **Self-evolution** — creates skills and adds MCP servers when gaps detected
 4. **Three-loop learning** — mistake capture → pattern detection → permanent rules
 5. **Context monitor** — real-time awareness with debounce and escalation
+6. **Skill archiving & auto-recovery** — unused skills archived, auto-detected and restored when your project needs them
 
 ## License
 
