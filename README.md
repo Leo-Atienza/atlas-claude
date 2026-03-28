@@ -41,7 +41,7 @@ ATLAS isn't a CLAUDE.md with some rules. It's a **full infrastructure layer** th
        │     Autonomous Task, Learning & Agent System │
        ├──────────────────────────────────────────────┤
        │                                              │
-       │  /new  /resume  /task  /done  /ship  /dream   │  ← 6 Entry Points
+       │  /new  /resume  /task  /done  /ship  /dream  │  ← 6 Entry Points
        │         │                                    │
        │         ▼                                    │
        │  ┌─────────────┐  ┌───────────────────────┐  │
