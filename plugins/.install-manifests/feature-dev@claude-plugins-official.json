@@ -1,0 +1,12 @@
+{
+  "pluginId": "feature-dev@claude-plugins-official",
+  "createdAt": "2026-02-14T15:22:03.037Z",
+  "files": {
+    ".claude-plugin\\plugin.json": "0ae678a1a25c12ce244624ecf33adffd05ede8e4898748bd7a954c4deb3dde3f",
+    "agents\\code-architect.md": "42a0d2ea0de9594f6a758d79ca5c2c569178b27e143a6f005d1880006fe183cb",
+    "agents\\code-explorer.md": "5153a1c8a46244602deee80bb4bd616fe241258827b8777ae9511ab54a5c4a35",
+    "agents\\code-reviewer.md": "ff937151eb3efa1580fd2c407f7e30119728e4af2ed69d263a4953d3a2b876cf",
+    "commands\\feature-dev.md": "16a6d628c02ee54bfaf662a355d17b14de8da3942a8f4f535086078bc47b75af",
+    "README.md": "eb0d1badf0727fd04722b6d522f696487cbf70e8dfe90bd371dec44016e98ec3"
+  }
+}

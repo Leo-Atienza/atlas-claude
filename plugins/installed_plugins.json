@@ -1,0 +1,145 @@
+{
+  "version": 2,
+  "plugins": {
+    "agent-sdk-dev@claude-plugins-official": [
+      {
+        "scope": "user",
+        "installPath": "C:\\Users\\leooa\\.claude\\plugins\\cache\\claude-plugins-official\\agent-sdk-dev\\unknown",
+        "version": "unknown",
+        "installedAt": "2026-02-14T15:21:28.548Z",
+        "lastUpdated": "2026-03-25T19:27:33.203Z",
+        "gitCommitSha": "2cd88e7947b7382e045666abee790c7f55f669f3"
+      }
+    ],
+    "asana@claude-plugins-official": [
+      {
+        "scope": "user",
+        "installPath": "C:\\Users\\leooa\\.claude\\plugins\\cache\\claude-plugins-official\\asana\\unknown",
+        "version": "unknown",
+        "installedAt": "2026-02-14T15:21:32.940Z",
+        "lastUpdated": "2026-03-25T19:27:33.155Z",
+        "gitCommitSha": "2cd88e7947b7382e045666abee790c7f55f669f3"
+      }
+    ],
+    "claude-code-setup@claude-plugins-official": [
+      {
+        "scope": "user",
+        "installPath": "C:\\Users\\leooa\\.claude\\plugins\\cache\\claude-plugins-official\\claude-code-setup\\1.0.0",
+        "version": "1.0.0",
+        "installedAt": "2026-02-14T15:21:38.871Z",
+        "lastUpdated": "2026-02-14T15:21:38.871Z",
+        "gitCommitSha": "2cd88e7947b7382e045666abee790c7f55f669f3"
+      }
+    ],
+    "claude-md-management@claude-plugins-official": [
+      {
+        "scope": "user",
+        "installPath": "C:\\Users\\leooa\\.claude\\plugins\\cache\\claude-plugins-official\\claude-md-management\\1.0.0",
+        "version": "1.0.0",
+        "installedAt": "2026-02-14T15:21:40.890Z",
+        "lastUpdated": "2026-02-14T15:21:40.890Z",
+        "gitCommitSha": "2cd88e7947b7382e045666abee790c7f55f669f3"
+      }
+    ],
+    "code-review@claude-plugins-official": [
+      {
+        "scope": "user",
+        "installPath": "C:\\Users\\leooa\\.claude\\plugins\\cache\\claude-plugins-official\\code-review\\unknown",
+        "version": "unknown",
+        "installedAt": "2026-02-14T15:21:43.049Z",
+        "lastUpdated": "2026-03-25T19:27:33.172Z",
+        "gitCommitSha": "2cd88e7947b7382e045666abee790c7f55f669f3"
+      }
+    ],
+    "code-simplifier@claude-plugins-official": [
+      {
+        "scope": "user",
+        "installPath": "C:\\Users\\leooa\\.claude\\plugins\\cache\\claude-plugins-official\\code-simplifier\\1.0.0",
+        "version": "1.0.0",
+        "installedAt": "2026-02-14T15:21:45.773Z",
+        "lastUpdated": "2026-02-14T15:21:45.773Z",
+        "gitCommitSha": "2cd88e7947b7382e045666abee790c7f55f669f3"
+      }
+    ],
+    "coderabbit@claude-plugins-official": [
+      {
+        "scope": "user",
+        "installPath": "C:\\Users\\leooa\\.claude\\plugins\\cache\\claude-plugins-official\\coderabbit\\1.0.0",
+        "version": "1.0.0",
+        "installedAt": "2026-02-14T15:21:48.877Z",
+        "lastUpdated": "2026-02-14T15:21:48.877Z",
+        "gitCommitSha": "51651e86d8d71e150e13313f43298f212abb47db"
+      }
+    ],
+    "commit-commands@claude-plugins-official": [
+      {
+        "scope": "user",
+        "installPath": "C:\\Users\\leooa\\.claude\\plugins\\cache\\claude-plugins-official\\commit-commands\\unknown",
+        "version": "unknown",
+        "installedAt": "2026-02-14T15:21:49.807Z",
+        "lastUpdated": "2026-03-25T19:27:33.189Z",
+        "gitCommitSha": "2cd88e7947b7382e045666abee790c7f55f669f3"
+      }
+    ],
+    "feature-dev@claude-plugins-official": [
+      {
+        "scope": "user",
+        "installPath": "C:\\Users\\leooa\\.claude\\plugins\\cache\\claude-plugins-official\\feature-dev\\unknown",
+        "version": "unknown",
+        "installedAt": "2026-02-14T15:22:02.929Z",
+        "lastUpdated": "2026-03-25T19:27:33.217Z",
+        "gitCommitSha": "2cd88e7947b7382e045666abee790c7f55f669f3"
+      }
+    ],
+    "firebase@claude-plugins-official": [
+      {
+        "scope": "user",
+        "installPath": "C:\\Users\\leooa\\.claude\\plugins\\cache\\claude-plugins-official\\firebase\\unknown",
+        "version": "unknown",
+        "installedAt": "2026-02-14T15:22:07.259Z",
+        "lastUpdated": "2026-03-25T19:27:33.121Z",
+        "gitCommitSha": "2cd88e7947b7382e045666abee790c7f55f669f3"
+      }
+    ],
+    "figma@claude-plugins-official": [
+      {
+        "scope": "user",
+        "installPath": "C:\\Users\\leooa\\.claude\\plugins\\cache\\claude-plugins-official\\figma\\2.0.2",
+        "version": "2.0.2",
+        "installedAt": "2026-02-14T15:22:10.028Z",
+        "lastUpdated": "2026-03-24T18:16:37.830Z",
+        "gitCommitSha": "83b11c0bc199a3c6ee87df0a0bd460139fa72cdc"
+      }
+    ],
+    "github@claude-plugins-official": [
+      {
+        "scope": "user",
+        "installPath": "C:\\Users\\leooa\\.claude\\plugins\\cache\\claude-plugins-official\\github\\unknown",
+        "version": "unknown",
+        "installedAt": "2026-02-14T15:22:10.753Z",
+        "lastUpdated": "2026-03-25T19:27:33.141Z",
+        "gitCommitSha": "2cd88e7947b7382e045666abee790c7f55f669f3"
+      }
+    ],
+    "kotlin-lsp@claude-plugins-official": [
+      {
+        "scope": "user",
+        "installPath": "C:\\Users\\leooa\\.claude\\plugins\\cache\\claude-plugins-official\\kotlin-lsp\\1.0.0",
+        "version": "1.0.0",
+        "installedAt": "2026-02-14T15:22:18.136Z",
+        "lastUpdated": "2026-02-14T15:22:18.136Z",
+        "gitCommitSha": "2cd88e7947b7382e045666abee790c7f55f669f3"
+      }
+    ],
+    "ralph-loop@claude-plugins-official": [
+      {
+        "scope": "user",
+        "installPath": "C:\\Users\\leooa\\.claude\\plugins\\cache\\claude-plugins-official\\ralph-loop\\unknown",
+        "version": "unknown",
+        "installedAt": "2026-02-14T15:22:31.724Z",
+        "lastUpdated": "2026-03-25T19:27:33.233Z",
+        "gitCommitSha": "2cd88e7947b7382e045666abee790c7f55f669f3"
+      }
+    ]
+  }
+}

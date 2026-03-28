@@ -1,0 +1,15 @@
+{
+  "pluginId": "claude-md-management@claude-plugins-official",
+  "createdAt": "2026-02-14T15:21:41.032Z",
+  "files": {
+    ".claude-plugin\\plugin.json": "1fb6c89a04509d463ba5f98b49310ead78718e9dbb5e1e604b408cdd506e614a",
+    "claude-md-improver-example.png": "a0b12357a8d8f9b1ba16692805344b8c4d03af2cc2eefcb70c68431b4350d1ad",
+    "commands\\revise-claude-md.md": "e52d3fec85c3b82f69f45f3f3a54b5a7e7df6a58db47d4c2a5913ad7487f02a6",
+    "README.md": "ffdc3d9064b173c82394a8a63bd2e208fd1bf69ee805b7f8bbe55bd73318805d",
+    "revise-claude-md-example.png": "3c424544efe3f581b0fd61312586553bb18be091988a064910a269fac2d91b55",
+    "skills\\claude-md-improver\\references\\quality-criteria.md": "7bf282887925728b9aab2bef18486cd4f2c863f86fd1ccf4364acddb43c2a010",
+    "skills\\claude-md-improver\\references\\templates.md": "97f0c41f852b9612a6176e62cc9b7cef3705018ca6919d6dfb0f82ccd2ffc36b",
+    "skills\\claude-md-improver\\references\\update-guidelines.md": "8b38b3bbee5c9e644318498c72a213a65bbd05466678e588fa7d9f4407f55bda",
+    "skills\\claude-md-improver\\SKILL.md": "29b43c0eaae3d615ee86c836050fa24252be516a7c41d2f8ee1b5cbf34e748be"
+  }
+}

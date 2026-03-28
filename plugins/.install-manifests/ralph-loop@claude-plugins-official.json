@@ -1,0 +1,14 @@
+{
+  "pluginId": "ralph-loop@claude-plugins-official",
+  "createdAt": "2026-02-14T15:22:31.862Z",
+  "files": {
+    ".claude-plugin\\plugin.json": "5e40650b84cd6edc3ea298879937f85ff7ca6fab654517ea3d2670b1c12cd150",
+    "commands\\cancel-ralph.md": "2094f86be9218120c7fcd37f3c1f53391e233dbf5f9d1660e555f373dc7ea6a1",
+    "commands\\help.md": "d94e074af2980f60091000cd239b206ab2aaee867f66a42bad651c405a78bd6a",
+    "commands\\ralph-loop.md": "a59d072b1b65b1f0e43a1156ffb6d2a0d03b26365cedffea56fd57d4aec75185",
+    "hooks\\hooks.json": "9bf0476fb7520e061e9f8f047bf2c422686b419fd0c3c844a4be94a2296e659c",
+    "hooks\\stop-hook.sh": "4c4823ed328a0fde13f7193ea312e177f56119e7df82d47c6110934d1300cff2",
+    "README.md": "1ca159b84403db08dee36980894952094bfca7dbdc9a18891bc5b241e79590d3",
+    "scripts\\setup-ralph-loop.sh": "1d5fecb3769794a0b03ff59b4dfb89a05b5da5764239bb1d0887121fb4a3ef02"
+  }
+}

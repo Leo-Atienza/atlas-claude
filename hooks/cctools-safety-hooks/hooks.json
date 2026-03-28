@@ -1,0 +1,58 @@
+{
+  "description": "Safety hooks to block or require approval for dangerous commands",
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash -c 'if test -f \"${CLAUDE_PLUGIN_ROOT}/hooks/bash_hook.py\"; then python3 \"${CLAUDE_PLUGIN_ROOT}/hooks/bash_hook.py\"; else echo \"{\\\"decision\\\":\\\"approve\\\"}\"; fi'",
+            "timeout": 10
+          }
+        ]
+      },
+      {
+        "matcher": "Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash -c 'if test -f \"${CLAUDE_PLUGIN_ROOT}/hooks/file_length_limit_hook.py\"; then python3 \"${CLAUDE_PLUGIN_ROOT}/hooks/file_length_limit_hook.py\"; else echo \"{\\\"decision\\\":\\\"approve\\\"}\"; fi'",
+            "timeout": 10
+          }
+        ]
+      },
+      {
+        "matcher": "Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash -c 'if test -f \"${CLAUDE_PLUGIN_ROOT}/hooks/file_length_limit_hook.py\"; then python3 \"${CLAUDE_PLUGIN_ROOT}/hooks/file_length_limit_hook.py\"; else echo \"{\\\"decision\\\":\\\"approve\\\"}\"; fi'",
+            "timeout": 10
+          }
+        ]
+      },
+      {
+        "matcher": "Read",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash -c 'if test -f \"${CLAUDE_PLUGIN_ROOT}/hooks/read_env_protection_hook.py\"; then python3 \"${CLAUDE_PLUGIN_ROOT}/hooks/read_env_protection_hook.py\"; else echo \"{\\\"decision\\\":\\\"approve\\\"}\"; fi'",
+            "timeout": 10
+          }
+        ]
+      }
+    ],
+    "UserPromptSubmit": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash -c 'if test -f \"${CLAUDE_PLUGIN_ROOT}/hooks/allow_git_hook.py\"; then python3 \"${CLAUDE_PLUGIN_ROOT}/hooks/allow_git_hook.py\"; else echo \"{\\\"decision\\\":\\\"approve\\\"}\"; fi'",
+            "timeout": 10
+          }
+        ]
+      }
+    ]
+  }
+}

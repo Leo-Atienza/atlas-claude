@@ -1,0 +1,88 @@
+{
+  "schema_version": 1,
+  "skill_packs": {
+    "trailofbits-security": {
+      "source": "github:trailofbits/skills",
+      "installed": "2026-02-25",
+      "last_checked": "2026-03-16",
+      "pinned": false
+    },
+    "cc-devops": {
+      "source": "github:akin-ozer/cc-devops-skills",
+      "installed": "2026-02-25",
+      "last_checked": "2026-03-16",
+      "pinned": false
+    },
+    "fullstack-dev": {
+      "source": "github:Jeffallan/claude-skills",
+      "installed": "2026-02-25",
+      "last_checked": "2026-03-16",
+      "pinned": false
+    },
+    "context-engineering-kit": {
+      "source": "github:NeoLabHQ/context-engineering-kit",
+      "installed": "2026-02-25",
+      "last_checked": "2026-03-16",
+      "pinned": false
+    },
+    "compound-engineering": {
+      "source": "github:EveryInc/compound-engineering-plugin",
+      "installed": "2026-02-25",
+      "last_checked": "2026-03-16",
+      "pinned": false
+    },
+    "cctools": {
+      "source": "github:pchalasani/claude-code-tools",
+      "installed": "2026-02-25",
+      "last_checked": "2026-03-16",
+      "pinned": false
+    },
+    "infra-showcase": {
+      "source": "github:diet103/claude-code-infrastructure-showcase",
+      "installed": "2026-02-25",
+      "last_checked": "2026-03-16",
+      "pinned": false
+    }
+  },
+  "cli_tools": {
+    "better-ccflare": {
+      "installed": "3.2.0",
+      "source": "npm:better-ccflare",
+      "last_checked": "2026-03-16"
+    },
+    "tdd-guard": {
+      "installed": "1.1.0",
+      "source": "npm:tdd-guard",
+      "last_checked": "2026-03-16"
+    },
+    "claude-rules-doctor": {
+      "installed": "0.2.2",
+      "source": "npm:claude-rules-doctor",
+      "last_checked": "2026-03-16"
+    },
+    "claudio": {
+      "installed": "1.11.1",
+      "source": "go:claudio.click/cmd/claudio",
+      "last_checked": "2026-03-16"
+    },
+    "claude-squad": {
+      "installed": "1.0.14",
+      "source": "github:smtg-ai/claude-squad",
+      "last_checked": "2026-03-16"
+    }
+  },
+  "git_skills": {
+    "claude-code-test-runner": {
+      "source": "github:firstloophq/claude-code-test-runner",
+      "path": "skills/claude-code-test-runner"
+    },
+    "detox-mcp": {
+      "source": "github:gayancliyanage/detox-mcp",
+      "path": "skills/detox-mcp"
+    },
+    "tdd-guard-skill": {
+      "source": "github:nizos/tdd-guard",
+      "path": "skills/tdd-guard"
+    }
+  }
+}

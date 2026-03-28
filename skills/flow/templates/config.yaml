@@ -1,0 +1,45 @@
+# .flow/config.yaml — Flow Workflow Configuration
+# Created by /flow:start
+version: 1
+
+depth: standard  # auto | quick | standard | deep | epic
+
+workflow:
+  research: true           # Run research agents during planning
+  plan_verify: true        # Plan-checker verification loop
+  goal_verify: true        # Goal-backward verification after execution
+  auto_advance: false      # Auto-advance phases without asking
+  common_ground: false     # Surface assumptions before work
+
+execution:
+  parallel: true           # Enable wave-based parallel execution
+  max_concurrent_agents: 3 # Max subagents per wave
+  wave_execution: true     # Group plans into dependency waves
+  swarm_mode: false        # Default swarm off
+
+review:
+  agents:                  # Review agent pool (loaded on-demand)
+    - security-sentinel
+    - performance-oracle
+    - architecture-strategist
+  conditional_agents: {}   # Triggered by file patterns
+
+quality:
+  tdd: false               # TDD mode
+  security_scan: true      # Security scan before completion
+  system_wide_test_check: true
+
+integrations:
+  tracker: none            # none | github | linear | jira
+  tracker_url: ""
+
+commits:
+  docs: true               # Commit planning docs
+  incremental: true        # Per-task commits
+  conventional: true       # Conventional commit messages
+
+gates:
+  confirm_project: true
+  confirm_roadmap: true
+  confirm_plan: true
+  confirm_destructive: true
