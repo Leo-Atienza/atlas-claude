@@ -10,22 +10,25 @@
 
 <p align="center">
   A self-evolving AI operating system for Claude Code<br>
-  <sub>282 skills &bull; 72+ agents &bull; 176 resources &bull; 15+ languages &bull; 10 lifecycle hooks</sub>
+  <sub>It doesn't just follow instructions — it learns, adapts, and grows itself.</sub>
 </p>
 
 <p align="center">
-  <a href="#quick-start">Quick Start</a> &bull;
-  <a href="#the-8-autonomous-behaviors">8 Behaviors</a> &bull;
-  <a href="#the-6-entry-points">6 Entry Points</a> &bull;
-  <a href="#the-flow-system">Flow System</a> &bull;
-  <a href="#skill-domains">Skills</a> &bull;
-  <a href="#hook-lifecycle">Hooks</a>
+  <a href="#-what-is-atlas">What</a> &bull;
+  <a href="#quick-start">Install</a> &bull;
+  <a href="#the-6-entry-points">Commands</a> &bull;
+  <a href="#autonomous-behaviors">Behaviors</a> &bull;
+  <a href="#the-flow-system">Flow</a> &bull;
+  <a href="#hook-lifecycle">Hooks</a> &bull;
+  <a href="#architecture">Architecture</a>
 </p>
 
 <p align="center">
   <img src="https://img.shields.io/badge/claude_code-opus_4.6-blueviolet?style=flat-square" alt="Claude Code">
+  <img src="https://img.shields.io/badge/version-2.5.0-informational?style=flat-square" alt="Version">
   <img src="https://img.shields.io/badge/skills-282-blue?style=flat-square" alt="Skills">
   <img src="https://img.shields.io/badge/agents-72+-green?style=flat-square" alt="Agents">
+  <img src="https://img.shields.io/badge/hooks-18-yellow?style=flat-square" alt="Hooks">
   <img src="https://img.shields.io/badge/license-MIT-orange?style=flat-square" alt="License">
 </p>
 
@@ -33,44 +36,60 @@
 
 ## What is ATLAS?
 
-ATLAS isn't a CLAUDE.md with some rules. It's a **full infrastructure layer** that transforms Claude Code from a stateless chatbot into a persistent, self-improving engineering team.
+Most Claude Code setups are a `CLAUDE.md` with some rules. ATLAS is a **full infrastructure layer** — 18 lifecycle hooks, 72 specialized agents, a progressive learning system, and self-evolution capabilities that let Claude Code grow its own toolset.
 
+<table>
+<tr>
+<td width="50%">
+
+**What you type:**
 ```
-       ┌──────────────────────────────────────────────┐
-       │                  A T L A S                   │
-       │     Autonomous Task, Learning & Agent System │
-       ├──────────────────────────────────────────────┤
-       │                                              │
-       │  /new  /resume  /task  /done  /ship  /dream  │  ← 6 Entry Points
-       │         │                                    │
-       │         ▼                                    │
-       │  ┌─────────────┐  ┌───────────────────────┐  │
-       │  │ Flow System │  │  Smart Swarm (auto)   │  │  ← Task Routing
-       │  │ quick→epic  │  │  SOLO→DUO→TEAM→SWARM  │  │
-       │  └──────┬──────┘  └──────────┬────────────┘  │
-       │         │                    │               │
-       │         ▼                    ▼               │
-       │  ┌──────────┐  ┌────────┐  ┌────────────┐    │
-       │  │ 282      │  │ 72+    │  │ 9 Hooks    │    │  ← Execution
-       │  │ Skills   │  │ Agents │  │ (lifecycle)│    │
-       │  └──────────┘  └────────┘  └────────────┘    │
-       │         │                    │               │
-       │         ▼                    ▼               │
-       │  ┌───────────────────────────────────────┐   │
-       │  │  Self-Evolution  │  Mistake Learning  │   │  ← Growth
-       │  │  (auto-create    │  (capture→pattern  │   │
-       │  │   skills+MCPs)   │   →permanent rule) │   │
-       │  └───────────────────────────────────────┘   │
-       │         │                                    │
-       │         ▼                                    │
-       │  ┌──────────────────────────────────────┐    │
-       │  │  Auto-Continuation (at 70% context)  │    │  ← Persistence
-       │  │  handoff → new session → --resume    │    │
-       │  └──────────────────────────────────────┘    │
-       └──────────────────────────────────────────────┘
+build a REST API for user management
 ```
 
-**It continues its own work** when context runs out. **It deploys agent teams automatically** based on task complexity. **It grows its own capabilities** by creating skills and adding MCP servers. **It learns from mistakes** across sessions.
+**What ATLAS does:**
+1. Scores complexity → **TEAM** (score: 9)
+2. Spawns 3 agents: architect, implementer, tester
+3. Routes to Tier 3 (Sonnet) for cost efficiency
+4. Loads relevant skills (FastAPI, security, testing)
+5. Executes with parallel agents in isolated worktrees
+6. Security scans before marking done
+7. Learns from any mistakes for next time
+
+</td>
+<td width="50%">
+
+```
+       ┌──────────────────────────────────┐
+       │            A T L A S             │
+       ├──────────────────────────────────┤
+       │                                  │
+       │  /new  /resume  /task  /done     │ ← You
+       │         │                        │
+       │         ▼                        │
+       │  ┌───────────┐  ┌───────────┐   │
+       │  │   Flow    │  │   Smart   │   │ ← Routing
+       │  │  System   │  │   Swarm   │   │
+       │  └─────┬─────┘  └─────┬─────┘   │
+       │        ▼              ▼          │
+       │  ┌──────────────────────────┐    │
+       │  │ 282 Skills · 72 Agents  │    │ ← Execution
+       │  │ 18 Hooks  · 5 Rules     │    │
+       │  └──────────┬───────────────┘    │
+       │             ▼                    │
+       │  ┌──────────────────────────┐    │
+       │  │ Learn · Evolve · Grow   │    │ ← Growth
+       │  └──────────────────────────┘    │
+       └──────────────────────────────────┘
+```
+
+</td>
+</tr>
+</table>
+
+> **TL;DR** — It continues its own work when context runs out. It deploys agent teams based on task complexity. It creates new skills when it finds capability gaps. It learns from mistakes across sessions.
+
+---
 
 ## Quick Start
 
@@ -79,215 +98,280 @@ ATLAS isn't a CLAUDE.md with some rules. It's a **full infrastructure layer** th
 git clone https://github.com/Leo-Atienza/atlas-claude.git
 
 # Install (safe — never overwrites existing files)
-cd atlas-claude
-bash install.sh
+cd atlas-claude && bash install.sh
 
-# Verify
+# Verify (27 checks across 9 categories)
 bash ~/.claude/scripts/smoke-test.sh
 ```
 
-The installer creates the full directory structure and copies core files to `~/.claude/`. Existing files are preserved.
+---
 
 ## The 6 Entry Points
 
-Everything funnels through 6 commands. You never need to think about the 282 skills, 72 agents, or 20 Flow commands underneath.
+Everything funnels through 6 commands. You never need to think about the 282 skills, 72 agents, or 37 commands underneath.
 
-| Command | What You Say | What ATLAS Does |
-|---------|-------------|-----------------|
+| Command | Plain English | What Happens Under the Hood |
+|:-------:|:-------------|:---------------------------|
 | `/new` | "build X", "create X" | Classifies task → auto-detects depth → initializes Flow → routes to agents |
-| `/resume` | "continue", "pick up" | Reads state files in precedence order → restores full context → continues |
-| `/task` | "fix X", "add X" | One-off task → auto-routes by complexity scoring |
+| `/resume` | "continue", "pick up" | Reads 4 state files in precedence order → restores full context → continues |
+| `/task` | "fix X", "add X" | One-off routing → complexity scoring → direct execution |
 | `/done` | "wrap up" | Reflects → captures knowledge → saves state → commits |
 | `/ship` | "push this" | Commits → pushes → opens PR → security scan |
-| `/dream` | "consolidate memories" | Deep memory consolidation → merge duplicates → prune stale → resolve conflicts |
+| `/dream` | "consolidate" | Deep memory merge → prune stale → resolve conflicts → reindex |
 
-## The 8 Autonomous Behaviors
+---
+
+## Autonomous Behaviors
 
 These happen **without user action**. ATLAS monitors, decides, and acts.
 
-### 1. Auto-Continuation
+### Auto-Continuation
 
-When context hits 70% usage, ATLAS writes a structured handoff file and spawns a new session that picks up exactly where it left off.
+When context hits 70%, ATLAS doesn't just stop — it writes a structured handoff and spawns a new session that picks up exactly where it left off. Chain depth limit: 5 sessions.
 
 ```
-context-monitor.js (70% trigger)
-  → agent writes handoff file (task, branch, files, plan, next action)
-  → session ends
-  → session-stop.sh detects trigger
+context-monitor.js detects 70% usage
+  → writes handoff (task, branch, files, plan, next action)
+  → session ends gracefully
   → auto-continue.sh spawns: claude --resume $SESSION_ID
   → new session reads handoff → resumes from exact point
 ```
 
-Chain depth limit: 5 sessions. Uses `--resume` to preserve session history.
+### Smart Swarm
 
-### 2. Smart Swarm Auto-Deploy
-
-Every task is scored across 5 dimensions (0-15 scale):
-
-| Dimension | What It Measures | 0 | 1 | 2 | 3 |
-|-----------|-----------------|---|---|---|---|
-| File Scope | Files affected | 1-2 | 3-5 | 6-15 | 16+ |
-| Concerns | Independent concerns | 1 | 2 | 3-4 | 5+ |
-| Risk | Consequence of failure | Low | Medium | High | Critical |
-| Isolation | Subtask independence | Dependent | Mostly dep. | Mostly indep. | Fully indep. |
-| Time Pressure | Urgency | None | Implied | Explicit | Blocking |
-
-**ATLAS doesn't ask — it scores and routes:**
-
-| Score | Mode | What Happens |
-|-------|------|-------------|
-| 0-4 | **SOLO** | Execute directly |
-| 5-7 | **DUO** | Auto-spawn 2 agents in parallel |
-| 8-11 | **TEAM** | Deploy 3-4 agents with coordinator |
-| 12-15 | **SWARM** | Full wave execution, worktree isolation per agent |
-
-### 3. Self-Evolution
-
-When ATLAS detects a capability gap:
+Every task is scored across 5 dimensions on a 0-15 scale:
 
 ```
-Missing tool?  → mcp-find → propose free server → mcp-add on approval → register
-Repeated 3x?  → Create new skill automatically → register in REGISTRY.md
-Need knowledge? → Search Context7 first → create skill only if recurring
+ File Scope ──┐
+ Concerns ────┤
+ Risk ────────┼── Score ──→ SOLO (0-4)  │ DUO (5-7)  │ TEAM (8-11) │ SWARM (12-15)
+ Isolation ───┤            execute      2 agents      3-4 agents    wave execution
+ Urgency ─────┘            directly     in parallel   + coordinator  + worktrees
 ```
 
-### 4. Mermaid Architecture Auto-Generation
+Combined with **three-tier model routing** — haiku for simple subtasks, sonnet for implementation, opus for architecture — to cut token costs 30-50% without sacrificing quality.
 
-- **Session start**: Detects existing `.mmd` files, signals to load for context
-- **After `/flow:map`**: Auto-generates Mermaid diagram from architecture analysis
-- Saves to `docs/diagrams/architecture.mmd` (persistent) and `.flow/codebase/` (ephemeral)
-
-### 5. Ticket-to-PR
-
-```bash
-/flow:start Fix #123
-```
-
-ATLAS auto-fetches the GitHub issue (title, body, labels, acceptance criteria) and injects it into the plan context. Works with `#123`, `GH-123`, and full GitHub URLs.
-
-### 6. Three-Loop Mistake Learning
+### Self-Evolution
 
 ```
-Loop 1: Tool failure → mistake-capture.py → failures.jsonl → fingerprint
-        → 3+ occurrences → "RECURRING FAILURE" signal → /learn → G-ERR topic
-
-Loop 2: Weekly maintenance → /analyze-mistakes audits patterns
-        → /health checks integrity → recommendations generated
-
-Loop 3: Claude Code update detected → changelog impact assessment
-        → /system-update applies changes
+Capability gap detected?
+  ├─ Missing tool    → search MCP registry → propose server → add on approval
+  ├─ Repeated 3x     → auto-create new skill → register in REGISTRY.md
+  └─ Need knowledge  → Context7 lookup → create skill only if recurring
 ```
 
-### 7. Skill Archiving & Auto-Recovery
+### Three-Loop Mistake Learning
 
-Skills you don't currently use are archived — not deleted. When you start a project that needs them, they come back automatically.
+```
+Loop 1 (Real-time):   Tool failure → fingerprint → 3+ matches → "RECURRING FAILURE" → /learn
+Loop 2 (Weekly):      /analyze-mistakes audits patterns → /health checks integrity
+Loop 3 (On update):   Claude Code changelog detected → impact assessment → /system-update
+```
+
+### Skill Archiving & Auto-Recovery
+
+Skills you don't use are archived, not deleted. When your project needs them, they auto-activate:
 
 ```
 SessionStart → skill-watcher.sh scans project files
-  → Dockerfile found? → AUTO-ACTIVATE: dockerfile-generator (DV-005)
-  → go.mod found? → AUTO-ACTIVATE: golang-pro (FS-004)
-  → *.sol found? → AUTO-ACTIVATE: building-secure-contracts (SC-013)
-
-Monthly (1st of month) → skill-usage-audit scheduled task
-  → Detected 1+ times → auto-unarchive to active in REGISTRY.md
-  → Not detected in 3+ months → auto-remove skill files
+  Dockerfile found?  → AUTO-ACTIVATE: dockerfile-generator
+  go.mod found?      → AUTO-ACTIVATE: golang-pro
+  *.sol found?       → AUTO-ACTIVATE: building-secure-contracts
 ```
 
-Detection patterns live in `archived-skills-manifest.json` — file globs, package names, and keywords for 60+ technologies. Zero manual maintenance.
+60+ technology detection patterns. Zero manual maintenance.
 
-### 8. Defense-in-Depth Security
+### Defense-in-Depth Security
 
 ```
-Layer 1 (PreToolUse):  security-gate.sh — blocks 20+ secret patterns in ~10ms
-Layer 2 (PostToolUse): Trail of Bits skills — sharp-edges, differential-review
-Layer 3 (At PR):       Full security scan before shipping
+Layer 1 (PreToolUse):  security-gate.sh blocks 20+ secret patterns
+Layer 2 (PreToolUse):  context-guard.js blocks expensive ops at 72% context
+Layer 3 (PostToolUse): Trail of Bits skills — sharp-edges, differential-review
+Layer 4 (At PR):       Full security scan before shipping
 ```
+
+---
 
 ## The Flow System
 
-One unified workflow replacing 63 commands from three predecessor systems. A single "complexity dial" scales from trivial to epic:
+One unified workflow system. A single "complexity dial" scales from trivial to epic:
 
 ```
-Trivial ──→ Quick ──→ Standard ──→ Deep ──→ Epic
-(<20 lines)  (small)   (3-10 files)  (10-30)   (system-wide)
-  │            │          │            │           │
-  ▼            ▼          ▼            ▼           ▼
- Just do    Minimal    Plan →      Full plan   Wave-based
-   it       ceremony   Execute    + parallel    + swarm
-                                   agents       mode
+Trivial ─────→ Quick ─────→ Standard ─────→ Deep ─────→ Epic
+(<20 lines)    (small)      (3-10 files)    (10-30)     (system-wide)
+    │             │              │              │             │
+    ▼             ▼              ▼              ▼             ▼
+ Just do      Minimal       Plan →         Full plan     Wave-based
+   it         ceremony      Execute       + parallel      + swarm
+                                           agents         mode
 ```
 
-**20 Flow commands**: start, plan, go, quick, map, review, verify, ship, debug, discover, brainstorm, ground, compound, complete, retro, status, test, smart-swarm, and more.
+**20 Flow commands** — start, plan, go, quick, map, review, verify, ship, debug, discover, brainstorm, ground, compound, complete, retro, status, test, smart-swarm, and more.
 
-**15 Flow agents**: planner, executor, verifier, mapper, debugger, UAT, researcher, repo-analyst, learnings-researcher, synthesizer, git-analyst, compound-writer, risk-assessor, plan-checker, swarm-coordinator.
+**15 specialized agents** — planner, executor, verifier, mapper, debugger, UAT, researcher, repo-analyst, learnings-researcher, synthesizer, git-analyst, compound-writer, risk-assessor, plan-checker, swarm-coordinator.
 
-## Skill Domains
-
-| Domain | Count | Highlights |
-|--------|-------|-----------|
-| **Languages** | 10+ | Python, TypeScript, Go, Rust, Swift, Kotlin, Java, SQL, Bash, Dart |
-| **Frontend** | 15+ | React, Next.js, Expo, React Native, SwiftUI, Compose, Tailwind, Three.js |
-| **Backend** | 10+ | FastAPI, Express, GraphQL, REST, gRPC, WebSockets |
-| **DevOps** | 31 | Terraform, Docker, K8s, Helm, Ansible, CI/CD (generators + validators) |
-| **Security** | 28 | Trail of Bits skills, OWASP, secrets detection, variant analysis |
-| **Documents** | 4 | PDF, DOCX, PPTX, XLSX (create, read, edit, fill) |
-| **Design** | 5+ | Frontend design, UI stack (50+ styles, 161 palettes), Figma-to-code |
-| **Video** | 1 | Remotion programmatic video |
-| **Data** | 3+ | Neon Postgres, database optimization, migrations |
-| **Meta** | 5+ | Skill creation, self-evolution, system health, smoke testing |
+---
 
 ## Hook Lifecycle
 
+18 hooks across 10 lifecycle events create a fully reactive system:
+
 ```
-┌─ SessionStart ─────────────────────────────────────────────┐
-│  Progressive Learning checks (reflection, conflicts)       │
-│  Mermaid diagram detection                                 │
-│  Skill health check (daily)                                │
-│  Version staleness + Claude Code version detection         │
-│  Mistake pattern summary                                   │
-│  Stale plan cleanup + log rotation                         │
-│  skill-watcher.sh → auto-activate archived skills          │
-└────────────────────────────────────────────────────────────┘
+┌─ SessionStart (3 hooks) ──────────────────────────────────────┐
+│  session-start.sh      9-section init, lessons, log rotation  │
+│  skill-watcher.sh      Auto-activate archived skills          │
+│  sync-skill-keywords   Regenerate keyword→skill cache         │
+├─ UserPromptSubmit (2 hooks) ──────────────────────────────────┤
+│  keyword-detector.js   Route natural language → /commands     │
+│  skill-injector.js     Detect tech keywords → suggest skills  │
+├─ PreToolUse (5 hooks) ────────────────────────────────────────┤
+│  context-guard.js      Block expensive tools at ≥72% context  │
+│  security-gate.sh      Block secrets, credentials, .env       │
+│  bash_hook.py          Block dangerous shell commands          │
+│  file_length_limit     Prevent file bloat                     │
+│  read_env_protection   Protect env file reads                 │
+├─ PostToolUse (4 hooks) ───────────────────────────────────────┤
+│  auto-formatter        prettier / dart format on save         │
+│  context-monitor.js    Track usage, trigger auto-continuation │
+│  mistake-capture.py    Log failures, detect patterns (EMA)    │
+│  agent-profiler.py     Per-agent reliability tracking (EMA)   │
+├─ PostToolUseFailure (1 hook) ─────────────────────────────────┤
+│  tool-failure-handler  Circuit breaker (3+ → reassess)        │
+├─ SubagentStart (1 hook) ──────────────────────────────────────┤
+│  subagent-tracker.js   Log spawns, enforce 6-agent limit      │
+├─ SubagentStop (1 hook) ───────────────────────────────────────┤
+│  subagent-verifier.js  Validate deliverable quality           │
+├─ PreCompact (1 hook) ─────────────────────────────────────────┤
+│  precompact-reflect    Force reflection before context loss   │
+├─ PostCompact (1 hook) ────────────────────────────────────────┤
+│  dream-check.sh        Auto-dream if threshold exceeded       │
+├─ Stop (3 hooks) ──────────────────────────────────────────────┤
+│  session-stop.sh       Handoff creation, todo capture         │
+│  verify-completion.py  Task completion verification           │
+│  agent hook            Final verification + tests             │
+└───────────────────────────────────────────────────────────────┘
+```
 
-┌─ PreToolUse ───────────────────────────────────────────────┐
-│  security-gate.sh → blocks secrets, credentials, .env      │
-│  bash_hook.py → blocks dangerous commands                  │
-│  file_length_limit_hook.py → prevents file bloat           │
-│  read_env_protection_hook.py → protects env files          │
-└────────────────────────────────────────────────────────────┘
+---
 
-┌─ PostToolUse ──────────────────────────────────────────────┐
-│  Auto-formatter (prettier / dart format)                   │
-│  context-monitor.js → tracks usage, triggers continuation  │
-│  mistake-capture.py → logs failures, detects patterns      │
-│  agent-profiler.py → EMA reliability tracking per agent    │
-└────────────────────────────────────────────────────────────┘
+## Skill Domains
 
-┌─ PreCompact ───────────────────────────────────────────────┐
-│  precompact-reflect.sh → force reflection before cutoff    │
-└────────────────────────────────────────────────────────────┘
+<table>
+<tr><th>Domain</th><th>Count</th><th>Highlights</th></tr>
+<tr><td><b>Languages</b></td><td>10+</td><td>Python, TypeScript, Go, Rust, Swift, Kotlin, Java, SQL, Bash, Dart</td></tr>
+<tr><td><b>Frontend</b></td><td>15+</td><td>React, Next.js, Expo, React Native, SwiftUI, Compose, Tailwind, Three.js, GSAP</td></tr>
+<tr><td><b>Backend</b></td><td>10+</td><td>FastAPI, Express, GraphQL, REST, gRPC, WebSockets</td></tr>
+<tr><td><b>DevOps</b></td><td>31</td><td>Terraform, Docker, K8s, Helm, Ansible, GitHub Actions, GitLab CI (gen + validate)</td></tr>
+<tr><td><b>Security</b></td><td>28</td><td>Trail of Bits suite, OWASP, secrets detection, variant analysis</td></tr>
+<tr><td><b>Documents</b></td><td>4</td><td>PDF, DOCX, PPTX, XLSX — create, read, edit, fill</td></tr>
+<tr><td><b>Design</b></td><td>5+</td><td>Frontend design, UI stack (50+ styles, 161 palettes), Figma-to-code</td></tr>
+<tr><td><b>Video/3D</b></td><td>2</td><td>Remotion programmatic video, Three.js 3D scenes</td></tr>
+<tr><td><b>Data</b></td><td>3+</td><td>Neon Postgres, database optimization, migrations</td></tr>
+<tr><td><b>Meta</b></td><td>5+</td><td>Skill creation, self-evolution, system health, smart swarm, smoke testing</td></tr>
+</table>
 
-┌─ PostCompact ─────────────────────────────────────────────┐
-│  post-compact-dream-check.sh → auto-dream if threshold    │
-└────────────────────────────────────────────────────────────┘
+---
 
-┌─ Stop ─────────────────────────────────────────────────────┐
-│  session-stop.sh → handoff, todos, auto-continuation       │
-│  verify-completion.py → task completion check               │
-│  agent hook → verification + tests                         │
-└────────────────────────────────────────────────────────────┘
+## Architecture
+
+```
+~/.claude/
+├── CLAUDE.md                    # Master instructions (the brain)
+├── settings.json                # Hook wiring + plugin config
+├── SYSTEM_VERSION.md            # Component inventory + health
+├── SYSTEM_CHANGELOG.md          # Infrastructure version history
+│
+├── hooks/                       # 18 lifecycle hooks
+│   ├── session-start.sh         #   SessionStart — 9-section init
+│   ├── session-stop.sh          #   Stop — handoff + auto-continuation
+│   ├── security-gate.sh         #   PreToolUse — secrets blocking
+│   ├── context-monitor.js       #   PostToolUse — real-time context tracking
+│   ├── context-guard.js         #   PreToolUse — proactive tool blocking at 72%
+│   ├── mistake-capture.py       #   PostToolUse — failure logging + EMA
+│   ├── tool-failure-handler.js  #   PostToolUseFailure — circuit breaker
+│   ├── subagent-tracker.js      #   SubagentStart — spawn logging + limits
+│   ├── subagent-verifier.js     #   SubagentStop — deliverable validation
+│   ├── keyword-detector.js      #   UserPromptSubmit — NL → command routing
+│   ├── skill-injector.js        #   UserPromptSubmit — tech keyword detection
+│   └── ...                      #   + 7 more
+│
+├── skills/                      # 282+ skills
+│   ├── REGISTRY.md              #   Single source of truth (all resources)
+│   ├── PLAYBOOK-WORKFLOWS.md    #   Task classification guide
+│   ├── PLAYBOOK-QUALITY.md      #   Security + quality processes
+│   ├── PLAYBOOK-TOOLS.md        #   MCP + CLI patterns
+│   └── [domain]/SKILL.md        #   Individual skill definitions
+│
+├── commands/                    # 37 slash commands
+│   ├── new.md, resume.md, ...   #   6 master entry points
+│   └── flow/*.md                #   20 Flow workflow commands
+│
+├── agents/                      # 72+ specialized agents
+│   ├── flow-*.md                #   15 Flow agents
+│   ├── smart-swarm-coordinator  #   Multi-agent orchestrator
+│   └── [domain]/*.md            #   Domain specialists
+│
+├── rules/                       # 5 modular convention files
+│   ├── general.md               #   Platform, code quality, naming
+│   ├── git.md                   #   Branch naming, commits, PRs
+│   ├── security.md              #   Input validation, auth, secrets
+│   ├── testing.md               #   TDD, assertions, mocking
+│   └── tier-routing.md          #   Three-tier model selection
+│
+├── scripts/                     # System utilities
+│   ├── smoke-test.sh            #   27-check system validator
+│   ├── auto-continue.sh         #   Session chaining
+│   ├── health-validator.js      #   Health verification
+│   ├── skill-stats-rollup.js    #   Skill performance aggregation
+│   └── rebuild-memory-bridge.sh #   Progressive Learning bridge
+│
+├── flow-knowledge/              # Knowledge bridge
+│   └── memory-bridge.yaml       #   Auto-indexed 58+ learning topics
+│
+└── scheduled-tasks/             # Cron-style automation
+    ├── weekly-dream/            #   Memory consolidation (Mon 9:17am)
+    └── skill-usage-audit/       #   Monthly auto-archive (1st of month)
 ```
 
 ## State Management
 
-Canonical precedence (when resuming, ATLAS reads in this order):
+When resuming, ATLAS reads state in strict precedence order:
 
-| Priority | File | Purpose |
-|----------|------|---------|
-| 1 | `.flow/state.yaml` | Flow workflow state (authoritative) |
+| Priority | Source | Purpose |
+|:--------:|:-------|:--------|
+| 1 | `.flow/state.yaml` | Active Flow workflow state (authoritative) |
 | 2 | `session-state.md` | Ephemeral session snapshot |
 | 3 | `~/.claude/.last-session-handoff` | Git state + todos from Stop hook |
 | 4 | `~/.claude/sessions/handoff-*.md` | Auto-continuation handoff |
+
+---
+
+## Optional Components
+
+Some hooks reference external components. They degrade gracefully — silent no-op if missing:
+
+| Component | Purpose | How to Get |
+|-----------|---------|-----------|
+| `cctools-safety-hooks/` | Block dangerous bash commands, file limits | Install [cctools](https://github.com/anthropics/claude-code-community-tools) |
+| `progressive-learning/` | Force reflection before compaction | Create manually or remove hook entry |
+| `claudio` | Audio notifications | Optional binary at `~/.claude/bin/claudio` |
+
+---
+
+## What's Novel
+
+| Feature | What It Does | Why It Matters |
+|---------|-------------|----------------|
+| **Auto-continuation** | Context-aware session chaining with structured handoff | Never lose work mid-task |
+| **5D complexity scoring** | Automatic agent team deployment | Right-sized execution without asking |
+| **Self-evolution** | Creates skills + adds MCP servers on capability gaps | System grows with your needs |
+| **Three-loop learning** | Capture → pattern → permanent rule | Mistakes become institutional knowledge |
+| **Tier routing** | Haiku/Sonnet/Opus per subtask | 30-50% token cost reduction |
+| **Skill auto-recovery** | Archive → detect → restore on project match | Zero-maintenance skill lifecycle |
+| **Circuit breaker** | EMA failure tracking + 3-strike shutdown | Prevents runaway tool failures |
+| **Subagent governance** | Spawn limits + deliverable validation | Quality control on agent output |
+
+---
 
 ## System Validation
 
@@ -306,73 +390,7 @@ bash ~/.claude/scripts/smoke-test.sh
 STATUS: ALL CLEAR
 ```
 
-## What's in This Repo
-
-```
-atlas-claude/
-├── README.md              # You're reading it
-├── LICENSE                # MIT
-├── install.sh             # One-command installer (safe, no overwrites)
-└── examples/
-    ├── CLAUDE.md          # Master instructions template
-    ├── settings.json      # Hook configuration template
-    ├── hooks/
-    │   ├── context-monitor.js     # Real-time context tracking + auto-continuation
-    │   ├── session-start.sh       # 9-section session initialization
-    │   ├── session-stop.sh        # Handoff + todos + auto-continuation
-    │   ├── statusline.js          # Visual status bar
-    │   ├── security-gate.sh       # Secrets/credentials blocking
-    │   ├── mistake-capture.py     # Failure logging + pattern detection
-    │   ├── verify-completion.py   # Task completion verification
-    │   ├── agent-profiler.py      # EMA reliability tracking per agent type
-    │   ├── skill-watcher.sh       # Auto-detect + activate archived skills
-    │   └── post-compact-dream-check.sh  # Auto-dream after context compaction
-    ├── rules/
-    │   ├── general.md     # Platform, code quality, naming, workflow
-    │   ├── git.md         # Branch naming, commits, PRs
-    │   ├── security.md    # Input validation, auth, secrets
-    │   └── testing.md     # TDD, assertions, mocking
-    ├── scripts/
-    │   ├── auto-continue.sh       # Session chaining with --resume
-    │   └── smoke-test.sh          # 27-check system validator
-    ├── skills/
-    │   ├── self-evolve/           # Meta-skill: autonomous capability growth
-    │   ├── smart-swarm/           # Auto-deploy multi-agent teams
-    │   └── archived-skills-manifest.json  # Detection patterns for 60+ technologies
-    ├── commands/
-    │   ├── continue.md            # Manual session continuation
-    │   └── flow/smart-swarm.md    # Complexity-scored agent deployment
-    ├── scheduled-tasks/
-    │   ├── weekly-dream/           # Weekly memory consolidation (Mon 9:17am)
-    │   ├── weekly-maintenance/     # System health + mistake analysis (Mon 9:00am)
-    │   ├── weekly-cleanup-scan/    # Disk, hooks, stale files (Mon 9:30am)
-    │   ├── weekly-memory-maintenance/  # Session pruning, INDEX consistency (Mon 9:45am)
-    │   ├── monthly-evolution-report/   # Knowledge growth + optimization (1st of month)
-    │   └── skill-usage-audit/      # Monthly auto-unarchive/remove unused skills (1st at 10am)
-    └── agents/
-        └── smart-swarm-coordinator.md  # Multi-agent team orchestrator
-```
-
-## Optional Components
-
-Some hooks in `settings.json` reference components **not included** in this repo. They degrade gracefully (silent no-op if missing):
-
-| Component | Referenced By | Purpose | How to Get |
-|-----------|--------------|---------|-----------|
-| `cctools-safety-hooks/` | PreToolUse hooks | Blocks dangerous bash commands, file length limits, env file protection | Install [cctools](https://github.com/anthropics/claude-code-community-tools) to `~/.claude/hooks/cctools-safety-hooks/` |
-| `progressive-learning/precompact-reflect.sh` | PreCompact hook | Forces reflection before context compaction | Create manually or remove the PreCompact hook entry |
-| `claudio` | Notification hook, session scripts | Audio notification on events | Optional binary at `~/.claude/bin/claudio` — remove the hook entry if not needed |
-
-If you don't need these, simply delete the corresponding entries from `settings.json` after installation.
-
-## What's Novel
-
-1. **Auto-continuation** — context-aware session chaining with structured handoff
-2. **5D complexity scoring** — automatic agent team deployment without asking
-3. **Self-evolution** — creates skills and adds MCP servers when gaps detected
-4. **Three-loop learning** — mistake capture → pattern detection → permanent rules
-5. **Context monitor** — real-time awareness with debounce and escalation
-6. **Skill archiving & auto-recovery** — unused skills archived, auto-detected and restored when your project needs them
+---
 
 ## License
 
