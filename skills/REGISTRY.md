@@ -1,6 +1,6 @@
 # Resource Registry — Single Source of Truth
 
-> **Last verified**: 2026-03-27
+> **Last verified**: 2026-03-29
 > **How to use**: Scan the Purpose column to match your task. Jump directly to the Path. Never scan skill directories.
 > **Maintenance**: Append new entries immediately when added. Delete/update when removed or merged.
 > **Lifecycle tags**: `[ARCHIVED]` = in skills dir, detected by skill-watcher hook. `[DEPRECATED]` = scheduled for removal.
@@ -48,6 +48,8 @@
 | SK-048 | gsap-performance | GSAP performance best practices | `skills/gsap-performance/SKILL.md` |
 | SK-050 | nano-banana | Google Nano Banana (Gemini Image) — AI image gen/edit, all models, grounding, batch, constraints | `skills/nano-banana/SKILL.md` |
 | SK-051 | dev-cycle | Disciplined dev cycle — enforces discovery, scoping, design before code. Scope creep guard, MoSCoW, appetite tracking | `skills/dev-cycle/SKILL.md` |
+| SK-052 | linkedin-poster | Compose and publish LinkedIn posts (text, articles, images) via LinkedIn API | `skills/linkedin-poster/SKILL.md` |
+| SK-053 | stop-slop | Remove AI writing patterns from prose — banned phrases, structural anti-patterns, scoring rubric | `skills/stop-slop/SKILL.md` |
 
 ## Standalone Skills (Archived — auto-detected by skill-watcher)
 
@@ -384,6 +386,13 @@
 | HK-009 | post-compact-dream-check.sh | PostCompact — auto-dream trigger | `hooks/post-compact-dream-check.sh` |
 | HK-010 | agent-profiler.py | PostToolUse:Agent — EMA performance profiling | `hooks/agent-profiler.py` |
 | HK-011 | skill-watcher.sh | SessionStart — detect archived skills in project | `hooks/skill-watcher.sh` |
+| HK-012 | context-guard.js | PreToolUse:* — proactively blocks expensive tools at 72% context | `hooks/context-guard.js` |
+| HK-013 | subagent-tracker.js | SubagentStart — logs agent spawns, enforces max 6 concurrent | `hooks/subagent-tracker.js` |
+| HK-014 | subagent-verifier.js | SubagentStop — verifies agent deliverable quality | `hooks/subagent-verifier.js` |
+| HK-015 | tool-failure-handler.js | PostToolUseFailure — circuit breaker + failure guidance | `hooks/tool-failure-handler.js` |
+| HK-016 | keyword-detector.js | UserPromptSubmit — auto-routes natural language to workflows | `hooks/keyword-detector.js` |
+| HK-017 | skill-injector.js | UserPromptSubmit — auto-detects tech keywords → skill suggestions + logs selection events | `hooks/skill-injector.js` |
+| HK-018 | sync-skill-keywords.js | SessionStart — regenerates keyword cache from REGISTRY.md + SKILL.md frontmatter | `hooks/sync-skill-keywords.js` |
 
 ## Scheduled Tasks
 

@@ -87,6 +87,10 @@ Search `~/.claude/flow-knowledge/` — solutions from all projects, indexed for 
 # Check global index
 cat ~/.claude/flow-knowledge/index.yaml 2>/dev/null
 
+# Search memory bridge (Progressive Learning topics indexed for Flow)
+# This contains 58+ curated entries from /reflect sessions — patterns, solutions, mistakes, failed approaches
+cat ~/.claude/flow-knowledge/memory-bridge.yaml 2>/dev/null
+
 # Search by keyword
 grep -rl "{keyword}" ~/.claude/flow-knowledge/ 2>/dev/null
 

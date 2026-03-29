@@ -41,6 +41,12 @@ package-lock.json
 .DS_Store
 Thumbs.db
 
+# Telemetry (runtime analytics)
+telemetry/
+
+# Session state (ephemeral handoffs)
+sessions/
+
 # Claude internal
 .claude-code-version
 statsig/

@@ -71,6 +71,9 @@ if git rev-parse --is-inside-work-tree >/dev/null 2>&1; then
   fi
 fi
 
+# ─── 1.75. Rebuild memory bridge for Flow agents ─────────────────────
+bash "$CLAUDE_DIR/scripts/rebuild-memory-bridge.sh" 2>/dev/null || true
+
 # ─── 2. Skill health check (daily, 1-day interval) ───────────────────
 SKILLS_DIR="$CLAUDE_DIR/skills"
 STATE_FILE="/tmp/claude-skill-health-last-run"
@@ -186,6 +189,36 @@ fi
 
 if [ -n "$SIGNALS" ]; then
   echo "{\"hookSpecificOutput\":{\"hookEventName\":\"SessionStart\",\"additionalContext\":\"MISTAKE LEARNING: ${SIGNALS}Act on recurring patterns before starting new work.\"}}"
+fi
+
+# ─── 5.5. Skill performance alerts ──────────────────────────────────
+SKILL_STATS="$CLAUDE_DIR/logs/skill-stats.json"
+if [ -f "$SKILL_STATS" ]; then
+  SKILL_ALERTS=$(node -e "
+    const s = JSON.parse(require('fs').readFileSync(process.argv[1], 'utf8'));
+    const alerts = Object.entries(s.skills || {})
+      .filter(([_, v]) => v.fallback_rate > 0.50 && v.total_selections >= 5)
+      .map(([id, v]) => id + ' (' + v.name + ') ' + Math.round(v.fallback_rate*100) + '% fallback over ' + v.total_selections + ' selections');
+    if (alerts.length) process.stdout.write(alerts.join('; '));
+  " "$SKILL_STATS" 2>/dev/null)
+  if [ -n "$SKILL_ALERTS" ]; then
+    echo "SKILL HEALTH: High fallback rates detected — $SKILL_ALERTS. Keywords may need updating."
+  fi
+fi
+
+# ─── 5.6. Tool health alerts (cross-session EMA) ───────────────────
+TOOL_HEALTH="$CLAUDE_DIR/logs/tool-health.json"
+if [ -f "$TOOL_HEALTH" ]; then
+  TOOL_ALERTS=$(node -e "
+    const h = JSON.parse(require('fs').readFileSync(process.argv[1], 'utf8'));
+    const alerts = Object.entries(h.tools || {})
+      .filter(([_, t]) => t.failure_rate_ema > 0.40 && t.total_calls >= 10)
+      .map(([name, t]) => name + ' (' + Math.round(t.failure_rate_ema*100) + '% EMA failure rate)');
+    if (alerts.length) process.stdout.write(alerts.join(', '));
+  " "$TOOL_HEALTH" 2>/dev/null)
+  if [ -n "$TOOL_ALERTS" ]; then
+    echo "HIGH TOOL FAILURE RATES: $TOOL_ALERTS. Investigate before heavy use."
+  fi
 fi
 
 # ─── 6. Stale plan cleanup ───────────────────────────────────────────

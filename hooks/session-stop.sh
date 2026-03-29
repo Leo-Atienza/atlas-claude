@@ -28,6 +28,9 @@ if [ "$REFLECTED" = false ]; then
   echo "note: Session ended without running /reflect" >> "$FLAG_FILE"
 fi
 
+# ─── 1.5. Skill stats rollup ─────────────────────────────────────────
+node "$HOME/.claude/scripts/skill-stats-rollup.js" 2>/dev/null || true
+
 # ─── 2. Session handoff ──────────────────────────────────────────────
 {
   echo "date: $TODAY"

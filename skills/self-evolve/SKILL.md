@@ -93,6 +93,7 @@ Activate self-evolve when ANY of these occur:
 2. **Write**: Create `~/.claude/skills/{name}/SKILL.md` with:
    - Proper frontmatter (name, description with trigger conditions)
    - `auto-generated: true` tag in frontmatter
+   - `keywords: [keyword1, keyword2, "multi word phrase"]` in frontmatter — these feed the keyword detection system so the skill is auto-suggested on matching prompts
    - Clear "When to Use" section
    - Step-by-step "Process" section
    - Expected "Output Format"

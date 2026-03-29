@@ -54,6 +54,43 @@ if not is_failure:
             is_failure = True
 
 if not is_failure:
+    # Track successful tool calls for tool health (Improvement 4)
+    log_dir = os.path.expanduser("~/.claude/logs")
+    os.makedirs(log_dir, exist_ok=True)
+    counts_path = os.path.join(log_dir, "tool-call-counts.json")
+    try:
+        counts = json.load(open(counts_path)) if os.path.exists(counts_path) else {}
+        counts[tool_name] = counts.get(tool_name, 0) + 1
+        json.dump(counts, open(counts_path, "w"))
+    except Exception:
+        pass
+
+    # Track skill application events (Improvement 2)
+    # When a SKILL.md file is read, it means the skill was applied
+    file_path = str(tool_input.get("file_path", ""))
+    if tool_name == "Read" and file_path.endswith("SKILL.md"):
+        events_path = os.path.join(log_dir, "skill-events.jsonl")
+        # Extract skill name from path (e.g., skills/frontend-design/SKILL.md -> frontend-design)
+        parts = file_path.replace("\\", "/").split("/")
+        skill_name = ""
+        for i, p in enumerate(parts):
+            if p == "skills" and i + 1 < len(parts):
+                skill_name = parts[i + 1]
+                break
+        if skill_name:
+            event = json.dumps({
+                "ts": datetime.now(timezone.utc).isoformat(),
+                "event": "applied",
+                "skill_id": "",
+                "skill_name": skill_name,
+                "session": data.get("session_id", "")[:16],
+            })
+            try:
+                with open(events_path, "a", encoding="utf-8") as f:
+                    f.write(event + "\n")
+            except Exception:
+                pass
+
     sys.exit(0)
 
 # Build structured failure entry

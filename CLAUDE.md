@@ -23,7 +23,7 @@ Six commands cover everything. Slash or plain English, both work.
 
 Read session-state.md for fast resume. Check `.flow/` for active workflow. Check `workflow.lock` in project memory. Check for project-level CLAUDE.md. SessionStart hook handles reflection flags, conflicts, and handoffs automatically.
 
-**React to hook signals**: When `DREAM NEEDED` or `AUTO-DREAM TRIGGERED` appears → run `/dream` immediately (NON-NEGOTIABLE). When `AUTO-ACTIVATE ARCHIVED SKILLS` appears → read the listed SKILL.md files and move entries from Archived to Active in REGISTRY.md.
+**React to hook signals**: When `DREAM NEEDED` or `AUTO-DREAM TRIGGERED` appears → run `/dream` immediately (NON-NEGOTIABLE). When `AUTO-ACTIVATE ARCHIVED SKILLS` appears → read the listed SKILL.md files and move entries from Archived to Active in REGISTRY.md. When `CONTEXT GUARD` blocks a tool → save state immediately (handoff file + todos). When `CIRCUIT BREAKER` fires → stop, reassess, change approach. When `DELIVERABLE CHECK` warns → verify agent output before using it. When `SKILL MATCH` or `KEYWORD DETECTED` appears → follow the suggested routing if it aligns with intent.
 
 ## Session End Protocol — MANDATORY
 
@@ -76,11 +76,13 @@ When a task matches a domain, look up the matching resource in `REGISTRY.md` and
 Activation priority: (1) language/framework, (2) security on PR completion, (3) domain specialist, (4) tool specialist.
 Max 2 specialist skills loaded simultaneously.
 
+**Prompt Hooks**: `skill-injector.js` (UserPromptSubmit) auto-detects technology keywords and suggests matching skills. `keyword-detector.js` auto-routes natural language to workflow commands. Both inject context — they don't auto-execute.
+
 **Self-Evolution**: Capability gap detected → activate self-evolve (SK-038). Ask before adding external MCP servers.
 
 **Smart Swarm**: TEAM (8-11) or SWARM (12-15) complexity → AUTOMATICALLY deploy agents via `/flow:smart-swarm`. DUO (5-7) → spawn 2 agents. SOLO (0-4) → execute directly.
 
-**Auto-Continuation**: At 70% context, write handoff file when instructed. Chain depth limit: 5 sessions.
+**Auto-Continuation**: At 70% context, write handoff file when instructed. Chain depth limit: 5 sessions. Context guard (PreToolUse) proactively blocks expensive tools at 72% — only Read/Glob/Grep/TodoWrite remain available.
 
 **Security**: Every PR → `sharp-edges`. Every diff → `differential-review`. Auth/crypto → `insecure-defaults`. Found vuln → `variant-analysis`.
 
@@ -109,7 +111,7 @@ Load only what the task needs: 1 playbook, max 2 skills, INDEX.md scan (deep-rea
 
 ## Mistake Learning — Automatic
 
-Hooks capture tool failures to `logs/failures.jsonl`. When `RECURRING FAILURE` signal appears → run `/learn` immediately. After user correction → offer `/learn`. When `MISTAKE LEARNING` signal appears → run `/analyze-mistakes` before other work.
+Hooks capture tool failures to `logs/failures.jsonl`. `tool-failure-handler.js` (PostToolUseFailure) handles framework-level failures with circuit breaker (3+ consecutive → reassess approach). `subagent-verifier.js` (SubagentStop) checks agent deliverable quality. When `RECURRING FAILURE` signal appears → run `/learn` immediately. After user correction → offer `/learn`. When `MISTAKE LEARNING` signal appears → run `/analyze-mistakes` before other work.
 
 ## Validation Gates — Non-Negotiable
 

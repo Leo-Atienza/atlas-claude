@@ -1,5 +1,68 @@
 # System Changelog
 
+## [2.5.0] — 2026-03-29
+### Added — OpenSpace-Inspired Self-Evolution Patterns
+Analyzed HKUDS/OpenSpace (Python MCP server for agent skill evolution). Borrowed 4 concepts adapted to our file-based hook architecture. No external dependencies added.
+
+- **Dynamic keyword registration** (`hooks/sync-skill-keywords.js`, HK-018): SessionStart hook regenerates `cache/skill-keyword-map.json` from REGISTRY.md + SKILL.md `keywords` frontmatter. Ensures skills created by self-evolve are immediately discoverable by skill-injector.js without manual keyword map edits.
+- **Skill performance tracking** (`scripts/skill-stats-rollup.js`): Logs skill selection events in `logs/skill-events.jsonl` (from skill-injector.js) and application events (from mistake-capture.py Read detection). Session-stop rollup aggregates into `logs/skill-stats.json` with per-skill applied_rate/fallback_rate. Auto-promotes skills reaching 3+ applications in `evolution.md` maturity milestones.
+- **Unified knowledge bridge** (`scripts/rebuild-memory-bridge.sh`): SessionStart script generates `flow-knowledge/memory-bridge.yaml` indexing all 58+ Progressive Learning topics from INDEX.md. Makes memory/topics/ searchable by flow-learnings-researcher without schema merging.
+- **Per-tool health tracking** (EMA in `tool-failure-handler.js`): Persistent `logs/tool-health.json` tracks exponential moving average failure rates per tool across sessions. Session-start alerts when any tool exceeds 40% EMA failure rate. Success counting in `mistake-capture.py` via `logs/tool-call-counts.json`.
+
+### Changed
+- `hooks/skill-injector.js`: Loads dynamic keyword cache before hardcoded map; logs selection events to skill-events.jsonl
+- `hooks/mistake-capture.py`: Success path now tracks tool call counts + detects SKILL.md reads as application events
+- `hooks/tool-failure-handler.js`: Persists per-tool EMA failure rates to tool-health.json
+- `hooks/session-start.sh`: Added memory bridge rebuild (step 1.75), skill performance alerts (step 5.5), tool health alerts (step 5.6)
+- `hooks/session-stop.sh`: Added skill-stats-rollup.js call (step 1.5)
+- `agents/flow-learnings-researcher.md`: Added memory-bridge.yaml as search source
+- `skills/self-evolve/SKILL.md`: Added `keywords` field to skill creation template
+- `settings.json`: Added sync-skill-keywords.js to SessionStart hooks
+- `skills/REGISTRY.md`: Added HK-018
+
+### New Files
+- `hooks/sync-skill-keywords.js` — keyword cache generator
+- `scripts/skill-stats-rollup.js` — skill performance aggregator
+- `scripts/rebuild-memory-bridge.sh` — Progressive Learning → Flow bridge
+- `cache/skill-keyword-map.json` — generated keyword cache (runtime)
+- `logs/skill-events.jsonl` — skill selection/application events (runtime)
+- `logs/skill-stats.json` — aggregated skill performance data (runtime)
+- `logs/tool-health.json` — persistent tool EMA failure rates (runtime)
+- `logs/tool-call-counts.json` — tool success counters (runtime)
+- `flow-knowledge/memory-bridge.yaml` — generated knowledge index (runtime)
+
+### Design Principles
+- All new data files are hook-only — never injected into Claude's context window
+- EMA alpha=0.3 for tool health — balances recency with smoothing
+- Skill events use append-only JSONL with 1MB rotation
+- Memory bridge is regenerated from scratch each session — never drifts from INDEX.md
+- Dynamic keywords fall back to derived patterns when no explicit `keywords` frontmatter exists
+
+## [2.4.0] — 2026-03-29
+### Added — OMC-Inspired Hook Enhancements
+Analyzed oh-my-claudecode (yeachan-heo/oh-my-claudecode) for features missing from our system. Implemented 6 new hooks natively without OMC dependency.
+
+- **PreToolUse context guard** (`hooks/context-guard.js`, HK-012): Proactively blocks expensive tools (Agent, Bash, Write, Edit, MultiEdit) when context >= 72% used. Always allows state-saving tools (Read, Glob, Grep, TodoWrite). Reads same bridge file as statusline.js. Prevents wasted tokens — upgrade from reactive (PostToolUse) to proactive (PreToolUse) context protection.
+- **SubagentStart tracker** (`hooks/subagent-tracker.js`, HK-013): Logs all agent spawns to `logs/subagent-events.jsonl`. Tracks concurrent agents via temp file, warns at >6 concurrent. Provides agent lifecycle visibility missing from agent-profiler.py (which only tracks completions).
+- **SubagentStop verifier** (`hooks/subagent-verifier.js`, HK-014): Validates agent deliverable quality on completion. Flags thin output (<30 chars) or error-containing results. Updates concurrent agent counter. Catches failed agents before their output is trusted.
+- **PostToolUseFailure handler** (`hooks/tool-failure-handler.js`, HK-015): Dedicated handler for framework-level tool failures (timeout, permission denied, tool not found). Circuit breaker: 3+ consecutive failures triggers reassess warning. More targeted than mistake-capture.py (which handles content-level errors in successful tools).
+- **Keyword detector** (`hooks/keyword-detector.js`, HK-016): UserPromptSubmit hook that routes natural language to workflow commands. Guards against informational queries. Maps: debug/bug→flow:debug, swarm/parallel→flow:smart-swarm, ship/push→/ship, etc. Injects routing context, doesn't auto-execute.
+- **Skill injector** (`hooks/skill-injector.js`, HK-017): UserPromptSubmit hook that detects technology keywords and suggests matching skills from REGISTRY.md. Embedded keyword→skill map for speed (no file reads per prompt). Covers all active skills. Max 2 suggestions per context budget rules.
+
+### Changed
+- `settings.json`: Added 4 new hook event types (UserPromptSubmit, SubagentStart, SubagentStop, PostToolUseFailure) and PreToolUse:* context guard
+- `CLAUDE.md`: Updated Auto-Continuation (context guard), Auto-Activation (prompt hooks), Mistake Learning (circuit breaker, deliverable verification), Hook Signals (6 new signal types)
+- `skills/REGISTRY.md`: Added HK-012 through HK-017
+
+### Design Principles
+- All hooks follow existing patterns: Node.js for speed, JSON stdin/stdout, silent fail on errors
+- context-guard.js reads the same bridge file as context-monitor.js — no new state files
+- subagent-tracker/verifier share `logs/subagent-events.jsonl` — one log, two writers
+- tool-failure-handler.js has its own log (`logs/tool-failures.jsonl`) separate from mistake-capture.py's `logs/failures.jsonl` — framework failures vs content errors
+- keyword-detector guards against false positives with info-query detection
+- skill-injector uses embedded map (not REGISTRY.md reads) for sub-3ms latency
+- No OMC dependency — all concepts reimplemented natively within existing architecture
+
 ## [2.3.0] — 2026-03-27
 ### Added — Ruflo-Inspired Adaptations
 - **Three-tier model routing** (`rules/tier-routing.md`): Bash→Haiku→Sonnet→Opus routing by task complexity. Reduces token costs 30-50% by matching agent tier to task difficulty. Integrated into smart-swarm, flow:go, and CLAUDE.md.
