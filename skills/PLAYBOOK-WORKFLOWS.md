@@ -1,6 +1,6 @@
 # Playbook: Workflows & Task Routing
 
-> **Auto-loaded when**: Planning projects, choosing workflows, managing GSD/Compound lifecycle, classifying tasks.
+> **Auto-loaded when**: Planning projects, choosing workflows, managing Flow lifecycle, classifying tasks.
 
 ---
 
@@ -12,9 +12,9 @@ When the user gives a task, classify it and act WITHOUT asking unless genuinely 
 
 | Signal in Request | Classification | Action Chain |
 |-------------------|---------------|-------------|
-| "build", "create app", "new project" | NEW_PROJECT | Classify scope → GSD or Compound route |
-| "add feature", "implement" | FEATURE | Check for GSD `.planning/` → route accordingly |
-| "fix bug", "broken", "not working" | BUG | Check for GSD `.planning/` → `/gsd:debug` or systematic-debugging |
+| "build", "create app", "new project" | NEW_PROJECT | Classify scope → `/flow:start` (auto-detects depth) |
+| "add feature", "implement" | FEATURE | Check for `.flow/` (or legacy `.planning/`) → route accordingly |
+| "fix bug", "broken", "not working" | BUG | Check for `.flow/` → `/flow:debug` or systematic-debugging |
 | "review", "check this PR" | CODE_REVIEW | Layered review: security → quality → framework |
 | "deploy", "push", "release" | DEPLOYMENT | Validate → security scan → ASK user before executing |
 | "optimize", "slow", "performance" | OPTIMIZATION | Measure first → PDCA cycle → validate improvement |
@@ -28,9 +28,9 @@ When the user gives a task, classify it and act WITHOUT asking unless genuinely 
 | Scope | Indicators | Route |
 |-------|-----------|-------|
 | **Trivial** | Single file, <20 lines, obvious fix | Do it directly, no planning needed |
-| **Small** | 1-3 files, clear requirements | `/gsd:quick` or Compound workflows |
-| **Medium** | 3-10 files, some ambiguity | `/compound-engineering:workflows:plan` → `:work` |
-| **Large** | 10+ files, multi-phase, architectural | `/gsd:new-project` → full lifecycle |
+| **Small** | 1-3 files, clear requirements | `/flow:quick` |
+| **Medium** | 3-10 files, some ambiguity | `/flow:plan` → `/flow:go` |
+| **Large** | 10+ files, multi-phase, architectural | `/flow:start` → full lifecycle (auto-detects deep/epic) |
 
 ### When to Ask vs. Act
 
@@ -53,52 +53,55 @@ Use `ask-questions-if-underspecified` pattern: 1-5 multiple-choice questions wit
 
 ---
 
-## 2. GSD Workflow — Complete Reference
+## 2. Flow Workflow — Complete Reference
+
+Flow is the unified workflow system. A single `/flow:start` auto-detects depth (quick → standard → deep → epic) based on file scope, risk, and ambiguity.
 
 ### Project Lifecycle
 
 ```
-/gsd:new-project [--auto]
-  → Creates: .planning/{PROJECT,REQUIREMENTS,ROADMAP,STATE,config}.md
-  → Flow: questions → research (optional) → requirements → roadmap
+/flow:start [description]
+  → Auto-scores: file count, risk (7 dimensions), ambiguity
+  → Creates: .flow/{state.yaml, config.yaml, ROADMAP.md, PLAN.md}
+  → Routes: quick | standard | deep | epic
 
-/gsd:plan-phase <N> [--research] [--skip-verify] [--prd <file>]
-  → Spawns: gsd-phase-researcher → gsd-planner → gsd-plan-checker
-  → Creates: .planning/phases/NN-name/{PLAN-01.md, RESEARCH.md}
+/flow:plan [description]
+  → Spawns: flow-planner → flow-plan-checker → flow-risk-assessor
+  → Creates: .flow/PLAN.md (plans-as-prompts with wave dependencies)
 
-/gsd:execute-phase <N> [--gaps-only]
-  → Spawns: parallel gsd-executor agents (wave-based)
+/flow:go [plan_file]
+  → Spawns: parallel flow-executor agents (wave-based)
   → Each executor: atomic commits, TDD support, deviation auto-fix
-  → Creates: PLAN-NN-SUMMARY.md per plan
+  → Creates: PLAN-NN-SUMMARY.md per wave
 
-/gsd:verify-work
-  → Spawns: gsd-verifier → creates VERIFICATION.md
-  → If failures: use /gsd:plan-phase N --gaps to create gap closure plans
+/flow:verify
+  → Spawns: flow-verifier → goal-backward verification
+  → If failures: creates gap closure plans
 
-/gsd:complete-milestone
-  → Archives completed milestone, prepares for next version
+/flow:complete
+  → Archives completed milestone, runs retro, compounds knowledge
 ```
 
 ### Quick Tasks & Debugging
 
 ```
-/gsd:quick [--full]
-  → Lives in .planning/quick/ (separate from phases)
-  → --full enables plan-checking + post-verification
+/flow:quick [description]
+  → Minimal ceremony — plan + execute in one pass
+  → For well-defined tasks under 4 files
 
-/gsd:debug "description"
-  → Spawns gsd-debugger with fresh 200k context
-  → Scientific method: hypothesis → test → verify
-  → State persists in .planning/debug/
+/flow:debug "description"
+  → Spawns flow-debugger with scientific method
+  → Hypothesis → test → verify, persistent state in .flow/debug/
 ```
 
 ### State Management
 
 ```
-/gsd:progress      → Current position + next recommended action
-/gsd:resume-work   → Restore interrupted session from STATE.md
-/gsd:pause-work    → Save context for later (or auto-triggered at 25% context)
-/gsd:health        → Diagnose .planning/ issues
+/flow:status       → Current position, velocity, next recommended action
+/resume            → Restore interrupted session from .flow/state.yaml
+                     (auto-migrates legacy .planning/ projects to Flow)
+/flow:map          → Parallel codebase mapping across 4 focus areas
+/health            → Diagnose .flow/ issues + system integrity
 ```
 
 ### Executor Behavior
@@ -164,16 +167,16 @@ TDD in executor: When task has `tdd="true"`:
 When a task arrives, follow this decision tree:
 
 ```
-1. IS THERE A GSD PROJECT? (check .planning/STATE.md)
-   ├─ YES → Is this a phase task? → /gsd:plan-phase or /gsd:execute-phase
-   │        Is this a quick task? → /gsd:quick
-   │        Is this a bug?       → /gsd:debug
-   │        Is this a review?    → /compound-engineering:workflows:review
+1. IS THERE A FLOW PROJECT? (check .flow/state.yaml or legacy .planning/STATE.md)
+   ├─ YES → Is this a phase task? → /flow:plan or /flow:go
+   │        Is this a quick task? → /flow:quick
+   │        Is this a bug?       → /flow:debug
+   │        Is this a review?    → /flow:review
    └─ NO  → Continue to step 2
 
 2. WHAT TYPE OF TASK?
-   ├─ New project (multi-phase)  → /gsd:new-project
-   ├─ Feature (medium scope)     → /compound-engineering:workflows:plan → :work
+   ├─ New project (multi-phase)  → /flow:start (auto-detects depth)
+   ├─ Feature (medium scope)     → /flow:plan → /flow:go
    ├─ Feature (small scope)      → Do directly or /feature-dev:feature-dev
    ├─ Bug fix                    → Systematic debugging
    ├─ Code review                → /compound-engineering:workflows:review
@@ -200,7 +203,7 @@ When a task arrives, follow this decision tree:
    ├─ Run security scan (sharp-edges on changed files)
    ├─ Validate generated IaC (generator → validator)
    ├─ Verify behavior (not just "code compiles")
-   └─ Offer /compound-engineering:workflows:compound if non-trivial
+   └─ Offer /flow:compound if non-trivial
 
 6. AFTER COMPLETION:
    ├─ Store key learnings in Memory Graph

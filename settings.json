@@ -47,7 +47,7 @@
         ]
       },
       {
-        "matcher": "Write|Edit|MultiEdit|Bash",
+        "matcher": "Write|Edit|MultiEdit|Bash|Agent",
         "hooks": [
           {
             "type": "command",
@@ -56,7 +56,7 @@
         ]
       },
       {
-        "matcher": "Bash|Write|Edit|MultiEdit",
+        "matcher": "Bash|Write|Edit|MultiEdit|Agent",
         "hooks": [
           {
             "type": "command",
@@ -137,6 +137,16 @@
             "timeout": 5
           }
         ]
+      },
+      {
+        "matcher": "Agent",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node ~/.claude/hooks/subagent-limiter.js",
+            "timeout": 3
+          }
+        ]
       }
     ],
     "SubagentStart": [
@@ -167,6 +177,15 @@
           {
             "type": "command",
             "command": "bash ~/.claude/scripts/progressive-learning/precompact-reflect.sh"
+          }
+        ]
+      },
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash ~/.claude/scripts/precompact-flow-validate.sh",
+            "timeout": 5
           }
         ]
       }

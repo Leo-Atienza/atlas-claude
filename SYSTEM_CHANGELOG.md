@@ -1,5 +1,29 @@
 # System Changelog
 
+## [2.6.0] — 2026-03-29
+### Added — Configuration Hardening & Performance
+Audit-driven improvements: configuration drift detection, missing safety mechanisms, stale documentation cleanup, and startup performance optimization.
+
+- **Subagent limiter** (`hooks/subagent-limiter.js`, HK-019): PreToolUse hook matching Agent. Reads concurrent agent count from subagent-tracker.js state file and blocks spawns when >= 6 concurrent. Fail-open on errors or stale state (>5min). Closes the gap where subagent-tracker.js (SubagentStart) could only warn after spawn.
+- **PreCompact flow validator** (`scripts/precompact-flow-validate.sh`, HK-020): PreCompact hook validates `.flow/state.yaml` exists, has `status`/`phase` fields, and isn't empty before context compaction. Never blocks — only warns via additionalContext.
+- **Hook registration drift detection** (`scripts/smoke-test.sh` section [11]): Cross-references settings.json hook entries against hooks/ directory. Reports FAIL for settings pointing to missing files, WARN for hooks on disk not registered.
+- **`/dream` command** (`commands/dream.md`): Thin command entry point delegating to `skills/dream/SKILL.md`. Completes the set — all 6 master entry points now have command files.
+
+### Changed
+- `hooks/session-start.sh`: Consolidated 3 separate `node -e` calls (version manifest, skill stats, tool health) into single Node invocation. Added 8-second timeout watchdog. Saves ~1-2s startup time.
+- `settings.json`: Extended context-monitor matcher to include Agent (`Write|Edit|MultiEdit|Bash|Agent`). Extended mistake-capture matcher to include Agent (`Bash|Write|Edit|MultiEdit|Agent`). Registered HK-019 and HK-020.
+- `skills/PLAYBOOK-WORKFLOWS.md`: Rewrote all GSD references to Flow equivalents. Section 2 completely replaced. 28 stale `/gsd:*` command references removed.
+
+### Removed
+- `flow-knowledge/index.yaml` — dead file (only `solutions: []`), never read by any hook or script
+- `flow-knowledge/solutions/` — empty directory
+
+### Design Principles
+- Subagent limiter is fail-open: errors, missing state files, or stale data all result in allowing the spawn
+- PreCompact validator never blocks compaction — warnings only
+- Drift detection uses Python for JSON parsing to avoid fragile bash jq dependency
+- Session-start consolidation outputs directly from Node (no intermediate JSON parsing)
+
 ## [2.5.0] — 2026-03-29
 ### Added — OpenSpace-Inspired Self-Evolution Patterns
 Analyzed HKUDS/OpenSpace (Python MCP server for agent skill evolution). Borrowed 4 concepts adapted to our file-based hook architecture. No external dependencies added.

@@ -154,6 +154,62 @@ else
   warn "mistake-capture.py returned non-zero"
 fi
 
+# ─── 11. Hook Registration Integrity (Drift Detection) ──────────────
+echo "[11] Hook Registration Integrity"
+DRIFT_RESULT=$(python3 -c "
+import json, os, glob, re
+
+settings_path = os.path.expanduser('~/.claude/settings.json')
+hooks_dir = os.path.expanduser('~/.claude/hooks')
+
+with open(settings_path) as f:
+    settings = json.load(f)
+
+# Extract hook file basenames from settings.json
+registered = set()
+for event_hooks in settings.get('hooks', {}).values():
+    for entry in event_hooks:
+        for hook in entry.get('hooks', []):
+            cmd = hook.get('command', '')
+            # Match hook file paths like ~/.claude/hooks/foo.js
+            for m in re.finditer(r'~?/\.claude/hooks/([^\s|;]+\.(js|sh|py))', cmd):
+                registered.add(m.group(1))
+            # Match hooks/foo.sh patterns
+            for m in re.finditer(r'hooks/([^\s|;]+\.(js|sh|py))', cmd):
+                registered.add(m.group(1))
+
+# Get .js/.sh/.py files directly in hooks/ (not subdirectories)
+on_disk = set()
+for ext in ('*.js', '*.sh', '*.py'):
+    for f in glob.glob(os.path.join(hooks_dir, ext)):
+        on_disk.add(os.path.basename(f))
+
+# settings entries pointing to missing files
+for f in sorted(registered):
+    if not os.path.exists(os.path.join(hooks_dir, f)):
+        print(f'MISSING:{f}')
+
+# hooks on disk not registered in settings
+for f in sorted(on_disk):
+    if f not in registered:
+        print(f'ORPHAN:{f}')
+" 2>/dev/null)
+
+if [ -z "$DRIFT_RESULT" ]; then
+  pass "No hook registration drift detected"
+else
+  echo "$DRIFT_RESULT" | while IFS= read -r line; do
+    case "$line" in
+      MISSING:*)
+        fail "settings.json references missing hook: ${line#MISSING:}"
+        ;;
+      ORPHAN:*)
+        warn "Hook on disk not registered in settings.json: ${line#ORPHAN:}"
+        ;;
+    esac
+  done
+fi
+
 # ─── Summary ────────────────────────────────────────────────────────
 echo ""
 echo "=== Results ==="

@@ -6,6 +6,11 @@
 HOME_DIR="$HOME"
 CLAUDE_DIR="$HOME_DIR/.claude"
 
+# Hard timeout watchdog — kill this script after 8 seconds to prevent hangs
+( sleep 8 && kill $$ 2>/dev/null ) &
+WATCHDOG_PID=$!
+trap "kill $WATCHDOG_PID 2>/dev/null" EXIT
+
 # ─── 1. Progressive Learning checks ───────────────────────────────────
 FLAG_FILE="$CLAUDE_DIR/.pending-reflection"
 CONFLICTS_FILE="$CLAUDE_DIR/projects/C--Users-leooa--claude/memory/conflicts.md"
@@ -124,20 +129,7 @@ if [ "$RUN_HEALTH" = true ]; then
 fi
 
 # ─── 3. Version manifest staleness nudge ─────────────────────────────
-MANIFEST="$CLAUDE_DIR/skills/VERSION-MANIFEST.json"
-if [ -f "$MANIFEST" ]; then
-  STALE_DAYS=$(node -e "
-    const m=JSON.parse(require('fs').readFileSync('$MANIFEST','utf8'));
-    const dates=[...Object.values(m.cli_tools||{}), ...Object.values(m.skill_packs||{})]
-      .map(v=>new Date(v.last_checked));
-    const oldest=Math.min(...dates);
-    const days=Math.round((Date.now()-oldest)/86400000);
-    if(days>14) process.stdout.write(String(days));
-  " 2>/dev/null)
-  if [ -n "$STALE_DAYS" ]; then
-    echo "VERSION CHECK: Last update check was $STALE_DAYS days ago. Run /health to check for updates."
-  fi
-fi
+# (consolidated into single Node call in section 5.5)
 
 # ─── 4. Claude Code version check ────────────────────────────────────
 VERSION_FILE="$CLAUDE_DIR/.claude-code-version"
@@ -191,34 +183,35 @@ if [ -n "$SIGNALS" ]; then
   echo "{\"hookSpecificOutput\":{\"hookEventName\":\"SessionStart\",\"additionalContext\":\"MISTAKE LEARNING: ${SIGNALS}Act on recurring patterns before starting new work.\"}}"
 fi
 
-# ─── 5.5. Skill performance alerts ──────────────────────────────────
+# ─── 5.5. Consolidated health alerts (single Node process) ──────────
+# Combines: version manifest staleness + skill performance + tool health
+# Saves ~1-2s by avoiding 3 separate Node process spawns
+MANIFEST="$CLAUDE_DIR/skills/VERSION-MANIFEST.json"
 SKILL_STATS="$CLAUDE_DIR/logs/skill-stats.json"
-if [ -f "$SKILL_STATS" ]; then
-  SKILL_ALERTS=$(node -e "
-    const s = JSON.parse(require('fs').readFileSync(process.argv[1], 'utf8'));
-    const alerts = Object.entries(s.skills || {})
-      .filter(([_, v]) => v.fallback_rate > 0.50 && v.total_selections >= 5)
-      .map(([id, v]) => id + ' (' + v.name + ') ' + Math.round(v.fallback_rate*100) + '% fallback over ' + v.total_selections + ' selections');
-    if (alerts.length) process.stdout.write(alerts.join('; '));
-  " "$SKILL_STATS" 2>/dev/null)
-  if [ -n "$SKILL_ALERTS" ]; then
-    echo "SKILL HEALTH: High fallback rates detected — $SKILL_ALERTS. Keywords may need updating."
-  fi
-fi
-
-# ─── 5.6. Tool health alerts (cross-session EMA) ───────────────────
 TOOL_HEALTH="$CLAUDE_DIR/logs/tool-health.json"
-if [ -f "$TOOL_HEALTH" ]; then
-  TOOL_ALERTS=$(node -e "
-    const h = JSON.parse(require('fs').readFileSync(process.argv[1], 'utf8'));
-    const alerts = Object.entries(h.tools || {})
-      .filter(([_, t]) => t.failure_rate_ema > 0.40 && t.total_calls >= 10)
-      .map(([name, t]) => name + ' (' + Math.round(t.failure_rate_ema*100) + '% EMA failure rate)');
-    if (alerts.length) process.stdout.write(alerts.join(', '));
-  " "$TOOL_HEALTH" 2>/dev/null)
-  if [ -n "$TOOL_ALERTS" ]; then
-    echo "HIGH TOOL FAILURE RATES: $TOOL_ALERTS. Investigate before heavy use."
-  fi
+
+if [ -f "$MANIFEST" ] || [ -f "$SKILL_STATS" ] || [ -f "$TOOL_HEALTH" ]; then
+  node -e "
+    const fs=require('fs');
+    try{const m=JSON.parse(fs.readFileSync(process.argv[1],'utf8'));
+      const d=[...Object.values(m.cli_tools||{}),...Object.values(m.skill_packs||{})]
+        .map(v=>new Date(v.last_checked));
+      const days=Math.round((Date.now()-Math.min(...d))/86400000);
+      if(days>14)console.log('VERSION CHECK: Last update check was '+days+' days ago. Run /health to check for updates.');
+    }catch(e){}
+    try{const s=JSON.parse(fs.readFileSync(process.argv[2],'utf8'));
+      const a=Object.entries(s.skills||{})
+        .filter(([_,v])=>v.fallback_rate>0.50&&v.total_selections>=5)
+        .map(([id,v])=>id+' ('+v.name+') '+Math.round(v.fallback_rate*100)+'% fallback');
+      if(a.length)console.log('SKILL HEALTH: High fallback rates detected — '+a.join('; ')+'. Keywords may need updating.');
+    }catch(e){}
+    try{const h=JSON.parse(fs.readFileSync(process.argv[3],'utf8'));
+      const a=Object.entries(h.tools||{})
+        .filter(([_,t])=>t.failure_rate_ema>0.40&&t.total_calls>=10)
+        .map(([n,t])=>n+' ('+Math.round(t.failure_rate_ema*100)+'% EMA failure)');
+      if(a.length)console.log('HIGH TOOL FAILURE RATES: '+a.join(', ')+'. Investigate before heavy use.');
+    }catch(e){}
+  " "$MANIFEST" "$SKILL_STATS" "$TOOL_HEALTH" 2>/dev/null || true
 fi
 
 # ─── 6. Stale plan cleanup ───────────────────────────────────────────

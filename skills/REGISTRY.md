@@ -393,6 +393,8 @@
 | HK-016 | keyword-detector.js | UserPromptSubmit — auto-routes natural language to workflows | `hooks/keyword-detector.js` |
 | HK-017 | skill-injector.js | UserPromptSubmit — auto-detects tech keywords → skill suggestions + logs selection events | `hooks/skill-injector.js` |
 | HK-018 | sync-skill-keywords.js | SessionStart — regenerates keyword cache from REGISTRY.md + SKILL.md frontmatter | `hooks/sync-skill-keywords.js` |
+| HK-019 | subagent-limiter.js | PreToolUse:Agent — blocks Agent spawns when concurrent limit (6) reached | `hooks/subagent-limiter.js` |
+| HK-020 | precompact-flow-validate.sh | PreCompact — validates .flow/ state before context compaction | `scripts/precompact-flow-validate.sh` |
 
 ## Scheduled Tasks
 
