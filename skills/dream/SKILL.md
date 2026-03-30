@@ -68,6 +68,37 @@ Update `MEMORY.md` so it stays **under 200 lines** and **under 25KB**.
 
 Update `evolution.md` with a timestamped entry recording what changed.
 
+## Phase 5 — Knowledge Graph Sync (if MCP available)
+
+If Memory Graph MCP tools are accessible (`create_entities`, `create_relations`):
+
+1. **Sync entities**: For each topic file in `topics/`, create/update a Knowledge Graph entity:
+   ```
+   create_entities([{
+     name: "{ID} — {Name}",
+     entityType: "learning-{category}",
+     observations: ["Summary: ...", "Tags: ...", "Maturity: ...", "Date: ..."]
+   }])
+   ```
+
+2. **Sync edge relations** (MAGMA graph): For each topic with edge metadata:
+   - `Supersedes` → `create_relations([{from: "{new_ID}", relationType: "supersedes", to: "{old_ID}"}])`
+   - `Caused by` → `create_relations([{from: "{ID}", relationType: "caused_by", to: "{cause_ID}"}])`
+   - `Components` → `create_relations([{from: "{ID}", relationType: "involves_component", to: "{component}"}])`
+
+3. **Cross-reference**: Create `related_to` relations between entries that share 2+ tags
+
+If Memory Graph MCP is NOT available, skip silently. File-based memory is primary.
+
+## Phase 6 — Skill Evolution Check
+
+Run skill improvement analysis:
+```bash
+node ~/.claude/scripts/skill-improver.js
+```
+
+If candidates are generated, include them in the dream summary.
+
 ---
 
 ## Output
@@ -91,7 +122,7 @@ Return a brief summary structured as:
 After completing consolidation, **always** update the timestamp so session-start knows when dream last ran:
 
 ```bash
-date +%s > /tmp/claude-dream-last-run
+date +%s > ~/.claude/cache/dream-last-run
 ```
 
 This prevents repeated triggers within the same week.

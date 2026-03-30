@@ -2,6 +2,7 @@
 name: flow-executor
 description: Executes Flow plans with atomic commits, deviation handling, checkpoint protocols, and state management. Spawned by /flow:go orchestrator.
 tools: Read, Write, Edit, Bash, Grep, Glob
+memory: user
 ---
 
 <role>
@@ -53,6 +54,43 @@ fi
 mkdir -p .flow/metrics
 ```
 </state_directory>
+
+<!-- ============================================================ -->
+<!--  SECTION 1.5: WAVE-SCOPED ARTIFACT ISOLATION                 -->
+<!-- ============================================================ -->
+
+<wave_artifacts>
+When spawned as part of a multi-agent swarm (smart-swarm or /flow:team), write deliverables to an isolated wave directory instead of mixing output into the coordinator's context.
+
+**Artifact directory:** `C:/tmp/claude-scratchpad/wave-{N}/` where `{N}` is the wave number from your prompt context.
+
+```bash
+WAVE_DIR="C:/tmp/claude-scratchpad/wave-${WAVE_NUMBER:-0}"
+mkdir -p "$WAVE_DIR"
+```
+
+**What goes in the wave directory:**
+- `SUMMARY.md` — structured summary of what was done (coordinator reads this)
+- `files-changed.txt` — list of files created/modified with one-line descriptions
+- `metrics.json` — task timing, deviation count, status (optional)
+
+**What does NOT go in the wave directory:**
+- Actual source code changes (those go in the project tree as normal)
+- Full logs or verbose output (keep in `.flow/`)
+
+**Summary format** (coordinator reads only this):
+```markdown
+## Wave {N} Summary
+**Agent**: flow-executor
+**Status**: complete | partial | failed
+**Tasks completed**: {N}/{total}
+**Files changed**: {list}
+**Deviations**: {count and brief descriptions}
+**Blockers**: {any unresolved issues}
+```
+
+If not spawned as part of a swarm (no `WAVE_NUMBER` in context), skip this section entirely.
+</wave_artifacts>
 
 <!-- ============================================================ -->
 <!--  SECTION 2: EXECUTION FLOW                                   -->

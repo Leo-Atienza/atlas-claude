@@ -57,6 +57,17 @@ grep -E '^\| G-(PAT|SOL|ERR|FAIL|PREF)-[0-9]+' "$INDEX_FILE" | while IFS='|' rea
   # Escape special YAML characters in summary
   summary_escaped=$(echo "$summary" | sed 's/"/\\"/g')
 
+  # Extract edge metadata from topic file if it exists
+  TOPIC_FILE="$MEMORY_DIR/topics/${id}-${slug}.md"
+  supersedes=""
+  caused_by=""
+  components=""
+  if [ -f "$TOPIC_FILE" ]; then
+    supersedes=$(grep -oP '^\*\*Supersedes\*\*: \K[^\s]+' "$TOPIC_FILE" 2>/dev/null | grep -v "none" || true)
+    caused_by=$(grep -oP '^\*\*Caused by\*\*: \K[^\s]+' "$TOPIC_FILE" 2>/dev/null | grep -v "none" || true)
+    components=$(grep -oP '^\*\*Components\*\*: \K.+' "$TOPIC_FILE" 2>/dev/null || true)
+  fi
+
   cat >> "$OUTPUT_FILE" << EOF
   - id: "$id"
     category: "$category"
@@ -65,5 +76,9 @@ grep -E '^\| G-(PAT|SOL|ERR|FAIL|PREF)-[0-9]+' "$INDEX_FILE" | while IFS='|' rea
     summary: "$summary_escaped"
     path: "memory/topics/${id}-${slug}.md"
     date: "$date"
+    edges:
+      supersedes: "${supersedes:-none}"
+      caused_by: "${caused_by:-none}"
+      components: "${components:-none}"
 EOF
 done

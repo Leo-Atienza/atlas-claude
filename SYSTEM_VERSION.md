@@ -14,10 +14,10 @@ last_health_check: 2026-03-30
 failing_components: none
 
 ## Component Counts
-hooks: 23
-commands: 39
-agents: 72
-skills: 38 (direct SKILL.md) + 150+ (via skill packs)
+hooks: 25
+commands: 41
+agents: 73
+skills: 32 (direct SKILL.md) + 150+ (via skill packs)
 plugins: 9
 rules: 5
 
@@ -46,6 +46,11 @@ hooks/tool-efficiency.js        | 3.0.0 | new      | OK
 scripts/self-repair.sh          | 3.0.0 | new      | OK
 scripts/skill-improver.js       | 3.0.0 | new      | OK
 hooks/post-compact-dream-check.sh | 2.2.0 | verified | OK
+hooks/teammate-quality-gate.js  | 3.0.0 | new      | OK
+hooks/task-completed-verify.js  | 3.0.0 | new      | OK
+agents/flow-security-auditor.md | 3.0.0 | new      | OK
+commands/flow/team.md           | 3.0.0 | new      | OK
+commands/skill-review.md        | 3.0.0 | new      | OK
 commands/learn.md               | 2.1.0 | verified | OK
 commands/analyze-mistakes.md    | 2.1.0 | verified | OK
 commands/health.md              | 2.1.0 | verified | OK

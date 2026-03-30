@@ -39,13 +39,8 @@
 | SK-039 | smart-swarm | Auto-organize multi-agent teams based on 5D complexity scoring | `skills/smart-swarm/SKILL.md` |
 | SK-040 | dream | Multi-phase memory consolidation — orient, gather signal, merge, prune | `skills/dream/SKILL.md` |
 | SK-041 | project-init | Auto-generate project CLAUDE.md from stack-detected templates | `skills/project-init/SKILL.md` |
-| SK-042 | gsap-core | GSAP core tweens, easing, stagger, transforms | `skills/gsap-core/SKILL.md` |
-| SK-043 | gsap-timeline | GSAP timeline sequencing, position parameter, labels | `skills/gsap-timeline/SKILL.md` |
-| SK-044 | gsap-scrolltrigger | GSAP ScrollTrigger — scroll-driven animation, scrub, pin | `skills/gsap-scrolltrigger/SKILL.md` |
-| SK-045 | gsap-plugins | GSAP plugins — Flip, Draggable, SplitText, ScrollTo | `skills/gsap-plugins/SKILL.md` |
-| SK-046 | gsap-utils | GSAP utility functions | `skills/gsap-utils/SKILL.md` |
-| SK-047 | gsap-react | GSAP React integration — useGSAP hook, refs, context | `skills/gsap-react/SKILL.md` |
-| SK-048 | gsap-performance | GSAP performance best practices | `skills/gsap-performance/SKILL.md` |
+| SK-042 | gsap | GSAP core animation — tweens, timelines, utilities, and performance | `skills/gsap/SKILL.md` |
+| SK-044 | gsap-advanced | GSAP advanced — ScrollTrigger, plugins (Flip, Draggable, SplitText), React/framework integration | `skills/gsap-advanced/SKILL.md` |
 | SK-050 | nano-banana | Google Nano Banana (Gemini Image) — AI image gen/edit, all models, grounding, batch, constraints | `skills/nano-banana/SKILL.md` |
 | SK-051 | dev-cycle | Disciplined dev cycle — enforces discovery, scoping, design before code. Scope creep guard, MoSCoW, appetite tracking | `skills/dev-cycle/SKILL.md` |
 | SK-052 | linkedin-poster | Compose and publish LinkedIn posts (text, articles, images) via LinkedIn API | `skills/linkedin-poster/SKILL.md` |
@@ -69,7 +64,12 @@
 | SK-035 | swift-concurrency-pro | `[ARCHIVED]` Swift concurrency review | `skills/swift-concurrency-pro/SKILL.md` |
 | SK-036 | swift-testing-pro | `[ARCHIVED]` Swift Testing APIs | `skills/swift-testing-pro/SKILL.md` |
 | SK-037 | swiftui-pro | `[ARCHIVED]` SwiftUI code review | `skills/swiftui-pro/SKILL.md` |
-| SK-049 | gsap-frameworks | `[ARCHIVED]` GSAP Vue/Svelte integration | `skills/gsap-frameworks/SKILL.md` |
+| SK-043 | gsap-timeline | `[MERGED → SK-042]` GSAP timeline — merged into gsap | — |
+| SK-045 | gsap-plugins | `[MERGED → SK-044]` GSAP plugins — merged into gsap-advanced | — |
+| SK-046 | gsap-utils | `[MERGED → SK-042]` GSAP utils — merged into gsap | — |
+| SK-047 | gsap-react | `[MERGED → SK-044]` GSAP React — merged into gsap-advanced | — |
+| SK-048 | gsap-performance | `[MERGED → SK-042]` GSAP performance — merged into gsap | — |
+| SK-049 | gsap-frameworks | `[MERGED → SK-044]` GSAP Vue/Svelte — merged into gsap-advanced | — |
 
 ## DevOps — Generators & Validators (Archived)
 
@@ -343,6 +343,7 @@
 | FL-A13 | flow-compound-writer | Knowledge compounding doc assembly | `agents/flow-compound-writer.md` |
 | FL-A14 | flow-uat | User acceptance testing | `agents/flow-uat.md` |
 | FL-A15 | smart-swarm-coordinator | Coordinate multi-agent teams | `agents/smart-swarm-coordinator.md` |
+| FL-A16 | flow-security-auditor | Pre-ship security audit (SC-001/002/003) | `agents/flow-security-auditor.md` |
 
 ## Master Commands
 

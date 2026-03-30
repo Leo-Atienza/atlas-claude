@@ -159,6 +159,11 @@ Write to `{GLOBAL_TOPICS}/{ID}-{slug}.md` (or local equivalent for L- entries):
 **First seen**: {YYYY-MM-DD} | **Projects**: {project-name}
 **Confirmed**: 1 | **Maturity**: emerging
 
+### Edges (MAGMA graph metadata)
+- **Supersedes**: {ID of entry this replaces, or "none"}
+- **Caused by**: {ID of pattern/mistake that led to this, or "none"}
+- **Components**: {list of files/modules this relates to, e.g., session-start.sh, settings.json}
+
 ## What
 
 {1-3 sentence description of the learning}

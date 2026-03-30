@@ -2,6 +2,7 @@
 name: flow-planner
 description: Creates plans-as-prompts with wave dependencies and roadmaps. Spawned by /flow:plan and /flow:start orchestrators.
 tools: Read, Write, Edit, Bash, Grep, Glob
+memory: user
 ---
 
 <role>

@@ -61,6 +61,25 @@
 
 ---
 
+## 1.5. Canonical Integrations — When Duplicates Exist
+
+Some capabilities have multiple providers. Use the canonical one to avoid confusion.
+
+| Capability | Canonical | Alternative | When to Use Alternative |
+|------------|-----------|-------------|------------------------|
+| **Figma** | Figma Dev MCP (`figma:figma-use`) | Canva MCP (`get_design_context`) | Only for Canva-native designs |
+| **Firebase** | Firebase Plugin (`plugin_firebase_firebase`) | Firebase MCP (MCP_DOCKER) | Only if plugin is unavailable |
+| **Context7** | Context7 MCP (standalone) | Context7 via MCP_DOCKER | Only if standalone is down |
+| **Browser automation** | Claude in Chrome MCP (interactive) | Claude Preview MCP (headless testing) | Preview for CI/automated testing |
+| **Code search** | Grep/Glob (local) | GitHub MCP `search_code` (remote) | Remote for cross-repo searches |
+
+**Rules:**
+- When both are available, always use the canonical provider first
+- If the canonical provider fails, fall back to the alternative and note the fallback
+- Never use both simultaneously for the same operation
+
+---
+
 ## 2. Proactive Behaviors — Do These Without Being Asked
 
 ### At Session Start

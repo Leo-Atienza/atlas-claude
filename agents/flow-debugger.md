@@ -2,6 +2,7 @@
 name: flow-debugger
 description: Scientific debugging with persistent state, hypothesis tracking, and fix verification. Spawned by /flow:debug orchestrator.
 tools: Read, Write, Edit, Bash, Grep, Glob
+memory: user
 ---
 
 <role>

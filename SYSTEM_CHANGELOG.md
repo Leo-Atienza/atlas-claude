@@ -20,6 +20,27 @@ Major version bump: ATLAS now has self-improvement capabilities that no other pu
 - **Hook health telemetry** (`hooks/hook-health-logger.js`, HK-021): Logs execution duration of every PostToolUse hook cycle. Session-start aggregation warns on hooks averaging >3s.
 - **Pre-ship quality gate**: `/flow:ship` now runs mandatory security scan, smoke test, and diff review before any git operations.
 
+**Agent Teams Integration**
+- **`/flow:team` command** (`commands/flow/team.md`): Spawn Agent Teams (2-6 agents) for TEAM/SWARM complexity tasks. Roles mapped to agent types and model tiers. Integrates with TeammateIdle and TaskCompleted hooks.
+- **TeammateIdle quality gate** (`hooks/teammate-quality-gate.js`): Rejects thin output (<50 chars), error patterns, and empty results. Exit code 2 sends feedback to keep agent working.
+- **TaskCompleted auto-verification** (`hooks/task-completed-verify.js`): Runs project tests (npm/cargo/pytest/go, 30s timeout) and checks .flow/state.yaml. Exit code 2 rejects completion if tests fail.
+
+**MAGMA-Inspired Memory Architecture**
+- **Edge metadata in knowledge topics**: `/reflect` now captures `Supersedes`, `Caused by`, and `Components` edges in topic files — enabling temporal, causal, and entity graph traversal.
+- **Graph-aware memory bridge** (`scripts/rebuild-memory-bridge.sh`): Extracts edge metadata from topic files and includes in YAML index. Flow agents can now traverse causal chains.
+- **Knowledge Graph MCP sync** (`skills/dream/SKILL.md` Phase 5): `/dream` syncs entities and edge relations to Memory Graph MCP when available.
+- **Skill evolution during dream** (`skills/dream/SKILL.md` Phase 6): `/dream` runs skill-improver.js to generate improvement candidates.
+
+**Context Isolation for Swarms (Deep Agents Pattern)**
+- **Wave-scoped artifact directories** (`agents/flow-executor.md`): Swarm agents write deliverables to `C:/tmp/claude-scratchpad/wave-{N}/`. Coordinator reads only SUMMARY.md from each wave.
+- **Smart swarm summary-only reads** (`agents/smart-swarm-coordinator.md`): Coordinator synthesizes from wave summaries, not full output. File conflict detection via `files-changed.txt`.
+- **Persistent per-agent memory**: Added `memory: user` to flow-planner, flow-executor, flow-debugger frontmatter — agents learn codebase patterns across sessions.
+
+**System Consolidation & Cleanup**
+- **GSAP skills consolidated**: 8 skills (gsap-core, gsap-timeline, gsap-scrolltrigger, gsap-plugins, gsap-utils, gsap-react, gsap-performance, gsap-frameworks) merged into 2 (`gsap` + `gsap-advanced`). Net -6 skill files.
+- **Canonical integrations declared** (`skills/PLAYBOOK-TOOLS.md` Section 1.5): Figma, Firebase, Context7, browser automation, and code search now have explicit canonical vs alternative providers.
+- **Flow security auditor agent** (`agents/flow-security-auditor.md`, FL-A16): Runs SC-001 (sharp edges), SC-002 (differential review), SC-003 (variant analysis) before shipping.
+
 ### Fixed — Critical Bugs
 - **`mistake-capture.py` crash on string responses**: Line 100 called `.get()` on string `tool_response`, causing silent crash before writing to `failures.jsonl`. The entire progressive learning loop (failures.jsonl → error-patterns.json → /learn → /analyze-mistakes) was silently dead. **This was the most impactful bug in the system.**
 - **Anonymous Stop agent hook**: `settings.json` had a bare `"type": "agent"` Stop hook with no subagent_type or description. Now properly configured as `bug-hunter` agent for completion verification.
@@ -34,6 +55,15 @@ Major version bump: ATLAS now has self-improvement capabilities that no other pu
 - `scripts/smoke-test.sh`: Added CLAUDE.md integrity check, raised registry cap to 200
 - `agents/flow-executor.md`: Removed all GSD/`.planning/` backward compatibility code
 - `commands/flow/ship.md`: Added mandatory pre-ship quality gate (Step 0)
+- `commands/reflect.md`: Added MAGMA edge metadata to topic template
+- `scripts/rebuild-memory-bridge.sh`: Enhanced to extract edge metadata from topic files
+- `skills/dream/SKILL.md`: Added Phase 5 (KG sync) and Phase 6 (skill evolution)
+- `agents/flow-executor.md`: Added wave-scoped artifact isolation, `memory: user` frontmatter
+- `agents/flow-planner.md`: Added `memory: user` frontmatter
+- `agents/flow-debugger.md`: Added `memory: user` frontmatter
+- `agents/smart-swarm-coordinator.md`: Added wave-scoped summary-only reads
+- `skills/PLAYBOOK-TOOLS.md`: Added Section 1.5 (canonical integrations)
+- `skills/REGISTRY.md`: Added FL-A16, consolidated GSAP entries
 - `scheduled-tasks/weekly-dream/SKILL.md`: Fixed /tmp path to ~/.claude/cache/
 
 ### New Files
@@ -44,6 +74,12 @@ Major version bump: ATLAS now has self-improvement capabilities that no other pu
 - `scripts/skill-improver.js` — skill improvement candidate generator
 - `commands/skill-review.md` — human-in-the-loop skill review command
 - `scheduled-tasks/skill-autofix/SKILL.md` — weekly AutoResearch agent
+- `commands/flow/team.md` — Agent Teams command for TEAM/SWARM tasks
+- `hooks/teammate-quality-gate.js` — TeammateIdle quality gate
+- `hooks/task-completed-verify.js` — TaskCompleted auto-verification
+- `agents/flow-security-auditor.md` — pre-ship security audit agent
+- `skills/gsap/SKILL.md` — consolidated GSAP core skill (replaces 4)
+- `skills/gsap-advanced/SKILL.md` — consolidated GSAP advanced skill (replaces 4)
 
 ## [2.6.0] — 2026-03-29
 ### Added — Configuration Hardening & Performance

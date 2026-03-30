@@ -287,6 +287,28 @@
           }
         ]
       }
+    ],
+    "TeammateIdle": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node ~/.claude/hooks/teammate-quality-gate.js",
+            "timeout": 10
+          }
+        ]
+      }
+    ],
+    "TaskCompleted": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node ~/.claude/hooks/task-completed-verify.js",
+            "timeout": 45
+          }
+        ]
+      }
     ]
   },
   "statusLine": {
