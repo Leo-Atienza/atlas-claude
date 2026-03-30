@@ -1,5 +1,30 @@
 {
-  "defaultMode": "bypassPermissions",
+  "defaultMode": "allowedTools",
+  "permissions": {
+    "allow": [
+      "Read",
+      "Glob",
+      "Grep",
+      "TodoWrite",
+      "ToolSearch",
+      "AskUserQuestion",
+      "EnterPlanMode",
+      "ExitPlanMode",
+      "Agent",
+      "Skill",
+      "NotebookRead",
+      "NotebookEdit",
+      "WebSearch",
+      "WebFetch",
+      "SendMessage",
+      "TaskOutput",
+      "RemoteTrigger",
+      "CronList",
+      "ListMcpResourcesTool",
+      "ReadMcpResourceTool"
+    ],
+    "deny": []
+  },
   "env": {
     "CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS": "1",
     "ENABLE_TOOL_SEARCH": "auto"
@@ -38,16 +63,6 @@
     ],
     "PostToolUse": [
       {
-        "matcher": "Read",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "node ~/.claude/hooks/skill-evolution.js",
-            "timeout": 3
-          }
-        ]
-      },
-      {
         "matcher": "Write|Edit|MultiEdit",
         "hooks": [
           {
@@ -57,41 +72,12 @@
         ]
       },
       {
-        "matcher": "Write|Edit|MultiEdit|Bash|Agent",
+        "matcher": "Read|Write|Edit|MultiEdit|Bash|Agent",
         "hooks": [
           {
             "type": "command",
-            "command": "node ~/.claude/hooks/context-monitor.js"
-          }
-        ]
-      },
-      {
-        "matcher": "Bash|Write|Edit|MultiEdit|Agent",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "python3 ~/.claude/hooks/mistake-capture.py",
+            "command": "node ~/.claude/hooks/post-tool-monitor.js",
             "timeout": 5
-          }
-        ]
-      },
-      {
-        "matcher": "Write|Edit|MultiEdit|Bash|Agent",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "node ~/.claude/hooks/hook-health-logger.js",
-            "timeout": 3
-          }
-        ]
-      },
-      {
-        "matcher": "Write|Edit|MultiEdit|Bash|Agent",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "node ~/.claude/hooks/tool-efficiency.js",
-            "timeout": 3
           }
         ]
       },

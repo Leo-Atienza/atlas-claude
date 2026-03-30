@@ -5,8 +5,14 @@
 #
 # Uses node for JSON parsing (always available in Claude Code) with jq fallback
 
-# Respect bypass mode
+# Respect bypass mode — but log it for audit trail
 if [ "$BYPASS_SAFETY_HOOKS" = "1" ]; then
+  LOG_DIR="$HOME/.claude/logs"
+  mkdir -p "$LOG_DIR" 2>/dev/null
+  INPUT_PREVIEW=$(cat | head -c 500)
+  SESSION_ID=$(echo "$INPUT_PREVIEW" | node -e "let d='';process.stdin.on('data',c=>d+=c);process.stdin.on('end',()=>{try{const j=JSON.parse(d);process.stdout.write((j.session_id||'unknown').slice(0,16))}catch(e){process.stdout.write('unknown')}})" 2>/dev/null || echo "unknown")
+  TOOL=$(echo "$INPUT_PREVIEW" | node -e "let d='';process.stdin.on('data',c=>d+=c);process.stdin.on('end',()=>{try{process.stdout.write(JSON.parse(d).tool_name||'unknown')}catch(e){process.stdout.write('unknown')}})" 2>/dev/null || echo "unknown")
+  echo "{\"ts\":\"$(date -u +%Y-%m-%dT%H:%M:%SZ)\",\"event\":\"bypass\",\"hook\":\"security-gate\",\"session\":\"$SESSION_ID\",\"tool\":\"$TOOL\"}" >> "$LOG_DIR/security-bypass.jsonl" 2>/dev/null
   echo '{"decision":"allow"}'
   exit 0
 fi

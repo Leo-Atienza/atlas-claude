@@ -107,7 +107,9 @@ When operating autonomously (auto mode, scheduled tasks, or agent hooks):
 
 ## Context Budget
 
-Load only what the task needs: 1 playbook, max 2 skills, INDEX.md scan (deep-read topics only when relevant). `/clear` at >70% usage. When tight, use inline knowledge over SKILL.md files.
+Load only what the task needs: 1 playbook, max 2 skills, INDEX.md scan (deep-read topics only when relevant). When tight, use inline knowledge over SKILL.md files.
+
+Context threshold cascade (automated by hooks): 65% → WARNING (wrap up current task) → 70% → AUTO-CONTINUATION (handoff file written) → 72% → GUARD (expensive tools blocked, only Read/Glob/Grep/TodoWrite allowed) → 75% → CRITICAL (stop immediately).
 
 ## Mistake Learning — Automatic
 
@@ -129,6 +131,8 @@ Hooks capture tool failures to `logs/failures.jsonl`. `tool-failure-handler.js` 
 ## Resource Lookup — Central Registry
 
 **`~/.claude/skills/REGISTRY.md`** is the single source of truth for all skills, MCP servers, and plugins. Scan the Purpose column to find matching resource by ID, jump to its Path. **Never scan skill directories end-to-end.**
+
+**`~/.claude/QUICK-REFERENCE.md`** — fast lookup: "I want to do X → use Y". Key files, session lifecycle, context budget cascade. Read when unsure which command/tool to use.
 
 When a skill, MCP server, or plugin is added/removed: update REGISTRY.md immediately.
 

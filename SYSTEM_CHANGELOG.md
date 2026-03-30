@@ -1,5 +1,37 @@
 # System Changelog
 
+## [3.1.0] — 2026-03-30
+### L99/L100 Deep Evaluation — 27 findings resolved, system hardened
+
+**Security (Critical)**
+- `settings.json`: Switched `defaultMode` from `bypassPermissions` to `allowedTools` with 20-tool curated allowlist. Write/Edit/MultiEdit/Bash/MCP tools now require user confirmation (H1)
+- `bash_hook.py`: Added 3 secret patterns (password, DB URI, generic token), 8 write indicators (base64, openssl, gpg, python/node eval, pipe tee), unconditional private key scan, Anthropic key regex fix `{20,}` → `{95}` (M12)
+- `security-gate.sh`: Added bypass audit logging (C1)
+- `read_env_protection_hook.py`: Extended to .credentials.json/.pem/.key (H2)
+
+**Observability**
+- `context-guard.js`: Stale metrics now emit `additionalContext` warning instead of silent pass-through (M5)
+- `post-tool-monitor.js`: Consolidated 4 hooks (context-monitor, mistake-capture, tool-efficiency, hook-health-logger) into single PostToolUse hub. Buffered tool-call-counts.json writes (flush every 10th call) (M8)
+- `session-start.sh`: Added MCP_DOCKER health check (section 5.6), weekly backup (section 9), strengthened DREAM NEEDED signal to BLOCKING (M10, L6, H5)
+- `subagent-limiter.js`: Added tier-routing advisory when 3+ agents active (L5)
+
+**Knowledge & Skills**
+- `skills/dream/SKILL.md`: Added Phase 3.5 — Knowledge Graduation lifecycle (initial → established → proven) (M6)
+- `post-compact-dream-check.sh`: Fixed split-brain — unified state file to persistent `~/.claude/cache/dream-last-run` (was `/tmp/`, lost on reboot)
+
+**Documentation**
+- Created `QUICK-REFERENCE.md` — "I want to do X → use Y" lookup table (H7)
+- Created `hooks/README.md` — hook contract documentation (stdin/stdout, exit codes, languages) (M11)
+- Updated `REGISTRY.md`: Removed 5 retired hooks (HK-004, HK-006, HK-021-023), added HK-024-027, added System Documentation section (DOC-001-003)
+
+**Cleanup**
+- Retired and deleted 6 hooks: context-monitor.js, mistake-capture.py, tool-efficiency.js, skill-evolution.js, hook-health-logger.js, pr-description-generator.sh
+- Deleted `hooks/retired/` directory (2 sessions of stable operation confirmed)
+- Fixed smoke test false positive for statusline.js (used in `statusLine` config, not hooks)
+- Added 7 new smoke test assertions (sections 12-15): secret blocking, stale metrics warning, buffered I/O, permissions mode
+
+**Metrics**: Smoke test 38 PASS / 0 FAIL / 0 WARN. Hooks reduced from 23 to 19 entries. PostToolUse consolidated from 6 hooks to 2.
+
 ## [3.0.0] — 2026-03-30
 ### Added — Self-Evolving Skills, Self-Healing Infrastructure, Quality Evaluation
 Major version bump: ATLAS now has self-improvement capabilities that no other public Claude Code system offers.

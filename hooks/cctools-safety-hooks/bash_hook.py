@@ -26,6 +26,49 @@ from git_commit_block_hook import check_git_commit_command
 from rm_block_hook import check_rm_command
 from env_file_protection_hook import check_env_file_access
 from command_utils import expand_command_aliases
+import re
+
+
+# Secret patterns — same as security-gate.sh but applied to Bash commands
+SECRET_PATTERNS = [
+    (r'AKIA[0-9A-Z]{16}', 'AWS access key'),
+    (r'sk-[a-zA-Z0-9]{48}', 'OpenAI API key'),
+    (r'sk-ant-[a-zA-Z0-9\-]{95}', 'Anthropic API key'),
+    (r'ghp_[a-zA-Z0-9]{36}', 'GitHub personal access token'),
+    (r'gho_[a-zA-Z0-9]{36}', 'GitHub OAuth token'),
+    (r'github_pat_[a-zA-Z0-9_]{82}', 'GitHub fine-grained PAT'),
+    (r'xoxb-[0-9]{10,}-[a-zA-Z0-9\-]+', 'Slack bot token'),
+    (r'password\s*[:=]\s*["\'][^\'"]{8,}', 'plaintext password'),
+    (r'(mongodb|postgres|mysql|redis)://[^:]+:[^@]+@', 'database connection string with credentials'),
+    (r'(token|api_key|apikey|secret_key)\s*[:=]\s*["\'][a-zA-Z0-9+/=]{40,}', 'generic token/API key'),
+]
+
+
+def check_secret_patterns(command):
+    """Check if a bash command contains hardcoded secrets."""
+    # Always check for private key headers regardless of write indicators
+    if re.search(r'-----BEGIN (RSA |EC |DSA |OPENSSH )?PRIVATE KEY-----', command):
+        return True, (
+            "Blocked: Bash command contains a private key header.\n\n"
+            "Secrets should never be hardcoded in commands. Use environment variables instead."
+        )
+
+    # Only check remaining patterns in commands that write/echo content
+    write_indicators = ['echo ', 'printf ', 'cat <<', "cat <<'", 'cat <<"',
+                        'tee ', '> ', '>> ', 'curl ', 'wget ',
+                        'base64', 'openssl', 'gpg', 'python3 -c', 'python -c',
+                        'node -e', '| tee', '| sudo tee']
+    has_write = any(ind in command for ind in write_indicators)
+    if not has_write:
+        return False, None
+
+    for pattern, label in SECRET_PATTERNS:
+        if re.search(pattern, command):
+            return True, (
+                f"Blocked: Bash command contains what appears to be a {label}.\n\n"
+                "Secrets should never be hardcoded in commands. Use environment variables instead."
+            )
+    return False, None
 
 
 def normalize_check_result(result):
@@ -42,8 +85,24 @@ def normalize_check_result(result):
 
 
 def main():
-    # Respect bypass mode
+    # Respect bypass mode — but log it for audit trail
     if os.environ.get('BYPASS_SAFETY_HOOKS') == '1':
+        try:
+            log_dir = os.path.join(os.path.expanduser('~'), '.claude', 'logs')
+            os.makedirs(log_dir, exist_ok=True)
+            import datetime
+            data = json.load(sys.stdin)
+            entry = {
+                "ts": datetime.datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%SZ'),
+                "event": "bypass",
+                "hook": "bash_hook",
+                "session": data.get("session_id", "unknown")[:16],
+                "command": data.get("tool_input", {}).get("command", "")[:200],
+            }
+            with open(os.path.join(log_dir, 'security-bypass.jsonl'), 'a') as f:
+                f.write(json.dumps(entry) + '\n')
+        except Exception:
+            pass
         print(json.dumps({"decision": "approve"}))
         sys.exit(0)
 
@@ -71,6 +130,7 @@ def main():
         check_git_checkout_command,
         check_git_commit_command,
         check_env_file_access,
+        check_secret_patterns,
     ]
 
     block_reasons = []

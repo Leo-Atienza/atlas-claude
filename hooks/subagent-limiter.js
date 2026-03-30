@@ -42,7 +42,9 @@ try {
     }
 
     const state = JSON.parse(fs.readFileSync(stateFile, 'utf8'));
-    const activeCount = Array.isArray(state.active) ? state.active.length : 0;
+    // Tracker writes a bare array, not { active: [...] }
+    const activeCount = Array.isArray(state) ? state.length
+      : Array.isArray(state.active) ? state.active.length : 0;
 
     if (activeCount >= MAX_CONCURRENT) {
       const result = {
@@ -50,6 +52,12 @@ try {
         reason: `Concurrent agent limit reached (${activeCount}/${MAX_CONCURRENT}). Wait for running agents to complete before spawning new ones.`
       };
       process.stdout.write(JSON.stringify(result));
+    } else if (activeCount >= 3) {
+      // Tier-routing advisory when many agents are active
+      const advisory = {
+        additionalContext: `TIER ROUTING: ${activeCount}/${MAX_CONCURRENT} agents active. Prefer model:"haiku" or model:"sonnet" for remaining agents to manage cost. Reserve Opus (default) for complex reasoning tasks only.`
+      };
+      process.stdout.write(JSON.stringify(advisory));
     }
 
     process.exit(0);

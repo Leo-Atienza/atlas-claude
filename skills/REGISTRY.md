@@ -376,29 +376,28 @@
 
 | ID | Name | Purpose | Path |
 |----|------|---------|------|
-| HK-001 | session-start.sh | SessionStart — context, health, version, lessons | `hooks/session-start.sh` |
+| HK-001 | session-start.sh | SessionStart — context, health, version, lessons, MCP check, dream trigger, backup | `hooks/session-start.sh` |
 | HK-002 | session-stop.sh | Stop — reflection flag, handoff creation | `hooks/session-stop.sh` |
-| HK-003 | security-gate.sh | PreToolUse:Write — block sensitive files/secrets | `hooks/security-gate.sh` |
-| HK-004 | context-monitor.js | PostToolUse — context usage warnings | `hooks/context-monitor.js` |
+| HK-003 | security-gate.sh | PreToolUse:Write — block sensitive files/secrets, bypass audit | `hooks/security-gate.sh` |
 | HK-005 | statusline.js | Status line — model, task, context % | `hooks/statusline.js` |
-| HK-006 | mistake-capture.py | PostToolUse — failure logging | `hooks/mistake-capture.py` |
 | HK-007 | verify-completion.py | Stop — task completion check | `hooks/verify-completion.py` |
 | HK-008 | precompact-reflect.sh | PreCompact — reflection trigger | `scripts/progressive-learning/precompact-reflect.sh` |
-| HK-009 | post-compact-dream-check.sh | PostCompact — auto-dream trigger | `hooks/post-compact-dream-check.sh` |
+| HK-009 | post-compact-dream-check.sh | PostCompact — auto-dream trigger (persistent state) | `hooks/post-compact-dream-check.sh` |
 | HK-010 | agent-profiler.py | PostToolUse:Agent — EMA performance profiling | `hooks/agent-profiler.py` |
 | HK-011 | skill-watcher.sh | SessionStart — detect archived skills in project | `hooks/skill-watcher.sh` |
-| HK-012 | context-guard.js | PreToolUse:* — proactively blocks expensive tools at 72% context | `hooks/context-guard.js` |
+| HK-012 | context-guard.js | PreToolUse:* — blocks expensive tools at 72% context, stale metrics warning | `hooks/context-guard.js` |
 | HK-013 | subagent-tracker.js | SubagentStart — logs agent spawns, enforces max 6 concurrent | `hooks/subagent-tracker.js` |
 | HK-014 | subagent-verifier.js | SubagentStop — verifies agent deliverable quality | `hooks/subagent-verifier.js` |
 | HK-015 | tool-failure-handler.js | PostToolUseFailure — circuit breaker + failure guidance | `hooks/tool-failure-handler.js` |
 | HK-016 | keyword-detector.js | UserPromptSubmit — auto-routes natural language to workflows | `hooks/keyword-detector.js` |
-| HK-017 | skill-injector.js | UserPromptSubmit — auto-detects tech keywords → skill suggestions + logs selection events | `hooks/skill-injector.js` |
+| HK-017 | skill-injector.js | UserPromptSubmit — auto-detects tech keywords → skill suggestions | `hooks/skill-injector.js` |
 | HK-018 | sync-skill-keywords.js | SessionStart — regenerates keyword cache from REGISTRY.md + SKILL.md frontmatter | `hooks/sync-skill-keywords.js` |
-| HK-019 | subagent-limiter.js | PreToolUse:Agent — blocks Agent spawns when concurrent limit (6) reached | `hooks/subagent-limiter.js` |
+| HK-019 | subagent-limiter.js | PreToolUse:Agent — concurrent limit (6) + tier-routing advisory | `hooks/subagent-limiter.js` |
 | HK-020 | precompact-flow-validate.sh | PreCompact — validates .flow/ state before context compaction | `scripts/precompact-flow-validate.sh` |
-| HK-021 | hook-health-logger.js | PostToolUse — logs hook execution times for performance monitoring | `hooks/hook-health-logger.js` |
-| HK-022 | skill-evolution.js | PostToolUse:Read — tracks SKILL.md activations for evolution engine | `hooks/skill-evolution.js` |
-| HK-023 | tool-efficiency.js | PostToolUse — counts tool calls per session, warns at high counts | `hooks/tool-efficiency.js` |
+| HK-024 | post-tool-monitor.js | PostToolUse — consolidated hub: context bridge, failure logging, tool counts (buffered), skill tracking, hook health | `hooks/post-tool-monitor.js` |
+| HK-025 | bash_hook.py | PreToolUse:Bash — command safety: git, rm, env, secret scanning (11 patterns) | `hooks/cctools-safety-hooks/bash_hook.py` |
+| HK-026 | file_length_limit_hook.py | PreToolUse:Write/Edit — prevents oversized file writes | `hooks/cctools-safety-hooks/file_length_limit_hook.py` |
+| HK-027 | read_env_protection_hook.py | PreToolUse:Read — blocks reading .env, .credentials, .pem, .key files | `hooks/cctools-safety-hooks/read_env_protection_hook.py` |
 
 ## Scheduled Tasks
 
@@ -407,6 +406,14 @@
 | SCHED-001 | weekly-dream | Weekly memory consolidation (Monday ~9:17am) | `scheduled-tasks/weekly-dream/SKILL.md` |
 | SCHED-002 | skill-usage-audit | Monthly archived skill audit + auto-unarchive | `scheduled-tasks/skill-usage-audit/SKILL.md` |
 | SCHED-003 | skill-autofix | Weekly AutoResearch — identifies and improves underperforming skills | `scheduled-tasks/skill-autofix/SKILL.md` |
+
+## System Documentation
+
+| ID | Name | Purpose | Path |
+|----|------|---------|------|
+| DOC-001 | QUICK-REFERENCE.md | "I want to do X → use Y" lookup table, key files, lifecycle | `QUICK-REFERENCE.md` |
+| DOC-002 | hooks/README.md | Hook contract: stdin/stdout format, exit codes, languages, adding hooks | `hooks/README.md` |
+| DOC-003 | SYSTEM_CHANGELOG.md | Chronological log of infrastructure changes | `SYSTEM_CHANGELOG.md` |
 
 ## Playbook Files
 

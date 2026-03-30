@@ -1,8 +1,8 @@
 #!/usr/bin/env node
 // PreToolUse Context Guard — Proactively blocks expensive tool calls when context is high.
 //
-// Unlike context-monitor.js (PostToolUse, reactive), this runs BEFORE tool execution
-// and prevents wasted tokens. Inspired by oh-my-claudecode's pre-tool-enforcer.
+// Runs BEFORE tool execution to prevent wasted tokens.
+// PostToolUse context tracking is handled by post-tool-monitor.js (section 3).
 //
 // Behavior:
 //   - Context >= 72% used: blocks expensive tools (Agent, Bash, Write, Edit, MultiEdit)
@@ -47,8 +47,12 @@ process.stdin.on('end', () => {
     const metrics = JSON.parse(fs.readFileSync(metricsPath, 'utf8'));
     const now = Math.floor(Date.now() / 1000);
 
-    // Stale metrics — don't block based on old data
+    // Stale metrics — warn but don't block based on old data
     if (metrics.timestamp && (now - metrics.timestamp) > STALE_SECONDS) {
+      const output = {
+        additionalContext: `CONTEXT GUARD: Metrics stale (>${STALE_SECONDS}s old). Context usage unknown. Last reading: ${metrics.remaining_percentage || '?'}% remaining.`
+      };
+      process.stdout.write(JSON.stringify(output));
       process.exit(0);
     }
 

@@ -62,7 +62,7 @@ if os.path.exists(ctx_file):
     try:
         with open(ctx_file, "r") as f:
             ctx = json.load(f)
-        remaining = ctx.get("remaining_pct", 100)
+        remaining = ctx.get("remaining_percentage", 100)
         if remaining <= 15:
             issues.append(f"Context nearly exhausted ({remaining}% remaining) — work may be truncated")
     except Exception:

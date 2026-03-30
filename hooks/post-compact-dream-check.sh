@@ -6,7 +6,7 @@
 # Lower thresholds than session-start (7 days / 50 files) because compaction
 # is a strong signal that significant work happened.
 
-DREAM_STATE_FILE="/tmp/claude-dream-last-run"
+DREAM_STATE_FILE="$HOME/.claude/cache/dream-last-run"
 MEMORY_DIR="$HOME/.claude/projects/<PROJECT_MEMORY_DIR>/memory"
 NOW=$(date +%s)
 INTERVAL_DAYS=3

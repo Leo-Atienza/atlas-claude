@@ -55,6 +55,28 @@ For each thing worth remembering, write or update a memory file following the au
 - Anything already in CLAUDE.md files
 - Ephemeral task details from the current conversation
 
+## Phase 3.5 — Knowledge Graduation
+
+Scan topic files in `topics/` for maturity promotion. Knowledge earns trust through repeated confirmation across sessions and projects.
+
+**Graduation criteria** (check the `Confirmed:` field in each topic's frontmatter):
+
+| Current Maturity | Threshold | Promotes To |
+|-----------------|-----------|-------------|
+| `initial` | Confirmed in 3+ different sessions | `established` |
+| `established` | Confirmed in 5+ sessions across 2+ projects | `proven` |
+| `proven` | No further promotion needed | — |
+
+**Process**:
+1. Read `INDEX.md` — scan for topics still at `initial` or `established` maturity
+2. For each candidate, check its topic file for `Confirmed:` count and `Projects:` list
+3. If graduation criteria are met:
+   - Update the topic file's `Maturity:` field
+   - Log the promotion in `evolution.md`: `- [YYYY-MM-DD] GRADUATED: {ID} ({name}) → {new_maturity} (confirmed {N} times)`
+4. Report promotions in the dream summary under `**Graduated**:`
+
+**If no topics qualify**, skip silently — graduation is earned, not forced.
+
 ## Phase 4 — Prune and Index
 
 Update `MEMORY.md` so it stays **under 200 lines** and **under 25KB**.
@@ -109,6 +131,7 @@ Return a brief summary structured as:
 ## Dream Summary — YYYY-MM-DD
 
 **Consolidated**: [what was merged/updated]
+**Graduated**: [topics promoted to established/proven, or "none"]
 **Pruned**: [what was removed/shortened]
 **New**: [any new memories created]
 **Conflicts resolved**: [any contradictions fixed]

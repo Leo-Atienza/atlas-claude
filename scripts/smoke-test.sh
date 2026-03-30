@@ -53,7 +53,7 @@ fi
 
 # ─── 2. Hooks Exist and Are Executable ───────────────────────────────
 echo "[2] Hooks"
-for h in hooks/session-start.sh hooks/session-stop.sh hooks/context-monitor.js hooks/statusline.js hooks/security-gate.sh hooks/mistake-capture.py; do
+for h in hooks/session-start.sh hooks/session-stop.sh hooks/post-tool-monitor.js hooks/statusline.js hooks/security-gate.sh hooks/subagent-tracker.js hooks/subagent-limiter.js hooks/subagent-verifier.js; do
   if [ -f "$CLAUDE_DIR/$h" ]; then
     pass "$h exists"
   else
@@ -155,21 +155,50 @@ for c in flow/start.md flow/map.md flow/smart-swarm.md continue.md; do
   fi
 done
 
-# ─── 9. Context Monitor Hook Can Parse ──────────────────────────────
+# ─── 9. Consolidated PostToolUse Hook Can Parse ─────────────────────
 echo "[9] Hook Functionality"
-RESULT=$(echo '{"session_id":"test","tool_name":"Bash"}' | node "$CLAUDE_DIR/hooks/context-monitor.js" 2>&1; echo "EXIT:$?")
+RESULT=$(echo '{"session_id":"test","tool_name":"Bash","tool_input":{"command":"test"},"tool_response":{"output":"ok"}}' | node "$CLAUDE_DIR/hooks/post-tool-monitor.js" 2>&1; echo "EXIT:$?")
 if echo "$RESULT" | grep -q "EXIT:0"; then
-  pass "context-monitor.js runs without error"
+  pass "post-tool-monitor.js runs without error"
 else
-  warn "context-monitor.js returned non-zero (may be normal without bridge file)"
+  warn "post-tool-monitor.js returned non-zero"
 fi
 
-# ─── 10. Mistake Capture Hook Can Parse ─────────────────────────────
-RESULT=$(echo '{"tool_name":"Bash","tool_input":{"command":"test"},"tool_response":{"output":"ok"}}' | python3 "$CLAUDE_DIR/hooks/mistake-capture.py" 2>&1; echo "EXIT:$?")
-if echo "$RESULT" | grep -q "EXIT:0"; then
-  pass "mistake-capture.py runs without error"
+# ─── 10. Subagent Data Format Compatibility ─────────────────────────
+echo "[10] Subagent System Integration"
+# Test: tracker writes format that limiter can read
+AGENT_TEST_FILE=$(mktemp)
+echo '{"session_id":"smoke-test","tool_input":{"subagent_type":"test-agent","description":"smoke test"}}' | node "$CLAUDE_DIR/hooks/subagent-tracker.js" 2>/dev/null
+NODE_TMPDIR=$(node -e "console.log(require('os').tmpdir())")
+AGENT_STATE_FILE="$NODE_TMPDIR/claude-agents-smoke-test.json"
+if [ -f "$AGENT_STATE_FILE" ]; then
+  # Verify limiter can parse the format tracker wrote
+  LIMITER_RESULT=$(echo '{"session_id":"smoke-test","tool_name":"Agent","tool_input":{}}' | node "$CLAUDE_DIR/hooks/subagent-limiter.js" 2>&1; echo "EXIT:$?")
+  if echo "$LIMITER_RESULT" | grep -q "EXIT:0"; then
+    # Verify the limiter actually reads a non-zero count
+    COUNT=$(node -e "const s=JSON.parse(require('fs').readFileSync(require('os').tmpdir()+'/claude-agents-smoke-test.json','utf8'));const c=Array.isArray(s)?s.length:Array.isArray(s.active)?s.active.length:0;console.log(c)" 2>/dev/null)
+    if [ "${COUNT:-0}" -gt 0 ] 2>/dev/null; then
+      pass "Subagent tracker→limiter format compatible (count=$COUNT)"
+    else
+      fail "Subagent limiter reads 0 agents despite tracker writing data (FORMAT MISMATCH)"
+    fi
+  else
+    fail "Subagent limiter failed to parse tracker state"
+  fi
+  # Cleanup: remove the agent via verifier
+  echo '{"session_id":"smoke-test","subagent_type":"test-agent","tool_response":{"output":"smoke test complete"}}' | node "$CLAUDE_DIR/hooks/subagent-verifier.js" 2>/dev/null
+  rm -f "$AGENT_STATE_FILE" 2>/dev/null
 else
-  warn "mistake-capture.py returned non-zero"
+  warn "Subagent tracker did not create state file (may be tmp dir issue)"
+fi
+
+# ─── 10b. Verify-completion.py key matches bridge file ──────────────
+BRIDGE_KEY=$(node -e "const fs=require('fs'),os=require('os'),p=require('path');const sp=p.join(os.homedir(),'.claude','hooks','statusline.js');const c=fs.readFileSync(sp,'utf8');const m=c.match(/remaining_percentage|remaining_pct/g);console.log(m?m[0]:'unknown')" 2>/dev/null)
+VERIFY_KEY=$(node -e "const fs=require('fs'),os=require('os'),p=require('path');const sp=p.join(os.homedir(),'.claude','hooks','verify-completion.py');const c=fs.readFileSync(sp,'utf8');const m=c.match(/ctx\.get\(['\"](\w+)['\"].*100\)/);console.log(m?m[1]:'unknown')" 2>/dev/null)
+if [ "$BRIDGE_KEY" = "$VERIFY_KEY" ]; then
+  pass "verify-completion.py key ('$VERIFY_KEY') matches bridge file ('$BRIDGE_KEY')"
+else
+  fail "verify-completion.py reads '$VERIFY_KEY' but bridge writes '$BRIDGE_KEY'"
 fi
 
 # ─── 11. Hook Registration Integrity (Drift Detection) ──────────────
@@ -196,11 +225,16 @@ for event_hooks in settings.get('hooks', {}).values():
             for m in re.finditer(r'hooks/([^\s|;]+\.(js|sh|py))', cmd):
                 registered.add(m.group(1))
 
+# Files used outside the hooks config (e.g. statusLine) — not orphans
+NON_HOOK_FILES = {'statusline.js'}
+
 # Get .js/.sh/.py files directly in hooks/ (not subdirectories)
 on_disk = set()
 for ext in ('*.js', '*.sh', '*.py'):
     for f in glob.glob(os.path.join(hooks_dir, ext)):
-        on_disk.add(os.path.basename(f))
+        name = os.path.basename(f)
+        if name not in NON_HOOK_FILES:
+            on_disk.add(name)
 
 # settings entries pointing to missing files
 for f in sorted(registered):
@@ -226,6 +260,76 @@ else
         ;;
     esac
   done
+fi
+
+# ─── [12] Security Gate Secret Blocking ─────────────────────────────
+echo "[12] Security Gate Secret Blocking"
+
+# Test bash_hook blocks AWS key in echo
+BASH_RESULT=$(echo '{"tool_name":"Bash","tool_input":{"command":"echo AKIAIOSFODNN7EXAMPLE1 > /tmp/test"}}' | CLAUDE_PLUGIN_ROOT="$HOME/.claude/hooks/cctools-safety-hooks" python3 ~/.claude/hooks/cctools-safety-hooks/bash_hook.py 2>/dev/null)
+if echo "$BASH_RESULT" | grep -q '"deny"'; then
+  pass "bash_hook blocks AWS key in echo command"
+else
+  fail "bash_hook did NOT block AWS key in echo command"
+fi
+
+# Test bash_hook blocks private key header (no write indicator)
+PRIVKEY_RESULT=$(echo '{"tool_name":"Bash","tool_input":{"command":"grep -----BEGIN RSA PRIVATE KEY----- /tmp/file"}}' | CLAUDE_PLUGIN_ROOT="$HOME/.claude/hooks/cctools-safety-hooks" python3 ~/.claude/hooks/cctools-safety-hooks/bash_hook.py 2>/dev/null)
+if echo "$PRIVKEY_RESULT" | grep -q '"deny"'; then
+  pass "bash_hook blocks private key header unconditionally"
+else
+  fail "bash_hook did NOT block private key header"
+fi
+
+# Test bash_hook allows clean commands
+CLEAN_RESULT=$(echo '{"tool_name":"Bash","tool_input":{"command":"ls -la /tmp"}}' | CLAUDE_PLUGIN_ROOT="$HOME/.claude/hooks/cctools-safety-hooks" python3 ~/.claude/hooks/cctools-safety-hooks/bash_hook.py 2>/dev/null)
+if echo "$CLEAN_RESULT" | grep -q '"approve"'; then
+  pass "bash_hook approves clean commands"
+else
+  fail "bash_hook did NOT approve clean command"
+fi
+
+# ─── [13] Context Guard Stale Metrics Warning ──────────────────────
+echo "[13] Context Guard Stale Metrics Warning"
+
+STALE_TS=$(($(date +%s) - 300))
+STALE_METRICS_PATH="$(node -e "console.log(require('os').tmpdir())")/claude-ctx-smoketest.json"
+echo "{\"timestamp\":$STALE_TS,\"remaining_percentage\":40}" > "$STALE_METRICS_PATH"
+
+GUARD_RESULT=$(echo '{"session_id":"smoketest","tool_name":"Bash","tool_input":{}}' | node ~/.claude/hooks/context-guard.js 2>/dev/null)
+rm -f "$STALE_METRICS_PATH"
+
+if echo "$GUARD_RESULT" | grep -q 'additionalContext'; then
+  pass "context-guard emits warning on stale metrics"
+else
+  fail "context-guard did NOT warn on stale metrics"
+fi
+
+# ─── [14] Post-Tool-Monitor Buffered I/O ───────────────────────────
+echo "[14] Post-Tool-Monitor Buffered I/O"
+
+# Verify the buffering logic exists in the file
+if grep -q 'counts\[toolName\] % 10' ~/.claude/hooks/post-tool-monitor.js 2>/dev/null; then
+  pass "post-tool-monitor has buffered I/O (flush every 10th call)"
+else
+  fail "post-tool-monitor missing buffered I/O logic"
+fi
+
+# ─── [15] Permissions Mode ─────────────────────────────────────────
+echo "[15] Permissions Mode"
+
+CURRENT_MODE=$(node -e "const s=JSON.parse(require('fs').readFileSync(require('os').homedir()+'/.claude/settings.json','utf8'));console.log(s.defaultMode)" 2>/dev/null)
+if [ "$CURRENT_MODE" = "allowedTools" ]; then
+  pass "settings.json defaultMode is allowedTools (not bypassPermissions)"
+else
+  warn "settings.json defaultMode is '$CURRENT_MODE' (expected allowedTools)"
+fi
+
+PERM_ALLOW=$(node -e "const s=JSON.parse(require('fs').readFileSync(require('os').homedir()+'/.claude/settings.json','utf8'));console.log((s.permissions&&s.permissions.allow||[]).length)" 2>/dev/null)
+if [ "$PERM_ALLOW" -gt 0 ] 2>/dev/null; then
+  pass "settings.json has permissions.allow list ($PERM_ALLOW tools)"
+else
+  fail "settings.json missing permissions.allow list"
 fi
 
 # ─── Summary ────────────────────────────────────────────────────────

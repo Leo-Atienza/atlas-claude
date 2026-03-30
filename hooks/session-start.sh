@@ -214,6 +214,12 @@ if [ -f "$MANIFEST" ] || [ -f "$SKILL_STATS" ] || [ -f "$TOOL_HEALTH" ]; then
   " "$MANIFEST" "$SKILL_STATS" "$TOOL_HEALTH" 2>/dev/null || true
 fi
 
+# ─── 5.6. MCP_DOCKER health check ───────────────────────────────────
+MCP_CONTAINER=$(docker ps --filter name=mcp -q 2>/dev/null)
+if [ $? -ne 0 ] || [ -z "$MCP_CONTAINER" ]; then
+  echo "MCP_DOCKER WARNING: No running MCP container found. Scheduled maintenance tasks (cron triggers, remote agents) will not execute this session."
+fi
+
 # ─── 5.7. Hook health alerts (slow hook detection) ─────────────────
 HOOK_HEALTH="$CLAUDE_DIR/logs/hook-health.jsonl"
 if [ -f "$HOOK_HEALTH" ] && [ -s "$HOOK_HEALTH" ]; then
@@ -298,8 +304,46 @@ if [ "$NEED_DREAM" = false ] && [ -f "$MEMORY_DIR/MEMORY.md" ]; then
 fi
 
 if [ "$NEED_DREAM" = true ]; then
-  echo "DREAM NEEDED: ${DREAM_REASON} Run /dream to consolidate memories."
+  echo "DREAM NEEDED: ${DREAM_REASON} BLOCKING: Run /dream NOW before proceeding with any other work. Memory consolidation is required to prevent knowledge loss."
 fi
 
-# ─── 9. Claudio audio ────────────────────────────────────────────────
+# ─── 9. Critical file backup (weekly) ───────────────────────────────
+BACKUP_DIR="$CLAUDE_DIR/backups"
+BACKUP_STATE="$CLAUDE_DIR/cache/backup-last-run"
+BACKUP_INTERVAL=604800  # 7 days in seconds
+RUN_BACKUP=false
+if [ -f "$BACKUP_STATE" ]; then
+  LAST_BACKUP=$(cat "$BACKUP_STATE" 2>/dev/null || echo "0")
+  if [ $(( NOW - LAST_BACKUP )) -ge $BACKUP_INTERVAL ]; then
+    RUN_BACKUP=true
+  fi
+else
+  RUN_BACKUP=true
+fi
+
+if [ "$RUN_BACKUP" = true ]; then
+  mkdir -p "$BACKUP_DIR" 2>/dev/null
+  STAMP=$(date +%Y%m%d)
+  # Back up critical single-point-of-failure files
+  cp -f "$CLAUDE_DIR/skills/REGISTRY.md" "$BACKUP_DIR/REGISTRY-${STAMP}.md" 2>/dev/null || true
+  cp -f "$CLAUDE_DIR/CLAUDE.md" "$BACKUP_DIR/CLAUDE-${STAMP}.md" 2>/dev/null || true
+  # Back up memory system (small files, zip if available)
+  MEMORY_SRC="$CLAUDE_DIR/projects/<PROJECT_MEMORY_DIR>/memory"
+  if [ -d "$MEMORY_SRC" ]; then
+    if command -v tar >/dev/null 2>&1; then
+      tar czf "$BACKUP_DIR/memory-${STAMP}.tar.gz" -C "$(dirname "$MEMORY_SRC")" "$(basename "$MEMORY_SRC")" 2>/dev/null || true
+    else
+      mkdir -p "$BACKUP_DIR/memory-${STAMP}" 2>/dev/null
+      cp -r "$MEMORY_SRC"/*.md "$BACKUP_DIR/memory-${STAMP}/" 2>/dev/null || true
+      cp -r "$MEMORY_SRC"/topics "$BACKUP_DIR/memory-${STAMP}/" 2>/dev/null || true
+    fi
+  fi
+  # Prune backups older than 30 days
+  find "$BACKUP_DIR" -name "REGISTRY-*.md" -mtime +30 -delete 2>/dev/null || true
+  find "$BACKUP_DIR" -name "CLAUDE-*.md" -mtime +30 -delete 2>/dev/null || true
+  find "$BACKUP_DIR" -name "memory-*.tar.gz" -mtime +30 -delete 2>/dev/null || true
+  echo "$NOW" > "$BACKUP_STATE"
+fi
+
+# ─── 10. Claudio audio ───────────────────────────────────────────────
 "$CLAUDE_DIR/bin/claudio" 2>/dev/null || true
