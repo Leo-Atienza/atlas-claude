@@ -104,6 +104,8 @@ cd atlas-claude && bash install.sh
 bash ~/.claude/scripts/smoke-test.sh
 ```
 
+> **After install:** `CLAUDE.md`, `settings.json`, and other config files are copied to `~/.claude/` from `examples/`. These are your personal files — customize them for your workflow. Some files contain `<YOUR_USERNAME>` and `<PROJECT_MEMORY_DIR>` placeholders that get auto-resolved by Claude Code, or you can replace them manually.
+
 ---
 
 ## The 6 Entry Points

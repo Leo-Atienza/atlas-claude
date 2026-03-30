@@ -3,7 +3,7 @@
 # Creates a reflection flag if reflection wasn't performed today.
 # Also generates a structured session handoff for continuity.
 
-MEMORY_DIR="$HOME/.claude/projects/C--Users-leooa--claude/memory"
+MEMORY_DIR="$HOME/.claude/projects/<PROJECT_MEMORY_DIR>/memory"
 SESSIONS_DIR="$MEMORY_DIR/sessions"
 FLAG_FILE="$HOME/.claude/.pending-reflection"
 HANDOFF_FILE="$HOME/.claude/.last-session-handoff"

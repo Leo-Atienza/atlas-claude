@@ -10,7 +10,7 @@ const path = require('path');
 const LOGS_DIR = path.join(os.homedir(), '.claude', 'logs');
 const EVENTS_PATH = path.join(LOGS_DIR, 'skill-events.jsonl');
 const STATS_PATH = path.join(LOGS_DIR, 'skill-stats.json');
-const EVOLUTION_PATH = path.join(os.homedir(), '.claude', 'projects', 'C--Users-leooa--claude', 'memory', 'evolution.md');
+const EVOLUTION_PATH = path.join(os.homedir(), '.claude', 'projects', 'C--Users-<YOUR_USERNAME>--claude', 'memory', 'evolution.md');
 const MATURITY_THRESHOLD = 3;
 const MAX_EVENTS_SIZE = 1_000_000; // 1MB rotation
 

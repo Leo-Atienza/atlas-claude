@@ -7,7 +7,7 @@
 # is a strong signal that significant work happened.
 
 DREAM_STATE_FILE="/tmp/claude-dream-last-run"
-MEMORY_DIR="$HOME/.claude/projects/C--Users-leooa--claude/memory"
+MEMORY_DIR="$HOME/.claude/projects/<PROJECT_MEMORY_DIR>/memory"
 NOW=$(date +%s)
 INTERVAL_DAYS=3
 

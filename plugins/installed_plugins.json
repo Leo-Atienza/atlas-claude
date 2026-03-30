@@ -4,7 +4,7 @@
     "agent-sdk-dev@claude-plugins-official": [
       {
         "scope": "user",
-        "installPath": "C:\\Users\\leooa\\.claude\\plugins\\cache\\claude-plugins-official\\agent-sdk-dev\\unknown",
+        "installPath": "C:\\Users\\<YOUR_USERNAME>\\.claude\\plugins\\cache\\claude-plugins-official\\agent-sdk-dev\\unknown",
         "version": "unknown",
         "installedAt": "2026-02-14T15:21:28.548Z",
         "lastUpdated": "2026-03-25T19:27:33.203Z",
@@ -14,7 +14,7 @@
     "asana@claude-plugins-official": [
       {
         "scope": "user",
-        "installPath": "C:\\Users\\leooa\\.claude\\plugins\\cache\\claude-plugins-official\\asana\\unknown",
+        "installPath": "C:\\Users\\<YOUR_USERNAME>\\.claude\\plugins\\cache\\claude-plugins-official\\asana\\unknown",
         "version": "unknown",
         "installedAt": "2026-02-14T15:21:32.940Z",
         "lastUpdated": "2026-03-25T19:27:33.155Z",
@@ -24,7 +24,7 @@
     "claude-code-setup@claude-plugins-official": [
       {
         "scope": "user",
-        "installPath": "C:\\Users\\leooa\\.claude\\plugins\\cache\\claude-plugins-official\\claude-code-setup\\1.0.0",
+        "installPath": "C:\\Users\\<YOUR_USERNAME>\\.claude\\plugins\\cache\\claude-plugins-official\\claude-code-setup\\1.0.0",
         "version": "1.0.0",
         "installedAt": "2026-02-14T15:21:38.871Z",
         "lastUpdated": "2026-02-14T15:21:38.871Z",
@@ -34,7 +34,7 @@
     "claude-md-management@claude-plugins-official": [
       {
         "scope": "user",
-        "installPath": "C:\\Users\\leooa\\.claude\\plugins\\cache\\claude-plugins-official\\claude-md-management\\1.0.0",
+        "installPath": "C:\\Users\\<YOUR_USERNAME>\\.claude\\plugins\\cache\\claude-plugins-official\\claude-md-management\\1.0.0",
         "version": "1.0.0",
         "installedAt": "2026-02-14T15:21:40.890Z",
         "lastUpdated": "2026-02-14T15:21:40.890Z",
@@ -44,7 +44,7 @@
     "code-review@claude-plugins-official": [
       {
         "scope": "user",
-        "installPath": "C:\\Users\\leooa\\.claude\\plugins\\cache\\claude-plugins-official\\code-review\\unknown",
+        "installPath": "C:\\Users\\<YOUR_USERNAME>\\.claude\\plugins\\cache\\claude-plugins-official\\code-review\\unknown",
         "version": "unknown",
         "installedAt": "2026-02-14T15:21:43.049Z",
         "lastUpdated": "2026-03-25T19:27:33.172Z",
@@ -54,7 +54,7 @@
     "code-simplifier@claude-plugins-official": [
       {
         "scope": "user",
-        "installPath": "C:\\Users\\leooa\\.claude\\plugins\\cache\\claude-plugins-official\\code-simplifier\\1.0.0",
+        "installPath": "C:\\Users\\<YOUR_USERNAME>\\.claude\\plugins\\cache\\claude-plugins-official\\code-simplifier\\1.0.0",
         "version": "1.0.0",
         "installedAt": "2026-02-14T15:21:45.773Z",
         "lastUpdated": "2026-02-14T15:21:45.773Z",
@@ -64,7 +64,7 @@
     "coderabbit@claude-plugins-official": [
       {
         "scope": "user",
-        "installPath": "C:\\Users\\leooa\\.claude\\plugins\\cache\\claude-plugins-official\\coderabbit\\1.0.0",
+        "installPath": "C:\\Users\\<YOUR_USERNAME>\\.claude\\plugins\\cache\\claude-plugins-official\\coderabbit\\1.0.0",
         "version": "1.0.0",
         "installedAt": "2026-02-14T15:21:48.877Z",
         "lastUpdated": "2026-02-14T15:21:48.877Z",
@@ -74,7 +74,7 @@
     "commit-commands@claude-plugins-official": [
       {
         "scope": "user",
-        "installPath": "C:\\Users\\leooa\\.claude\\plugins\\cache\\claude-plugins-official\\commit-commands\\unknown",
+        "installPath": "C:\\Users\\<YOUR_USERNAME>\\.claude\\plugins\\cache\\claude-plugins-official\\commit-commands\\unknown",
         "version": "unknown",
         "installedAt": "2026-02-14T15:21:49.807Z",
         "lastUpdated": "2026-03-25T19:27:33.189Z",
@@ -84,7 +84,7 @@
     "feature-dev@claude-plugins-official": [
       {
         "scope": "user",
-        "installPath": "C:\\Users\\leooa\\.claude\\plugins\\cache\\claude-plugins-official\\feature-dev\\unknown",
+        "installPath": "C:\\Users\\<YOUR_USERNAME>\\.claude\\plugins\\cache\\claude-plugins-official\\feature-dev\\unknown",
         "version": "unknown",
         "installedAt": "2026-02-14T15:22:02.929Z",
         "lastUpdated": "2026-03-25T19:27:33.217Z",
@@ -94,7 +94,7 @@
     "firebase@claude-plugins-official": [
       {
         "scope": "user",
-        "installPath": "C:\\Users\\leooa\\.claude\\plugins\\cache\\claude-plugins-official\\firebase\\unknown",
+        "installPath": "C:\\Users\\<YOUR_USERNAME>\\.claude\\plugins\\cache\\claude-plugins-official\\firebase\\unknown",
         "version": "unknown",
         "installedAt": "2026-02-14T15:22:07.259Z",
         "lastUpdated": "2026-03-25T19:27:33.121Z",
@@ -104,7 +104,7 @@
     "figma@claude-plugins-official": [
       {
         "scope": "user",
-        "installPath": "C:\\Users\\leooa\\.claude\\plugins\\cache\\claude-plugins-official\\figma\\2.0.2",
+        "installPath": "C:\\Users\\<YOUR_USERNAME>\\.claude\\plugins\\cache\\claude-plugins-official\\figma\\2.0.2",
         "version": "2.0.2",
         "installedAt": "2026-02-14T15:22:10.028Z",
         "lastUpdated": "2026-03-24T18:16:37.830Z",
@@ -114,7 +114,7 @@
     "github@claude-plugins-official": [
       {
         "scope": "user",
-        "installPath": "C:\\Users\\leooa\\.claude\\plugins\\cache\\claude-plugins-official\\github\\unknown",
+        "installPath": "C:\\Users\\<YOUR_USERNAME>\\.claude\\plugins\\cache\\claude-plugins-official\\github\\unknown",
         "version": "unknown",
         "installedAt": "2026-02-14T15:22:10.753Z",
         "lastUpdated": "2026-03-25T19:27:33.141Z",
@@ -124,7 +124,7 @@
     "kotlin-lsp@claude-plugins-official": [
       {
         "scope": "user",
-        "installPath": "C:\\Users\\leooa\\.claude\\plugins\\cache\\claude-plugins-official\\kotlin-lsp\\1.0.0",
+        "installPath": "C:\\Users\\<YOUR_USERNAME>\\.claude\\plugins\\cache\\claude-plugins-official\\kotlin-lsp\\1.0.0",
         "version": "1.0.0",
         "installedAt": "2026-02-14T15:22:18.136Z",
         "lastUpdated": "2026-02-14T15:22:18.136Z",
@@ -134,7 +134,7 @@
     "ralph-loop@claude-plugins-official": [
       {
         "scope": "user",
-        "installPath": "C:\\Users\\leooa\\.claude\\plugins\\cache\\claude-plugins-official\\ralph-loop\\unknown",
+        "installPath": "C:\\Users\\<YOUR_USERNAME>\\.claude\\plugins\\cache\\claude-plugins-official\\ralph-loop\\unknown",
         "version": "unknown",
         "installedAt": "2026-02-14T15:22:31.724Z",
         "lastUpdated": "2026-03-25T19:27:33.233Z",

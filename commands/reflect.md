@@ -19,7 +19,7 @@ This is the evolution mechanism. You are always growing.
 </objective>
 
 <constants>
-GLOBAL_MEMORY = ~/.claude/projects/C--Users-leooa--claude/memory
+GLOBAL_MEMORY = ~/.claude/projects/<PROJECT_MEMORY_DIR>/memory
 GLOBAL_INDEX  = {GLOBAL_MEMORY}/INDEX.md
 GLOBAL_TOPICS = {GLOBAL_MEMORY}/topics/
 GLOBAL_SESSIONS = {GLOBAL_MEMORY}/sessions/

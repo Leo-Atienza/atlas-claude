@@ -99,7 +99,7 @@ Capture the human side of the conversation — not technical decisions, but:
 After writing, commit alongside PROJECT.md:
 
 ```bash
-node C:/Users/leooa/.claude/get-shit-done/bin/gsd-tools.cjs commit "docs: capture project discovery" --files .planning/DISCOVERY.md
+node ~/.claude/get-shit-done/bin/gsd-tools.cjs commit "docs: capture project discovery" --files .planning/DISCOVERY.md
 ```
 
 Or bundle with the PROJECT.md commit if writing them together.

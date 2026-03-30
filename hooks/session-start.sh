@@ -13,7 +13,7 @@ trap "kill $WATCHDOG_PID 2>/dev/null" EXIT
 
 # ─── 1. Progressive Learning checks ───────────────────────────────────
 FLAG_FILE="$CLAUDE_DIR/.pending-reflection"
-CONFLICTS_FILE="$CLAUDE_DIR/projects/C--Users-leooa--claude/memory/conflicts.md"
+CONFLICTS_FILE="$CLAUDE_DIR/projects/<PROJECT_MEMORY_DIR>/memory/conflicts.md"
 HANDOFF_FILE="$CLAUDE_DIR/.last-session-handoff"
 
 if [ -f "$FLAG_FILE" ]; then
@@ -143,7 +143,7 @@ if [ -n "$CURRENT_VER" ]; then
 fi
 
 # ─── 5. Lessons & error pattern summary ──────────────────────────────
-TOPICS_DIR="$CLAUDE_DIR/projects/C--Users-leooa--claude/memory/topics"
+TOPICS_DIR="$CLAUDE_DIR/projects/<PROJECT_MEMORY_DIR>/memory/topics"
 ERR_COUNT=$(ls "$TOPICS_DIR"/G-ERR-*.md 2>/dev/null | wc -l)
 
 FAILURES_LOG="$CLAUDE_DIR/logs/failures.jsonl"
@@ -261,7 +261,7 @@ fi
 # ─── 8. Dream memory consolidation check ─────────────────────────────
 DREAM_STATE_FILE="$CLAUDE_DIR/cache/dream-last-run"
 DREAM_INTERVAL_DAYS=7
-MEMORY_DIR="$CLAUDE_DIR/projects/C--Users-leooa--claude/memory"
+MEMORY_DIR="$CLAUDE_DIR/projects/<PROJECT_MEMORY_DIR>/memory"
 
 NEED_DREAM=false
 DREAM_REASON=""

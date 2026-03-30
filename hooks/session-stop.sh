@@ -3,7 +3,7 @@
 # Combines: session-stop-flag.sh + claudio
 # The agent-type verification hook remains separate in settings.json.
 
-MEMORY_DIR="$HOME/.claude/projects/C--Users-leooa--claude/memory"
+MEMORY_DIR="$HOME/.claude/projects/<PROJECT_MEMORY_DIR>/memory"
 SESSIONS_DIR="$MEMORY_DIR/sessions"
 FLAG_FILE="$HOME/.claude/.pending-reflection"
 HANDOFF_FILE="$HOME/.claude/.last-session-handoff"

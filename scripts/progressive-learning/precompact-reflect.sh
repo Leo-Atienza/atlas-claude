@@ -3,7 +3,7 @@
 # Fires before context compaction. Tells Claude to reflect NOW before context is lost.
 # This output is shown to Claude as context.
 
-MEMORY_DIR="$HOME/.claude/projects/C--Users-leooa--claude/memory"
+MEMORY_DIR="$HOME/.claude/projects/<PROJECT_MEMORY_DIR>/memory"
 
 # Check if there's meaningful content (sessions dir exists and has content)
 if [ -d "$MEMORY_DIR/sessions" ]; then

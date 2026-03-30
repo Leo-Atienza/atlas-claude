@@ -4,7 +4,7 @@
 # Output is shown to Claude at session start.
 
 FLAG_FILE="$HOME/.claude/.pending-reflection"
-CONFLICTS_FILE="$HOME/.claude/projects/C--Users-leooa--claude/memory/conflicts.md"
+CONFLICTS_FILE="$HOME/.claude/projects/<PROJECT_MEMORY_DIR>/memory/conflicts.md"
 HANDOFF_FILE="$HOME/.claude/.last-session-handoff"
 
 # Check for missed reflection from previous session

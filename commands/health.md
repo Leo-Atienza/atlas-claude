@@ -61,10 +61,10 @@ Check INDEX.md ↔ topics/ alignment:
 
 ```bash
 # Count INDEX.md entries
-grep -c "^| G-\|^| L-" ~/.claude/projects/C--Users-leooa--claude/memory/INDEX.md
+grep -c "^| G-\|^| L-" ~/.claude/projects/<PROJECT_MEMORY_DIR>/memory/INDEX.md
 
 # Count topic files
-ls ~/.claude/projects/C--Users-leooa--claude/memory/topics/*.md 2>/dev/null | wc -l
+ls ~/.claude/projects/<PROJECT_MEMORY_DIR>/memory/topics/*.md 2>/dev/null | wc -l
 ```
 
 **Cross-check**: For each ID in INDEX.md, verify a matching topic file exists. Report orphans and missing files.
@@ -72,14 +72,14 @@ ls ~/.claude/projects/C--Users-leooa--claude/memory/topics/*.md 2>/dev/null | wc
 ## 4. Unresolved Conflicts
 
 ```bash
-grep -c "^## CONFLICT-" ~/.claude/projects/C--Users-leooa--claude/memory/conflicts.md 2>/dev/null || echo "0"
+grep -c "^## CONFLICT-" ~/.claude/projects/<PROJECT_MEMORY_DIR>/memory/conflicts.md 2>/dev/null || echo "0"
 ```
 
 ## 5. Sessions Health
 
 ```bash
-ls ~/.claude/projects/C--Users-leooa--claude/memory/sessions/*.md 2>/dev/null | wc -l
-ls -t ~/.claude/projects/C--Users-leooa--claude/memory/sessions/*.md 2>/dev/null | head -1
+ls ~/.claude/projects/<PROJECT_MEMORY_DIR>/memory/sessions/*.md 2>/dev/null | wc -l
+ls -t ~/.claude/projects/<PROJECT_MEMORY_DIR>/memory/sessions/*.md 2>/dev/null | head -1
 test -f ~/.claude/.pending-reflection && echo "PENDING: Reflection missed" || echo "OK: No pending reflections"
 ```
 
@@ -121,11 +121,11 @@ Read `~/.claude/settings.json` and report enabled vs disabled plugins.
 Use the validator's `knowledge` output for staleness. Also count by category:
 
 ```bash
-echo "Patterns:"; grep -c "^| G-PAT" ~/.claude/projects/C--Users-leooa--claude/memory/INDEX.md 2>/dev/null
-echo "Solutions:"; grep -c "^| G-SOL" ~/.claude/projects/C--Users-leooa--claude/memory/INDEX.md 2>/dev/null
-echo "Mistakes:"; grep -c "^| G-ERR" ~/.claude/projects/C--Users-leooa--claude/memory/INDEX.md 2>/dev/null
-echo "Preferences:"; grep -c "^| G-PREF" ~/.claude/projects/C--Users-leooa--claude/memory/INDEX.md 2>/dev/null
-echo "Failed Approaches:"; grep -c "^| G-FAIL" ~/.claude/projects/C--Users-leooa--claude/memory/INDEX.md 2>/dev/null
+echo "Patterns:"; grep -c "^| G-PAT" ~/.claude/projects/<PROJECT_MEMORY_DIR>/memory/INDEX.md 2>/dev/null
+echo "Solutions:"; grep -c "^| G-SOL" ~/.claude/projects/<PROJECT_MEMORY_DIR>/memory/INDEX.md 2>/dev/null
+echo "Mistakes:"; grep -c "^| G-ERR" ~/.claude/projects/<PROJECT_MEMORY_DIR>/memory/INDEX.md 2>/dev/null
+echo "Preferences:"; grep -c "^| G-PREF" ~/.claude/projects/<PROJECT_MEMORY_DIR>/memory/INDEX.md 2>/dev/null
+echo "Failed Approaches:"; grep -c "^| G-FAIL" ~/.claude/projects/<PROJECT_MEMORY_DIR>/memory/INDEX.md 2>/dev/null
 ```
 
 For stale entries (>90 days old): ask the user if each is still relevant. If yes, update the Date column in INDEX.md to today. If no, remove the entry and its topic file.

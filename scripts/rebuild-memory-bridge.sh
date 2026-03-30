@@ -3,7 +3,7 @@
 # Called by session-start.sh. Parses INDEX.md tables into a YAML index so
 # flow-learnings-researcher can find memory/topics/ entries efficiently.
 
-MEMORY_DIR="$HOME/.claude/projects/C--Users-leooa--claude/memory"
+MEMORY_DIR="$HOME/.claude/projects/C--Users-<YOUR_USERNAME>--claude/memory"
 INDEX_FILE="$MEMORY_DIR/INDEX.md"
 OUTPUT_DIR="$HOME/.claude/flow-knowledge"
 OUTPUT_FILE="$OUTPUT_DIR/memory-bridge.yaml"
