@@ -1,1 +1,30 @@
-{"type":"commonjs"}
+{
+  "name": "create-atlas-env",
+  "version": "1.0.0",
+  "description": "Scaffold ATLAS (Autonomous Task, Learning & Agent System) into ~/.claude/ for Claude Code",
+  "type": "commonjs",
+  "bin": {
+    "create-atlas-env": "./bin/create-atlas-env.js"
+  },
+  "files": [
+    "bin/create-atlas-env.js",
+    "examples/",
+    "README-npm.md"
+  ],
+  "engines": {
+    "node": ">=18"
+  },
+  "keywords": [
+    "claude",
+    "claude-code",
+    "atlas",
+    "ai-agent",
+    "hooks",
+    "productivity"
+  ],
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/leoatienza/atlas-claude"
+  }
+}
