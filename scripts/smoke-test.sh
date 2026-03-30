@@ -33,6 +33,24 @@ for f in CLAUDE.md settings.json skills/REGISTRY.md; do
   fi
 done
 
+# CLAUDE.md content integrity (detect truncation/corruption)
+CLAUDE_SIZE=$(wc -c < "$CLAUDE_DIR/CLAUDE.md" 2>/dev/null || echo "0")
+if [ "$CLAUDE_SIZE" -lt 1024 ]; then
+  fail "CLAUDE.md is suspiciously small (${CLAUDE_SIZE} bytes) — may be truncated"
+else
+  # Verify key sections exist
+  CLAUDE_SECTIONS_OK=true
+  for section in "Master Entry Points" "Session End Protocol" "Task Routing"; do
+    if ! grep -q "$section" "$CLAUDE_DIR/CLAUDE.md" 2>/dev/null; then
+      fail "CLAUDE.md missing required section: $section"
+      CLAUDE_SECTIONS_OK=false
+    fi
+  done
+  if [ "$CLAUDE_SECTIONS_OK" = true ]; then
+    pass "CLAUDE.md integrity OK (${CLAUDE_SIZE} bytes, key sections present)"
+  fi
+fi
+
 # ─── 2. Hooks Exist and Are Executable ───────────────────────────────
 echo "[2] Hooks"
 for h in hooks/session-start.sh hooks/session-stop.sh hooks/context-monitor.js hooks/statusline.js hooks/security-gate.sh hooks/mistake-capture.py; do
@@ -72,7 +90,7 @@ if [ -f "$REGISTRY" ]; then
     if [ ! -f "$full" ]; then
       MISSING_COUNT=$((MISSING_COUNT + 1))
     fi
-  done < <(grep -oE '`(skills|commands|agents)/[^`]+\.md`' "$REGISTRY" | tr -d '`' | head -50)
+  done < <(grep -oE '`(skills|commands|agents)/[^`]+\.md`' "$REGISTRY" | tr -d '`' | head -200)
 
   if [ "$MISSING_COUNT" -eq 0 ]; then
     pass "All $CHECKED checked registry paths exist on disk"

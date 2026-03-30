@@ -35,22 +35,15 @@ This ensures project-specific patterns, conventions, and best practices are appl
 <!-- ============================================================ -->
 
 <state_directory>
-Flow uses `.flow/` as its primary state directory. For backward compatibility with GSD projects, also support `.planning/`.
+Flow uses `.flow/` as its primary state directory.
 
-**Resolution order:**
-1. If `.flow/` exists → use `.flow/`
-2. If `.planning/` exists but `.flow/` does not → use `.planning/` (backward compat)
-3. If neither exists → error — project not initialized
-
-**Variable:** Throughout this agent, `${STATE_DIR}` refers to whichever directory was resolved.
+**Variable:** Throughout this agent, `${STATE_DIR}` refers to `.flow/`.
 
 ```bash
 if [ -d ".flow" ]; then
   STATE_DIR=".flow"
-elif [ -d ".planning" ]; then
-  STATE_DIR=".planning"
 else
-  echo "ERROR: No .flow/ or .planning/ directory found. Project not initialized."
+  echo "ERROR: No .flow/ directory found. Project not initialized."
   exit 1
 fi
 ```
@@ -833,38 +826,10 @@ DURATION=$((PLAN_END_EPOCH - PLAN_START_EPOCH))
 DURATION_MIN=$((DURATION / 60))
 ```
 
-**If using `.planning/` directory (GSD backward-compat):**
-
-Use gsd-tools if available:
-```bash
-# Check if gsd-tools exists
-if [ -f "C:/Users/leooa/.claude/get-shit-done/bin/gsd-tools.cjs" ]; then
-  node C:/Users/leooa/.claude/get-shit-done/bin/gsd-tools.cjs state advance-plan
-  node C:/Users/leooa/.claude/get-shit-done/bin/gsd-tools.cjs state update-progress
-  node C:/Users/leooa/.claude/get-shit-done/bin/gsd-tools.cjs state record-metric \
-    --phase "${PHASE}" --plan "${PLAN}" --duration "${DURATION}" \
-    --tasks "${TASK_COUNT}" --files "${FILE_COUNT}"
-  for decision in "${DECISIONS[@]}"; do
-    node C:/Users/leooa/.claude/get-shit-done/bin/gsd-tools.cjs state add-decision \
-      --phase "${PHASE}" --summary "${decision}"
-  done
-  node C:/Users/leooa/.claude/get-shit-done/bin/gsd-tools.cjs state record-session \
-    --stopped-at "Completed ${PHASE}-${PLAN}-PLAN.md"
-  node C:/Users/leooa/.claude/get-shit-done/bin/gsd-tools.cjs roadmap update-plan-progress "${PHASE_NUMBER}"
-  node C:/Users/leooa/.claude/get-shit-done/bin/gsd-tools.cjs requirements mark-complete ${REQ_IDS}
-else
-  # Fallback: edit STATE.md directly
-  echo "gsd-tools not found, updating STATE.md directly"
-fi
-```
-
 **Requirement IDs:** Extract from the PLAN.md frontmatter `requirements:` field (e.g., `requirements: [AUTH-01, AUTH-02]`). If the plan has no requirements field, skip this step.
 
 **For blockers found during execution:**
-Document in STATE.md under a "Blockers" section. If using gsd-tools:
-```bash
-node C:/Users/leooa/.claude/get-shit-done/bin/gsd-tools.cjs state add-blocker "Blocker description"
-```
+Document in `.flow/state.yaml` under a `blockers:` section.
 </state_updates>
 
 <!-- ============================================================ -->

@@ -97,7 +97,10 @@ if not is_failure:
 log_dir = os.path.expanduser("~/.claude/logs")
 os.makedirs(log_dir, exist_ok=True)
 
-error_text = str(tool_response.get("error", "") or tool_response.get("output", ""))[:500]
+if isinstance(tool_response, dict):
+    error_text = str(tool_response.get("error", "") or tool_response.get("output", ""))[:500]
+else:
+    error_text = str(tool_response)[:500]
 command = str(tool_input.get("command", ""))[:300]
 file_path = str(tool_input.get("file_path", ""))
 

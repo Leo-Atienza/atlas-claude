@@ -38,6 +38,16 @@
     ],
     "PostToolUse": [
       {
+        "matcher": "Read",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node ~/.claude/hooks/skill-evolution.js",
+            "timeout": 3
+          }
+        ]
+      },
+      {
         "matcher": "Write|Edit|MultiEdit",
         "hooks": [
           {
@@ -62,6 +72,26 @@
             "type": "command",
             "command": "python3 ~/.claude/hooks/mistake-capture.py",
             "timeout": 5
+          }
+        ]
+      },
+      {
+        "matcher": "Write|Edit|MultiEdit|Bash|Agent",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node ~/.claude/hooks/hook-health-logger.js",
+            "timeout": 3
+          }
+        ]
+      },
+      {
+        "matcher": "Write|Edit|MultiEdit|Bash|Agent",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node ~/.claude/hooks/tool-efficiency.js",
+            "timeout": 3
           }
         ]
       },
@@ -250,6 +280,8 @@
         "hooks": [
           {
             "type": "agent",
+            "subagent_type": "bug-hunter",
+            "description": "Final session verification — check for bugs in changed files and run tests if applicable",
             "timeout": 120,
             "statusMessage": "Verifying completion & running tests..."
           }

@@ -15,7 +15,7 @@ Follow the dream skill phases:
 
 After completing, update the dream timestamp:
 ```bash
-date +%s > /tmp/claude-dream-last-run
+date +%s > ~/.claude/cache/dream-last-run
 ```
 
 Output a brief dream summary of what changed.

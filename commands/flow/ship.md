@@ -25,6 +25,23 @@ Replaces: /ship, compound:feature-video (partial)
 
 <process>
 
+## Step 0: Pre-Ship Quality Gate (MANDATORY)
+
+Before any git operations, run these checks. Do NOT skip.
+
+1. **Security scan**: Run Trail of Bits `sharp-edges` patterns on changed files:
+   - Check for hardcoded secrets, API keys, credentials
+   - Check for SQL injection, XSS, command injection vectors
+   - Check for insecure defaults (HTTP vs HTTPS, weak crypto)
+   - If any HIGH severity finding → BLOCK and report to user
+2. **Smoke test** (if in ~/.claude): Run `bash ~/.claude/scripts/smoke-test.sh` — all checks must pass
+3. **Diff review**: Run `git diff` and scan for:
+   - Accidentally committed `.env`, credential files, or large binaries
+   - Debug/console.log statements left in production code
+   - TODO/FIXME/HACK comments that should be resolved before shipping
+
+If any gate fails, report the issue and ask the user whether to proceed or fix first.
+
 ## Step 1: Analyze Changes
 
 1. Run `git status` to see untracked and modified files

@@ -395,6 +395,9 @@
 | HK-018 | sync-skill-keywords.js | SessionStart — regenerates keyword cache from REGISTRY.md + SKILL.md frontmatter | `hooks/sync-skill-keywords.js` |
 | HK-019 | subagent-limiter.js | PreToolUse:Agent — blocks Agent spawns when concurrent limit (6) reached | `hooks/subagent-limiter.js` |
 | HK-020 | precompact-flow-validate.sh | PreCompact — validates .flow/ state before context compaction | `scripts/precompact-flow-validate.sh` |
+| HK-021 | hook-health-logger.js | PostToolUse — logs hook execution times for performance monitoring | `hooks/hook-health-logger.js` |
+| HK-022 | skill-evolution.js | PostToolUse:Read — tracks SKILL.md activations for evolution engine | `hooks/skill-evolution.js` |
+| HK-023 | tool-efficiency.js | PostToolUse — counts tool calls per session, warns at high counts | `hooks/tool-efficiency.js` |
 
 ## Scheduled Tasks
 
@@ -402,6 +405,7 @@
 |----|------|---------|------|
 | SCHED-001 | weekly-dream | Weekly memory consolidation (Monday ~9:17am) | `scheduled-tasks/weekly-dream/SKILL.md` |
 | SCHED-002 | skill-usage-audit | Monthly archived skill audit + auto-unarchive | `scheduled-tasks/skill-usage-audit/SKILL.md` |
+| SCHED-003 | skill-autofix | Weekly AutoResearch — identifies and improves underperforming skills | `scheduled-tasks/skill-autofix/SKILL.md` |
 
 ## Playbook Files
 

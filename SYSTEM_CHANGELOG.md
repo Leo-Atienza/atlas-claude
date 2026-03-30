@@ -1,5 +1,50 @@
 # System Changelog
 
+## [3.0.0] — 2026-03-30
+### Added — Self-Evolving Skills, Self-Healing Infrastructure, Quality Evaluation
+Major version bump: ATLAS now has self-improvement capabilities that no other public Claude Code system offers.
+
+**Self-Evolving Skills (OpenSpace + AutoResearch Pattern)**
+- **Skill evolution engine** (`hooks/skill-evolution.js`, HK-022): PostToolUse:Read hook that tracks SKILL.md activations. Writes usage outcomes to `logs/skill-outcomes.jsonl`. Feeds the improvement pipeline.
+- **Skill improvement generator** (`scripts/skill-improver.js`): Analyzes skill performance data and generates improvement candidates in `skills/.candidates/`. Identifies high fallback rates, low application rates, and unused-but-activated skills.
+- **`/skill:review` command** (`commands/skill-review.md`): Review, accept, dismiss, or investigate skill improvement candidates. Human-in-the-loop — candidates are never auto-promoted.
+- **AutoResearch scheduled agent** (`scheduled-tasks/skill-autofix/SKILL.md`, SCHED-003): Weekly agent that picks underperforming skills, researches improvements via Context7/WebSearch, and writes improved versions to `.candidates/`.
+
+**Self-Healing Infrastructure**
+- **Self-repair script** (`scripts/self-repair.sh`): Detects and fixes missing log files, broken directories, orphan git locks, stale /tmp state files, non-executable hooks. Run via `/health --fix`.
+- **CLAUDE.md integrity check**: Smoke-test now validates CLAUDE.md content — size threshold (>1KB) and required section detection (Master Entry Points, Session End Protocol, Task Routing).
+- **Persistent cache** (`cache/`): Dream state and skill health timestamps moved from volatile `/tmp/` to `~/.claude/cache/`, surviving Windows reboots.
+
+**Quality Evaluation**
+- **Tool efficiency tracker** (`hooks/tool-efficiency.js`, HK-023): PostToolUse hook counting tool calls per session. Warns at 100/200 calls with breakdown. Logs to `cache/efficiency-{session}.json`.
+- **Hook health telemetry** (`hooks/hook-health-logger.js`, HK-021): Logs execution duration of every PostToolUse hook cycle. Session-start aggregation warns on hooks averaging >3s.
+- **Pre-ship quality gate**: `/flow:ship` now runs mandatory security scan, smoke test, and diff review before any git operations.
+
+### Fixed — Critical Bugs
+- **`mistake-capture.py` crash on string responses**: Line 100 called `.get()` on string `tool_response`, causing silent crash before writing to `failures.jsonl`. The entire progressive learning loop (failures.jsonl → error-patterns.json → /learn → /analyze-mistakes) was silently dead. **This was the most impactful bug in the system.**
+- **Anonymous Stop agent hook**: `settings.json` had a bare `"type": "agent"` Stop hook with no subagent_type or description. Now properly configured as `bug-hunter` agent for completion verification.
+- **Dead GSD paths in flow-executor.md**: Removed 30+ lines of hardcoded `gsd-tools.cjs` paths and `.planning/` backward compatibility that referenced deleted legacy system.
+- **State files lost on reboot**: `/tmp/claude-dream-last-run` and `/tmp/claude-skill-health-last-run` replaced with persistent `~/.claude/cache/` paths.
+- **Smoke-test registry cap**: Was checking only first 50 REGISTRY.md paths. Now checks up to 200 (currently validates 141).
+
+### Changed
+- `hooks/mistake-capture.py`: Fixed string tool_response handling in error extraction
+- `hooks/session-start.sh`: Added slow hook detection (section 5.7), moved state files to cache/, added cache dir creation
+- `settings.json`: Registered HK-021/022/023, fixed Stop agent hook, added Read matcher for skill-evolution
+- `scripts/smoke-test.sh`: Added CLAUDE.md integrity check, raised registry cap to 200
+- `agents/flow-executor.md`: Removed all GSD/`.planning/` backward compatibility code
+- `commands/flow/ship.md`: Added mandatory pre-ship quality gate (Step 0)
+- `scheduled-tasks/weekly-dream/SKILL.md`: Fixed /tmp path to ~/.claude/cache/
+
+### New Files
+- `hooks/skill-evolution.js` — skill activation tracker
+- `hooks/hook-health-logger.js` — hook execution time logger
+- `hooks/tool-efficiency.js` — session tool call counter
+- `scripts/self-repair.sh` — auto-fix common infrastructure issues
+- `scripts/skill-improver.js` — skill improvement candidate generator
+- `commands/skill-review.md` — human-in-the-loop skill review command
+- `scheduled-tasks/skill-autofix/SKILL.md` — weekly AutoResearch agent
+
 ## [2.6.0] — 2026-03-29
 ### Added — Configuration Hardening & Performance
 Audit-driven improvements: configuration drift detection, missing safety mechanisms, stale documentation cleanup, and startup performance optimization.

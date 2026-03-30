@@ -81,7 +81,7 @@ bash "$CLAUDE_DIR/scripts/rebuild-memory-bridge.sh" 2>/dev/null || true
 
 # ─── 2. Skill health check (daily, 1-day interval) ───────────────────
 SKILLS_DIR="$CLAUDE_DIR/skills"
-STATE_FILE="/tmp/claude-skill-health-last-run"
+STATE_FILE="$CLAUDE_DIR/cache/skill-health-last-run"
 INTERVAL_DAYS=1
 NOW=$(date +%s)
 
@@ -214,6 +214,30 @@ if [ -f "$MANIFEST" ] || [ -f "$SKILL_STATS" ] || [ -f "$TOOL_HEALTH" ]; then
   " "$MANIFEST" "$SKILL_STATS" "$TOOL_HEALTH" 2>/dev/null || true
 fi
 
+# ─── 5.7. Hook health alerts (slow hook detection) ─────────────────
+HOOK_HEALTH="$CLAUDE_DIR/logs/hook-health.jsonl"
+if [ -f "$HOOK_HEALTH" ] && [ -s "$HOOK_HEALTH" ]; then
+  SLOW_HOOKS=$(python3 -c "
+import json, sys
+from collections import defaultdict
+durations = defaultdict(list)
+for line in open(sys.argv[1]):
+    try:
+        e = json.loads(line)
+        durations[e['hook']].append(e['duration_ms'])
+    except: pass
+slow = []
+for hook, times in durations.items():
+    avg = sum(times) / len(times)
+    if avg > 3000 and len(times) >= 3:
+        slow.append(f'{hook} ({int(avg)}ms avg over {len(times)} calls)')
+if slow: print('; '.join(slow))
+" "$HOOK_HEALTH" 2>/dev/null)
+  if [ -n "$SLOW_HOOKS" ]; then
+    echo "SLOW HOOKS DETECTED: $SLOW_HOOKS. Consider optimizing or increasing timeout."
+  fi
+fi
+
 # ─── 6. Stale plan cleanup ───────────────────────────────────────────
 PLANS_DIR="$CLAUDE_DIR/plans"
 if [ -d "$PLANS_DIR" ]; then
@@ -235,7 +259,7 @@ if [ -d "$LOGS_DIR" ]; then
 fi
 
 # ─── 8. Dream memory consolidation check ─────────────────────────────
-DREAM_STATE_FILE="/tmp/claude-dream-last-run"
+DREAM_STATE_FILE="$CLAUDE_DIR/cache/dream-last-run"
 DREAM_INTERVAL_DAYS=7
 MEMORY_DIR="$CLAUDE_DIR/projects/C--Users-leooa--claude/memory"
 

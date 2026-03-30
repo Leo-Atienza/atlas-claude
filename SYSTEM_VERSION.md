@@ -1,21 +1,21 @@
 # Claude Code System — Version State
 
 ## System Version
-version: 2.6.0
-last_updated: 2026-03-29
+version: 3.0.0
+last_updated: 2026-03-30
 
 ## Platform Tracking
 claude_code_last_seen: 2.1.81
-last_check: 2026-03-29
+last_check: 2026-03-30
 update_available: false
 
 ## Component Health
-last_health_check: 2026-03-29
+last_health_check: 2026-03-30
 failing_components: none
 
 ## Component Counts
-hooks: 20
-commands: 38
+hooks: 23
+commands: 39
 agents: 72
 skills: 38 (direct SKILL.md) + 150+ (via skill packs)
 plugins: 9
@@ -40,6 +40,11 @@ hooks/sync-skill-keywords.js    | 2.5.0 | new      | OK
 hooks/tool-failure-handler.js   | 2.4.0 | new      | OK
 hooks/subagent-limiter.js       | 2.6.0 | new      | OK
 scripts/precompact-flow-validate.sh | 2.6.0 | new  | OK
+hooks/hook-health-logger.js     | 3.0.0 | new      | OK
+hooks/skill-evolution.js        | 3.0.0 | new      | OK
+hooks/tool-efficiency.js        | 3.0.0 | new      | OK
+scripts/self-repair.sh          | 3.0.0 | new      | OK
+scripts/skill-improver.js       | 3.0.0 | new      | OK
 hooks/post-compact-dream-check.sh | 2.2.0 | verified | OK
 commands/learn.md               | 2.1.0 | verified | OK
 commands/analyze-mistakes.md    | 2.1.0 | verified | OK
