@@ -15,6 +15,7 @@
 
 <p align="center">
   <a href="#-what-is-atlas">What</a> &bull;
+  <a href="#system-map">System Map</a> &bull;
   <a href="#quick-start">Install</a> &bull;
   <a href="#the-6-entry-points">Commands</a> &bull;
   <a href="#autonomous-behaviors">Behaviors</a> &bull;
@@ -88,6 +89,18 @@ build a REST API for user management
 </table>
 
 > **TL;DR** — It continues its own work when context runs out. It deploys agent teams based on task complexity. It creates new skills when it finds capability gaps. It learns from mistakes across sessions.
+
+---
+
+## System Map
+
+<p align="center">
+  <a href="atlas-system-map.html">
+    <img src="assets/atlas-system-map.png" alt="ATLAS System Architecture Map" width="100%">
+  </a>
+  <br>
+  <sub>Interactive version: <a href="atlas-system-map.html"><code>atlas-system-map.html</code></a></sub>
+</p>
 
 ---
 
