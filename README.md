@@ -99,7 +99,7 @@ build a REST API for user management
     <img src="assets/atlas-system-map.png" alt="ATLAS System Architecture Map" width="100%">
   </a>
   <br>
-  <sub>Interactive version: <a href="atlas-system-map.html"><code>atlas-system-map.html</code></a></sub>
+  <sub>Interactive version: <a href="https://htmlpreview.github.io/?https://github.com/Leo-Atienza/atlas-claude/blob/main/atlas-system-map.html"><code>atlas-system-map.html</code></a></sub>
 </p>
 
 ---
