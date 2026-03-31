@@ -1,6 +1,6 @@
 # Resource Registry — Single Source of Truth
 
-> **Last verified**: 2026-03-29
+> **Last verified**: 2026-03-30
 > **How to use**: Scan the Purpose column to match your task. Jump directly to the Path. Never scan skill directories.
 > **Maintenance**: Append new entries immediately when added. Delete/update when removed or merged.
 > **Lifecycle tags**: `[ARCHIVED]` = in skills dir, detected by skill-watcher hook. `[DEPRECATED]` = scheduled for removal.
@@ -174,6 +174,10 @@
 | FS-055 | fullstack-guardian | Full-stack quality enforcement | `skills/fullstack-dev/fullstack-guardian/` |
 | FS-057 | rag-architect | RAG pipeline design | `skills/fullstack-dev/rag-architect/` |
 | FS-058 | prompt-engineer | Prompt engineering patterns | `skills/fullstack-dev/prompt-engineer/` |
+| FS-067 | atlassian-mcp | `[ARCHIVED]` Jira/Confluence integration via MCP | `skills/fullstack-dev/atlassian-mcp/` |
+| FS-068 | playwright-expert | `[ARCHIVED]` E2E testing with Playwright, POM, flaky test debug | `skills/fullstack-dev/playwright-expert/` |
+| FS-069 | spec-miner | `[ARCHIVED]` Reverse-engineer specs from undocumented systems | `skills/fullstack-dev/spec-miner/` |
+| FS-070 | the-fool | `[ARCHIVED]` Devil's advocate, pre-mortem, red teaming for plans | `skills/fullstack-dev/the-fool/` |
 
 ## Fullstack Dev — Archived (auto-detected by skill-watcher)
 
@@ -239,6 +243,31 @@
 | CE-012 | mcp | MCP integration patterns | `skills/context-engineering-kit/mcp/` |
 | CE-013 | tech-stack | Language/framework best practices | `skills/context-engineering-kit/tech-stack/` |
 
+## Compound Engineering Skills `[ARCHIVED]`
+
+> Third-party skill pack — auto-detected by skill-watcher when project uses matching patterns.
+
+| ID | Name | Purpose | Path |
+|----|------|---------|------|
+| CPE-001 | agent-browser | `[ARCHIVED]` Browser automation via agent-browser CLI | `skills/compound-engineering/agent-browser/` |
+| CPE-002 | agent-native-architecture | `[ARCHIVED]` Agent-first application architecture guide | `skills/compound-engineering/agent-native-architecture/` |
+| CPE-003 | andrew-kane-gem-writer | `[ARCHIVED]` Ruby gems in Andrew Kane's minimal style | `skills/compound-engineering/andrew-kane-gem-writer/` |
+| CPE-004 | brainstorming | `[ARCHIVED]` Structured exploration before planning | `skills/compound-engineering/brainstorming/` |
+| CPE-005 | compound-docs | `[ARCHIVED]` Capture solved problems as categorized docs | `skills/compound-engineering/compound-docs/` |
+| CPE-006 | create-agent-skills | `[ARCHIVED]` Author Claude Code skills and commands | `skills/compound-engineering/create-agent-skills/` |
+| CPE-007 | dhh-rails-style | `[ARCHIVED]` Ruby/Rails in DHH's 37signals style | `skills/compound-engineering/dhh-rails-style/` |
+| CPE-008 | document-review | `[ARCHIVED]` Structured doc review before next workflow step | `skills/compound-engineering/document-review/` |
+| CPE-009 | dspy-ruby | `[ARCHIVED]` Type-safe LLM apps in Ruby with DSPy.rb | `skills/compound-engineering/dspy-ruby/` |
+| CPE-010 | every-style-editor | `[ARCHIVED]` Line-by-line copy review for Every's style guide | `skills/compound-engineering/every-style-editor/` |
+| CPE-011 | file-todos | `[ARCHIVED]` File-based todo tracking with slash commands | `skills/compound-engineering/file-todos/` |
+| CPE-012 | gemini-imagegen | `[ARCHIVED]` Image gen/edit via Gemini API | `skills/compound-engineering/gemini-imagegen/` |
+| CPE-013 | git-worktree | `[ARCHIVED]` Git worktree management for parallel dev | `skills/compound-engineering/git-worktree/` |
+| CPE-014 | orchestrating-swarms | `[ARCHIVED]` Multi-agent swarm orchestration patterns | `skills/compound-engineering/orchestrating-swarms/` |
+| CPE-015 | rclone | `[ARCHIVED]` Cloud storage sync (S3, R2, GDrive, etc.) | `skills/compound-engineering/rclone/` |
+| CPE-016 | resolve-pr-parallel | `[ARCHIVED]` Resolve PR comments via parallel processing | `skills/compound-engineering/resolve-pr-parallel/` |
+| CPE-017 | setup | `[ARCHIVED]` Auto-detect stack and configure review agents | `skills/compound-engineering/setup/` |
+| CPE-018 | skill-creator | `[ARCHIVED]` Create/update Claude Code skills (compound ver.) | `skills/compound-engineering/skill-creator/` |
+
 ## Session & CLI Tools
 
 | ID | Name | Purpose | Path |
@@ -246,6 +275,17 @@
 | CT-001 | aichat | Session search/recovery | `skills/cctools/aichat/` |
 | CT-003 | voice | Audio feedback on events | `skills/cctools/voice/` |
 | CT-004 | infra-showcase | Backend/frontend dev guidelines, route testing | `skills/infra-showcase/` |
+| CT-005 | langroid-add-pattern | `[ARCHIVED]` Record Langroid agent design patterns | `skills/cctools/langroid/add-pattern/` |
+| CT-006 | langroid-patterns | `[ARCHIVED]` Reference library of Langroid multi-agent patterns | `skills/cctools/langroid/patterns/` |
+| CT-007 | tmux-cli | `[ARCHIVED]` Communicate with agents in other tmux panes | `skills/cctools/tmux-cli/tmux-cli/` |
+| CT-008 | code-walk-thru | `[ARCHIVED]` Walk through code explaining changes line by line | `skills/cctools/workflow/code-walk-thru/` |
+| CT-009 | log-work | `[ARCHIVED]` Append work-segment entries to dated WORKLOG | `skills/cctools/workflow/log-work/` |
+| CT-010 | make-issue-spec | `[ARCHIVED]` Create dated issue specs with implementation plan | `skills/cctools/workflow/make-issue-spec/` |
+| CT-011 | backend-dev-guidelines | `[ARCHIVED]` Node.js/Express layered architecture guide (sub of CT-004) | `skills/infra-showcase/backend-dev-guidelines/` |
+| CT-012 | error-tracking | `[ARCHIVED]` Sentry v8 error tracking setup (sub of CT-004) | `skills/infra-showcase/error-tracking/` |
+| CT-013 | frontend-dev-guidelines | `[ARCHIVED]` React/TypeScript patterns with MUI/TanStack (sub of CT-004) | `skills/infra-showcase/frontend-dev-guidelines/` |
+| CT-014 | route-tester | `[ARCHIVED]` Test authenticated API routes (sub of CT-004) | `skills/infra-showcase/route-tester/` |
+| CT-015 | skill-developer | `[ARCHIVED]` Create skills following Anthropic best practices (sub of CT-004) | `skills/infra-showcase/skill-developer/` |
 
 ## MCP Servers
 
@@ -323,6 +363,7 @@
 | FL-C18 | flow:retro | Cross-phase/sprint retrospective | `commands/flow/retro.md` |
 | FL-C19 | flow:status | Dashboard: position, velocity, todos, quality | `commands/flow/status.md` |
 | FL-C20 | flow:smart-swarm | Auto-detect complexity + agent team execution | `commands/flow/smart-swarm.md` |
+| FL-C21 | flow:team | Spawn Agent Team for complex peer-to-peer collaboration | `commands/flow/team.md` |
 
 ### Flow Agents
 
@@ -361,6 +402,9 @@
 | MC-009 | /analyze-mistakes | Weekly failure pattern analysis | `commands/analyze-mistakes.md` |
 | MC-010 | /init-memory | Initialize Progressive Learning | `commands/init-memory.md` |
 | MC-011 | /continue | Resume from auto-continuation handoff | `commands/continue.md` |
+| MC-013 | /compact | Prepare session state for context compaction | `commands/compact.md` |
+| MC-014 | /dream | Deep memory consolidation (orient, merge, prune) | `commands/dream.md` |
+| MC-015 | /skill:review | Review skill improvement candidates | `commands/skill-review.md` |
 
 ## System Infrastructure
 

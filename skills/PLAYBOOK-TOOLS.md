@@ -85,7 +85,7 @@ Some capabilities have multiple providers. Use the canonical one to avoid confus
 ### At Session Start
 1. Check `.planning/STATE.md` — if found, offer resume
 2. Check project CLAUDE.md — read project-specific instructions
-3. If user mentions a codebase, check for existing GSD structure
+3. If user mentions a codebase, check for existing `.flow/` structure
 
 ### During Any Task
 1. Read matching specialist SKILL.md before domain-specific work
@@ -101,9 +101,9 @@ Some capabilities have multiple providers. Use the canonical one to avoid confus
 4. Offer knowledge compounding if problem was non-trivial
 
 ### After Significant Work
-1. Offer `/compound-engineering:workflows:compound` for non-trivial solutions
+1. Offer `/flow:compound` for non-trivial solutions
 2. Update Memory Graph with key learnings
-3. If in GSD project, update STATE.md progress
+3. If in Flow project, update `.flow/state.yaml` progress
 
 ---
 
@@ -220,16 +220,18 @@ Currently implemented via REGISTRY lookup. Tags can be added to SKILL.md frontma
 ### Code Review
 ```
 /code-review:code-review          → Review a pull request
-/compound-engineering:workflows:review → Multi-agent exhaustive review (preferred)
+/flow:review                      → Multi-agent parallel review (preferred)
+/compound-engineering:workflows:review → [ARCHIVED] Legacy multi-agent review
 ```
 
 ### Feature Development
 ```
 /feature-dev:feature-dev          → Guided feature dev with codebase understanding
-/compound-engineering:workflows:work → Execute plans with TDD + quality gates
+/flow:go                          → Wave-based parallel execution (preferred)
+/compound-engineering:workflows:work → [ARCHIVED] Legacy TDD + quality gates execution
 ```
 
-### Project Management (Fullstack Dev)
+### Project Management (Fullstack Dev) `[ARCHIVED — auto-detected by skill-watcher]`
 ```
 /fullstack-dev:common-ground      → Surface hidden assumptions about project
 /fullstack-dev:project:discovery:create-epic-discovery → Research/discovery epics
@@ -267,24 +269,21 @@ Currently implemented via REGISTRY lookup. Tags can be added to SKILL.md frontma
 /agent-sdk-dev:new-sdk-app        → Create new Claude Agent SDK application
 ```
 
-### GSD (Extended — less common commands)
+### GSD (Legacy — Deprecated, Replaced by Flow)
+> GSD commands are deprecated. Use `/flow:*` equivalents instead. Kept for reference only.
+> See REGISTRY.md FL-C01 through FL-C21 for current Flow commands.
 ```
-/gsd:add-phase          → Add phase to end of roadmap
-/gsd:insert-phase       → Insert urgent work between phases
-/gsd:remove-phase       → Remove future phase, renumber
-/gsd:add-tests          → Generate tests for completed phase
-/gsd:add-todo           → Capture idea as todo
-/gsd:check-todos        → List pending todos
-/gsd:audit-milestone    → Audit milestone before archiving
-/gsd:plan-milestone-gaps → Create phases to close audit gaps
-/gsd:cleanup            → Archive completed phase directories
-/gsd:new-milestone      → Start new milestone cycle
-/gsd:discuss-phase      → Gather phase context before planning
-/gsd:list-phase-assumptions → Surface assumptions before planning
-/gsd:set-profile        → Switch model profile (quality/balanced/budget)
-/gsd:settings           → Configure GSD toggles
-/gsd:health             → Diagnose .planning/ issues
-/gsd:update             → Update GSD to latest version
-/gsd:reapply-patches    → Reapply local mods after update
-/gsd:join-discord       → Join GSD community
+/gsd:add-phase          → DEPRECATED: use /flow:plan
+/gsd:insert-phase       → DEPRECATED: use /flow:plan
+/gsd:remove-phase       → DEPRECATED: use /flow:plan
+/gsd:add-tests          → DEPRECATED: use /flow:test
+/gsd:add-todo           → DEPRECATED: use TodoWrite tool
+/gsd:check-todos        → DEPRECATED: use TodoWrite tool
+/gsd:audit-milestone    → DEPRECATED: use /flow:verify
+/gsd:plan-milestone-gaps → DEPRECATED: use /flow:plan
+/gsd:cleanup            → DEPRECATED: use /flow:complete
+/gsd:new-milestone      → DEPRECATED: use /flow:start
+/gsd:discuss-phase      → DEPRECATED: use /flow:brainstorm
+/gsd:list-phase-assumptions → DEPRECATED: use /flow:ground
+/gsd:health             → DEPRECATED: use /health
 ```

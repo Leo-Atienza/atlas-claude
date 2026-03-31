@@ -66,17 +66,17 @@ When working with code in a specific language/framework, read the matching SKILL
 | Language/Framework | Skill Path | Key Enforcements |
 |-------------------|-----------|------------------|
 | Python 3.11+ | FS-001 (`fullstack-dev/python-pro/`) | Type hints, async/await, pytest >90%, pathlib |
-| FastAPI | FS-013 (`fullstack-dev/fastapi-expert/`) | Pydantic V2, Annotated DI, async SQLAlchemy |
-| Django | FS-014 (`fullstack-dev/django-expert/`) | Django patterns, ORM, migrations |
+| FastAPI | FS-013 (`fullstack-dev/fastapi-expert/`) `[ARCHIVED]` | Pydantic V2, Annotated DI, async SQLAlchemy |
+| Django | FS-014 (`fullstack-dev/django-expert/`) `[ARCHIVED]` | Django patterns, ORM, migrations |
 | TypeScript | FS-002 (`fullstack-dev/typescript-pro/`) | Strict TS, proper generics, type safety |
 | React/Next.js | FS-020 + FS-021 (`nextjs-developer` + `react-expert`) + Context7 | Server components, hooks patterns |
-| Angular 17+ | FS-023 (`fullstack-dev/angular-architect/`) | Standalone components, signals, OnPush |
-| Go | FS-004 (`fullstack-dev/golang-pro/`) | Error handling, goroutines, interfaces |
-| Rust | FS-005 (`fullstack-dev/rust-engineer/`) | Ownership, lifetimes, error handling |
-| SQL/Database | FS-027 (`fullstack-dev/database-optimizer/`) | EXPLAIN before optimizing, strategic indexes |
+| Angular 17+ | FS-023 (`fullstack-dev/angular-architect/`) `[ARCHIVED]` | Standalone components, signals, OnPush |
+| Go | FS-004 (`fullstack-dev/golang-pro/`) `[ARCHIVED]` | Error handling, goroutines, interfaces |
+| Rust | FS-005 (`fullstack-dev/rust-engineer/`) `[ARCHIVED]` | Ownership, lifetimes, error handling |
+| SQL/Database | FS-027 (`fullstack-dev/database-optimizer/`) `[ARCHIVED]` | EXPLAIN before optimizing, strategic indexes |
 | API Design | FS-028 (`fullstack-dev/api-designer/`) | REST principles, OpenAPI 3.1, RFC 7807 errors |
-| Kubernetes | FS-030 (`fullstack-dev/kubernetes-specialist/`) | Resource management, networking, security |
-| Cloud Architecture | FS-029 (`fullstack-dev/cloud-architect/`) | Multi-cloud, cost optimization, HA |
+| Kubernetes | FS-030 (`fullstack-dev/kubernetes-specialist/`) `[ARCHIVED]` | Resource management, networking, security |
+| Cloud Architecture | FS-029 (`fullstack-dev/cloud-architect/`) `[ARCHIVED]` | Multi-cloud, cost optimization, HA |
 
 ### Key Enforcement Patterns
 
