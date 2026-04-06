@@ -15,7 +15,6 @@
 
 <p align="center">
   <a href="#-what-is-atlas">What</a> &bull;
-  <a href="#system-map">System Map</a> &bull;
   <a href="#quick-start">Install</a> &bull;
   <a href="#the-6-entry-points">Commands</a> &bull;
   <a href="#autonomous-behaviors">Behaviors</a> &bull;
@@ -92,18 +91,6 @@ build a REST API for user management
 
 ---
 
-## System Map
-
-<p align="center">
-  <a href="atlas-system-map.html">
-    <img src="assets/atlas-system-map.png" alt="ATLAS System Architecture Map" width="100%">
-  </a>
-  <br>
-  <sub>Interactive version: <a href="https://htmlpreview.github.io/?https://github.com/Leo-Atienza/atlas-claude/blob/main/atlas-system-map.html"><code>atlas-system-map.html</code></a></sub>
-</p>
-
----
-
 ## Quick Start
 
 ```bash
@@ -116,8 +103,6 @@ cd atlas-claude && bash install.sh
 # Verify (27 checks across 9 categories)
 bash ~/.claude/scripts/smoke-test.sh
 ```
-
-> **After install:** `CLAUDE.md`, `settings.json`, and other config files are copied to `~/.claude/` from `examples/`. These are your personal files — customize them for your workflow. Some files contain `<YOUR_USERNAME>` and `<PROJECT_MEMORY_DIR>` placeholders that get auto-resolved by Claude Code, or you can replace them manually.
 
 ---
 

@@ -50,3 +50,16 @@ sessions/
 # Claude internal
 .claude-code-version
 statsig/
+
+# Plugin runtime state (install counts, caches)
+plugins/cache/
+plugins/blocklist.json
+plugins/install-counts-cache.json
+plugins/installed_plugins.json
+plugins/known_marketplaces.json
+plugins/marketplaces/
+
+# Other runtime directories
+session-env/
+downloads/
+flow-knowledge/

@@ -27,9 +27,9 @@ If no description provided, ask the user what they want to build.
 $ARGUMENTS
 
 Reference files:
-@~/.claude/skills/flow/references/depth-analysis.md
-@~/.claude/skills/flow/references/state-management.md
-@~/.claude/skills/flow/templates/config.yaml
+@C:/Users/leooa/.claude/skills/flow/references/depth-analysis.md
+@C:/Users/leooa/.claude/skills/flow/references/state-management.md
+@C:/Users/leooa/.claude/skills/flow/templates/config.yaml
 </context>
 
 <process>

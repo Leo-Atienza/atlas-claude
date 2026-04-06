@@ -68,4 +68,4 @@ Saved:
 Compacting now...
 ```
 
-Then run `/compact` to trigger Claude Code's native context compaction. The existing PreCompact hooks (precompact-reflect.sh, precompact-flow-validate.sh) and PostCompact hook (post-compact-dream-check.sh) will fire automatically during compaction.
+Then run `/compact` to trigger Claude Code's native context compaction. The existing PreCompact hook (precompact-reflect.sh) will fire automatically during compaction.

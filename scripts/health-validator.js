@@ -19,7 +19,7 @@ const { execSync } = require('child_process');
 
 const CLAUDE_DIR = path.join(os.homedir(), '.claude');
 const SKILLS_DIR = path.join(CLAUDE_DIR, 'skills');
-const MEMORY_DIR = path.join(CLAUDE_DIR, 'projects', '<PROJECT_MEMORY_DIR>', 'memory');
+const MEMORY_DIR = path.join(CLAUDE_DIR, 'projects', 'C--Users-leooa--claude', 'memory');
 const MANIFEST_PATH = path.join(SKILLS_DIR, 'VERSION-MANIFEST.json');
 const REGISTRY_PATH = path.join(SKILLS_DIR, 'REGISTRY.md');
 const INDEX_PATH = path.join(MEMORY_DIR, 'INDEX.md');

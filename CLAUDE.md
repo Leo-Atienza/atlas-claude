@@ -1,143 +1,143 @@
 # Global Agent Instructions
 
-**Core principle: Act autonomously. Classify the task, route to the right tool/skill/workflow, and execute. Only ask when genuinely ambiguous. Think harder — push beyond surface-level answers, dig deeper into problems, consider edge cases, and deliver thorough, high-quality results every time.**
+**Core principle: Be a creative, smart partner — not just an executor. Think harder, push beyond surface-level answers, and deliver exceptional results every time. Treat every task like it's going to production.**
 
-**For deep guidance on any section below, read the matching playbook file (see Playbook Routing).**
+## The Pipeline — How Every Task Works
 
-## Master Entry Points — Use These First
+Every task follows this sequence. Claude determines the right depth automatically.
 
-Six commands cover everything. Slash or plain English, both work.
+### 1. Analyze & Understand
+- Scan codebase and project CLAUDE.md first — understand what exists before researching externally
+- Search online when needed: Context7 for library docs, WebSearch for unfamiliar tech. Don't guess — look up. Skip for code already in the project.
+- Ask clarifying questions for ambiguous tasks — conversational style, as many as needed
+- Offer one strong creative recommendation when relevant (design direction, tech approach)
+- ACT without asking for: tests, security scans, skill loading, obvious bug fixes
 
-| Command | Plain English | When to use |
-|---|---|---|
-| `/new [description]` | "build X", "create X", "new project X" | Starting anything new |
-| `/resume` | "continue", "pick up where we left off" | Returning to existing work |
-| `/task [description]` | "fix X", "add X", "review X", "explain X" | One-off task in current session |
-| `/done` | "done", "wrap up", "that's it for today" | End of session — reflects + commits |
-| `/ship` | "ship it", "push this", "create a PR" | Commit + push + open PR |
-| `/dream` | "consolidate memories", "clean up memories" | Deep memory consolidation — orient, merge, prune |
+### 2. Plan & Prepare
+- Load relevant skills from Active Skills Directory on-demand (not all at start)
+- Check available MCP servers and suggest relevant integrations when useful
+- Create a plan: what to build, how, file structure, design direction, technical decisions
+- Use Plan mode for non-trivial work — it handles approval automatically
 
-**These chain everything automatically.** You never need to invoke workflows, reflect, or security scans directly — the entry points handle all of it.
+### 3. Execute
+- Follow all rules in this file — no exceptions, no shortcuts
+- TDD when tests make sense. SDD (Spec-Driven Development) for spec-heavy work.
+- Make creative decisions autonomously — always choose premium over safe. Never hinder performance.
+- Give milestone updates and decision checkpoints as you go
+- Security-scan all changed files
 
-## Session Start
+### 4. Deliver
+- Self-review: verify tests pass, build succeeds, preview works before declaring done
+- Show: code complete + tests passing + preview/screenshot
+- Highlight key decisions made
+- Suggest "next level" improvements proactively
+- Never claim "done" without verification
 
-Read session-state.md for fast resume. Check `.flow/` for active workflow. Check `workflow.lock` in project memory. Check for project-level CLAUDE.md. SessionStart hook handles reflection flags, conflicts, and handoffs automatically.
+### 5. Learn & Improve (conditional)
+- Only when genuinely novel: save patterns to Knowledge Store, mistakes to G-ERR, new skills for real gaps. Skip for trivial/routine sessions.
+- **Instinct extraction:** After non-trivial sessions, extract reusable patterns with confidence scoring:
+  - Score each candidate pattern 1-5 (1=maybe useful, 5=critical insight)
+  - Only save patterns scoring 4+ to Knowledge Store (prevents noise accumulation)
+  - Tag with confidence: `[HIGH]` (reproduced 3+ times), `[MEDIUM]` (reproduced once), `[LOW]` (theoretical)
+  - When 3+ related patterns cluster around a domain, consider creating a new skill
 
-**React to hook signals**: When `DREAM NEEDED` or `AUTO-DREAM TRIGGERED` appears → run `/dream` immediately (NON-NEGOTIABLE). When `AUTO-ACTIVATE ARCHIVED SKILLS` appears → read the listed SKILL.md files and move entries from Archived to Active in REGISTRY.md. When `CONTEXT GUARD` blocks a tool → save state immediately (handoff file + todos). When `CIRCUIT BREAKER` fires → stop, reassess, change approach. When `DELIVERABLE CHECK` warns → verify agent output before using it. When `SKILL MATCH` or `KEYWORD DETECTED` appears → follow the suggested routing if it aligns with intent.
+**Exception — Trivial tasks** (<20 lines, 1 file, obvious intent): Skip to Execute. No questions, no plan.
 
-## Session End Protocol — MANDATORY
+## Task Complexity — Unified Scale
 
-**Every session gets reflected.** No exceptions. Run `/reflect` at end of every session. If PreCompact hook fires, reflect IMMEDIATELY.
+One system for everything: scope, agent routing, and flow depth.
 
-**State File Precedence** (when resuming, read in this order):
-1. `.flow/state.yaml` — Flow workflow state (authoritative for active Flow work)
-2. `session-state.md` (project root) — Ephemeral session snapshot
-3. `~/.claude/.last-session-handoff` — Git state + todos from Stop hook
-4. `~/.claude/sessions/handoff-*.md` — Auto-continuation handoff (context limit hit)
+| Scale | Scope | Agent Model | Flow |
+|-------|-------|-------------|------|
+| **Trivial** | <20 lines, 1 file, obvious fix | No agents — use Bash for deterministic transforms | Do directly |
+| **Small** | 1-3 files, clear requirements | Haiku for simple tasks, Sonnet if logic-heavy | Plan briefly, execute |
+| **Medium** | 3-10 files, some ambiguity | Sonnet for implementation, Haiku for tests/docs | Present plan, get approval |
+| **Large** | 10+ files, multi-phase | Opus for planning/verification, Sonnet for execution | Full Flow pipeline |
 
-**Write session-state.md** before ending: `{ workflow, active_skills, branch, next_action }`.
+**Cost awareness:** Prefer lower-tier agents for independent subtasks. Never downgrade for: security auditing, architecture decisions, complex debugging.
 
-Knowledge categories: `G-PAT` (patterns), `G-SOL` (solutions), `G-ERR` (mistakes), `G-PREF` (preferences), `G-FAIL` (failed approaches). Stored in `INDEX.md` → `topics/`. Rules: never silently overwrite, filter PII, sequential IDs.
+**ACT without asking:** Clear bug reproduction, unambiguous single action, validation/testing, security scanning.
+**ASK before acting:** Multiple valid architectures, unclear scope, destructive ops, deployment, greenfield tech choice. Use 1-5 multiple-choice questions with defaults marked.
 
-## Playbook Routing — Smart, Automatic
+## Session Resume
 
-| Playbook File | Load When |
-|---|---|
-| `skills/PLAYBOOK-WORKFLOWS.md` | Planning projects, choosing workflows, Flow lifecycle, classifying tasks |
-| `skills/PLAYBOOK-QUALITY.md` | Writing code, security scans, DevOps generation, quality processes |
-| `skills/PLAYBOOK-TOOLS.md` | Using MCP servers, looking up slash commands, checking built-in skills, updating system |
+When returning to previous work, ask: "Want a recap or should we jump in?"
+Read state files in order: `.flow/state.yaml` → `session-state.md` → `~/.claude/.last-session-handoff` → `~/.claude/sessions/handoff-*.md`
 
-**Rules**: Load ONLY the one you need, never all three. If a task spans two domains, load the primary one first, then the secondary only if needed.
+## Code Quality
 
-## Task Routing — Flow
+- Simplest solution that works correctly. No premature abstraction.
+- Single responsibility per function. No god functions.
+- No unused imports, variables, or dead code.
+- Error handling is not optional. Every async operation handles failure.
+- No hardcoded URLs, IDs, or environment-specific values — use env vars.
 
-All tasks route through Flow. `/flow:start` auto-detects depth.
+### Naming
+- TypeScript: PascalCase types/components, camelCase functions/vars
+- Python: snake_case everywhere, UPPER_SNAKE for constants
+- Files: kebab-case for routes/pages, PascalCase for React components
 
-| Route | When |
-|-------|------|
-| `/flow:start [desc]` | Any new work (auto-detects quick/standard/deep/epic) |
-| `/flow:plan` → `/flow:go` | Medium features (3-10 files) |
-| `/flow:quick` | Small, well-defined tasks |
-| `/flow:debug` | Bugs |
-| `/flow:ship` | Commit + push + PR |
-| `/flow:smart-swarm [desc]` | Complex tasks needing multiple agents (auto-scores complexity) |
-| `/continue` | Resume from auto-continuation handoff file |
-| Just do it | Trivial (<20 lines, 1 file) |
+### Workflow
+- Always: branch → work → PR → squash merge → delete branch
+- After any file edit: run appropriate linter/formatter
+- After any code change: run targeted tests to verify
+- Before finishing any task: confirm it builds AND tests pass
 
-Full commands: `skills/flow/SKILL.md`. `.flow/` exists → `/flow:status` for context.
+## Git
 
-## Research — Automatic
+- Branch naming: `feat/desc`, `fix/issue-123`, `refactor/module`, `chore/task`
+- One branch per logical unit. No "misc-changes" branches.
+- Conventional commits: `feat|fix|refactor|test|docs|chore|perf|ci: subject`
+- Subject: imperative mood, <=72 chars, no trailing period, lowercase.
+- Body: explain WHY, not WHAT. The diff shows what.
+- One logical change per commit. Squash WIP before PR.
+- ALWAYS run `git status` before every commit.
+- PR description: what changed, why, how to test, screenshots if UI.
+- Never force-push to main, staging, or production.
+- Delete branch after merge.
 
-Search online proactively: Context7 (library docs) → WebSearch (general) → MCP registry (tools) → WebFetch (URLs). Do not guess when you can look up.
+## Security
 
-## Auto-Activation — On-Demand
+- Validate and sanitize ALL user input at system boundaries. Trust internal code.
+- Parameterized queries only. Never interpolate user data into SQL.
+- Auth checks in middleware, not scattered across handlers.
+- Check authorization on every request to a protected resource.
+- Secure, httpOnly, sameSite cookies. Never localStorage for auth tokens.
+- NEVER commit secrets. Rotate any accidentally committed secret immediately.
+- NEVER log passwords, tokens, credit cards, SSNs, or PII.
+- Error messages to clients: generic. Details: server-side logs only.
+- Pin exact versions in production. Audit transitive deps before major updates.
+- Blocked patterns (enforced by context-guard.js): `*.env*`, `*credentials*`, `*id_rsa*`, `*.pem`, `*.key`, AWS keys (`AKIA`), API tokens, private keys, DB connection strings.
 
-When a task matches a domain, look up the matching resource in `REGISTRY.md` and read its SKILL.md.
-Activation priority: (1) language/framework, (2) security on PR completion, (3) domain specialist, (4) tool specialist.
-Max 2 specialist skills loaded simultaneously.
+## Testing
 
-**Prompt Hooks**: `skill-injector.js` (UserPromptSubmit) auto-detects technology keywords and suggests matching skills. `keyword-detector.js` auto-routes natural language to workflow commands. Both inject context — they don't auto-execute.
+- TDD for new features: write the failing test first, then implement.
+- Test file co-located with source: `foo.ts` → `foo.test.ts`
+- Run targeted tests during dev, full suite only before commits.
+- Arrange → Act → Assert. One logical assertion cluster per test.
+- Test names describe behavior: "returns 404 when user not found"
+- No test depends on execution order or shared mutable state.
+- Mock ALL external services. Never call live APIs in tests.
+- New features: cover happy path + top 3 edge cases minimum.
+- Bug fixes: regression test required before fix is merged.
+- NEVER modify test assertions to make tests pass — fix the code.
+- NEVER use `.skip` or `xit` without a TODO referencing an issue.
 
-**Self-Evolution**: Capability gap detected → activate self-evolve (SK-038). Ask before adding external MCP servers.
+## Skills & Knowledge
 
-**Smart Swarm**: TEAM (8-11) or SWARM (12-15) complexity → AUTOMATICALLY deploy agents via `/flow:smart-swarm`. DUO (5-7) → spawn 2 agents. SOLO (0-4) → execute directly.
-
-**Auto-Continuation**: At 70% context, write handoff file when instructed. Chain depth limit: 5 sessions. Context guard (PreToolUse) proactively blocks expensive tools at 72% — only Read/Glob/Grep/TodoWrite remain available.
-
-**Security**: Every PR → `sharp-edges`. Every diff → `differential-review`. Auth/crypto → `insecure-defaults`. Found vuln → `variant-analysis`.
-
-**Quality**: TDD red→green→refactor. Reflexion if complexity>10, nesting>3, fn>50 lines. Context7 before recommending library patterns.
-
-## MCP — Lazy via TOOL_SEARCH
-
-Prefer MCP over CLI. TOOL_SEARCH active — discover tools on demand. One Context7 (MCP_DOCKER), one browser stack (Chrome=interactive, Preview=testing). shadcn MCP for components. Full routing: `skills/PLAYBOOK-TOOLS.md`.
-
-## Scratchpad Directory
-
-Use `C:/tmp/claude-scratchpad/` for ALL temporary file needs. Create on first use: `mkdir -p /c/tmp/claude-scratchpad/`.
+- **Skills**: Read `skills/ACTIVE-DIRECTORY.md` to find skills → load the relevant page on-demand. Archive in `skills/ARCHIVE-DIRECTORY.md`. If a skill gap is found → search online → create it.
+- **Knowledge**: Read `topics/KNOWLEDGE-DIRECTORY.md` → load relevant page. Save only genuinely novel patterns (G-PAT), solutions (G-SOL), mistakes (G-ERR), preferences (G-PREF), or failed approaches (G-FAIL).
+- **Reference**: Read `REFERENCE.md` for slash commands, MCP patterns, security triggers, DevOps generators.
+- **MCP**: Prefer MCP over CLI. TOOL_SEARCH discovers tools on-demand.
 
 ## Auto Mode
 
-When operating autonomously (auto mode, scheduled tasks, or agent hooks):
-1. **Execute immediately** — make reasonable assumptions, proceed on low-risk work
-2. **Minimize interruptions** — prefer assumptions over questions for routine decisions
-3. **Prefer action over planning** — do not enter plan mode unless explicitly asked
-4. **No destructive actions** — deletions/production changes still need confirmation
-5. **No data exfiltration** — don't post to external services unless directed
+When autonomous (scheduled tasks, agent hooks): plan first for non-trivial work, make reasonable assumptions (flag them), no destructive actions without confirmation.
 
-## Context Budget
+## Platform
 
-Load only what the task needs: 1 playbook, max 2 skills, INDEX.md scan (deep-read topics only when relevant). When tight, use inline knowledge over SKILL.md files.
-
-Context threshold cascade (automated by hooks): 65% → WARNING (wrap up current task) → 70% → AUTO-CONTINUATION (handoff file written) → 72% → GUARD (expensive tools blocked, only Read/Glob/Grep/TodoWrite allowed) → 75% → CRITICAL (stop immediately).
-
-## Mistake Learning — Automatic
-
-Hooks capture tool failures to `logs/failures.jsonl`. `tool-failure-handler.js` (PostToolUseFailure) handles framework-level failures with circuit breaker (3+ consecutive → reassess approach). `subagent-verifier.js` (SubagentStop) checks agent deliverable quality. When `RECURRING FAILURE` signal appears → run `/learn` immediately. After user correction → offer `/learn`. When `MISTAKE LEARNING` signal appears → run `/analyze-mistakes` before other work.
-
-## Validation Gates — Non-Negotiable
-
-1. Never claim "done" without verification — tests pass, behavior confirmed
-2. Never push/deploy without asking — explicit confirmation required
-3. Always security-scan before completion — `sharp-edges` on changed files
-4. Always use specialist skills — look up the right ID in REGISTRY.md for domain work
-
-## When to Ask the User
-
-**Ask** (with multiple-choice + defaults): ambiguous architecture, genuinely unclear scope, destructive ops, deployments, greenfield tech choices.
-
-**Never ask** (just do it): tests, security scans, reading skill files, MCP tools, TDD, code validation, online research for context.
-
-## Resource Lookup — Central Registry
-
-**`~/.claude/skills/REGISTRY.md`** is the single source of truth for all skills, MCP servers, and plugins. Scan the Purpose column to find matching resource by ID, jump to its Path. **Never scan skill directories end-to-end.**
-
-**`~/.claude/QUICK-REFERENCE.md`** — fast lookup: "I want to do X → use Y". Key files, session lifecycle, context budget cascade. Read when unsure which command/tool to use.
-
-When a skill, MCP server, or plugin is added/removed: update REGISTRY.md immediately.
-
-**After any system infrastructure change** (hooks, commands, settings.json, skills): update SYSTEM_CHANGELOG.md and REGISTRY.md. Non-negotiable.
+Windows 11 host, Unix shell syntax in bash (forward slashes, /dev/null not NUL). Scratchpad: `C:/tmp/claude-scratchpad/`.
 
 ## Graceful Degradation
 
-If a skill, hook, or script is missing or fails: continue without it, note the failure in your response, and suggest a fix. Never halt a session over broken infrastructure.
+If a skill, hook, or script is missing or fails: continue without it, note the failure, suggest a fix.

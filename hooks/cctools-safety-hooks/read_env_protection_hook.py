@@ -32,6 +32,22 @@ def check_env_file_path(file_path):
         )
         return True, reason_text
 
+    # Block credential/secret files by name pattern
+    sensitive_names = ['.credentials.json', 'credentials.json', 'service-account.json',
+                       'service_account.json', 'client_secret.json', 'client_secrets.json']
+    sensitive_patterns = ['.pem', '.key', '.p12', '.pfx', '.jks', '.keystore']
+    if basename in sensitive_names:
+        return True, (
+            f"Blocked: '{basename}' likely contains credentials or secrets.\n\n"
+            "Reading credential files could expose auth tokens, service account keys, or private keys.\n"
+            "To inspect this file, do so manually outside of Claude Code."
+        )
+    if any(basename.endswith(ext) for ext in sensitive_patterns):
+        return True, (
+            f"Blocked: '{basename}' appears to be a private key or certificate file.\n\n"
+            "To inspect this file, do so manually outside of Claude Code."
+        )
+
     return False, None
 
 

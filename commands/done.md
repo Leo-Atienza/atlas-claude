@@ -12,30 +12,41 @@ Run `git status` in the current directory.
 - If yes → run `/commit-commands:commit`
 - If no → skip
 
-## Step 2 — Capture mistakes (if any)
+## Step 2 — Quick Reflect (automatic, never skip)
 
-Check `~/.claude/logs/error-patterns.json` for patterns with count >= 3.
-If recurring patterns exist: run `/learn` for the top one automatically before reflecting.
-This ensures mistakes are codified into G-ERR topics while context is fresh.
+Capture what matters from this session. This is a simplified version — focus on mistakes and key learnings only.
 
-## Step 3 — Reflect (mandatory, never skip)
+### a. Check for mistakes (G-ERR)
+Review the session for any mistakes made, wrong assumptions, bugs hit, or near-misses.
+For each mistake found:
+1. Read `~/.claude/topics/KNOWLEDGE-DIRECTORY.md` to get the current highest G-ERR ID
+2. Write a new topic file to `~/.claude/topics/` with the next G-ERR ID
+3. Add the entry to `KNOWLEDGE-DIRECTORY.md`
+4. Add the entry to `KNOWLEDGE-PAGE-3-errors.md`
 
-Run `/reflect` — this captures everything from this session into the memory system:
-- Patterns discovered
-- Solutions built
-- Mistakes made and bugs hit
-- User preferences confirmed
-- Failed approaches and why they failed
+### b. Check for significant patterns or solutions
+If a genuinely reusable pattern (G-PAT) or solution (G-SOL) was discovered:
+1. Same process — read directory, get next ID, write topic file, update directory and page
+Only capture what would genuinely help future sessions. Skip if nothing notable.
 
-This is what makes future sessions smarter. Do not skip this even if the session felt trivial.
+### c. Update session index
+Write a one-line entry to `~/.claude/projects/C--Users-leooa--claude/memory/sessions/sessions-index.md`:
+```
+| {date} | {project} | {1-line summary} | {IDs captured, or "none"} |
+```
 
-## Step 4 — Update project state (if in a Flow or GSD project)
+### d. Update project state
+If `.flow/state.yaml` exists → update phase status.
+If `.planning/STATE.md` exists → update progress.
 
-Check for `.flow/state.yaml` first, then `.planning/STATE.md`.
+## Step 3 — Conditional Dream (automatic, skip if recent)
 
-- If `.flow/state.yaml` exists → update position, velocity, and phase status
-- If `.planning/STATE.md` exists → ensure STATE.md reflects current progress accurately
-- If a phase was completed → mark it done in the appropriate state file
+Check `~/.claude/cache/dream-last-run`:
+- If file doesn't exist OR timestamp is 7+ days old → run a lightweight dream:
+  1. Scan `~/.claude/topics/KNOWLEDGE-DIRECTORY.md` for obvious issues (duplicate IDs, missing pages)
+  2. Check `~/.claude/projects/C--Users-leooa--claude/memory/sessions/sessions-index.md` — if > 30 sessions, prune oldest beyond 30
+  3. Write current timestamp to `~/.claude/cache/dream-last-run`
+- If dream ran within 7 days → skip entirely
 
 ## Step 4 — Session summary
 
@@ -46,7 +57,7 @@ Session complete.
 
 Done: [what was accomplished]
 Left for next time: [what's pending, if anything]
-Key learnings captured: [1-2 bullet points of what was saved to memory]
+Learnings captured: [IDs if any, or "none"]
 ```
 
 ## Step 5 — Handout continuation prompt (optional)
@@ -55,40 +66,29 @@ Ask the user:
 
 > "Would you like a **handout continuation prompt** to kickstart the next session?"
 
-If yes, generate a compact, copy-pasteable prompt block that covers:
-
-1. **Project context** — repo name, stack, current milestone/phase
-2. **What was done** — bullet list of completed work this session
-3. **What's next** — pending tasks, blockers, next steps
-4. **Key decisions** — technical choices made, trade-offs, rejected alternatives
-5. **Important files/paths** — any files central to what was built or changed
-6. **Resume instruction** — a single sentence the user can paste to wake Claude right up
-
-Format:
+If yes, generate a compact, copy-pasteable prompt block:
 
 ```
 --- HANDOUT: CONTINUE FROM [DATE] ---
 
-Project: [name] | Stack: [tech] | Phase: [current phase if GSD]
+Project: [name] | Stack: [tech]
 
 Done this session:
 - [bullet]
-- [bullet]
 
 Next up:
-- [bullet]
 - [bullet]
 
 Key decisions:
 - [bullet]
 
-Files to know: [comma-separated key paths]
+Files to know: [key paths]
 
 To resume: "Continue [project] work. [1-sentence context]. Start with [first task]."
 --- END HANDOUT ---
 ```
 
-Keep it tight — aim for under 20 lines. This is for pasting, not reading.
+Keep it under 20 lines.
 
 ---
 

@@ -1,14 +1,18 @@
 ---
 name: frontend-design
-description: Create distinctive, production-grade frontend interfaces with high design quality. Use this skill when the user asks to build web components, pages, artifacts, posters, or applications (examples include websites, landing pages, dashboards, React components, HTML/CSS layouts, or when styling/beautifying any web UI). Generates creative, polished code and UI design that avoids generic AI aesthetics.
-license: Complete terms in LICENSE.txt
+description: "Create distinctive, production-grade frontend interfaces with high design quality. Use when the user asks to build web components, pages, artifacts, posters, or applications (websites, landing pages, dashboards, React components, HTML/CSS layouts, or styling/beautifying any web UI). Generates creative, polished code that avoids generic AI aesthetics."
+license: Based on Anthropic's frontend-design skill and Impeccable (Apache 2.0). See respective repos for full license terms.
 ---
 
 This skill guides creation of distinctive, production-grade frontend interfaces that avoid generic "AI slop" aesthetics. Implement real working code with exceptional attention to aesthetic details and creative choices.
 
+**Companion skill:** Load `web-l100` (SK-057) alongside this skill for the full L100 animation architecture — which tool handles which layer, spring tokens, scroll patterns, performance checklist, and component recipes.
+
 The user provides frontend requirements: a component, page, application, or interface to build. They may include context about the purpose, audience, or technical constraints.
 
-## Design Thinking
+---
+
+## Design Direction
 
 Before coding, understand the context and commit to a BOLD aesthetic direction:
 - **Purpose**: What problem does this interface solve? Who uses it?
@@ -16,7 +20,7 @@ Before coding, understand the context and commit to a BOLD aesthetic direction:
 - **Constraints**: Technical requirements (framework, performance, accessibility).
 - **Differentiation**: What makes this UNFORGETTABLE? What's the one thing someone will remember?
 
-**CRITICAL**: Choose a clear conceptual direction and execute it with precision. Bold maximalism and refined minimalism both work - the key is intentionality, not intensity.
+**CRITICAL**: Choose a clear conceptual direction and execute it with precision. Bold maximalism and refined minimalism both work — the key is intentionality, not intensity.
 
 Then implement working code (HTML/CSS/JS, React, Vue, etc.) that is:
 - Production-grade and functional
@@ -26,18 +30,112 @@ Then implement working code (HTML/CSS/JS, React, Vue, etc.) that is:
 
 ## Frontend Aesthetics Guidelines
 
-Focus on:
-- **Typography**: Choose fonts that are beautiful, unique, and interesting. Avoid generic fonts like Arial and Inter; opt instead for distinctive choices that elevate the frontend's aesthetics; unexpected, characterful font choices. Pair a distinctive display font with a refined body font.
-- **Color & Theme**: Commit to a cohesive aesthetic. Use CSS variables for consistency. Dominant colors with sharp accents outperform timid, evenly-distributed palettes.
-- **Motion**: Use animations for effects and micro-interactions. Prioritize CSS-only solutions for HTML. Use Motion library for React when available. Focus on high-impact moments: one well-orchestrated page load with staggered reveals (animation-delay) creates more delight than scattered micro-interactions. Use scroll-triggering and hover states that surprise.
-- **Gesture-Driven Interaction**: For touch/drag UI (drawers, sheets, carousels), use imperative CSS transitions via `element.style` to bypass React re-renders during 60fps gestures. Use pointer capture (`setPointerCapture`) for reliable drag outside element bounds. Apply logarithmic rubber-band dampening (`8 * (Math.log(v + 1) - 2)`) for native iOS over-drag feel. Use velocity-based snap navigation (px/ms threshold ~0.4) for flick gestures. Decouple animation state from JS via data-attribute state machines (`data-mounted`, `data-visible`, `data-removed`) — CSS and JS stay cleanly separated. Store computed heights as CSS custom properties to avoid per-frame JS measurement. Use `ReactDOM.flushSync` before `getBoundingClientRect()` to prevent stale layout reads. Always respect `prefers-reduced-motion`.
-- **Spatial Composition**: Unexpected layouts. Asymmetry. Overlap. Diagonal flow. Grid-breaking elements. Generous negative space OR controlled density.
-- **Backgrounds & Visual Details**: Create atmosphere and depth rather than defaulting to solid colors. Add contextual effects and textures that match the overall aesthetic. Apply creative forms like gradient meshes, noise textures, geometric patterns, layered transparencies, dramatic shadows, decorative borders, custom cursors, and grain overlays.
+### Typography
+> *Consult [typography reference](reference/typography.md) for scales, pairing, loading strategies, and OpenType features.*
 
-NEVER use generic AI-generated aesthetics like overused font families (Inter, Roboto, Arial, system fonts), cliched color schemes (particularly purple gradients on white backgrounds), predictable layouts and component patterns, and cookie-cutter design that lacks context-specific character.
+Choose fonts that are beautiful, unique, and interesting. Pair a distinctive display font with a refined body font.
+
+**DO**: Use a modular type scale with fluid sizing (clamp) for headings
+**DO**: Vary font weights and sizes to create clear visual hierarchy
+**DON'T**: Use overused fonts — Inter, Roboto, Arial, Open Sans, system defaults
+**DON'T**: Use monospace typography as lazy shorthand for "technical/developer" vibes
+**DON'T**: Put large icons with rounded corners above every heading — they rarely add value and make sites look templated
+
+### Color & Theme
+> *Consult [color reference](reference/color-and-contrast.md) for OKLCH, palettes, dark mode, and accessibility.*
+
+Commit to a cohesive palette. Dominant colors with sharp accents outperform timid, evenly-distributed palettes.
+
+**DO**: Use modern CSS color functions (oklch, color-mix, light-dark) for perceptually uniform, maintainable palettes
+**DO**: Tint your neutrals toward your brand hue — even a subtle hint creates subconscious cohesion
+**DON'T**: Use gray text on colored backgrounds — it looks washed out; use a shade of the background color instead
+**DON'T**: Use pure black (#000) or pure white (#fff) — always tint; pure black/white never appears in nature
+**DON'T**: Use the AI color palette: cyan-on-dark, purple-to-blue gradients, neon accents on dark backgrounds
+**DON'T**: Use gradient text for "impact" — especially on metrics or headings; it's decorative rather than meaningful
+**DON'T**: Default to dark mode with glowing accents — it looks "cool" without requiring actual design decisions
+
+### Layout & Space
+> *Consult [spatial reference](reference/spatial-design.md) for grids, rhythm, container queries, and optical adjustments.*
+
+Create visual rhythm through varied spacing — not the same padding everywhere. Embrace asymmetry and unexpected compositions.
+
+**DO**: Create visual rhythm through varied spacing — tight groupings, generous separations
+**DO**: Use fluid spacing with clamp() that breathes on larger screens
+**DO**: Use asymmetry and unexpected compositions; break the grid intentionally for emphasis
+**DON'T**: Wrap everything in cards — not everything needs a container
+**DON'T**: Nest cards inside cards — visual noise, flatten the hierarchy
+**DON'T**: Use identical card grids — same-sized cards with icon + heading + text, repeated endlessly
+**DON'T**: Use the hero metric layout template — big number, small label, supporting stats, gradient accent
+**DON'T**: Center everything — left-aligned text with asymmetric layouts feels more designed
+**DON'T**: Use the same spacing everywhere — without rhythm, layouts feel monotonous
+
+### Visual Details
+**DO**: Use intentional, purposeful decorative elements that reinforce brand
+**DO**: Create atmosphere and depth — gradient meshes, noise textures, geometric patterns, layered transparencies, dramatic shadows, decorative borders, custom cursors, grain overlays
+**DON'T**: Use glassmorphism everywhere — blur effects, glass cards, glow borders used decoratively rather than purposefully
+**DON'T**: Use rounded elements with thick colored border on one side — a lazy accent that almost never looks intentional
+**DON'T**: Use sparklines as decoration — tiny charts that look sophisticated but convey nothing meaningful
+**DON'T**: Use rounded rectangles with generic drop shadows — safe, forgettable, could be any AI output
+**DON'T**: Use modals unless there's truly no better alternative — modals are lazy
+
+### Motion
+> *Consult [motion reference](reference/motion-design.md) for timing, easing catalog, and reduced motion.*
+
+Focus on high-impact moments: one well-orchestrated page load with staggered reveals creates more delight than scattered micro-interactions.
+
+**DO**: Use motion to convey state changes — entrances, exits, feedback
+**DO**: Use exponential easing (ease-out-quart/quint/expo) for natural deceleration
+**DO**: For height animations, use grid-template-rows transitions instead of animating height directly
+**DON'T**: Animate layout properties (width, height, padding, margin) — use transform and opacity only
+**DON'T**: Use bounce or elastic easing — they feel dated and tacky; real objects decelerate smoothly
+
+### Gesture-Driven Interaction
+For touch/drag UI (drawers, sheets, carousels), use imperative CSS transitions via `element.style` to bypass React re-renders during 60fps gestures. Use pointer capture (`setPointerCapture`) for reliable drag outside element bounds. Apply logarithmic rubber-band dampening (`8 * (Math.log(v + 1) - 2)`) for native iOS over-drag feel. Use velocity-based snap navigation (px/ms threshold ~0.4) for flick gestures. Decouple animation state from JS via data-attribute state machines (`data-mounted`, `data-visible`, `data-removed`). Store computed heights as CSS custom properties to avoid per-frame JS measurement. Use `ReactDOM.flushSync` before `getBoundingClientRect()` to prevent stale layout reads. Always respect `prefers-reduced-motion`.
+
+### Interaction
+> *Consult [interaction reference](reference/interaction-design.md) for states, focus, forms, and loading patterns.*
+
+Make interactions feel fast. Use optimistic UI — update immediately, sync later.
+
+**DO**: Use progressive disclosure — start simple, reveal sophistication through interaction
+**DO**: Design empty states that teach the interface, not just say "nothing here"
+**DO**: Make every interactive surface feel intentional and responsive
+**DON'T**: Repeat the same information — redundant headers, intros that restate the heading
+**DON'T**: Make every button primary — use ghost buttons, text links, secondary styles; hierarchy matters
+
+### Responsive
+> *Consult [responsive reference](reference/responsive-design.md) for mobile-first, fluid design, and input detection.*
+
+**DO**: Use container queries (@container) for component-level responsiveness
+**DO**: Adapt the interface for different contexts — don't just shrink it
+**DON'T**: Hide critical functionality on mobile — adapt the interface, don't amputate it
+
+### UX Writing
+> *Consult [ux-writing reference](reference/ux-writing.md) for labels, errors, empty states, and translation.*
+
+**DO**: Make every word earn its place
+**DON'T**: Repeat information users can already see
+
+---
+
+## The AI Slop Test
+
+**Critical quality check**: If you showed this interface to someone and said "AI made this," would they believe you immediately? If yes, that's the problem.
+
+A distinctive interface should make someone ask "how was this made?" not "which AI made this?"
+
+Review the DON'T guidelines above — they are the fingerprints of AI-generated work from 2024-2025.
+
+---
+
+## Implementation Principles
+
+Match implementation complexity to the aesthetic vision. Maximalist designs need elaborate code with extensive animations and effects. Minimalist or refined designs need restraint, precision, and careful attention to spacing, typography, and subtle details.
+
+NEVER use generic AI-generated aesthetics like overused font families, cliched color schemes (particularly purple gradients on white backgrounds), predictable layouts and component patterns, and cookie-cutter design that lacks context-specific character.
 
 Interpret creatively and make unexpected choices that feel genuinely designed for the context. No design should be the same. Vary between light and dark themes, different fonts, different aesthetics. NEVER converge on common choices (Space Grotesk, for example) across generations.
 
 **IMPORTANT**: Match implementation complexity to the aesthetic vision. Maximalist designs need elaborate code with extensive animations and effects. Minimalist or refined designs need restraint, precision, and careful attention to spacing, typography, and subtle details. Elegance comes from executing the vision well.
 
-Remember: Claude is capable of extraordinary creative work. Don't hold back, show what can truly be created when thinking outside the box and committing fully to a distinctive vision.
+Remember: Claude is capable of extraordinary creative work. Don't hold back — show what can truly be created when thinking outside the box and committing fully to a distinctive vision.

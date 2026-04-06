@@ -39,7 +39,7 @@ Do NOT write a rule about the specific instance. Write about the CLASS of mistak
 
 ## Step 3: Check for Duplicates
 
-Read `~/.claude/projects/<PROJECT_MEMORY_DIR>/memory/INDEX.md` and scan existing G-ERR entries.
+Read `~/.claude/projects/C--Users-leooa--claude/memory/INDEX.md` and scan existing G-ERR entries.
 
 - If an EXISTING G-ERR covers the same class: propose UPDATING that topic file instead of creating a new one (add the new instance as evidence, bump the date)
 - If RELATED but distinct: create new topic and note the relationship
@@ -47,7 +47,7 @@ Read `~/.claude/projects/<PROJECT_MEMORY_DIR>/memory/INDEX.md` and scan existing
 ## Step 4: Determine Next ID
 
 ```bash
-ls ~/.claude/projects/<PROJECT_MEMORY_DIR>/memory/topics/G-ERR-*.md 2>/dev/null | sort | tail -1
+ls ~/.claude/projects/C--Users-leooa--claude/memory/topics/G-ERR-*.md 2>/dev/null | sort | tail -1
 ```
 
 Extract the highest G-ERR number, increment by 1.
@@ -75,7 +75,7 @@ Ask: **"Add this? (yes / modify / skip)"**
 
 ## Step 6: Apply (only after approval)
 
-1. Create topic file at `~/.claude/projects/<PROJECT_MEMORY_DIR>/memory/topics/G-ERR-{NNN}-{slug}.md`:
+1. Create topic file at `~/.claude/projects/C--Users-leooa--claude/memory/topics/G-ERR-{NNN}-{slug}.md`:
 
 ```markdown
 # G-ERR-{NNN}: {Name}

@@ -9,7 +9,7 @@ You are running the monthly skill usage audit. All actions are automatic — no 
 
 1. **Read detection logs** — Read `~/.claude/logs/skill-watcher.jsonl` to see which archived skills were detected in projects over the past month.
 
-2. **Check session history** — Read `~/.claude/projects/<PROJECT_MEMORY_DIR>/memory/sessions/sessions-index.md` and scan for sessions that used technologies matching archived skills.
+2. **Check session history** — Read `~/.claude/projects/C--Users-leooa--claude/memory/sessions/sessions-index.md` and scan for sessions that used technologies matching archived skills.
 
 3. **Auto-apply decisions** (no confirmation needed):
    - **Detected 1+ times** → UNARCHIVE immediately: edit `~/.claude/skills/REGISTRY.md`, move entry from Archived section back to its Active section, remove `[ARCHIVED]` tag

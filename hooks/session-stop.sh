@@ -1,37 +1,23 @@
 #!/bin/bash
 # Consolidated Stop hook
-# Combines: session-stop-flag.sh + claudio
-# The agent-type verification hook remains separate in settings.json.
+# Sections: session handoff (file + stdout), todo capture, auto-continuation
 
-MEMORY_DIR="$HOME/.claude/projects/<PROJECT_MEMORY_DIR>/memory"
-SESSIONS_DIR="$MEMORY_DIR/sessions"
-FLAG_FILE="$HOME/.claude/.pending-reflection"
 HANDOFF_FILE="$HOME/.claude/.last-session-handoff"
 TODAY=$(date +%Y-%m-%d)
 NOW=$(date +%H:%M:%S)
 
-# ─── 1. Reflection flag check ────────────────────────────────────────
-REFLECTED=false
-if [ -d "$SESSIONS_DIR" ]; then
-  for f in "$SESSIONS_DIR"/${TODAY}*.md; do
-    if [ -f "$f" ]; then
-      REFLECTED=true
-      break
-    fi
-  done
+# ─── Read session_id from stdin JSON ─────────────────────────────────
+SESSION_ID=""
+if ! [ -t 0 ]; then
+  STDIN_DATA=$(cat)
+  SESSION_ID=$(echo "$STDIN_DATA" | node -e "
+    let d=''; process.stdin.on('data',c=>d+=c); process.stdin.on('end',()=>{
+      try { console.log(JSON.parse(d).session_id || ''); } catch(e) { console.log(''); }
+    });
+  " 2>/dev/null)
 fi
 
-if [ "$REFLECTED" = false ]; then
-  echo "date: $TODAY" > "$FLAG_FILE"
-  echo "time: $NOW" >> "$FLAG_FILE"
-  echo "cwd: $(pwd)" >> "$FLAG_FILE"
-  echo "note: Session ended without running /reflect" >> "$FLAG_FILE"
-fi
-
-# ─── 1.5. Skill stats rollup ─────────────────────────────────────────
-node "$HOME/.claude/scripts/skill-stats-rollup.js" 2>/dev/null || true
-
-# ─── 2. Session handoff ──────────────────────────────────────────────
+# ─── 1. Session handoff (write file + echo to terminal) ─────────────
 {
   echo "date: $TODAY"
   echo "time: $NOW"
@@ -57,7 +43,7 @@ node "$HOME/.claude/scripts/skill-stats-rollup.js" 2>/dev/null || true
   fi
 } > "$HANDOFF_FILE" 2>/dev/null
 
-# ─── 3. Capture todo state ────────────────────────────────────────────
+# ─── 2. Capture todo state ───────────────────────────────────────────
 TODOS_DIR="$HOME/.claude/todos"
 if [ -d "$TODOS_DIR" ]; then
   IN_PROGRESS=$(find "$TODOS_DIR" -name "*.json" -exec grep -l '"in_progress"' {} \; 2>/dev/null | head -5)
@@ -65,28 +51,28 @@ if [ -d "$TODOS_DIR" ]; then
     echo "" >> "$HANDOFF_FILE"
     echo "pending_todos:" >> "$HANDOFF_FILE"
     for f in $IN_PROGRESS; do
-      python3 -c "
-import json, sys
-try:
-    with open('$f') as fh:
-        todos = json.load(fh)
-    for t in todos:
-        if t.get('status') == 'in_progress':
-            print('  - [IN PROGRESS] ' + t.get('content',''))
-        elif t.get('status') == 'pending':
-            print('  - [PENDING] ' + t.get('content',''))
-except: pass
+      node -e "
+const fs = require('fs');
+try {
+  const todos = JSON.parse(fs.readFileSync('$f', 'utf8'));
+  for (const t of todos) {
+    if (t.status === 'in_progress') console.log('  - [IN PROGRESS] ' + (t.content || ''));
+    else if (t.status === 'pending') console.log('  - [PENDING] ' + (t.content || ''));
+  }
+} catch(e) {}
 " 2>/dev/null >> "$HANDOFF_FILE"
     done
   fi
 fi
 
-# ─── 4. Claudio audio ────────────────────────────────────────────────
-"$HOME/.claude/bin/claudio" 2>/dev/null || true
+# Echo handoff to terminal so user sees it
+echo ""
+echo "── SESSION HANDOFF ──────────────────────────────"
+cat "$HANDOFF_FILE" 2>/dev/null
+echo "─────────────────────────────────────────────────"
 
-# ─── 5. Auto-continuation check ────────────────────────────────────
-# If context-monitor.js wrote a handoff trigger, spawn a new session
-SESSION_ID=$(ls -t /tmp/claude-ctx-*.json 2>/dev/null | head -1 | sed 's/.*claude-ctx-//' | sed 's/.json//')
+# ─── 3. Auto-continuation check ─────────────────────────────────────
+# Use session_id from stdin (parsed above) instead of filesystem guessing
 if [ -n "$SESSION_ID" ]; then
   TRIGGER="/tmp/claude-handoff-${SESSION_ID}.trigger"
   if [ -f "$TRIGGER" ]; then

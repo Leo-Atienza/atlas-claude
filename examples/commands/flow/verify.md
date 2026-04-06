@@ -27,7 +27,7 @@ Core principle: Task completion =/= Goal achievement. A component can exist with
 $ARGUMENTS
 
 Reference files:
-@~/.claude/skills/flow/references/truth-verification.md
+@C:/Users/leooa/.claude/skills/flow/references/truth-verification.md
 </context>
 
 <process>

@@ -43,6 +43,6 @@ Monthly Evolution Report — Knowledge System Intelligence
 7. **Report**: Write a comprehensive report to the user with sections: Growth, Usage, Evolution, Efficiency, Recommendations.
 
 ## Paths
-- MEMORY: ~/.claude/projects/<PROJECT_MEMORY_DIR>/memory
+- MEMORY: ~/.claude/projects/C--Users-leooa--claude/memory
 - SETTINGS: ~/.claude/settings.json
 - CLAUDE_MD: ~/.claude/CLAUDE.md

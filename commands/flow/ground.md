@@ -31,9 +31,9 @@ Assumptions are classified by:
 $ARGUMENTS
 
 Reference files:
-@~/.claude/commands/fullstack-dev/common-ground/references/assumption-classification.md
-@~/.claude/commands/fullstack-dev/common-ground/references/file-management.md
-@~/.claude/commands/fullstack-dev/common-ground/references/reasoning-graph.md
+@C:/Users/leooa/.claude/commands/fullstack-dev/common-ground/references/assumption-classification.md
+@C:/Users/leooa/.claude/commands/fullstack-dev/common-ground/references/file-management.md
+@C:/Users/leooa/.claude/commands/fullstack-dev/common-ground/references/reasoning-graph.md
 </context>
 
 <process>

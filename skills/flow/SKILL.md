@@ -104,15 +104,69 @@ Flow is a single adaptive workflow system that scales from trivial tasks to mult
 | `flow-compound-writer` | Knowledge compounding assembly |
 | `flow-uat` | Conversational UAT testing |
 
+## Pipeline Integration
+
+### INITIATE enhancements
+Before `/flow:start` runs:
+- Check `topics/KNOWLEDGE-DIRECTORY.md` for relevant past patterns/solutions
+- Check `skills/ACTIVE-DIRECTORY.md` → load relevant skills from pages (silently)
+- If not in Active → check `skills/ARCHIVE-DIRECTORY.md` → load from archive page
+
+### BUILD enhancements
+During execution:
+- **Reflexion gate**: after execution, self-review output against L100 quality bar (see Reflexion Gate below)
+- **TDD integration**: when tests make sense, use red→green→refactor pattern
+- **SDD integration**: for spec-heavy work, write spec before code
+
+### SHIP enhancements
+- `/flow:compound` saves to Knowledge Store (Directory/Page system at `topics/`)
+- Knowledge extraction happens automatically at session end, not just when `/flow:compound` is called
+
+### Depth level additions
+| Level | Learn Step | Reflexion | SDD |
+|---|---|---|---|
+| quick | Yes (minimal) | No | No |
+| standard | Yes | Yes | No |
+| deep | Yes | Yes | Yes |
+| epic | Yes | Yes | Yes |
+
+## Reflexion Gate (Pre-Delivery Self-Review)
+
+Before declaring any task "done," run this self-review:
+
+1. **L100 Check**: Does the output meet every point in the Quality Bar?
+   - Springs on interactive elements? Skeleton loading? Accessible? Responsive?
+   - Performance: no unnecessary re-renders, lazy loading, content-visibility?
+   - Modern APIs used where available?
+
+2. **Code Quality**: Would this pass a senior code review?
+   - Clean, readable, no dead code
+   - Error handling at system boundaries
+   - Types are strict, no `any`
+   - Tests cover happy path + top edge cases
+
+3. **Creative Quality**: Is this premium?
+   - Does it look/feel designed, not just coded?
+   - Are animations smooth and purposeful?
+   - Would the user be proud to show this?
+
+4. **Completeness**: Is anything missing?
+   - All acceptance criteria met?
+   - Edge cases handled?
+   - Mobile/responsive checked?
+
+If any check fails → fix it before delivering. Don't mention the Reflexion gate to the user — just deliver quality.
+
 ## Key Principles
 
 1. **Plans are prompts** — PLAN.md IS the executor prompt, zero translation loss
 2. **Goal-backward verification** — Verify goals achieved, not tasks completed
 3. **Wave execution** — Pre-computed dependency waves, parallel subagent spawning
 4. **Deviation rules** — Auto-fix bugs/critical/blocking without asking
-5. **Knowledge compounding** — Solutions searchable across projects
+5. **Knowledge compounding** — Solutions saved to Knowledge Store pages across projects
 6. **Adaptive depth** — System scales with task complexity
 7. **Smart context** — Orchestrators stay lean (~15%), agents get fresh 200k
+8. **Reflexion** — Self-review against L100 quality bar before every delivery
 
 ## Workflow Reference Files
 

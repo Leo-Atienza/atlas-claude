@@ -7,7 +7,7 @@ Weekly Memory Maintenance — Automated Knowledge System Health Check
 
 ## Tasks
 
-1. **Session Pruning**: Check session count in `~/.claude/projects/<PROJECT_MEMORY_DIR>/memory/sessions/sessions-index.md`. If >30 entries, prune oldest sessions AFTER verifying their learnings exist in topic files. Delete the session .md files and remove rows from sessions-index.md.
+1. **Session Pruning**: Check session count in `~/.claude/projects/C--Users-leooa--claude/memory/sessions/sessions-index.md`. If >30 entries, prune oldest sessions AFTER verifying their learnings exist in topic files. Delete the session .md files and remove rows from sessions-index.md.
 
 2. **INDEX ↔ Topics Consistency**:
    - Read INDEX.md and extract all entry IDs (G-PAT-xxx, G-SOL-xxx, G-ERR-xxx, G-PREF-xxx, G-FAIL-xxx)
@@ -25,7 +25,7 @@ Weekly Memory Maintenance — Automated Knowledge System Health Check
 5. **Report**: Output a concise summary of actions taken and any issues found.
 
 ## Paths
-- MEMORY: ~/.claude/projects/<PROJECT_MEMORY_DIR>/memory
+- MEMORY: ~/.claude/projects/C--Users-leooa--claude/memory
 - INDEX: {MEMORY}/INDEX.md
 - TOPICS: {MEMORY}/topics/
 - SESSIONS: {MEMORY}/sessions/

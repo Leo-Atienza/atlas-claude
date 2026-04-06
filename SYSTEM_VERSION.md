@@ -1,59 +1,8 @@
-# Claude Code System — Version State
+# ATLAS System
 
-## System Version
-version: 3.0.0
-last_updated: 2026-03-30
+version: 5.6.0
+last_updated: 2026-04-06
 
-## Platform Tracking
-claude_code_last_seen: 2.1.81
-last_check: 2026-03-30
-update_available: false
-
-## Component Health
-last_health_check: 2026-03-30
-failing_components: none
-
-## Component Counts
-hooks: 25
-commands: 41
-agents: 73
-skills: 32 (direct SKILL.md) + 150+ (via skill packs)
-plugins: 9
-rules: 5
-
-## Key Components
-hooks/session-start.sh          | 2.5.0 | verified | OK
-hooks/session-stop.sh           | 2.5.0 | verified | OK
-hooks/security-gate.sh          | 2.1.0 | verified | OK
-hooks/context-monitor.js        | 2.1.0 | verified | OK
-hooks/context-guard.js          | 2.4.0 | new      | OK
-hooks/statusline.js             | 2.1.0 | verified | OK
-hooks/mistake-capture.py        | 2.5.0 | updated  | OK
-hooks/verify-completion.py      | 2.1.0 | verified | OK
-hooks/agent-profiler.py         | 2.3.0 | verified | OK
-hooks/keyword-detector.js       | 2.4.0 | new      | OK
-hooks/skill-injector.js         | 2.4.0 | new      | OK
-hooks/skill-watcher.sh          | 2.2.0 | verified | OK
-hooks/subagent-tracker.js       | 2.4.0 | new      | OK
-hooks/subagent-verifier.js      | 2.4.0 | new      | OK
-hooks/sync-skill-keywords.js    | 2.5.0 | new      | OK
-hooks/tool-failure-handler.js   | 2.4.0 | new      | OK
-hooks/subagent-limiter.js       | 2.6.0 | new      | OK
-scripts/precompact-flow-validate.sh | 2.6.0 | new  | OK
-hooks/hook-health-logger.js     | 3.0.0 | new      | OK
-hooks/skill-evolution.js        | 3.0.0 | new      | OK
-hooks/tool-efficiency.js        | 3.0.0 | new      | OK
-scripts/self-repair.sh          | 3.0.0 | new      | OK
-scripts/skill-improver.js       | 3.0.0 | new      | OK
-hooks/post-compact-dream-check.sh | 2.2.0 | verified | OK
-hooks/teammate-quality-gate.js  | 3.0.0 | new      | OK
-hooks/task-completed-verify.js  | 3.0.0 | new      | OK
-agents/flow-security-auditor.md | 3.0.0 | new      | OK
-commands/flow/team.md           | 3.0.0 | new      | OK
-commands/skill-review.md        | 3.0.0 | new      | OK
-commands/learn.md               | 2.1.0 | verified | OK
-commands/analyze-mistakes.md    | 2.1.0 | verified | OK
-commands/health.md              | 2.1.0 | verified | OK
-skills/REGISTRY.md              | 2.5.0 | verified | OK
-scripts/skill-stats-rollup.js   | 2.5.0 | new      | OK
-scripts/rebuild-memory-bridge.sh | 2.5.0 | new      | OK
+Run `bash ~/.claude/scripts/smoke-test.sh` for current component health.
+Run `bash ~/.claude/scripts/session-metrics.sh` for session analytics.
+Run `claude --version` for Claude Code version.

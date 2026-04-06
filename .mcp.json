@@ -3,6 +3,77 @@
     "shadcn": {
       "command": "npx",
       "args": ["shadcn@latest", "mcp"]
+    },
+    "supabase": {
+      "command": "npx",
+      "args": ["-y", "@supabase/mcp-server-supabase@latest"],
+      "env": {
+        "SUPABASE_ACCESS_TOKEN": "${SUPABASE_ACCESS_TOKEN}"
+      }
+    },
+    "stripe": {
+      "command": "npx",
+      "args": ["-y", "@stripe/mcp@latest"],
+      "env": {
+        "STRIPE_SECRET_KEY": "${STRIPE_SECRET_KEY}"
+      }
+    },
+    "resend": {
+      "command": "npx",
+      "args": ["-y", "resend-mcp"],
+      "env": {
+        "RESEND_API_KEY": "${RESEND_API_KEY}"
+      }
+    },
+    "prisma": {
+      "command": "npx",
+      "args": ["-y", "prisma", "mcp"]
+    },
+    "expo": {
+      "type": "http",
+      "url": "https://mcp.expo.dev/mcp"
+    },
+    "sentry": {
+      "command": "npx",
+      "args": ["-y", "@sentry/mcp-server"],
+      "env": {
+        "SENTRY_ACCESS_TOKEN": "${SENTRY_ACCESS_TOKEN}"
+      }
+    },
+    "mobile": {
+      "command": "npx",
+      "args": ["-y", "@mobilenext/mobile-mcp@latest"]
+    },
+    "posthog": {
+      "command": "npx",
+      "args": ["-y", "mcp-remote@latest", "https://mcp.posthog.com/mcp"]
+    },
+    "cloudflare": {
+      "type": "http",
+      "url": "https://mcp.cloudflare.com/mcp"
+    },
+    "linear": {
+      "type": "http",
+      "url": "https://mcp.linear.app/mcp"
+    },
+    "upstash": {
+      "command": "npx",
+      "args": ["-y", "@upstash/mcp-server@latest"],
+      "env": {
+        "UPSTASH_EMAIL": "${UPSTASH_EMAIL}",
+        "UPSTASH_API_KEY": "${UPSTASH_API_KEY}"
+      }
+    },
+    "netlify": {
+      "command": "npx",
+      "args": ["-y", "@anthropic-ai/netlify-mcp-server@latest"],
+      "env": {
+        "NETLIFY_ACCESS_TOKEN": "${NETLIFY_ACCESS_TOKEN}"
+      }
+    },
+    "context-mode": {
+      "command": "npx",
+      "args": ["-y", "context-mode@latest"]
     }
   }
 }

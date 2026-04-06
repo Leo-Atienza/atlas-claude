@@ -1,0 +1,33 @@
+{
+  "comment": "Single source of truth for context budget thresholds. All hooks import this file.",
+  "thresholds": {
+    "warning": {
+      "remaining_pct": 40,
+      "used_pct": 60,
+      "description": "Begin wrapping up current task"
+    },
+    "auto_continuation": {
+      "remaining_pct": 30,
+      "used_pct": 70,
+      "description": "Write handoff file for new session"
+    },
+    "guard_block": {
+      "remaining_pct": 22,
+      "used_pct": 78,
+      "description": "Expensive tools blocked (Agent, Bash, Write, Edit)"
+    },
+    "critical": {
+      "remaining_pct": 15,
+      "used_pct": 85,
+      "description": "Stop all work, save state immediately"
+    }
+  },
+  "statusline_colors": {
+    "green_below_used": 56,
+    "yellow_below_used": 75,
+    "orange_below_used": 90,
+    "red_at_or_above": 90
+  },
+  "stale_seconds": 120,
+  "debounce_calls": 5
+}

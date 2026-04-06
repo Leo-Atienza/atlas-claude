@@ -28,8 +28,8 @@ CHAIN_DEPTH=$(sed -n '3p' "$TRIGGER_FILE" 2>/dev/null || echo "0")
 # Clean up trigger BEFORE spawning (prevents infinite loops)
 rm -f "$TRIGGER_FILE"
 
-# Chain depth safety: max 5 continuations
-if [ "${CHAIN_DEPTH:-0}" -ge 5 ]; then
+# Chain depth safety: max 2 continuations
+if [ "${CHAIN_DEPTH:-0}" -ge 2 ]; then
   echo "WARNING: Auto-continuation chain depth limit reached (${CHAIN_DEPTH}). Stopping." >&2
   echo "chain_depth_exceeded: true" >> "$HANDOFF_PATH" 2>/dev/null || true
   exit 0
@@ -53,7 +53,7 @@ fi
 
 # Build the continuation prompt
 NEXT_DEPTH=$((CHAIN_DEPTH + 1))
-PROMPT="AUTO-CONTINUATION SESSION (chain depth: ${NEXT_DEPTH}/5)
+PROMPT="AUTO-CONTINUATION SESSION (chain depth: ${NEXT_DEPTH}/2)
 
 You are continuing a previous session that reached 70% context usage. The previous session wrote a structured handoff file with all the context you need.
 
@@ -62,7 +62,7 @@ INSTRUCTIONS:
 2. Read any referenced plan files, .flow/ state files, or todo state
 3. Verify the git branch and working directory match expectations
 4. Resume from the 'immediate_next_action' field — do NOT start over
-5. You are in chain position ${NEXT_DEPTH}. If you also hit 70% context, the auto-continuation system will spawn another session (up to depth 5)
+5. You are in chain position ${NEXT_DEPTH}. If you also hit 70% context, the auto-continuation system will spawn another session (up to depth 2)
 
 IMPORTANT:
 - Do NOT ask the user what to do. Resume autonomously.
@@ -71,7 +71,7 @@ IMPORTANT:
 - If the handoff file references a todo list, restore it with TodoWrite.
 
 Handoff file: ${HANDOFF_PATH}
-Chain depth: ${NEXT_DEPTH}/5"
+Chain depth: ${NEXT_DEPTH}/2"
 
 # Log the continuation
 echo "[$(date -Iseconds)] Auto-continuation: session=$SESSION_ID chain=$NEXT_DEPTH handoff=$HANDOFF_PATH" \

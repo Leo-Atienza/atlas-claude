@@ -21,14 +21,12 @@ Weekly Cleanup Scan — System Hygiene Check
    ```
 
 4. **Hook Integrity**: Verify all scripts referenced in settings.json exist:
+   - ~/.claude/hooks/context-guard.js
+   - ~/.claude/hooks/post-tool-monitor.js
+   - ~/.claude/hooks/tool-failure-handler.js
    - ~/.claude/hooks/session-start.sh
    - ~/.claude/hooks/session-stop.sh
-   - ~/.claude/hooks/security-gate.sh
-   - ~/.claude/hooks/context-monitor.js
    - ~/.claude/hooks/statusline.js
-   - ~/.claude/hooks/mistake-capture.py
-   - ~/.claude/hooks/verify-completion.py
-   - ~/.claude/hooks/post-compact-dream-check.sh
    - ~/.claude/scripts/progressive-learning/precompact-reflect.sh
    - ~/.claude/bin/claudio
 

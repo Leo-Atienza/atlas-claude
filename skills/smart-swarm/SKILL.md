@@ -126,6 +126,18 @@ estimated_tokens = num_agents × 50K (avg context per agent) + 20K (orchestrator
 
 **Hard cap**: 6 concurrent agents maximum.
 
+## Iterative Retrieval (Context Explosion Prevention)
+
+When spawning subagents, avoid pre-loading all context. Use draft-retrieve-incorporate cycles instead:
+
+1. **Draft:** Subagent produces initial output with minimal context (task file + key constraints)
+2. **Retrieve:** Coordinator identifies specific missing context from the draft's gaps or questions
+3. **Incorporate:** Subagent receives only the targeted context and refines
+
+**Why:** Pre-loading all dependencies into every subagent causes context explosion (N agents x full context = massive token burn). Iterative retrieval keeps each agent lean — they request what they need.
+
+**When to use:** TEAM and SWARM modes. Skip for DUO (2 agents can afford full context).
+
 ## When NOT to Swarm
 
 - Task is sequential (each step depends on the previous)

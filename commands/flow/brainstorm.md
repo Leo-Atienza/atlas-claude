@@ -24,7 +24,7 @@ Output: `.flow/brainstorms/{date}-{topic}-brainstorm.md`
 $ARGUMENTS
 
 Reference skill:
-@~/.claude/skills/compound-engineering/brainstorming/SKILL.md
+@C:/Users/leooa/.claude/skills/compound-engineering/brainstorming/SKILL.md
 </context>
 
 <process>

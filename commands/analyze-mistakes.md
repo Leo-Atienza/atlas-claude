@@ -59,9 +59,9 @@ else:
 
 ```bash
 # Count and list existing error topics
-ls ~/.claude/projects/<PROJECT_MEMORY_DIR>/memory/topics/G-ERR-*.md 2>/dev/null | wc -l
+ls ~/.claude/projects/C--Users-leooa--claude/memory/topics/G-ERR-*.md 2>/dev/null | wc -l
 echo "---"
-grep "^| G-ERR" ~/.claude/projects/<PROJECT_MEMORY_DIR>/memory/INDEX.md 2>/dev/null
+grep "^| G-ERR" ~/.claude/projects/C--Users-leooa--claude/memory/INDEX.md 2>/dev/null
 ```
 
 Read each G-ERR topic file. Look for:
