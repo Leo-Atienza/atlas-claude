@@ -216,13 +216,13 @@ Wired:   session-stop (auto-extracts from handoff), precompact (hint before cont
 One unified workflow system. A single "complexity dial" scales from trivial to epic:
 
 ```
-Trivial ─────→ Quick ─────→ Standard ─────→ Deep ─────→ Epic
-(<20 lines)    (small)      (3-10 files)    (10-30)     (system-wide)
-    │             │              │              │             │
-    ▼             ▼              ▼              ▼             ▼
- Just do      Minimal       Plan →         Full plan     Wave-based
-   it         ceremony      Execute       + parallel      + swarm
-                                           agents         mode
+Trivial ─────→ Quick ─────→ Standard ──────→ Deep ──────→ Epic
+(<20 lines)    (small)      (3-10 files)    (10-30)      (system-wide)
+    │             │              │              │              │
+    ▼             ▼              ▼              ▼              ▼
+ Just do      Minimal       Plan →         Full plan      Wave-based
+   it         ceremony      Execute       + parallel       + swarm
+                                           agents          mode
 ```
 
 **21 Flow commands** — start, plan, go, quick, map, review, verify, ship, debug, discover, brainstorm, ground, compound, complete, retro, status, test, smart-swarm, auto, swarm, team.
@@ -259,9 +259,9 @@ Trivial ─────→ Quick ─────→ Standard ─────→ 
 │                      atlas-extractor auto-classify, chain ≤2  │
 ├─ Notification ────────────────────────────────────────────────┤
 │  claudio             Audio alerts for long-running ops        │
-└─ StatusLine ──────────────────────────────────────────────────┤
-   statusline.js       Context bar, current task, call count    │
-   ────────────────────────────────────────────────────────────┘
+├─ StatusLine ──────────────────────────────────────────────────┤
+│   statusline.js       Context bar, current task, call count   │
+────────────────────────────────────────────────────────────────┘
 ```
 
 ### Context Budget Cascade
