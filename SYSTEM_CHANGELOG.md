@@ -1,5 +1,45 @@
 # System Changelog
 
+## [5.9.0] — 2026-04-07
+### ULTRATHINK Audit — version sync, documentation drift fix, cleanup
+
+**Version & Count Sync (7 files)**
+- Aligned version to v5.9.0 across: SYSTEM_VERSION.md, SYSTEM_CHANGELOG.md, system_architecture.md, REFERENCE.md, MEMORY.md
+- Fixed skill count drift: 65/70 → 78 (15 Core + 63 Available) in REFERENCE.md and system_architecture.md
+- Fixed knowledge count drift: 63 → 66 entries (28 G-PAT) in system_architecture.md
+
+**Smoke Test**
+- Added ACTIVE-PAGE-3-native-crossplatform.md verification (gap since v5.8.0)
+
+**Cleanup**
+- Moved 2 orphaned __pycache__ directories to TRASH
+- Reset stale tool-health.json streak counters
+- Removed dead MEMORY.md reference to non-existent sessions/sessions-index.md
+
+**Files**: 7 modified, 2 directories trashed
+
+---
+
+## [5.8.0] — 2026-04-06
+### Native Engine — 5 new skills, Universal Conductor v2.0, ACTIVE-PAGE-3
+- Added SK-088 (Tauri Desktop), SK-089 (Hardware Bridge), SK-090 (Local-First), SK-091 (Edge Intelligence), SK-092 (Monorepo)
+- SK-058 upgraded to Universal Conductor v2.0
+- Created ACTIVE-PAGE-3 (native/cross-platform)
+- Added 5 Fusion Blueprint templates, expo-app template updated to SDK 54
+- Skills: 65 → 70
+
+---
+
+## [5.7.0] — 2026-04-06
+### Vanguard Web Architecture — 5 new skills, SK-057 archived
+- Added SK-083 (Vanguard), SK-084 (CSS-First UI), SK-085 (Streaming & Cache), SK-086 (AI-Native UI), SK-087 (Build Pipeline)
+- SK-057 (L100 Web Orchestrator) archived — superseded by SK-083
+- SK-030/054 upgraded with new patterns
+- Render Tiers, CSS-First principle, streaming pipeline
+- Skills: 61 → 65
+
+---
+
 ## [5.6.0] — 2026-04-06
 ### Final System Audit — dead file purge, rotation, hook profile consistency
 

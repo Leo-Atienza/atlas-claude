@@ -37,11 +37,25 @@
 | Unit/component test | Vitest (SK-056) + Testing Library |
 | Use new browser API | Web Platform APIs (SK-054) — popover, view transitions |
 | Advanced JS/TS patterns | Advanced JavaScript (SK-045) — TC39, V8, TypeScript |
-| Build a premium website | Web orchestrator (SK-057) — coordinates all web skills |
-| Build a premium mobile app | App orchestrator (SK-058) — coordinates all mobile skills |
+| Build a premium website | Vanguard (SK-083) — Render Tiers, CSS-First, streaming pipeline |
+| CSS-first UI (zero-JS) | CSS-First UI Engine (SK-084) — Container Queries, :has(), @layer, Popover+Anchor |
+| Streaming & cache architecture | Streaming & Cache (SK-085) — compositional cache, Activity, ViewTransition |
+| AI-powered UI | AI-Native UI (SK-086) — streamText, useChat, tool→component, generative UI |
+| Modern build tooling | Build Pipeline (SK-087) — Biome 2.0, Lightning CSS, Turbopack |
+| Build a premium mobile app | Universal Conductor (SK-058) — routes to all native/cross-platform skills |
+| Build a desktop app | Tauri Desktop (SK-088) — Rust backend, system WebView, 30+ plugins |
+| Access device hardware | Hardware Bridge (SK-089) — camera, scanning, biometrics, NFC, sensors |
+| Build offline-first app | Local-First (SK-090) — CRDT sync, PowerSync, TinyBase, Legend State |
+| On-device AI/ML | Edge Intelligence (SK-091) — llama.rn, MediaPipe, sqlite-vec, RAG pipeline |
+| Multi-platform monorepo | Monorepo (SK-092) — Turborepo for mobile + desktop + web |
 | Design QA pipeline | `/critique` → `/audit` → `/polish` (SK-078/079/080) |
 | Map a codebase (graph) | Codebase Knowledge Graph (SK-081) — AST + semantic → queryable graph |
 | Review with blast radius | Graph-Aware Code Review (SK-082) — dependency-traced minimal file sets |
+| Batch stagger reveals / text effects | Anime.js (SK-093) — lightweight modular animation, WAAPI engine |
+| MPA page transitions | Barba.js (SK-094) — GSAP-orchestrated cross-page transitions |
+| Design-driven 3D | Spline (SK-095) — visual 3D editor → web runtime |
+| 3D with code (React) | Three.js / R3F (SK-007) — WebGL/WebGPU, Drei helpers |
+| Multi-library animation | Cinematic Web Engine (SK-096) — SALA, Layer Ownership, Motion Tokens |
 
 ---
 
@@ -177,7 +191,7 @@ Every generator has a validator. Always run both.
 |---|---|
 | `CLAUDE.md` | Master instructions (self-contained) |
 | `settings.json` | Hooks, permissions, env vars |
-| `skills/ACTIVE-DIRECTORY.md` | Active skill index (61 skills: 15 Core + 46 Available) |
+| `skills/ACTIVE-DIRECTORY.md` | Active skill index (78 skills: 15 Core + 63 Available) |
 | `skills/ARCHIVE-DIRECTORY.md` | Archived skill index (7 bundles) |
 | `hooks/post-tool-monitor.js` | Central PostToolUse telemetry hub |
 | `hooks/context-guard.js` | PreToolUse context + security enforcer |

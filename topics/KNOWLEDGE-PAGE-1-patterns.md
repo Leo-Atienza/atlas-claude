@@ -247,3 +247,42 @@ Sandbox tool output — don't dump raw results into context. Index with FTS5. Re
 Auto-generate skeleton screens from DOM snapshots: `getBoundingClientRect()` on visible elements → flat array of `{x, y, w, h, r}` bone objects → render as gray rectangles with pulse animation. Multi-breakpoint capture (375/768/1280px). This produces accurate content-shaped loading states instead of generic spinners. Works with any framework — the bone data is just JSON.
 
 **Source**: Boneyard (amorim/boneyard)
+
+---
+
+## G-PAT-033: Single Animation Loop Architecture (SALA)
+**Date**: 2026-04-07 | **Tags**: #animation #performance #gsap #architecture | **Confidence**: [HIGH]
+
+When combining multiple animation libraries (GSAP, Lenis, Three.js/R3F, Anime.js), sync all to a single `requestAnimationFrame` via GSAP's ticker. Each library disables its own RAF: Lenis uses `autoRaf: false` + `lenis.raf(time * 1000)`, R3F uses `frameloop="never"` + `advance()`, Anime.js uses `tick()`. Result: zero clock drift between scroll position and animation progress, single 16ms frame budget.
+
+```typescript
+gsap.ticker.add((time) => lenis.raf(time * 1000));  // Lenis
+gsap.ticker.add(() => r3fAdvance(performance.now() / 1000));  // R3F
+gsap.ticker.lagSmoothing(0);  // Critical for smooth scroll
+```
+
+**When to apply**: Any project using 2+ animation tools that share visual timing. Skip for single-library projects.
+
+**Source**: Cinematic Web Engine (SK-096)
+
+---
+
+## G-PAT-034: Layer Ownership Model
+**Date**: 2026-04-07 | **Tags**: #animation #architecture #conflicts | **Confidence**: [HIGH]
+
+When multiple animation libraries coexist, assign each DOM element to exactly one animation tool. Both GSAP and Motion write to `element.style` — letting two tools animate the same property causes jitter. Assign ownership by layer: L5=3D (Three.js), L4=scroll choreography (GSAP+ScrollTrigger), L3=batch reveals (Anime.js), L2=React component animation (Motion), L1=CSS-native (zero JS), L0=page transitions. If a conflict is unavoidable, use `gsap.set(el, { clearProps: 'all' })` before transferring ownership.
+
+**When to apply**: Any page mixing GSAP + Motion/Framer Motion, or any project with 3+ animation tools.
+
+**Source**: Cinematic Web Engine (SK-096)
+
+---
+
+## G-PAT-035: Motion Token System
+**Date**: 2026-04-07 | **Tags**: #animation #design-system #easing | **Confidence**: [MEDIUM]
+
+Define 4 semantic motion tokens (snappy/standard/gentle/cinematic) with equivalent values across all animation tools. Example: `snappy` = GSAP `duration: 0.3, ease: 'back.out(1.4)'` = Motion `stiffness: 400, damping: 30` = CSS `cubic-bezier(0.34, 1.56, 0.64, 1)`. This ensures visual consistency when different components use different libraries. Store in a shared `springs.ts`/`motion-tokens.ts` file.
+
+**When to apply**: Multi-library animation projects where visual consistency across tool boundaries matters.
+
+**Source**: Cinematic Web Engine (SK-096)

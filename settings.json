@@ -27,7 +27,8 @@
   },
   "env": {
     "CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS": "1",
-    "ENABLE_TOOL_SEARCH": "auto"
+    "ENABLE_TOOL_SEARCH": "auto",
+    "ATLAS_HOOK_PROFILE": "standard"
   },
   "hooks": {
     "Notification": [
@@ -37,26 +38,6 @@
           {
             "type": "command",
             "command": "~/.claude/bin/claudio || true"
-          }
-        ]
-      }
-    ],
-    "UserPromptSubmit": [
-      {
-        "hooks": [
-          {
-            "type": "command",
-            "command": "node ~/.claude/hooks/keyword-detector.js",
-            "timeout": 3
-          }
-        ]
-      },
-      {
-        "hooks": [
-          {
-            "type": "command",
-            "command": "node ~/.claude/hooks/skill-injector.js",
-            "timeout": 3
           }
         ]
       }
@@ -72,21 +53,11 @@
         ]
       },
       {
-        "matcher": "Read|Write|Edit|MultiEdit|Bash|Agent",
+        "matcher": "Write|Edit|MultiEdit|Bash|Agent",
         "hooks": [
           {
             "type": "command",
             "command": "node ~/.claude/hooks/post-tool-monitor.js",
-            "timeout": 5
-          }
-        ]
-      },
-      {
-        "matcher": "Agent",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "python3 ~/.claude/hooks/agent-profiler.py",
             "timeout": 5
           }
         ]
@@ -105,22 +76,12 @@
     ],
     "PreToolUse": [
       {
-        "matcher": ".*",
+        "matcher": "Write|Edit|MultiEdit|Bash|Agent",
         "hooks": [
           {
             "type": "command",
             "command": "node ~/.claude/hooks/context-guard.js",
             "timeout": 3
-          }
-        ]
-      },
-      {
-        "matcher": "Write|Edit|MultiEdit",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "bash ~/.claude/hooks/security-gate.sh",
-            "statusMessage": "Security check..."
           }
         ]
       },
@@ -153,38 +114,6 @@
             "timeout": 5
           }
         ]
-      },
-      {
-        "matcher": "Agent",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "node ~/.claude/hooks/subagent-limiter.js",
-            "timeout": 3
-          }
-        ]
-      }
-    ],
-    "SubagentStart": [
-      {
-        "hooks": [
-          {
-            "type": "command",
-            "command": "node ~/.claude/hooks/subagent-tracker.js",
-            "timeout": 5
-          }
-        ]
-      }
-    ],
-    "SubagentStop": [
-      {
-        "hooks": [
-          {
-            "type": "command",
-            "command": "node ~/.claude/hooks/subagent-verifier.js",
-            "timeout": 5
-          }
-        ]
       }
     ],
     "PreCompact": [
@@ -193,25 +122,6 @@
           {
             "type": "command",
             "command": "bash ~/.claude/scripts/progressive-learning/precompact-reflect.sh"
-          }
-        ]
-      },
-      {
-        "hooks": [
-          {
-            "type": "command",
-            "command": "bash ~/.claude/scripts/precompact-flow-validate.sh",
-            "timeout": 5
-          }
-        ]
-      }
-    ],
-    "PostCompact": [
-      {
-        "hooks": [
-          {
-            "type": "command",
-            "command": "bash ~/.claude/hooks/post-compact-dream-check.sh"
           }
         ]
       }
@@ -224,24 +134,6 @@
             "command": "bash ~/.claude/hooks/session-start.sh"
           }
         ]
-      },
-      {
-        "hooks": [
-          {
-            "type": "command",
-            "command": "bash ~/.claude/hooks/skill-watcher.sh",
-            "timeout": 10
-          }
-        ]
-      },
-      {
-        "hooks": [
-          {
-            "type": "command",
-            "command": "node ~/.claude/hooks/sync-skill-keywords.js",
-            "timeout": 10
-          }
-        ]
       }
     ],
     "Stop": [
@@ -250,48 +142,6 @@
           {
             "type": "command",
             "command": "bash ~/.claude/hooks/session-stop.sh"
-          }
-        ]
-      },
-      {
-        "hooks": [
-          {
-            "type": "command",
-            "command": "python3 ~/.claude/hooks/verify-completion.py",
-            "timeout": 10
-          }
-        ]
-      },
-      {
-        "hooks": [
-          {
-            "type": "agent",
-            "subagent_type": "bug-hunter",
-            "description": "Final session verification — check for bugs in changed files and run tests if applicable",
-            "timeout": 120,
-            "statusMessage": "Verifying completion & running tests..."
-          }
-        ]
-      }
-    ],
-    "TeammateIdle": [
-      {
-        "hooks": [
-          {
-            "type": "command",
-            "command": "node ~/.claude/hooks/teammate-quality-gate.js",
-            "timeout": 10
-          }
-        ]
-      }
-    ],
-    "TaskCompleted": [
-      {
-        "hooks": [
-          {
-            "type": "command",
-            "command": "node ~/.claude/hooks/task-completed-verify.js",
-            "timeout": 45
           }
         ]
       }

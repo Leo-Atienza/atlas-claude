@@ -41,6 +41,7 @@ echo "[2] Skills Directory/Page"
 [ -f "$CLAUDE_DIR/skills/ACTIVE-DIRECTORY.md" ]          && pass "ACTIVE-DIRECTORY.md" || fail "ACTIVE-DIRECTORY.md MISSING"
 [ -f "$CLAUDE_DIR/skills/ACTIVE-PAGE-1-web-frontend.md" ] && pass "ACTIVE-PAGE-1" || fail "ACTIVE-PAGE-1 MISSING"
 [ -f "$CLAUDE_DIR/skills/ACTIVE-PAGE-2-backend-tools.md" ] && pass "ACTIVE-PAGE-2" || fail "ACTIVE-PAGE-2 MISSING"
+[ -f "$CLAUDE_DIR/skills/ACTIVE-PAGE-3-native-crossplatform.md" ] && pass "ACTIVE-PAGE-3" || fail "ACTIVE-PAGE-3 MISSING"
 [ -f "$CLAUDE_DIR/skills/ARCHIVE-DIRECTORY.md" ]          && pass "ARCHIVE-DIRECTORY.md" || fail "ARCHIVE-DIRECTORY.md MISSING"
 for i in 1 2 3 4 5 6 7; do
   ls "$CLAUDE_DIR/skills/ARCHIVE-PAGE-$i"-*.md >/dev/null 2>&1 && pass "ARCHIVE-PAGE-$i" || fail "ARCHIVE-PAGE-$i MISSING"

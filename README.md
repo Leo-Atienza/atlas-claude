@@ -25,9 +25,9 @@
 
 <p align="center">
   <img src="https://img.shields.io/badge/claude_code-opus_4.6-blueviolet?style=flat-square" alt="Claude Code">
-  <img src="https://img.shields.io/badge/version-5.6.0-informational?style=flat-square" alt="Version">
-  <img src="https://img.shields.io/badge/skills-61_active-blue?style=flat-square" alt="Skills">
-  <img src="https://img.shields.io/badge/knowledge-63_entries-teal?style=flat-square" alt="Knowledge">
+  <img src="https://img.shields.io/badge/version-5.9.0-informational?style=flat-square" alt="Version">
+  <img src="https://img.shields.io/badge/skills-78_active-blue?style=flat-square" alt="Skills">
+  <img src="https://img.shields.io/badge/knowledge-66_entries-teal?style=flat-square" alt="Knowledge">
   <img src="https://img.shields.io/badge/hooks-11-yellow?style=flat-square" alt="Hooks">
   <img src="https://img.shields.io/badge/license-MIT-orange?style=flat-square" alt="License">
 </p>
@@ -36,7 +36,7 @@
 
 ## What is ATLAS?
 
-Most Claude Code setups are a `CLAUDE.md` with some rules. ATLAS is a **full infrastructure layer** — 11 lifecycle hooks, a self-contained 8KB brain, a 63-entry knowledge store, and a unified Flow execution engine that scales from trivial fixes to multi-agent epic tasks.
+Most Claude Code setups are a `CLAUDE.md` with some rules. ATLAS is a **full infrastructure layer** — 11 lifecycle hooks, a self-contained 8KB brain, a 66-entry knowledge store, and a unified Flow execution engine that scales from trivial fixes to multi-agent epic tasks.
 
 <table>
 <tr>
@@ -73,7 +73,7 @@ build a REST API for user management
        │  └─────┬─────┘  └─────┬─────┘    │
        │        ▼              ▼          │
        │  ┌──────────────────────────┐    │
-       │  │ 61 Skills · 63 Knowledge │    │ ← Execution
+       │  │ 78 Skills · 66 Knowledge │    │ ← Execution
        │  │ 11 Hooks  · 15+ MCPs     │    │
        │  └──────────┬───────────────┘    │
        │             ▼                    │
@@ -176,7 +176,7 @@ Capability gap detected?
 Every non-trivial session extracts reusable patterns with confidence scoring:
 - Candidate patterns scored 1-5 — only 4+ saved (prevents noise accumulation)
 - Tag: `[HIGH]` (3+ reproductions) · `[MEDIUM]` (once) · `[LOW]` (theoretical)
-- 63 entries across 5 categories: G-PAT · G-SOL · G-ERR · G-PREF · G-FAIL
+- 66 entries across 5 categories: G-PAT · G-SOL · G-ERR · G-PREF · G-FAIL
 
 ### Defense-in-Depth Security
 
@@ -220,7 +220,7 @@ Trivial ─────→ Quick ─────→ Standard ─────→ 
 │                      health summary, debug cleanup, backups   │
 ├─ PreToolUse ──────────────────────────────────────────────────┤
 │  context-guard.js    Security gate (20+ secret patterns)      │
-│                      + context budget (blocks tools at ≥72%)  │
+│                      + context budget (blocks tools at ≥78%)  │
 │  bash_hook.py        Block dangerous shell commands           │
 │  file_length_limit   Prevent runaway file bloat               │
 │  read_env_protection Protect .env / credentials reads         │
@@ -242,19 +242,41 @@ Trivial ─────→ Quick ─────→ Standard ─────→ 
    ────────────────────────────────────────────────────────────┘
 ```
 
+### Context Budget Cascade
+
+Single source of truth: `hooks/context-thresholds.json`
+
+| Stage | Used % | What Happens |
+|-------|--------|-------------|
+| Warning | 60% | Wrap up current task |
+| Auto-continuation | 70% | Handoff file written for new session |
+| Guard block | 78% | Agent, Bash, Write, Edit blocked |
+| Critical | 85% | Stop immediately, save state |
+
+### Hook Profiles
+
+Control hook overhead via `ATLAS_HOOK_PROFILE` env var:
+
+| Profile | Hooks Active | Use When |
+|---------|-------------|----------|
+| `minimal` | context-guard only | Trivial tasks, quick edits |
+| `standard` | All hooks (default) | Normal development |
+| `strict` | Same as standard (reserved) | Future differentiation |
+
 ---
 
 ## Skill System
 
 ### Directory/Page Architecture
 
-Skills are indexed in two levels — scan the directory, open the page on demand. Never load all 61 at start.
+Skills are indexed in two levels — scan the directory, open the page on demand. Never load all 78 at start.
 
 ```
 skills/
-├── ACTIVE-DIRECTORY.md       # Index: 61 active skills (15 Core + 46 Available)
+├── ACTIVE-DIRECTORY.md       # Index: 78 active skills (15 Core + 63 Available)
 ├── ACTIVE-PAGE-1-*.md        # Web, animation, design, testing, security
 ├── ACTIVE-PAGE-2-*.md        # Backend, deployment, workflow
+├── ACTIVE-PAGE-3-*.md        # Native, desktop, cross-platform
 ├── ARCHIVE-DIRECTORY.md      # Index: 7 archive bundles
 └── ARCHIVE-PAGE-1..7.md      # Archived by domain (load only when project matches)
 ```
@@ -264,13 +286,27 @@ skills/
 | Domain | Skills |
 |--------|--------|
 | **Frontend** | Next.js Developer, React Expert, TypeScript Expert |
-| **Animation** | Motion (Framer), GSAP Core, Lenis Smooth Scroll, L100 Web Orchestrator |
+| **Animation** | Motion (Framer), GSAP Core, Lenis Smooth Scroll |
+| **Architecture** | Vanguard Web Architecture |
 | **Data** | TanStack Ecosystem |
 | **Backend** | Supabase Expert, Stripe Expert |
 | **Security** | Sharp Edges Scanner, Differential Risk Review |
 | **Quality** | Vitest Testing Framework, Code Review |
-| **Design** | Frontend Design System |
 | **Writing** | Anti-Slop Writing |
+
+### Skill Domains (Available)
+
+| Domain | Count | Highlights |
+|--------|:-----:|-----------|
+| **Web Frameworks** | 13 | Next.js (best practices, cache, upgrade), React composition/perf, TypeScript, TanStack |
+| **Animation & Motion** | 8 | GSAP (core + advanced), Motion, Lenis, Anime.js, Barba.js, Cinematic Web Engine |
+| **CSS & Styling** | 2 | CSS-First UI Engine, Web Platform APIs |
+| **3D & Immersive** | 2 | Three.js/R3F, Spline 3D |
+| **Native & Desktop** | 10 | Tauri Desktop, Universal Conductor, Hardware Bridge, Local-First, Edge Intelligence, Motion/Visual/Transition/Sensory native |
+| **Backend & Data** | 5 | Supabase, Stripe, PostgreSQL, SQL, API Design |
+| **Testing & Deploy** | 5 | Playwright, E2E, Vitest, Deploy to Vercel, TDD |
+| **Workflow & Meta** | 10 | Smart Swarm, Deep Research, Dream, Self-Evolve, Design QA pipeline |
+| **Design** | 6 | Frontend Design, UX Design, Canvas, Design Audit/Critique/Polish |
 
 **Archive bundles** (auto-activate on project file match): Infra/DevOps · Security · Enterprise · Data/ML · Mobile/Native · Workflow/Meta · Document/Media
 
@@ -278,11 +314,11 @@ skills/
 
 ## Knowledge Store
 
-63 entries across 5 pages. Directory/Page architecture — scan the index, open a page on demand.
+66 entries across 5 pages. Directory/Page architecture — scan the index, open a page on demand.
 
 | Page | Category | Count | Content |
 |:----:|:--------:|:-----:|:--------|
-| 1 | **G-PAT** | 25 | Reusable patterns |
+| 1 | **G-PAT** | 28 | Reusable patterns |
 | 2 | **G-SOL** | 16 | Solved problems |
 | 3 | **G-ERR** | 9 | Mistakes to avoid |
 | 4 | **G-PREF** | 7 | User preferences |
@@ -297,7 +333,7 @@ skills/
 ├── CLAUDE.md                    # Self-contained brain (~8KB, all rules inline)
 ├── REFERENCE.md                 # Slash commands, MCP patterns, security triggers
 ├── settings.json                # Hook wiring, permissions, env vars
-├── SYSTEM_VERSION.md            # Version tracking (v5.6.0)
+├── SYSTEM_VERSION.md            # Version tracking (v5.9.0)
 ├── SYSTEM_CHANGELOG.md          # Infrastructure version history
 │
 ├── hooks/                       # 11 lifecycle hooks
@@ -308,19 +344,21 @@ skills/
 │   ├── post-tool-monitor.js     #   PostToolUse — efficiency, failures, context, health
 │   ├── tool-failure-handler.js  #   PostToolUseFailure — circuit breaker
 │   ├── statusline.js            #   StatusLine — context bar, task, call count
-│   ├── precompact-reflect.sh    #   PreCompact — force reflection before context loss
+│   ├── context-thresholds.json  #   Single source of truth for context budget
 │   └── cctools-safety-hooks/    #   PreToolUse — bash, file_length, env protection
 │
 ├── skills/                      # Directory/Page architecture
-│   ├── ACTIVE-DIRECTORY.md      #   Index: 61 active skills (15 Core + 46 Available)
+│   ├── ACTIVE-DIRECTORY.md      #   Index: 78 active skills (15 Core + 63 Available)
 │   ├── ACTIVE-PAGE-1-*.md       #   Web, animation, design, testing, security
 │   ├── ACTIVE-PAGE-2-*.md       #   Backend, deployment, workflow
+│   ├── ACTIVE-PAGE-3-*.md       #   Native, desktop, cross-platform
 │   ├── ARCHIVE-DIRECTORY.md     #   Index: 7 archive bundles
-│   └── ARCHIVE-PAGE-1..7.md     #   Archived by domain — load on demand
+│   ├── ARCHIVE-PAGE-1..7.md     #   Archived by domain — load on demand
+│   └── templates/               #   9 project templates (Next.js, Expo, API, Tauri, etc.)
 │
 ├── topics/                      # Knowledge store — Directory/Page architecture
 │   ├── KNOWLEDGE-DIRECTORY.md   #   Master index (scan first)
-│   ├── KNOWLEDGE-PAGE-1-*.md    #   25 G-PAT entries (patterns)
+│   ├── KNOWLEDGE-PAGE-1-*.md    #   28 G-PAT entries (patterns)
 │   ├── KNOWLEDGE-PAGE-2-*.md    #   16 G-SOL entries (solutions)
 │   ├── KNOWLEDGE-PAGE-3-*.md    #   9 G-ERR entries (mistakes)
 │   ├── KNOWLEDGE-PAGE-4-*.md    #   7 G-PREF entries (preferences)
@@ -336,6 +374,13 @@ skills/
 │   ├── session-metrics.sh       #   Session analytics report
 │   ├── health-validator.js      #   Health verification
 │   └── skill-improver.js        #   Skill auto-improvement
+│
+├── agents/                      # 16 specialized Flow agents
+│   ├── flow-planner.md          #   Plan creation with wave dependencies
+│   ├── flow-executor.md         #   Atomic commits, deviation handling
+│   ├── flow-verifier.md         #   Goal-backward verification
+│   ├── flow-debugger.md         #   Scientific debugging with state tracking
+│   └── ...                      #   mapper, UAT, researcher, synthesizer, etc.
 │
 └── scheduled-tasks/             # Automation
     └── skill-autofix/           #   Scheduled skill improvements
@@ -360,8 +405,8 @@ Some hooks reference external components. They degrade gracefully — silent no-
 
 | Component | Purpose | How to Get |
 |-----------|---------|-----------|
-| `cctools-safety-hooks/` | Block dangerous bash commands, file limits, env protection | Install [cctools](https://github.com/anthropics/claude-code-community-tools) |
-| `claudio` | Audio notifications for long-running operations | Optional binary at `~/.claude/bin/claudio` |
+| `cctools-safety-hooks/` | Block dangerous bash commands, file limits, env protection | Install [cctools](https://github.com/pchalasani/claude-code-tools) |
+| `claudio` | Audio notifications for long-running operations | `go install claudio.click/cmd/claudio@latest` |
 
 ---
 
@@ -370,13 +415,15 @@ Some hooks reference external components. They degrade gracefully — silent no-
 | Feature | What It Does | Why It Matters |
 |---------|-------------|----------------|
 | **Self-contained brain** | CLAUDE.md with all rules inline — no external rule files | Simpler, faster, zero broken references |
-| **Directory/Page skills** | Index → page → skill (never load all 61 at start) | Context-efficient, scales to any size |
+| **Directory/Page skills** | Index → page → skill (never load all 78 at start) | Context-efficient, scales to any size |
+| **3-page skill architecture** | Web + Backend + Native across 3 active pages | Full-stack coverage without bloat |
 | **Knowledge compounding** | 5-category store, confidence-scored, only 4+ saved | Filters noise, preserves signal across sessions |
 | **Auto-continuation** | Context-aware session chaining with structured handoff | Never lose work mid-task |
 | **5D complexity scoring** | Automatic agent deployment (SOLO/DUO/TEAM/SWARM) | Right-sized execution, no manual routing |
 | **Self-evolution** | Creates skills + adds MCPs on detected capability gaps | System grows with your needs |
 | **Shared hook lib** | `lib.js` shared across all JS hooks | Zero duplication, consistent behavior |
 | **Circuit breaker** | Failure tracking + 3-strike reassessment | Prevents runaway tool failure loops |
+| **Context budget cascade** | 4-stage threshold system with single source of truth | Graceful degradation, not abrupt failure |
 
 ---
 
@@ -386,7 +433,22 @@ Some hooks reference external components. They degrade gracefully — silent no-
 bash ~/.claude/scripts/smoke-test.sh
 ```
 
-Verifies: critical files, hooks, settings validity, skill/knowledge counts, log integrity, auto-continuation, and core commands.
+Checks 50 items: critical files, hooks, settings validity, skill pages (1-3), archive pages (1-7), knowledge pages, templates, symlinks, context thresholds, security config, and hook executability.
+
+---
+
+## Version History
+
+| Version | Date | Highlights |
+|---------|------|-----------|
+| **5.9.0** | 2026-04-07 | ULTRATHINK audit — version sync, count corrections, smoke test gap fix |
+| **5.8.0** | 2026-04-06 | Native Engine — 5 new skills, Universal Conductor v2.0, ACTIVE-PAGE-3 |
+| **5.7.0** | 2026-04-06 | Vanguard Web Architecture — 5 new skills, Render Tiers, CSS-First |
+| **5.6.0** | 2026-04-06 | Final audit — dead file purge, hook profile consistency |
+| **5.0.0** | 2026-04-05 | System overhaul — self-contained CLAUDE.md, 88 dead files cleaned |
+| **4.0.0** | 2026-04-05 | Pipeline architecture — Directory/Page system, hooks consolidated |
+
+See `SYSTEM_CHANGELOG.md` for full history.
 
 ---
 

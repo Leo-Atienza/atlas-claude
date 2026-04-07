@@ -3,7 +3,7 @@
 > Lookup: scan this table → find the skill → note its Page → open that page for full details.
 > Loading: read the relevant page on-demand, never all at start.
 > Tiers: **Core** = weekly use, prioritize in suggestions. **Available** = on-demand when task matches.
-> Total active skills: **61** (15 Core + 46 Available) — last updated 2026-04-06
+> Total active skills: **78** (15 Core + 63 Available) — last updated 2026-04-07
 
 ## Core Skills
 
@@ -17,7 +17,7 @@
 | SK-048 | Lenis Smooth Scroll | Lightweight smooth scroll (3KB) with GSAP integration | 1 |
 | SK-055 | TanStack Ecosystem | TanStack Query + Form + Router for React | 1 |
 | SK-056 | Vitest Testing Framework | Fast unit testing + Testing Library + test pyramid | 1 |
-| SK-057 | L100 Web Orchestrator | Orchestrates Motion + GSAP + Lenis + View Transitions for premium websites | 1 |
+| SK-083 | Vanguard Web Architecture | Orchestrates web stack via Render Tiers, CSS-First, streaming pipeline | 1 |
 | FS-060 | Supabase Expert | Auth, RLS, Storage, Edge Functions, Realtime, TypeScript | 2 |
 | FS-061 | Stripe Expert | Checkout, Subscriptions, Webhooks, Customer Portal | 2 |
 | SC-001 | Sharp Edges Scanner | API footguns, dangerous defaults, fail-open patterns | 1 |
@@ -42,7 +42,7 @@
 | SK-045 | Advanced JavaScript & TypeScript | TC39 (ES2025+), V8 optimization, concurrency, TypeScript | 1 |
 | SK-054 | Web Platform APIs | View Transitions, Popover, Anchor Positioning, Scroll Animations, WebGPU | 1 |
 | FS-003 | JavaScript Expert | Modern JavaScript patterns | 1 |
-| FS-065 | Motion iOS Config | Spring configs, haptics, gestures, 60fps, skeletons | 1 |
+| FS-065 | Motion iOS Config | Spring configs, haptics, gestures, 60fps, skeletons | 3 |
 | SC-003 | Insecure Defaults Detector | Hardcoded secrets, weak defaults, fail-open detection | 1 |
 | CE-003 | Reflexion | Auto-refinement loops (complexity, nesting checks) | 1 |
 | SK-009 | Playwright Testing | Browser automation & E2E testing (Chromium/Firefox/WebKit) | 2 |
@@ -56,7 +56,7 @@
 | SK-040 | Dream Consolidation | Multi-phase memory consolidation — orient, merge, prune | 2 |
 | SK-041 | Project Init | Auto-generate project CLAUDE.md from stack-detected templates | 2 |
 | SK-050 | Nano Banana (Gemini Image) | AI image gen/edit via Google Gemini | 2 |
-| SK-058 | L100 App Orchestrator | Orchestrates Reanimated + Gesture Handler + Moti + FlashList for premium mobile | 2 |
+| SK-058 | Universal App Conductor | Orchestrates mobile + desktop + universal apps — routes to all native/cross-platform skills | 3 |
 | FS-012 | SQL Expert | SQL optimization, strategic indexes | 2 |
 | FS-028 | API Designer | REST, OpenAPI 3.1, RFC 7807 errors | 2 |
 | FS-033 | Testing Strategist | Testing strategies and patterns | 2 |
@@ -75,3 +75,20 @@
 | SK-080 | Design Polish | Final quality pass: 20-item checklist, ship-ready verification | 1 |
 | SK-081 | Codebase Knowledge Graph | AST + semantic → queryable graph, 71.5x token reduction, confidence-scored | 2 |
 | SK-082 | Graph-Aware Code Review | Blast-radius analysis for reviews, 8.2x token reduction, dependency tracing | 2 |
+| SK-084 | CSS-First UI Engine | Container Queries, :has(), @layer, native Popover+Anchor, OKLCH | 1 |
+| SK-085 | Streaming & Cache Architecture | Compositional cache, Activity, ViewTransition, selective hydration | 1 |
+| SK-086 | AI-Native UI | AI SDK streaming patterns, tool-to-component, generative UI | 1 |
+| SK-087 | Modern Build Pipeline | Biome 2.0, Lightning CSS, Turbopack — Rust-powered tooling | 1 |
+| SK-088 | Tauri Desktop Engine | Rust-backed desktop apps, IPC, plugins, security, mobile support | 3 |
+| SK-089 | Device Hardware Bridge | Unified camera, scanning, biometrics, sensors across platforms | 3 |
+| SK-090 | Local-First Architecture | Offline-first CRDT sync — PowerSync, TinyBase, Legend State | 3 |
+| SK-091 | Edge Intelligence | On-device AI/ML: llama.rn, MediaPipe, sqlite-vec, RAG pipeline | 3 |
+| SK-092 | Cross-Platform Monorepo | Turborepo for mobile + desktop + web code sharing | 3 |
+| SK-093 | Anime.js v4 | Modular lightweight animation — stagger, text, scroll, WAAPI engine | 1 |
+| SK-094 | Barba.js Page Transitions | MPA smooth page transitions — GSAP orchestration, prefetch, lifecycle | 1 |
+| SK-095 | Spline 3D Runtime | Design-to-web 3D — lazy loading, events, React/Next.js integration | 1 |
+| SK-096 | Cinematic Web Engine | Unified animation orchestration — SALA, Layer Ownership, Motion Tokens | 1 |
+| SK-097 | Native Motion Engine | Reanimated 4, Gesture Handler, Moti — 60fps native animations, springs, gestures | 3 |
+| SK-098 | Native Visual Canvas | Skia (GPU 2D), R3F native (3D), Rive (state machines), Lottie | 3 |
+| SK-099 | Native Transition & Scroll | Shared elements, FlashList v2, Legend List, scroll-linked effects | 3 |
+| SK-100 | Native Sensory Design System | Motion tokens, haptic palette, sound design, animation tiers (T0-T3) | 3 |

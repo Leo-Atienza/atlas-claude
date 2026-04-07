@@ -11,6 +11,7 @@
 | SK-004 | Spreadsheet Tools | Open/edit/create spreadsheets; CSV conversion | Dormant — Document & Media Tools | 7 |
 | SK-008 | Remotion Video | Programmatic video creation with React | Dormant — Document & Media Tools | 7 |
 | SK-052 | LinkedIn Publisher | Compose and publish LinkedIn posts via API | Dormant — Document & Media Tools | 7 |
+| SK-057 | L100 Web Orchestrator | Superseded by SK-083 Vanguard Web Architecture | Web (archived) | N/A |
 | DV-001–DV-031 | CC-DevOps Suite (31 skills) | Terraform, Ansible, K8s, Helm, Docker, CI/CD generators | Infra & DevOps | 1 |
 | FS-029 | Cloud Architect | Multi-cloud architecture patterns | Infra & DevOps | 1 |
 | FS-030 | K8s Specialist | Kubernetes orchestration and scaling | Infra & DevOps | 1 |

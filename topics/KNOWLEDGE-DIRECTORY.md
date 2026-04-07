@@ -38,6 +38,9 @@
 | G-PAT-030 | Continuous Learning Loop | #workflow #knowledge #memory | 2026-04-05 |
 | G-PAT-031 | Context Compression Strategy | #agents #context #performance | 2026-04-05 |
 | G-PAT-032 | Skeleton Loading Generation | #frontend #loading #ux | 2026-04-05 |
+| G-PAT-033 | Single Animation Loop Architecture (SALA) | #animation #performance #gsap #architecture | 2026-04-07 |
+| G-PAT-034 | Layer Ownership Model | #animation #architecture #conflicts | 2026-04-07 |
+| G-PAT-035 | Motion Token System | #animation #design-system #easing | 2026-04-07 |
 
 ## Solutions (G-SOL) — Page 2
 
@@ -99,4 +102,4 @@
 
 ---
 
-**Totals**: 25 patterns + 16 solutions + 9 errors + 7 preferences + 6 failures = **63 entries**
+**Totals**: 28 patterns + 16 solutions + 9 errors + 7 preferences + 6 failures = **66 entries**

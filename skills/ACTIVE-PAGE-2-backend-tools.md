@@ -69,4 +69,3 @@
 | SK-013 | Theme Factory | `skills/theme-factory/SKILL.md` | Apply themes to any artifact (10 presets + custom theming) |
 | SK-050 | Nano Banana (Gemini Image) | `skills/nano-banana/SKILL.md` | AI image generation and editing via Google Gemini |
 | SK-053 | Anti-Slop Writing | `skills/stop-slop/SKILL.md` | Remove AI writing patterns — banned phrases, scoring rubric |
-| SK-058 | L100 App Orchestrator | `skills/app-l100/SKILL.md` | Orchestrates Reanimated + Gesture Handler + Moti + FlashList for premium mobile apps |

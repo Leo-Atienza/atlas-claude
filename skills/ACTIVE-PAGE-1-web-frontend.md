@@ -2,6 +2,12 @@
 
 > These skills are always available. Load on-demand when a task matches their domain.
 
+## Vanguard Architecture
+
+| ID | Name | Path | Description |
+|----|------|------|-------------|
+| SK-083 | Vanguard Web Architecture | `skills/web-l100/SKILL.md` | Orchestrates web stack via Render Tiers (T0-T4), CSS-First principle, streaming pipeline |
+
 ## Web Frameworks
 
 | ID | Name | Path | Description |
@@ -29,15 +35,41 @@
 | SK-044 | GSAP Advanced (ScrollTrigger) | `skills/gsap-advanced/SKILL.md` | ScrollTrigger, Flip, Draggable, SplitText, framework integration |
 | SK-047 | Motion (Framer Motion) | `skills/motion-animation/SKILL.md` | React animation: springs, layout animations, gestures, scroll, exit |
 | SK-048 | Lenis Smooth Scroll | `skills/lenis-smooth-scroll/SKILL.md` | Lightweight smooth scroll (3KB gzipped) with GSAP/ScrollTrigger integration |
-| SK-057 | L100 Web Orchestrator | `skills/web-l100/SKILL.md` | Orchestrates Motion + GSAP + Lenis + View Transitions for premium websites |
-| FS-065 | Motion iOS Config | `skills/fullstack-dev/motion-ios/SKILL.md` | Spring configs, haptics, gestures, 60fps targeting, skeleton loading |
+| SK-093 | Anime.js v4 | `skills/anime-js/SKILL.md` | Modular lightweight animation — stagger reveals, text effects, WAAPI engine |
+| SK-094 | Barba.js Page Transitions | `skills/barba-js/SKILL.md` | MPA smooth page transitions — GSAP timeline orchestration, view lifecycle |
+| SK-096 | Cinematic Web Engine | `skills/cinematic-web-engine/SKILL.md` | Unified animation orchestration — SALA, Layer Ownership, Motion Tokens |
+
+## 3D & Immersive
+
+| ID | Name | Path | Description |
+|----|------|------|-------------|
+| SK-007 | Three.js 3D Graphics | `skills/threejs/SKILL.md` | Scene, geometry, materials, shaders, R3F, Drei, WebGPU, 3D animation |
+| SK-095 | Spline 3D Runtime | `skills/spline-3d/SKILL.md` | Design-to-web 3D — lazy loading, events, React/Next.js, performance |
+
+## CSS & Styling
+
+| ID | Name | Path | Description |
+|----|------|------|-------------|
+| SK-084 | CSS-First UI Engine | `skills/css-first-ui/SKILL.md` | Container Queries, :has(), @layer, native Popover+Anchor, OKLCH — zero-JS UI |
+
+## Streaming & Data
+
+| ID | Name | Path | Description |
+|----|------|------|-------------|
+| SK-085 | Streaming & Cache Architecture | `skills/streaming-cache/SKILL.md` | Compositional cache, Activity, ViewTransition, selective hydration |
+| SK-086 | AI-Native UI | `skills/ai-native-ui/SKILL.md` | AI SDK streaming patterns, tool-to-component, generative UI within PPR |
+
+## Build Tooling
+
+| ID | Name | Path | Description |
+|----|------|------|-------------|
+| SK-087 | Modern Build Pipeline | `skills/modern-build-pipeline/SKILL.md` | Biome 2.0, Lightning CSS, Turbopack — Rust-powered tooling |
 
 ## Design & UX
 
 | ID | Name | Path | Description |
 |----|------|------|-------------|
 | SK-006 | UX Design Intelligence | `skills/ui-design-stack/SKILL.md` | UX strategy with 67 design styles, 161 palettes, BM25 semantic search |
-| SK-007 | Three.js 3D Graphics | `skills/threejs/SKILL.md` | Scene setup, geometry, materials, shaders, 3D animation, WebGL |
 | SK-075 | Canvas Design | `skills/canvas-design/SKILL.md` | Visual art creation via design philosophy manifestos → canvas expression (.pdf/.png) |
 
 ## Testing & Quality
