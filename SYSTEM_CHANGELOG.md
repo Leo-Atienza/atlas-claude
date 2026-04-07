@@ -1,5 +1,32 @@
 # System Changelog
 
+## [6.0.0] — 2026-04-07
+### Atlas Intelligence Layer — temporal KG + heuristic extractor
+
+**New: `hooks/atlas-kg.js`** — Temporal Knowledge Graph
+- JSON-backed entity-relationship graph (entities.json + triples.json in `~/.claude/atlas-kg/`)
+- Typed triples with temporal validity (valid_from/valid_to) and confidence scoring
+- Query by entity, relationship, time window; timeline generation; recent facts; summary
+- CLI: `node atlas-kg.js {add|query|invalidate|timeline|recent|summary|stats}`
+- Zero dependencies (pure Node.js)
+
+**New: `hooks/atlas-extractor.js`** — Heuristic Memory Auto-Extractor
+- Pure regex classifier: free text → G-PAT/G-SOL/G-ERR/G-PREF/G-FAIL categories
+- Engineering-focused marker sets with confidence scoring and disambiguation
+- CLI: `node atlas-extractor.js {extract|extract-stdin|compact}`
+- Zero dependencies (pure Node.js)
+
+**Hook Integration (3 points)**
+- `session-start.sh` §6: injects KG summary on session wake-up
+- `session-stop.sh` §1b: auto-extracts memory candidates from handoff content
+- `precompact-reflect.sh`: KG summary + extractor hint preserved before compaction
+
+**Curation note**: Extracted from mempalace (12 components). Only 2 taken — the rest rejected as overengineered, dependency-heavy, or duplicating existing systems.
+
+**Files**: 2 new hooks, 2 modified hooks (session-start.sh, session-stop.sh)
+
+---
+
 ## [5.9.0] — 2026-04-07
 ### ULTRATHINK Audit — version sync, documentation drift fix, cleanup
 

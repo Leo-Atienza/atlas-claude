@@ -11,8 +11,8 @@ CONFLICTS_FILE="$CLAUDE_DIR/projects/C--Users-leooa--claude/memory/conflicts.md"
 HANDOFF_FILE="$CLAUDE_DIR/.last-session-handoff"
 
 if [ -f "$CONFLICTS_FILE" ]; then
-  CONFLICT_COUNT=$(grep -c "^## CONFLICT-[0-9]" "$CONFLICTS_FILE" 2>/dev/null || echo "0")
-  if [ "$CONFLICT_COUNT" -gt 0 ]; then
+  CONFLICT_COUNT=$(grep -c "^## CONFLICT-[0-9]" "$CONFLICTS_FILE" 2>/dev/null) || CONFLICT_COUNT=0
+  if [ "$CONFLICT_COUNT" -gt 0 ] 2>/dev/null; then
     echo "PROGRESSIVE LEARNING: $CONFLICT_COUNT unresolved knowledge conflict(s) detected."
   fi
 fi
@@ -104,25 +104,31 @@ if [ -n "$health_messages" ]; then
   echo -e "$health_messages"
 fi
 
-# ─── 6. Debug directory cleanup (files older than 14 days) ──────────
+# ─── 6. Atlas Knowledge Graph — inject recent facts ────────────────
+KG_SUMMARY=$(node "$CLAUDE_DIR/hooks/atlas-kg.js" summary 2>/dev/null)
+if [ -n "$KG_SUMMARY" ] && [ "$KG_SUMMARY" != "Knowledge graph empty." ]; then
+  echo "$KG_SUMMARY"
+fi
+
+# ─── 7a. Debug directory cleanup (files older than 14 days) ─────────
 DEBUG_DIR="$CLAUDE_DIR/debug"
 if [ -d "$DEBUG_DIR" ]; then
   find "$DEBUG_DIR" -maxdepth 1 -name "*.txt" -mtime +14 -delete 2>/dev/null || true
 fi
 
-# ─── 6b. Shell-snapshots cleanup (files older than 30 days) ─────────
+# ─── 7b. Shell-snapshots cleanup (files older than 30 days) ─────────
 SNAP_DIR="$CLAUDE_DIR/shell-snapshots"
 if [ -d "$SNAP_DIR" ]; then
   find "$SNAP_DIR" -maxdepth 1 -name "snapshot-*.sh" -mtime +30 -delete 2>/dev/null || true
 fi
 
-# ─── 6c. Stale todos cleanup (files older than 30 days) ────────────
+# ─── 7c. Stale todos cleanup (files older than 30 days) ────────────
 TODOS_DIR="$CLAUDE_DIR/todos"
 if [ -d "$TODOS_DIR" ]; then
   find "$TODOS_DIR" -maxdepth 1 -name "*.json" -mtime +30 -delete 2>/dev/null || true
 fi
 
-# ─── 7. Stale temp file cleanup ─────────────────────────────────────
+# ─── 8. Stale temp file cleanup ─────────────────────────────────────
 find /tmp -maxdepth 1 -name "claude-ctx-*.json" -mmin +1440 -delete 2>/dev/null || true
 find /tmp -maxdepth 1 -name "claude-fail-streak-*.json" -mmin +1440 -delete 2>/dev/null || true
 find /tmp -maxdepth 1 -name "claude-handoff-*.trigger" -mmin +1440 -delete 2>/dev/null || true
@@ -132,7 +138,7 @@ if [ -d "$CACHE_DIR" ]; then
   find "$CACHE_DIR" -maxdepth 1 -name "efficiency-*.json" -mmin +10080 -delete 2>/dev/null || true
 fi
 
-# ─── 8. Critical file backup (weekly) ───────────────────────────────
+# ─── 9. Critical file backup (weekly) ───────────────────────────────
 BACKUP_DIR="$CLAUDE_DIR/backups"
 BACKUP_STATE="$CLAUDE_DIR/cache/backup-last-run"
 LAST_BACKUP=$(cat "$BACKUP_STATE" 2>/dev/null || echo "0")

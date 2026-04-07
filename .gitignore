@@ -63,3 +63,9 @@ plugins/marketplaces/
 session-env/
 downloads/
 flow-knowledge/
+
+# Atlas Intelligence Layer — runtime KG data (user-specific, changes every session)
+atlas-kg/
+
+# Stale hooks moved to TRASH during cleanup
+hooks/TRASH/

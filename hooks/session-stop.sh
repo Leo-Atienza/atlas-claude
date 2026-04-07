@@ -65,6 +65,25 @@ try {
   fi
 fi
 
+# ─── 1b. Atlas Extractor — auto-extract memories from handoff ────────
+EXTRACTOR="$HOME/.claude/hooks/atlas-extractor.js"
+if [ -f "$EXTRACTOR" ] && [ -f "$HANDOFF_FILE" ]; then
+  EXTRACTED=$(cat "$HANDOFF_FILE" | node "$EXTRACTOR" extract-stdin 2>/dev/null | node -e "
+    let d=''; process.stdin.on('data',c=>d+=c); process.stdin.on('end',()=>{
+      try {
+        const items = JSON.parse(d).filter(m => m.confidence >= 0.5);
+        if (items.length > 0) {
+          console.log('ATLAS_EXTRACT: ' + items.length + ' candidate(s)');
+          items.slice(0,3).forEach(m => console.log('  [' + m.atlas_tag + '] ' + m.preview.slice(0,80)));
+        }
+      } catch(e) {}
+    });
+  " 2>/dev/null)
+  if [ -n "$EXTRACTED" ]; then
+    echo "$EXTRACTED" >> "$HANDOFF_FILE"
+  fi
+fi
+
 # Echo handoff to terminal so user sees it
 echo ""
 echo "── SESSION HANDOFF ──────────────────────────────"

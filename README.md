@@ -25,7 +25,7 @@
 
 <p align="center">
   <img src="https://img.shields.io/badge/claude_code-opus_4.6-blueviolet?style=flat-square" alt="Claude Code">
-  <img src="https://img.shields.io/badge/version-5.9.0-informational?style=flat-square" alt="Version">
+  <img src="https://img.shields.io/badge/version-6.0.0-informational?style=flat-square" alt="Version">
   <img src="https://img.shields.io/badge/skills-78_active-blue?style=flat-square" alt="Skills">
   <img src="https://img.shields.io/badge/knowledge-66_entries-teal?style=flat-square" alt="Knowledge">
   <img src="https://img.shields.io/badge/hooks-11-yellow?style=flat-square" alt="Hooks">
@@ -74,7 +74,7 @@ build a REST API for user management
        │        ▼              ▼          │
        │  ┌──────────────────────────┐    │
        │  │ 78 Skills · 66 Knowledge │    │ ← Execution
-       │  │ 11 Hooks  · 15+ MCPs     │    │
+       │  │ 11 Hooks  · KG · 15+ MCPs│    │
        │  └──────────┬───────────────┘    │
        │             ▼                    │
        │  ┌──────────────────────────┐    │
@@ -187,6 +187,28 @@ Layer 3 (PostToolUse): Trail of Bits skills — sharp-edges, differential-review
 Layer 4 (At PR):       Full security scan before shipping
 ```
 
+### Atlas Intelligence Layer
+
+Two zero-dependency Node.js modules wired into the hook lifecycle for persistent memory across sessions.
+
+**`hooks/atlas-kg.js`** — Temporal Knowledge Graph
+```
+Storage: ~/.claude/atlas-kg/entities.json + triples.json
+Queries: entity lookup, relationship traversal, time windows, recent facts, timeline
+CLI:     node atlas-kg.js {add|query|invalidate|timeline|recent|summary|stats}
+Wired:   session-start (injects recent facts on wake-up)
+```
+
+**`hooks/atlas-extractor.js`** — Heuristic Memory Auto-Extractor
+```
+Maps free text → G-PAT / G-SOL / G-ERR / G-PREF / G-FAIL with confidence scoring
+Runs on handoff content at session-stop — auto-flags candidates without forcing saves
+CLI:     node atlas-extractor.js {extract|extract-stdin|compact}
+Wired:   session-stop (auto-extracts from handoff), precompact (hint before context loss)
+```
+
+> Extracted from mempalace (12 components). Only 2 taken — the rest rejected as overengineered, dependency-heavy, or duplicating existing systems.
+
 ---
 
 ## The Flow System
@@ -231,10 +253,10 @@ Trivial ─────→ Quick ─────→ Standard ─────→ 
 ├─ PostToolUseFailure ──────────────────────────────────────────┤
 │  tool-failure-handler Circuit breaker (3 strikes → reassess)  │
 ├─ PreCompact ──────────────────────────────────────────────────┤
-│  precompact-reflect  Force reflection before context loss     │
+│  precompact-reflect  KG summary + extractor hint before loss  │
 ├─ Stop ────────────────────────────────────────────────────────┤
 │  session-stop.sh     Handoff creation, todo capture,          │
-│                      auto-continuation chain (depth ≤ 2)      │
+│                      atlas-extractor auto-classify, chain ≤2  │
 ├─ Notification ────────────────────────────────────────────────┤
 │  claudio             Audio alerts for long-running ops        │
 └─ StatusLine ──────────────────────────────────────────────────┤
@@ -345,6 +367,8 @@ skills/
 │   ├── tool-failure-handler.js  #   PostToolUseFailure — circuit breaker
 │   ├── statusline.js            #   StatusLine — context bar, task, call count
 │   ├── context-thresholds.json  #   Single source of truth for context budget
+│   ├── atlas-kg.js              #   Temporal Knowledge Graph (entity/triple/time queries)
+│   ├── atlas-extractor.js       #   Heuristic auto-classifier (text → G-PAT/SOL/ERR/PREF/FAIL)
 │   └── cctools-safety-hooks/    #   PreToolUse — bash, file_length, env protection
 │
 ├── skills/                      # Directory/Page architecture
@@ -424,6 +448,8 @@ Some hooks reference external components. They degrade gracefully — silent no-
 | **Shared hook lib** | `lib.js` shared across all JS hooks | Zero duplication, consistent behavior |
 | **Circuit breaker** | Failure tracking + 3-strike reassessment | Prevents runaway tool failure loops |
 | **Context budget cascade** | 4-stage threshold system with single source of truth | Graceful degradation, not abrupt failure |
+| **Temporal Knowledge Graph** | Entity-triple graph with time validity, queried at session start | Persistent facts that survive context compaction |
+| **Heuristic auto-extractor** | Classifies session output → G-PAT/SOL/ERR/PREF/FAIL candidates | Auto-flags without forcing saves — noise prevention built in |
 
 ---
 
@@ -441,6 +467,7 @@ Checks 50 items: critical files, hooks, settings validity, skill pages (1-3), ar
 
 | Version | Date | Highlights |
 |---------|------|-----------|
+| **6.0.0** | 2026-04-07 | Atlas Intelligence Layer — temporal KG + heuristic extractor, zero deps |
 | **5.9.0** | 2026-04-07 | ULTRATHINK audit — version sync, count corrections, smoke test gap fix |
 | **5.8.0** | 2026-04-06 | Native Engine — 5 new skills, Universal Conductor v2.0, ACTIVE-PAGE-3 |
 | **5.7.0** | 2026-04-06 | Vanguard Web Architecture — 5 new skills, Render Tiers, CSS-First |
