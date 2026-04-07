@@ -25,7 +25,7 @@
 
 <p align="center">
   <img src="https://img.shields.io/badge/claude_code-opus_4.6-blueviolet?style=flat-square" alt="Claude Code">
-  <img src="https://img.shields.io/badge/version-6.0.0-informational?style=flat-square" alt="Version">
+  <img src="https://img.shields.io/badge/version-6.1.0-informational?style=flat-square" alt="Version">
   <img src="https://img.shields.io/badge/skills-78_active-blue?style=flat-square" alt="Skills">
   <img src="https://img.shields.io/badge/knowledge-66_entries-teal?style=flat-square" alt="Knowledge">
   <img src="https://img.shields.io/badge/hooks-11-yellow?style=flat-square" alt="Hooks">
@@ -467,6 +467,7 @@ Checks 50 items: critical files, hooks, settings validity, skill pages (1-3), ar
 
 | Version | Date | Highlights |
 |---------|------|-----------|
+| **6.1.0** | 2026-04-07 | Living Atlas Audit — dead weight purge (22 files), orphaned refs fixed |
 | **6.0.0** | 2026-04-07 | Atlas Intelligence Layer — temporal KG + heuristic extractor, zero deps |
 | **5.9.0** | 2026-04-07 | ULTRATHINK audit — version sync, count corrections, smoke test gap fix |
 | **5.8.0** | 2026-04-06 | Native Engine — 5 new skills, Universal Conductor v2.0, ACTIVE-PAGE-3 |

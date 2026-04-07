@@ -8,7 +8,7 @@
  *   node health-validator.js --skip-network          # Skip version checks (fast)
  *   node health-validator.js --check versions --skip-network  # Dry-run versions
  *
- * Checks: registry, knowledge, versions, hooks, behavior
+ * Checks: knowledge, versions, hooks, behavior
  * Output: JSON to stdout. Exit code always 0 (reporter, not gate).
  */
 
@@ -21,7 +21,6 @@ const CLAUDE_DIR = path.join(os.homedir(), '.claude');
 const SKILLS_DIR = path.join(CLAUDE_DIR, 'skills');
 const MEMORY_DIR = path.join(CLAUDE_DIR, 'projects', 'C--Users-leooa--claude', 'memory');
 const MANIFEST_PATH = path.join(SKILLS_DIR, 'VERSION-MANIFEST.json');
-const REGISTRY_PATH = path.join(SKILLS_DIR, 'REGISTRY.md');
 const INDEX_PATH = path.join(MEMORY_DIR, 'INDEX.md');
 const SETTINGS_PATH = path.join(CLAUDE_DIR, 'settings.json');
 const SESSIONS_DIR = path.join(MEMORY_DIR, 'sessions');
@@ -50,44 +49,7 @@ function daysSince(dateStr) {
   return Math.round((Date.now() - d.getTime()) / 86400000);
 }
 
-// ─── Check 1: Registry Integrity ─────────────────────────────────────
-
-function registryIntegrity() {
-  const result = { total: 0, missing: 0, details: [] };
-
-  const content = safeReadFile(REGISTRY_PATH);
-  if (!content) {
-    result.details.push('REGISTRY.md not found');
-    return result;
-  }
-
-  // Match backtick-quoted paths in table rows: | ID | Name | Purpose | `path` |
-  const pathRegex = /\|\s*`([^`]+)`\s*\|?\s*$/gm;
-  let match;
-
-  while ((match = pathRegex.exec(content)) !== null) {
-    const relPath = match[1];
-
-    // Skip non-path entries (plugin IDs, marketplace refs, Docker refs, etc.)
-    if (relPath.includes('@') || relPath.startsWith('Docker') || relPath.startsWith('Built-in') || relPath.startsWith('Plugin')) continue;
-    // Skip MCP access descriptions (not file paths)
-    if (/^[A-Z]/.test(relPath) && !relPath.startsWith('skills/') && !relPath.startsWith('commands/') && !relPath.startsWith('agents/')) continue;
-
-    result.total++;
-
-    // Resolve path relative to ~/.claude/
-    const absPath = path.join(CLAUDE_DIR, relPath);
-
-    if (!fs.existsSync(absPath)) {
-      result.missing++;
-      result.details.push(`NOT FOUND: ${relPath}`);
-    }
-  }
-
-  return result;
-}
-
-// ─── Check 2: Knowledge Staleness ────────────────────────────────────
+// ─── Check 1: Knowledge Staleness ────────────────────────────────────
 
 function knowledgeStaleness() {
   const result = { total: 0, stale: 0, stale_threshold_days: 90, details: [] };
@@ -333,9 +295,6 @@ function main() {
 
   const results = {};
 
-  if (!specificCheck || specificCheck === 'registry') {
-    results.registry = registryIntegrity();
-  }
   if (!specificCheck || specificCheck === 'knowledge') {
     results.knowledge = knowledgeStaleness();
   }

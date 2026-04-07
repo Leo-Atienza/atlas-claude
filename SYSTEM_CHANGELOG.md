@@ -1,5 +1,27 @@
 # System Changelog
 
+## [6.1.0] — 2026-04-07
+### Living Atlas Audit — dead weight purge, orphaned refs fixed, version sync
+
+**Dead Weight Purge (22 files/dirs, ~488KB)**
+- Deleted: TRASH/__pycache__ + active __pycache__ in cctools-safety-hooks
+- Deleted: 5 corrupted .claude.json backups (March artifacts)
+- Deleted: 10 pre-rebuild backup files (v4.0 artifacts, superseded by weekly backups)
+- Deleted: cache/changelog.md (193KB, superseded by SYSTEM_CHANGELOG.md)
+- Deleted: 2 test efficiency cache files
+- Deleted: broken debug/latest symlink
+
+**Orphaned Reference Fixes**
+- `scripts/health-validator.js`: Removed dead `registryIntegrity()` function (referenced deleted REGISTRY.md since v4.0.0)
+- `atlas-kg/entities.json`: Fixed 4 entities with `type: "unknown"` → proper types (component/project)
+
+**Version Sync (4 files)**
+- Aligned to v6.1.0: SYSTEM_VERSION.md, system_architecture.md, SYSTEM_CHANGELOG.md, MEMORY.md
+
+**Files**: 4 modified, 22 trashed (via TRASH-FILES.md)
+
+---
+
 ## [6.0.0] — 2026-04-07
 ### Atlas Intelligence Layer — temporal KG + heuristic extractor
 
