@@ -25,8 +25,8 @@
 
 <p align="center">
   <img src="https://img.shields.io/badge/claude_code-opus_4.6-blueviolet?style=flat-square" alt="Claude Code">
-  <img src="https://img.shields.io/badge/version-6.1.0-informational?style=flat-square" alt="Version">
-  <img src="https://img.shields.io/badge/skills-78_active-blue?style=flat-square" alt="Skills">
+  <img src="https://img.shields.io/badge/version-6.4.0-informational?style=flat-square" alt="Version">
+  <img src="https://img.shields.io/badge/skills-65_active-blue?style=flat-square" alt="Skills">
   <img src="https://img.shields.io/badge/knowledge-66_entries-teal?style=flat-square" alt="Knowledge">
   <img src="https://img.shields.io/badge/hooks-11-yellow?style=flat-square" alt="Hooks">
   <img src="https://img.shields.io/badge/license-MIT-orange?style=flat-square" alt="License">
@@ -36,7 +36,7 @@
 
 ## What is ATLAS?
 
-Most Claude Code setups are a `CLAUDE.md` with some rules. ATLAS is a **full infrastructure layer** — 11 lifecycle hooks, a self-contained 8KB brain, a 66-entry knowledge store, and a unified Flow execution engine that scales from trivial fixes to multi-agent epic tasks.
+Most Claude Code setups are a `CLAUDE.md` with some rules. ATLAS is a **full infrastructure layer** — 11 lifecycle hooks, a self-contained 8KB brain, a 66-entry knowledge store, and a unified Flow execution engine that scales from trivial fixes to multi-agent epic tasks. 65 active skills across 3 pages, pruned to signal — no bloat.
 
 <table>
 <tr>
@@ -73,7 +73,7 @@ build a REST API for user management
        │  └─────┬─────┘  └─────┬─────┘    │
        │        ▼              ▼          │
        │  ┌──────────────────────────┐    │
-       │  │ 78 Skills · 66 Knowledge │    │ ← Execution
+       │  │ 65 Skills · 66 Knowledge │    │ ← Execution
        │  │ 11 Hooks  · KG · 15+ MCPs│    │
        │  └──────────┬───────────────┘    │
        │             ▼                    │
@@ -291,11 +291,11 @@ Control hook overhead via `ATLAS_HOOK_PROFILE` env var:
 
 ### Directory/Page Architecture
 
-Skills are indexed in two levels — scan the directory, open the page on demand. Never load all 78 at start.
+Skills are indexed in two levels — scan the directory, open the page on demand. Never load all 65 at start.
 
 ```
 skills/
-├── ACTIVE-DIRECTORY.md       # Index: 78 active skills (15 Core + 63 Available)
+├── ACTIVE-DIRECTORY.md       # Index: 65 active skills (15 Core + 50 Available)
 ├── ACTIVE-PAGE-1-*.md        # Web, animation, design, testing, security
 ├── ACTIVE-PAGE-2-*.md        # Backend, deployment, workflow
 ├── ACTIVE-PAGE-3-*.md        # Native, desktop, cross-platform
@@ -439,8 +439,8 @@ Some hooks reference external components. They degrade gracefully — silent no-
 | Feature | What It Does | Why It Matters |
 |---------|-------------|----------------|
 | **Self-contained brain** | CLAUDE.md with all rules inline — no external rule files | Simpler, faster, zero broken references |
-| **Directory/Page skills** | Index → page → skill (never load all 78 at start) | Context-efficient, scales to any size |
-| **3-page skill architecture** | Web + Backend + Native across 3 active pages | Full-stack coverage without bloat |
+| **Directory/Page skills** | Index → page → skill (never load all 65 at start) | Context-efficient, scales to any size |
+| **Curated skill set** | 13 redundant/superseded skills archived in v6.4.0 | Signal over noise — every active skill earns its place |
 | **Knowledge compounding** | 5-category store, confidence-scored, only 4+ saved | Filters noise, preserves signal across sessions |
 | **Auto-continuation** | Context-aware session chaining with structured handoff | Never lose work mid-task |
 | **5D complexity scoring** | Automatic agent deployment (SOLO/DUO/TEAM/SWARM) | Right-sized execution, no manual routing |
@@ -467,6 +467,7 @@ Checks 50 items: critical files, hooks, settings validity, skill pages (1-3), ar
 
 | Version | Date | Highlights |
 |---------|------|-----------|
+| **6.4.0** | 2026-04-07 | Skill curation (78→65), CLAUDE.md pipeline upgrade, functional smoke tests |
 | **6.1.0** | 2026-04-07 | Living Atlas Audit — dead weight purge (22 files), orphaned refs fixed |
 | **6.0.0** | 2026-04-07 | Atlas Intelligence Layer — temporal KG + heuristic extractor, zero deps |
 | **5.9.0** | 2026-04-07 | ULTRATHINK audit — version sync, count corrections, smoke test gap fix |

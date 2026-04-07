@@ -191,7 +191,7 @@ Every generator has a validator. Always run both.
 |---|---|
 | `CLAUDE.md` | Master instructions (self-contained) |
 | `settings.json` | Hooks, permissions, env vars |
-| `skills/ACTIVE-DIRECTORY.md` | Active skill index (78 skills: 15 Core + 63 Available) |
+| `skills/ACTIVE-DIRECTORY.md` | Active skill index (65 skills: 15 Core + 50 Available) |
 | `skills/ARCHIVE-DIRECTORY.md` | Archived skill index (7 bundles) |
 | `hooks/post-tool-monitor.js` | Central PostToolUse telemetry hub |
 | `hooks/context-guard.js` | PreToolUse context + security enforcer |

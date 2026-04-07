@@ -1,6 +1,6 @@
 # ATLAS System
 
-version: 6.1.0
+version: 6.4.0
 last_updated: 2026-04-07
 
 Run `bash ~/.claude/scripts/smoke-test.sh` for current component health.

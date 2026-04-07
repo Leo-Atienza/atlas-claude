@@ -7,15 +7,7 @@ CLAUDE_DIR="$HOME_DIR/.claude"
 NOW=$(date +%s)
 
 # ─── 1. Session context ─────────────────────────────────────────────
-CONFLICTS_FILE="$CLAUDE_DIR/projects/C--Users-leooa--claude/memory/conflicts.md"
 HANDOFF_FILE="$CLAUDE_DIR/.last-session-handoff"
-
-if [ -f "$CONFLICTS_FILE" ]; then
-  CONFLICT_COUNT=$(grep -c "^## CONFLICT-[0-9]" "$CONFLICTS_FILE" 2>/dev/null) || CONFLICT_COUNT=0
-  if [ "$CONFLICT_COUNT" -gt 0 ] 2>/dev/null; then
-    echo "PROGRESSIVE LEARNING: $CONFLICT_COUNT unresolved knowledge conflict(s) detected."
-  fi
-fi
 
 if [ -f "$HANDOFF_FILE" ]; then
   echo "SESSION HANDOFF from previous session:"
@@ -34,12 +26,15 @@ if [ -n "$CURRENT_VER" ]; then
   echo "$CURRENT_VER" > "$VERSION_FILE"
 fi
 
-# ─── 3. Log rotation (>2MB files) ───────────────────────────────────
+# ─── 3. Log rotation (line-count cap: keep last 500 lines) ──────────
 LOGS_DIR="$CLAUDE_DIR/logs"
 if [ -d "$LOGS_DIR" ]; then
   for logfile in "$LOGS_DIR"/failures.jsonl "$LOGS_DIR"/hook-health.jsonl "$LOGS_DIR"/tool-failures.jsonl; do
-    if [ -f "$logfile" ] && [ "$(wc -c < "$logfile" 2>/dev/null || echo 0)" -gt 2000000 ]; then
-      tail -500 "$logfile" > "${logfile}.tmp" && mv "${logfile}.tmp" "$logfile"
+    if [ -f "$logfile" ]; then
+      LINES=$(wc -l < "$logfile" 2>/dev/null || echo 0)
+      if [ "$LINES" -gt 500 ]; then
+        tail -500 "$logfile" > "${logfile}.tmp" && mv "${logfile}.tmp" "$logfile"
+      fi
     fi
   done
 fi
@@ -110,22 +105,52 @@ if [ -n "$KG_SUMMARY" ] && [ "$KG_SUMMARY" != "Knowledge graph empty." ]; then
   echo "$KG_SUMMARY"
 fi
 
-# ─── 7a. Debug directory cleanup (files older than 14 days) ─────────
+# ─── 7a. TRASH cleanup (files older than 7 days) ──────────────────
+TRASH_DIR="$CLAUDE_DIR/TRASH"
+if [ -d "$TRASH_DIR" ]; then
+  find "$TRASH_DIR" -mindepth 1 -mtime +7 -delete 2>/dev/null || true
+fi
+
+# ─── 7c. Debug directory cleanup (files older than 14 days) ─────────
 DEBUG_DIR="$CLAUDE_DIR/debug"
 if [ -d "$DEBUG_DIR" ]; then
   find "$DEBUG_DIR" -maxdepth 1 -name "*.txt" -mtime +14 -delete 2>/dev/null || true
 fi
 
-# ─── 7b. Shell-snapshots cleanup (files older than 30 days) ─────────
+# ─── 7d. Shell-snapshots cleanup (files older than 30 days) ─────────
 SNAP_DIR="$CLAUDE_DIR/shell-snapshots"
 if [ -d "$SNAP_DIR" ]; then
   find "$SNAP_DIR" -maxdepth 1 -name "snapshot-*.sh" -mtime +30 -delete 2>/dev/null || true
 fi
 
-# ─── 7c. Stale todos cleanup (files older than 30 days) ────────────
+# ─── 7e. Stale todos cleanup (files older than 3 days) ─────────────
 TODOS_DIR="$CLAUDE_DIR/todos"
 if [ -d "$TODOS_DIR" ]; then
-  find "$TODOS_DIR" -maxdepth 1 -name "*.json" -mtime +30 -delete 2>/dev/null || true
+  find "$TODOS_DIR" -maxdepth 1 -name "*.json" -mtime +3 -delete 2>/dev/null || true
+fi
+
+# ─── 7f. Plans rotation (keep last 15 by mtime, delete rest) ───────
+PLANS_DIR="$CLAUDE_DIR/plans"
+if [ -d "$PLANS_DIR" ]; then
+  PLAN_COUNT=$(find "$PLANS_DIR" -maxdepth 1 -name "*.md" -type f 2>/dev/null | wc -l)
+  if [ "$PLAN_COUNT" -gt 15 ]; then
+    ls -t "$PLANS_DIR"/*.md 2>/dev/null | tail -n +16 | while read -r f; do rm -f "$f" 2>/dev/null; done
+  fi
+fi
+
+# ─── 7g. Session-env rotation (dirs older than 7 days) ─────────────
+SESSION_ENV_DIR="$CLAUDE_DIR/session-env"
+if [ -d "$SESSION_ENV_DIR" ]; then
+  find "$SESSION_ENV_DIR" -mindepth 1 -maxdepth 1 -type d -mtime +7 -exec rm -rf {} \; 2>/dev/null || true
+fi
+
+# ─── 7h. Cache efficiency rotation (keep last 10) ──────────────────
+CACHE_DIR="$CLAUDE_DIR/cache"
+if [ -d "$CACHE_DIR" ]; then
+  EFF_COUNT=$(ls -1 "$CACHE_DIR"/efficiency-*.json 2>/dev/null | wc -l)
+  if [ "$EFF_COUNT" -gt 10 ]; then
+    ls -t "$CACHE_DIR"/efficiency-*.json 2>/dev/null | tail -n +11 | while read -r f; do rm -f "$f" 2>/dev/null; done
+  fi
 fi
 
 # ─── 8. Stale temp file cleanup ─────────────────────────────────────
@@ -133,9 +158,11 @@ find /tmp -maxdepth 1 -name "claude-ctx-*.json" -mmin +1440 -delete 2>/dev/null 
 find /tmp -maxdepth 1 -name "claude-fail-streak-*.json" -mmin +1440 -delete 2>/dev/null || true
 find /tmp -maxdepth 1 -name "claude-handoff-*.trigger" -mmin +1440 -delete 2>/dev/null || true
 
-CACHE_DIR="$CLAUDE_DIR/cache"
-if [ -d "$CACHE_DIR" ]; then
-  find "$CACHE_DIR" -maxdepth 1 -name "efficiency-*.json" -mmin +10080 -delete 2>/dev/null || true
+# Scratchpad cleanup (files older than 14 days)
+SCRATCHPAD="/c/tmp/claude-scratchpad"
+if [ -d "$SCRATCHPAD" ]; then
+  find "$SCRATCHPAD" -maxdepth 1 -type f -mtime +14 -delete 2>/dev/null || true
+  find "$SCRATCHPAD" -mindepth 1 -maxdepth 1 -type d -mtime +14 -exec rm -rf {} \; 2>/dev/null || true
 fi
 
 # ─── 9. Critical file backup (weekly) ───────────────────────────────
@@ -154,5 +181,7 @@ if [ $(( NOW - LAST_BACKUP )) -ge 604800 ]; then
   find "$BACKUP_DIR" -name "CLAUDE-*.md" -mtime +30 -delete 2>/dev/null || true
   find "$BACKUP_DIR" -name "ACTIVE-DIRECTORY-*.md" -mtime +30 -delete 2>/dev/null || true
   find "$BACKUP_DIR" -name "memory-*.tar.gz" -mtime +30 -delete 2>/dev/null || true
+  # Keep only the 2 most recent .claude.json backups
+  ls -t "$BACKUP_DIR"/.claude.json.backup.* 2>/dev/null | tail -n +3 | while read -r f; do [ -f "$f" ] && find "$f" -delete 2>/dev/null; done || true
   echo "$NOW" > "$BACKUP_STATE"
 fi

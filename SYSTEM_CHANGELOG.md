@@ -1,5 +1,93 @@
 # System Changelog
 
+## [6.4.0] — 2026-04-07
+### System Effectiveness Audit — fix 12 underutilized/broken components
+
+**session-start.sh upgraded with comprehensive rotation**
+- Plans: keep last 15 by mtime (was: unlimited, 99 files accumulated)
+- Session-env dirs: 7-day retention (was: 30-day, 90 dirs accumulated)
+- Todos: 3-day retention (was: 30-day, 44 files accumulated)
+- Cache efficiency files: keep last 10 (was: 7-day, 30+ files)
+- Scratchpad: 14-day retention for files and dirs (new)
+- Log rotation: line-count cap at 500 lines (was: 2MB byte-size only, never triggered)
+
+**Atlas KG improved**
+- Invalidated 2 stale triples (version v6.1.0, pruned_skills_to 65)
+- session-stop.sh now captures: last commit subject (git), session directory (non-git)
+- Non-git sessions (like ~/.claude/) now produce KG triples instead of silently skipping
+
+**Skill tracking reset**
+- skill-stats.json and skill-events.jsonl were phantom data — no hook ever wrote to them
+- Reset both files; awaiting proper instrumentation before tracking resumes
+
+**Scheduled tasks consolidated 7 → 3**
+- Kept: weekly-dream, weekly-maintenance, monthly-evolution-report
+- Removed: weekly-cleanup-scan (now in session-start.sh), weekly-memory-maintenance (redundant with dream), skill-autofix + skill-usage-audit (depend on broken tracking)
+
+**Waste purged**
+- TRASH emptied: evolution.md, conflicts.md, evolution-reports/, memory-sessions/, 4 backup files (~165KB)
+- 85 stale plan files deleted (1.1MB)
+- 51 old session-env dirs, 44 stale todo files, 18 cache files, 800 log lines trimmed
+
+## [6.3.0] — 2026-04-07
+### Memory Restructuring — realign auto-memory with intended design
+
+**Memory audit found the system misused as documentation store instead of user/project/feedback memories.**
+
+**Moved out of memory/ (not memories — system docs)**
+- `system_architecture.md` → `~/.claude/ARCHITECTURE.md`
+- `installed-resources.md` → `~/.claude/INSTALLED.md`
+
+**Deleted (dead weight)**
+- `evolution.md` — meta-tracking with 3 saves, 0 promotions, 0 maturity milestones
+- `evolution-reports/` — single report from March, superseded by SYSTEM_CHANGELOG
+- `conflicts.md` — empty template, never used in 30+ days
+- `sessions/` — 8 stale March session logs, replaced by handoff system
+
+**Hook fix**
+- `session-start.sh`: Removed conflicts.md reference (§1 simplified)
+
+**New memories**
+- `user_profile.md` — first actual user-type memory (role, stack, preferences)
+
+**MEMORY.md rewritten** — clean 4-section index (User/Feedback/Project/Reference), removed Knowledge Store pointers (have own index), System Notes (duplicated changelog), Atlas docs (in ARCHITECTURE.md)
+
+**Files**: 2 moved, 4 deleted (dirs+files), 3 modified, 1 created
+
+---
+
+## [6.2.0] — 2026-04-07
+### System Review — pruning, hygiene, and hardening
+
+**Skill Pruning (78 → 65 active)**
+- Archived 13 skills: redundant subsets (FS-003, FS-065, SK-032, SK-033, CE-003), niche/novelty (SK-010, SK-050, SK-075), meta/workflow overlap (SK-038, SK-041, SK-072, SK-073, SK-074)
+- Updated ACTIVE-DIRECTORY.md, ARCHIVE-DIRECTORY.md, REFERENCE.md, MEMORY.md
+
+**Data Hygiene**
+- Emptied TRASH directory (538KB of pre-rebuild artifacts, corrupted backups, test data)
+- Trashed superseded memory/INDEX.md (13KB, replaced by KNOWLEDGE-DIRECTORY.md)
+- Cleaned .claude.json backup accumulation in backups/ (kept only most recent)
+
+**Automation Improvements**
+- Added TRASH auto-cleanup to session-start.sh §7a (7-day retention policy)
+- Added .claude.json backup rotation to session-start.sh §9 (keep 2 most recent)
+- Wired session-stop.sh to feed Atlas KG with project/branch triples on session end
+- Seeded Atlas KG with baseline system facts (8 entities, 5 triples)
+
+**Hook Hardening**
+- Added section [11] to smoke-test.sh: 8 functional tests for critical hooks
+  - context-guard: Read allowed, .env blocked, AWS key blocked
+  - post-tool-monitor: clean stdin processing
+  - tool-failure-handler: clean stdin processing
+  - lib.js: require-able without errors
+  - atlas-kg.js: require-able with working queries
+  - statusline.js: runs without crash
+- All 60 tests passing (was 58/60 before path fix)
+
+**Files**: 10 modified, 1 trashed, 538KB freed
+
+---
+
 ## [6.1.0] — 2026-04-07
 ### Living Atlas Audit — dead weight purge, orphaned refs fixed, version sync
 

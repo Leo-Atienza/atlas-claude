@@ -3,7 +3,7 @@
 > Lookup: scan this table → find the skill → note its Page → open that page for full details.
 > Loading: read the relevant page on-demand, never all at start.
 > Tiers: **Core** = weekly use, prioritize in suggestions. **Available** = on-demand when task matches.
-> Total active skills: **78** (15 Core + 63 Available) — last updated 2026-04-07
+> Total active skills: **65** (15 Core + 50 Available) — last updated 2026-04-07
 
 ## Core Skills
 
@@ -35,27 +35,18 @@
 | SK-029 | Next.js Best Practices | RSC, data patterns, async APIs, App Router conventions | 1 |
 | SK-030 | Next.js Cache & PPR | Cache Components, PPR, use cache, cacheLife | 1 |
 | SK-031 | Next.js Upgrade Guide | Upgrade Next.js to latest with migration steps | 1 |
-| SK-032 | React Composition Patterns | Scalable React component composition from Vercel | 1 |
-| SK-033 | React Performance (Vercel) | React/Next.js perf optimization from Vercel Engineering | 1 |
 | SK-034 | Web Interface Guidelines | Web design compliance review | 1 |
 | SK-044 | GSAP Advanced (ScrollTrigger) | ScrollTrigger, Flip, Draggable, SplitText, framework integration | 1 |
 | SK-045 | Advanced JavaScript & TypeScript | TC39 (ES2025+), V8 optimization, concurrency, TypeScript | 1 |
 | SK-054 | Web Platform APIs | View Transitions, Popover, Anchor Positioning, Scroll Animations, WebGPU | 1 |
-| FS-003 | JavaScript Expert | Modern JavaScript patterns | 1 |
-| FS-065 | Motion iOS Config | Spring configs, haptics, gestures, 60fps, skeletons | 3 |
 | SC-003 | Insecure Defaults Detector | Hardcoded secrets, weak defaults, fail-open detection | 1 |
-| CE-003 | Reflexion | Auto-refinement loops (complexity, nesting checks) | 1 |
 | SK-009 | Playwright Testing | Browser automation & E2E testing (Chromium/Firefox/WebKit) | 2 |
-| SK-010 | ClaudeKit Design | Brand, logos, CIP, banners, slides, icons, social | 2 |
 | SK-011 | MCP Server Builder | Guide for creating MCP servers (Python FastMCP / Node TS) | 2 |
 | SK-013 | Theme Factory | Apply themes to any artifact (10 presets + custom) | 2 |
 | SK-027 | E2E Testing (AI-Powered) | AI-powered end-to-end testing for mobile/desktop | 2 |
 | SK-028 | Deploy to Vercel | Deploy apps/websites to Vercel | 2 |
-| SK-038 | Self-Evolve | Detect capability gaps, create skills, add MCP servers autonomously | 2 |
 | SK-039 | Smart Swarm | Auto-organize multi-agent teams based on 5D complexity scoring | 2 |
 | SK-040 | Dream Consolidation | Multi-phase memory consolidation — orient, merge, prune | 2 |
-| SK-041 | Project Init | Auto-generate project CLAUDE.md from stack-detected templates | 2 |
-| SK-050 | Nano Banana (Gemini Image) | AI image gen/edit via Google Gemini | 2 |
 | SK-058 | Universal App Conductor | Orchestrates mobile + desktop + universal apps — routes to all native/cross-platform skills | 3 |
 | FS-012 | SQL Expert | SQL optimization, strategic indexes | 2 |
 | FS-028 | API Designer | REST, OpenAPI 3.1, RFC 7807 errors | 2 |
@@ -64,10 +55,6 @@
 | FS-052 | PostgreSQL Expert | PostgreSQL optimization and admin | 2 |
 | SK-070 | TDD (mattpocock) | Red-green-refactor loop for test-first development | 2 |
 | SK-071 | Triage Issue | Bug investigation with root cause + TDD fix plans | 2 |
-| SK-072 | Write a PRD | PRD generation through interactive interviews | 2 |
-| SK-073 | PRD to Plan | Convert PRDs into phased implementation plans (tracer bullets) | 2 |
-| SK-074 | Grill Me | Interview-driven plan/design validation | 2 |
-| SK-075 | Canvas Design | Visual art creation via design philosophy → canvas expression | 1 |
 | SK-076 | Deep Research | Enterprise research pipeline: 8 phases, 3 modes, citation-backed | 2 |
 | SK-077 | Subagent-Driven Dev | Task dispatch → fresh subagent → two-stage review | 2 |
 | SK-078 | Design Audit | 5-dimension technical quality audit (accessibility, perf, theming, responsive, anti-patterns) | 1 |

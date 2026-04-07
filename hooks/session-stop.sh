@@ -65,22 +65,46 @@ try {
   fi
 fi
 
-# ─── 1b. Atlas Extractor — auto-extract memories from handoff ────────
+# ─── 1b. Atlas KG — capture session facts ──────────────────────────
+KG_SCRIPT="$HOME/.claude/hooks/atlas-kg.js"
 EXTRACTOR="$HOME/.claude/hooks/atlas-extractor.js"
-if [ -f "$EXTRACTOR" ] && [ -f "$HANDOFF_FILE" ]; then
-  EXTRACTED=$(cat "$HANDOFF_FILE" | node "$EXTRACTOR" extract-stdin 2>/dev/null | node -e "
-    let d=''; process.stdin.on('data',c=>d+=c); process.stdin.on('end',()=>{
-      try {
-        const items = JSON.parse(d).filter(m => m.confidence >= 0.5);
-        if (items.length > 0) {
-          console.log('ATLAS_EXTRACT: ' + items.length + ' candidate(s)');
-          items.slice(0,3).forEach(m => console.log('  [' + m.atlas_tag + '] ' + m.preview.slice(0,80)));
-        }
-      } catch(e) {}
-    });
-  " 2>/dev/null)
-  if [ -n "$EXTRACTED" ]; then
-    echo "$EXTRACTED" >> "$HANDOFF_FILE"
+if [ -f "$KG_SCRIPT" ] && [ -f "$HANDOFF_FILE" ]; then
+  # Capture project context as KG triples
+  if git rev-parse --is-inside-work-tree >/dev/null 2>&1; then
+    PROJECT_NAME=$(basename "$(git rev-parse --show-toplevel 2>/dev/null)" 2>/dev/null)
+    BRANCH=$(git branch --show-current 2>/dev/null)
+    if [ -n "$PROJECT_NAME" ] && [ -n "$BRANCH" ]; then
+      node "$KG_SCRIPT" add "$PROJECT_NAME" "worked_on" "$BRANCH" --from="$TODAY" 2>/dev/null
+    fi
+    # Capture recent commit subjects as project activity
+    LAST_COMMIT_MSG=$(git log --format="%s" -1 2>/dev/null)
+    if [ -n "$PROJECT_NAME" ] && [ -n "$LAST_COMMIT_MSG" ]; then
+      node "$KG_SCRIPT" add "$PROJECT_NAME" "last_commit" "${LAST_COMMIT_MSG:0:80}" --from="$TODAY" 2>/dev/null
+    fi
+  else
+    # Non-git sessions: capture working directory as context
+    CWD_NAME=$(basename "$(pwd)")
+    if [ -n "$CWD_NAME" ]; then
+      node "$KG_SCRIPT" add "user" "session_in" "$CWD_NAME" --from="$TODAY" 2>/dev/null
+    fi
+  fi
+
+  # Run extractor on handoff content
+  if [ -f "$EXTRACTOR" ]; then
+    EXTRACTED=$(cat "$HANDOFF_FILE" | node "$EXTRACTOR" extract-stdin 2>/dev/null | node -e "
+      let d=''; process.stdin.on('data',c=>d+=c); process.stdin.on('end',()=>{
+        try {
+          const items = JSON.parse(d).filter(m => m.confidence >= 0.5);
+          if (items.length > 0) {
+            console.log('ATLAS_EXTRACT: ' + items.length + ' candidate(s)');
+            items.slice(0,3).forEach(m => console.log('  [' + m.atlas_tag + '] ' + m.preview.slice(0,80)));
+          }
+        } catch(e) {}
+      });
+    " 2>/dev/null)
+    if [ -n "$EXTRACTED" ]; then
+      echo "$EXTRACTED" >> "$HANDOFF_FILE"
+    fi
   fi
 fi
 

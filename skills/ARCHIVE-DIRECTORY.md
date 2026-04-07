@@ -92,3 +92,16 @@
 | SK-015 | Discovery Doc | Technical discovery document creation | Workflow & Meta | 6 |
 | SK-051 | Dev Cycle | Development lifecycle management | Workflow & Meta | 6 |
 | CP-* | Compound Engineering Suite | Brainstorming, orchestrating-swarms, PR resolution, etc. | Workflow & Meta | 6 |
+| FS-003 | JavaScript Expert | Modern JS patterns (superseded by SK-045 Advanced JS & TS) | Web (archived) | N/A |
+| FS-065 | Motion iOS Config | Spring/haptic configs (superseded by SK-097 Native Motion Engine) | Mobile & Native | 5 |
+| SK-010 | ClaudeKit Design | Claude brand assets — logos, CIP, banners, slides | Dormant — Document & Media | 7 |
+| SK-032 | React Composition Patterns | Vercel React composition (covered by FS-021 React Expert) | Web (archived) | N/A |
+| SK-033 | React Performance (Vercel) | Vercel perf patterns (covered by FS-021 React Expert) | Web (archived) | N/A |
+| CE-003 | Reflexion | Auto-refinement triggers (inlined in CLAUDE.md) | Workflow & Meta | 6 |
+| SK-038 | Self-Evolve | Autonomous skill/MCP creation (capability baked into workflow) | Workflow & Meta | 6 |
+| SK-041 | Project Init | Auto-generate project CLAUDE.md (once-per-project use) | Workflow & Meta | 6 |
+| SK-050 | Nano Banana (Gemini Image) | AI image gen/edit via Gemini (novelty) | Dormant — Document & Media | 7 |
+| SK-072 | Write a PRD | PRD generation via interactive interviews | Workflow & Meta | 6 |
+| SK-073 | PRD to Plan | PRD → phased implementation plans (overlaps Flow) | Workflow & Meta | 6 |
+| SK-074 | Grill Me | Interview-driven plan/design validation | Workflow & Meta | 6 |
+| SK-075 | Canvas Design | Visual art creation via design philosophy | Dormant — Document & Media | 7 |

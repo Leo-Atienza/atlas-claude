@@ -8,14 +8,20 @@ Every task follows this sequence. Claude determines the right depth automaticall
 
 ### 1. Analyze & Understand
 - Scan codebase and project CLAUDE.md first — understand what exists before researching externally
+- **System lookup (non-trivial tasks):** Before planning, check what the system already has for this task:
+  - `skills/ACTIVE-DIRECTORY.md` — find matching skills by technology, pattern, or domain. Load the relevant page.
+  - `topics/KNOWLEDGE-DIRECTORY.md` — find matching G-PAT (patterns), G-SOL (solutions), G-ERR (mistakes to avoid), G-FAIL (approaches that failed before). Load the relevant page.
+  - `REFERENCE.md` — check if a slash command, MCP server, or DevOps generator already handles part of the task.
+  - TOOL_SEARCH — discover available MCP tools before defaulting to CLI.
 - Search online when needed: Context7 for library docs, WebSearch for unfamiliar tech. Don't guess — look up. Skip for code already in the project.
 - Ask clarifying questions for ambiguous tasks — conversational style, as many as needed
 - Offer one strong creative recommendation when relevant (design direction, tech approach)
 - ACT without asking for: tests, security scans, skill loading, obvious bug fixes
 
 ### 2. Plan & Prepare
-- Load relevant skills from Active Skills Directory on-demand (not all at start)
-- Check available MCP servers and suggest relevant integrations when useful
+- Apply loaded skills and knowledge — they contain hard-won patterns, known failures, and tested approaches. Use them.
+- **Context7 for framework work:** When the task involves a library/framework (Next.js, React, Supabase, Stripe, etc.), resolve-library-id → get-library-docs BEFORE writing code. Don't rely on training data for API specifics.
+- Check available MCP servers and use them (prefer MCP over CLI for reads).
 - Create a plan: what to build, how, file structure, design direction, technical decisions
 - Use Plan mode for non-trivial work — it handles approval automatically
 
@@ -24,10 +30,13 @@ Every task follows this sequence. Claude determines the right depth automaticall
 - TDD when tests make sense. SDD (Spec-Driven Development) for spec-heavy work.
 - Make creative decisions autonomously — always choose premium over safe. Never hinder performance.
 - Give milestone updates and decision checkpoints as you go
-- Security-scan all changed files
+- **Security triggers** (see REFERENCE.md for full table): Run `sharp-edges` before marking any feature complete. Run `differential-review` when reviewing diffs/PRs. Run `insecure-defaults` when touching auth/secrets/config.
+- **Reflexion self-check:** After writing code, check: cyclomatic complexity >10? Nesting >3 levels? Function >50 lines? Duplicate blocks? Missing error handling? If yes → refactor before moving on.
 
 ### 4. Deliver
 - Self-review: verify tests pass, build succeeds, preview works before declaring done
+- **Visual verification for UI work:** Use Claude Preview MCP (preview_start → preview_screenshot) to verify UI changes. Use preview_inspect for CSS accuracy. Don't skip this for frontend tasks.
+- **Design QA for UI features:** Run the design pipeline: SK-078 (audit) for technical quality, SK-079 (critique) for UX evaluation, SK-080 (polish) for ship-readiness. Scale to task size — a small CSS fix needs only a glance, a new page needs the full pipeline.
 - Show: code complete + tests passing + preview/screenshot
 - Highlight key decisions made
 - Suggest "next level" improvements proactively
@@ -126,9 +135,9 @@ Read state files in order: `.flow/state.yaml` → `session-state.md` → `~/.cla
 ## Skills & Knowledge
 
 - **Skills**: Read `skills/ACTIVE-DIRECTORY.md` to find skills → load the relevant page on-demand. Archive in `skills/ARCHIVE-DIRECTORY.md`. If a skill gap is found → search online → create it.
-- **Knowledge**: Read `topics/KNOWLEDGE-DIRECTORY.md` → load relevant page. Save only genuinely novel patterns (G-PAT), solutions (G-SOL), mistakes (G-ERR), preferences (G-PREF), or failed approaches (G-FAIL).
-- **Reference**: Read `REFERENCE.md` for slash commands, MCP patterns, security triggers, DevOps generators.
-- **MCP**: Prefer MCP over CLI. TOOL_SEARCH discovers tools on-demand.
+- **Knowledge**: Read `topics/KNOWLEDGE-DIRECTORY.md` → load relevant page. **Check G-ERR and G-FAIL entries before implementing** — they document known mistakes and failed approaches. Save only genuinely novel patterns (G-PAT), solutions (G-SOL), mistakes (G-ERR), preferences (G-PREF), or failed approaches (G-FAIL).
+- **Reference**: Read `REFERENCE.md` for slash commands, MCP patterns, security triggers, DevOps generators. **When generating IaC/Docker/CI:** use the generator+validator pairs (always run both).
+- **MCP**: Prefer MCP over CLI. TOOL_SEARCH discovers tools on-demand. **Context7 is mandatory for framework tasks** — resolve-library-id → get-library-docs before writing framework-specific code.
 
 ## Auto Mode
 

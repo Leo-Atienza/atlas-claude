@@ -149,6 +149,51 @@ for h in "$CLAUDE_DIR/hooks"/*.sh; do
   [ -x "$h" ] && pass "$(basename "$h") executable" || warn "$(basename "$h") not executable"
 done
 
+# ─── 11. Hook Functional Tests ─────────────────────────────────────
+echo "[11] Hook Functional Tests"
+
+# Test context-guard.js: should allow Read tool (always-allowed)
+GUARD_RESULT=$(echo '{"session_id":"test-smoke","tool_name":"Read","tool_input":{}}' \
+  | node "$CLAUDE_DIR/hooks/context-guard.js" 2>/dev/null; echo "EXIT:$?")
+echo "$GUARD_RESULT" | grep -q "EXIT:0" \
+  && pass "context-guard allows Read tool" || fail "context-guard blocks Read tool"
+
+# Test context-guard.js: should block writes to .env files
+GUARD_BLOCK=$(echo '{"session_id":"test-smoke","tool_name":"Write","tool_input":{"file_path":"/tmp/test/.env","content":"test"}}' \
+  | node "$CLAUDE_DIR/hooks/context-guard.js" 2>/dev/null)
+echo "$GUARD_BLOCK" | grep -qi "block\|sensitive" \
+  && pass "context-guard blocks .env writes" || fail "context-guard does NOT block .env writes"
+
+# Test context-guard.js: should block content with AWS keys
+GUARD_SECRET=$(echo '{"session_id":"test-smoke","tool_name":"Edit","tool_input":{"file_path":"/tmp/test.js","new_string":"const key = AKIA1234567890123456"}}' \
+  | node "$CLAUDE_DIR/hooks/context-guard.js" 2>/dev/null)
+echo "$GUARD_SECRET" | grep -qi "block\|secret" \
+  && pass "context-guard blocks AWS key content" || fail "context-guard does NOT block AWS keys"
+
+# Test post-tool-monitor.js: should exit cleanly on valid input
+echo '{"session_id":"test-smoke","tool_name":"Read","tool_input":{},"tool_response":"ok"}' \
+  | node "$CLAUDE_DIR/hooks/post-tool-monitor.js" >/dev/null 2>&1
+[ $? -eq 0 ] && pass "post-tool-monitor runs cleanly" || fail "post-tool-monitor crashes"
+
+# Test tool-failure-handler.js: should exit cleanly
+echo '{"session_id":"test-smoke","tool_name":"Bash","tool_input":{"command":"ls"},"tool_response":{"error":"test"}}' \
+  | node "$CLAUDE_DIR/hooks/tool-failure-handler.js" >/dev/null 2>&1
+[ $? -eq 0 ] && pass "tool-failure-handler runs cleanly" || fail "tool-failure-handler crashes"
+
+# Test lib.js: should be require-able without errors
+HOOKS_WIN=$(cygpath -w "$CLAUDE_DIR/hooks" 2>/dev/null || echo "$CLAUDE_DIR/hooks")
+node -e "require(String.raw\`$HOOKS_WIN\` + '/lib')" 2>/dev/null \
+  && pass "lib.js loads without errors" || fail "lib.js fails to load"
+
+# Test atlas-kg.js: should be require-able and support stats
+node -e "const kg = require(String.raw\`$HOOKS_WIN\` + '/atlas-kg'); const s = kg.stats(); console.log(s.entities >= 0 ? 'OK' : 'FAIL')" 2>/dev/null | grep -q "OK" \
+  && pass "atlas-kg.js loads and queries" || fail "atlas-kg.js broken"
+
+# Test statusline.js: should exit cleanly
+timeout 3 node "$CLAUDE_DIR/hooks/statusline.js" >/dev/null 2>&1; EXIT=$?
+[ "$EXIT" -eq 0 ] || [ "$EXIT" -eq 143 ] \
+  && pass "statusline.js runs without crash" || warn "statusline.js exit code $EXIT"
+
 # ─── Summary ────────────────────────────────────────────────────────
 echo ""
 echo "=== Results: $PASS passed, $FAIL failed, $WARN warnings ==="
