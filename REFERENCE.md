@@ -216,7 +216,6 @@ Control hook overhead via `ATLAS_HOOK_PROFILE` env var in settings.json:
 |---------|-------------|----------|
 | `minimal` | context-guard only | Trivial tasks, quick edits |
 | `standard` | All current hooks (default) | Normal development |
-| `strict` | Same as standard (reserved for future differentiation) | No additional behavior yet |
 
 Disable individual hooks: `ATLAS_DISABLED_HOOKS="post-tool-monitor,claudio"`
 

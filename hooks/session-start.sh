@@ -47,12 +47,19 @@ if [ -f "$EP_FILE" ]; then
     try {
       const p = JSON.parse(fs.readFileSync(process.argv[1], "utf8"));
       const cutoff = Date.now() - 7 * 24 * 60 * 60 * 1000;
-      let pruned = 0;
+      let changed = false;
       for (const [k, v] of Object.entries(p)) {
         const lastSeen = new Date(v.last_seen || v.first_seen || 0).getTime();
-        if (lastSeen < cutoff) { delete p[k]; pruned++; }
+        if (lastSeen < cutoff) { delete p[k]; changed = true; }
       }
-      if (pruned > 0) fs.writeFileSync(process.argv[1], JSON.stringify(p));
+      const entries = Object.entries(p);
+      if (entries.length > 100) {
+        entries.sort(([,a],[,b]) => new Date(b.last_seen||0) - new Date(a.last_seen||0));
+        const kept = Object.fromEntries(entries.slice(0, 100));
+        fs.writeFileSync(process.argv[1], JSON.stringify(kept));
+      } else if (changed) {
+        fs.writeFileSync(process.argv[1], JSON.stringify(p));
+      }
     } catch(e) {}
   ' "$EP_FILE" 2>/dev/null
 fi
@@ -80,12 +87,17 @@ if [ -f "$TH_FILE" ]; then
     try {
       const h = JSON.parse(require("fs").readFileSync(process.argv[1],"utf8"));
       if (h.tools) {
+        const cutoff = new Date(Date.now() - 48 * 3600 * 1000).toISOString();
         const bad = Object.entries(h.tools)
-          .filter(([,v]) => v.total_failures >= 5)
-          .sort(([,a],[,b]) => b.total_failures - a.total_failures)
-          .slice(0,3);
+          .map(([t, v]) => {
+            const recent = (v.failures || []).filter(ts => ts > cutoff).length;
+            return [t, recent];
+          })
+          .filter(([, recent]) => recent >= 3)
+          .sort(([, a], [, b]) => b - a)
+          .slice(0, 3);
         if (bad.length) {
-          const lines = bad.map(([t,v]) => "  " + t + ": " + v.total_failures + " failures");
+          const lines = bad.map(([t, n]) => "  " + t + ": " + n + " failures (last 48h)");
           console.log("Unhealthy tools:\n" + lines.join("\n"));
         }
       }

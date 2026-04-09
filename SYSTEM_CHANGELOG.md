@@ -197,7 +197,7 @@
 - statusline.js: Added isHookEnabled() gate (matches context-guard, post-tool-monitor, tool-failure-handler)
 - lib.js: Added honest scope comment documenting which hooks respect profile settings
 
-**Deferred**: Legacy memory/INDEX.md (13KB) migration — deeply referenced by 6 commands + 1 agent, requires dedicated task
+**Completed (v6.5.0)**: Legacy memory/INDEX.md migration — all 10 active files updated to use topics/KNOWLEDGE-DIRECTORY.md and KNOWLEDGE-PAGE-{1-5}.md. Commands: health, new-web, compact, analyze-mistakes, learn, done, reflect, init-memory, skill-review. Agents: flow-learnings-researcher. Skills: dream, self-evolve.
 
 **Files**: 6 modified, 6 files deleted, 3 empty directories removed
 

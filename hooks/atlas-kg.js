@@ -57,6 +57,23 @@ function tripleId(sub, pred, obj) {
   return `t_${sub}_${pred}_${obj}_${hash}`;
 }
 
+// ── Predicate-Based Type Inference ───────────────────────────────────
+
+const PREDICATE_TYPE_MAP = {
+  worked_on:   { subject: "project",   object: "branch" },
+  last_commit: { subject: "project",   object: "commit" },
+  session_in:  { subject: "user",      object: "directory" },
+  version:     { subject: "system",    object: "version" },
+  integrated:  { subject: "system",    object: "component" },
+  source_of:   { subject: "project",   object: "component" },
+  pruned_skills_to: { subject: "system", object: "metric" },
+};
+
+function inferType(predicate, role) {
+  const map = PREDICATE_TYPE_MAP[predicate];
+  return map ? map[role] : null;
+}
+
 // ── Write Operations ─────────────────────────────────────────────────
 
 function addEntity(name, type = "unknown", properties = {}) {
@@ -86,25 +103,34 @@ function addTriple(subject, predicate, object, opts = {}) {
   const objId = entityId(object);
   const pred = predicate.toLowerCase().replace(/\s+/g, "_");
 
-  // Auto-create entities
+  // Auto-create entities with inferred types
   const entities = loadJSON(ENTITIES_FILE);
+  const subType = inferType(pred, "subject") || "unknown";
+  const objType = inferType(pred, "object") || "unknown";
+
   if (!entities[subId]) {
     entities[subId] = {
       id: subId,
       name: subject,
-      type: "unknown",
+      type: subType,
       properties: {},
       created_at: new Date().toISOString(),
     };
+  } else if (entities[subId].type === "unknown" && subType !== "unknown") {
+    entities[subId].type = subType;
+    entities[subId].updated_at = new Date().toISOString();
   }
   if (!entities[objId]) {
     entities[objId] = {
       id: objId,
       name: object,
-      type: "unknown",
+      type: objType,
       properties: {},
       created_at: new Date().toISOString(),
     };
+  } else if (entities[objId].type === "unknown" && objType !== "unknown") {
+    entities[objId].type = objType;
+    entities[objId].updated_at = new Date().toISOString();
   }
   saveJSON(ENTITIES_FILE, entities);
 
@@ -159,6 +185,37 @@ function invalidate(subject, predicate, object, ended = null) {
   }
   if (invalidated > 0) saveJSON(TRIPLES_FILE, triples);
   return invalidated;
+}
+
+function invalidateByPredicate(subject, predicate, ended = null) {
+  const subId = entityId(subject);
+  const pred = predicate.toLowerCase().replace(/\s+/g, "_");
+  ended = ended || new Date().toISOString().slice(0, 10);
+
+  const triples = loadJSON(TRIPLES_FILE);
+  let invalidated = 0;
+  for (const t of Object.values(triples)) {
+    if (t.subject === subId && t.predicate === pred && !t.valid_to) {
+      t.valid_to = ended;
+      invalidated++;
+    }
+  }
+  if (invalidated > 0) saveJSON(TRIPLES_FILE, triples);
+  return invalidated;
+}
+
+function prune(maxAgeDays = 30) {
+  const cutoff = new Date(Date.now() - maxAgeDays * 86400000).toISOString();
+  const triples = loadJSON(TRIPLES_FILE);
+  let pruned = 0;
+  for (const t of Object.values(triples)) {
+    if (t.valid_to && t.valid_to < cutoff.slice(0, 10)) {
+      delete triples[t.id];
+      pruned++;
+    }
+  }
+  if (pruned > 0) saveJSON(TRIPLES_FILE, triples);
+  return pruned;
 }
 
 // ── Query Operations ─────────────────────────────────────────────────
@@ -343,6 +400,20 @@ function cli() {
       console.log(`Invalidated ${n} triple(s)`);
       break;
     }
+    case "invalidate-pred": {
+      const [sp, pp] = positional;
+      if (!sp || !pp)
+        return console.error("Usage: atlas-kg invalidate-pred <subject> <predicate>");
+      const np = invalidateByPredicate(sp, pp, flags.ended);
+      console.log(`Invalidated ${np} triple(s) for ${sp} → ${pp}`);
+      break;
+    }
+    case "prune": {
+      const days = parseInt(flags.days || "30", 10);
+      const np = prune(days);
+      console.log(`Pruned ${np} expired triple(s) older than ${days} days`);
+      break;
+    }
     case "query": {
       const entity = positional[0];
       if (!entity) return console.error("Usage: atlas-kg query <entity> [--as_of=DATE]");
@@ -395,6 +466,8 @@ function cli() {
       console.log("  add-entity <name> [--type=TYPE]");
       console.log("  add <subject> <predicate> <object> [--from=DATE]");
       console.log("  invalidate <subject> <predicate> <object> [--ended=DATE]");
+      console.log("  invalidate-pred <subject> <predicate> [--ended=DATE]");
+      console.log("  prune [--days=30]");
       console.log("  query <entity> [--as_of=DATE] [--direction=both|outgoing|incoming]");
       console.log("  timeline [entity]");
       console.log("  recent [--days=7]");
@@ -409,6 +482,8 @@ module.exports = {
   addEntity,
   addTriple,
   invalidate,
+  invalidateByPredicate,
+  prune,
   queryEntity,
   queryRelationship,
   timeline,

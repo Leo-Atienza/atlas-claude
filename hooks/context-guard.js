@@ -28,6 +28,7 @@ const STALE_SECONDS = thresholds.stale_seconds;
 const ALWAYS_ALLOWED = new Set([
   'Read', 'Glob', 'Grep', 'TodoWrite', 'ToolSearch',
   'AskUserQuestion', 'EnterPlanMode', 'ExitPlanMode',
+  'Skill', 'SendMessage',
 ]);
 
 // Tools that get security gate checks

@@ -67,16 +67,28 @@ function findCurrentTask(session) {
   if (!fs.existsSync(todosDir)) return '';
 
   try {
-    const files = fs.readdirSync(todosDir)
-      .filter(f => f.startsWith(session) && f.includes('-agent-') && f.endsWith('.json'))
+    const allFiles = fs.readdirSync(todosDir).filter(f => f.endsWith('.json'));
+
+    // Try strict match first (session prefix + agent pattern)
+    let files = allFiles
+      .filter(f => f.startsWith(session) && f.includes('-agent-'))
       .map(f => ({ name: f, mtime: fs.statSync(path.join(todosDir, f)).mtime }))
       .sort((a, b) => b.mtime - a.mtime);
+
+    // Fallback: partial session ID match (first 8 chars)
+    if (files.length === 0 && session.length >= 8) {
+      const prefix = session.substring(0, 8);
+      files = allFiles
+        .filter(f => f.includes(prefix))
+        .map(f => ({ name: f, mtime: fs.statSync(path.join(todosDir, f)).mtime }))
+        .sort((a, b) => b.mtime - a.mtime);
+    }
 
     if (files.length === 0) return '';
 
     const todos = readJsonSafe(path.join(todosDir, files[0].name), []);
     const inProgress = todos.find(t => t.status === 'in_progress');
-    return inProgress?.activeForm || '';
+    return inProgress?.content || '';
   } catch (_) {
     return '';
   }

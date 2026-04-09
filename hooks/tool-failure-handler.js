@@ -87,12 +87,16 @@ function updateToolHealth(toolName, streakCount) {
   const health = readJsonSafe(healthPath, { tools: {} });
   if (!health.tools) health.tools = {};
 
-  const t = health.tools[toolName] || { total_failures: 0 };
-  t.total_failures += 1;
-  t.last_failure = new Date().toISOString();
+  const now = new Date().toISOString();
+  const t = health.tools[toolName] || { total_failures: 0, failures: [] };
+  t.total_failures = (t.total_failures || 0) + 1;
+  t.failures = t.failures || [];
+  t.failures.push(now);
+  if (t.failures.length > 50) t.failures = t.failures.slice(-50);
+  t.last_failure = now;
   t.consecutive_streak = streakCount;
   health.tools[toolName] = t;
-  health._meta = { last_updated: new Date().toISOString() };
+  health._meta = { last_updated: now };
 
   writeJsonSafe(healthPath, health);
 }

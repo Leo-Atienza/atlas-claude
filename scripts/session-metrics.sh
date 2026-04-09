@@ -50,16 +50,22 @@ fi
 echo ""
 
 # ─── 3. Tool health (from tool-health.json) ──────────────────────────
-echo "[3] Tool Health"
+echo "[3] Tool Health (48h window)"
 TH_FILE="$LOGS_DIR/tool-health.json"
 if [ -f "$TH_FILE" ]; then
   node -e '
     const h = JSON.parse(require("fs").readFileSync(process.argv[1],"utf8"));
     if (!h.tools || Object.keys(h.tools).length === 0) { console.log("  No tools tracked"); process.exit(0); }
-    const sorted = Object.entries(h.tools).sort(([,a],[,b]) => b.total_failures - a.total_failures);
-    sorted.forEach(([tool, data]) => {
-      const status = data.total_failures >= 10 ? "UNHEALTHY" : data.total_failures >= 5 ? "WARN" : "OK";
-      console.log("  " + tool + ": " + data.total_failures + " failures (" + status + ")");
+    const cutoff = new Date(Date.now() - 48 * 3600 * 1000).toISOString();
+    const sorted = Object.entries(h.tools).map(([tool, data]) => {
+      const recent = (data.failures || []).filter(ts => ts > cutoff).length;
+      return [tool, recent, data.total_failures || 0];
+    }).filter(([, recent]) => recent > 0)
+    .sort(([, a], [, b]) => b - a);
+    if (sorted.length === 0) { console.log("  All tools healthy (0 failures in 48h)"); process.exit(0); }
+    sorted.forEach(([tool, recent, total]) => {
+      const status = recent >= 10 ? "UNHEALTHY" : recent >= 5 ? "WARN" : "OK";
+      console.log("  " + tool + ": " + recent + " failures/48h (" + total + " all-time, " + status + ")");
     });
   ' "$TH_FILE" 2>/dev/null || echo "  Parse error"
 else

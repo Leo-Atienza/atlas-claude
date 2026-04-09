@@ -25,7 +25,7 @@
 
 <p align="center">
   <img src="https://img.shields.io/badge/claude_code-opus_4.6-blueviolet?style=flat-square" alt="Claude Code">
-  <img src="https://img.shields.io/badge/version-6.4.0-informational?style=flat-square" alt="Version">
+  <img src="https://img.shields.io/badge/version-6.5.0-informational?style=flat-square" alt="Version">
   <img src="https://img.shields.io/badge/skills-65_active-blue?style=flat-square" alt="Skills">
   <img src="https://img.shields.io/badge/knowledge-66_entries-teal?style=flat-square" alt="Knowledge">
   <img src="https://img.shields.io/badge/hooks-11-yellow?style=flat-square" alt="Hooks">
@@ -36,7 +36,7 @@
 
 ## What is ATLAS?
 
-Most Claude Code setups are a `CLAUDE.md` with some rules. ATLAS is a **full infrastructure layer** — 11 lifecycle hooks, a self-contained 8KB brain, a 66-entry knowledge store, and a unified Flow execution engine that scales from trivial fixes to multi-agent epic tasks. 65 active skills across 3 pages, pruned to signal — no bloat.
+Most Claude Code setups are a `CLAUDE.md` with some rules. ATLAS is a **full infrastructure layer** — 11 lifecycle hooks, a self-contained brain with auto-workflows, a 66-entry knowledge store, and a unified Flow execution engine that scales from trivial fixes to multi-agent epic tasks. 65 active skills across 3 pages, pruned to signal — no bloat.
 
 <table>
 <tr>
@@ -372,7 +372,7 @@ skills/
 │   └── cctools-safety-hooks/    #   PreToolUse — bash, file_length, env protection
 │
 ├── skills/                      # Directory/Page architecture
-│   ├── ACTIVE-DIRECTORY.md      #   Index: 78 active skills (15 Core + 63 Available)
+│   ├── ACTIVE-DIRECTORY.md      #   Index: 65 active skills (15 Core + 50 Available)
 │   ├── ACTIVE-PAGE-1-*.md       #   Web, animation, design, testing, security
 │   ├── ACTIVE-PAGE-2-*.md       #   Backend, deployment, workflow
 │   ├── ACTIVE-PAGE-3-*.md       #   Native, desktop, cross-platform
@@ -394,10 +394,9 @@ skills/
 │   └── flow/                    #   21 Flow workflow commands
 │
 ├── scripts/                     # System utilities
-│   ├── smoke-test.sh            #   Comprehensive system validator
-│   ├── session-metrics.sh       #   Session analytics report
-│   ├── health-validator.js      #   Health verification
-│   └── skill-improver.js        #   Skill auto-improvement
+│   ├── smoke-test.sh            #   Comprehensive system validator (13 sections)
+│   ├── session-metrics.sh       #   Session analytics report (48h windowed)
+│   └── health-validator.js      #   Health verification
 │
 ├── agents/                      # 16 specialized Flow agents
 │   ├── flow-planner.md          #   Plan creation with wave dependencies
@@ -459,7 +458,7 @@ Some hooks reference external components. They degrade gracefully — silent no-
 bash ~/.claude/scripts/smoke-test.sh
 ```
 
-Checks 50 items: critical files, hooks, settings validity, skill pages (1-3), archive pages (1-7), knowledge pages, templates, symlinks, context thresholds, security config, and hook executability.
+Checks 13 sections: critical files, hooks, settings validity, skill pages (1-3), archive pages (1-7), knowledge pages, templates, symlinks, context thresholds, security config, hook executability, Atlas KG integrity, and memory system health.
 
 ---
 
@@ -467,6 +466,7 @@ Checks 50 items: critical files, hooks, settings validity, skill pages (1-3), ar
 
 | Version | Date | Highlights |
 |---------|------|-----------|
+| **6.5.0** | 2026-04-08 | KG type inference + prune, 48h-windowed health, CLAUDE.md auto-workflows, dead weight purge |
 | **6.4.0** | 2026-04-07 | Skill curation (78→65), CLAUDE.md pipeline upgrade, functional smoke tests |
 | **6.1.0** | 2026-04-07 | Living Atlas Audit — dead weight purge (22 files), orphaned refs fixed |
 | **6.0.0** | 2026-04-07 | Atlas Intelligence Layer — temporal KG + heuristic extractor, zero deps |

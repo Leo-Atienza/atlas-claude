@@ -18,13 +18,12 @@ const paths = {
 };
 
 // ── Hook Profiles ──────────────────────────────────────────────────
-// ATLAS_HOOK_PROFILE=minimal|standard|strict (default: standard)
+// ATLAS_HOOK_PROFILE=minimal|standard (default: standard)
 // ATLAS_DISABLED_HOOKS=comma-separated hook identifiers to skip
 //
 // Profiles control which hooks fire:
 //   minimal  — context-guard only (fastest, for trivial tasks)
 //   standard — all current hooks (default behavior)
-//   strict   — all hooks + extra validation (for production deploys)
 // Profile gates: Only JS hooks calling isHookEnabled() respect profiles.
 // Bash/Python hooks (session-start/stop, precompact-reflect, auto-formatter,
 // cctools-*, claudio) always run regardless of profile setting.
@@ -32,7 +31,6 @@ const ALL_HOOKS = ['context-guard', 'post-tool-monitor', 'tool-failure-handler',
 const HOOK_PROFILES = {
   minimal: new Set(['context-guard']),
   standard: new Set(ALL_HOOKS),
-  strict: new Set(ALL_HOOKS), // Currently same as standard; reserved for future validation hooks
 };
 
 function getActiveProfile() {
@@ -73,8 +71,8 @@ function readJsonSafe(filePath, fallback) {
   }
 }
 
-function writeJsonSafe(filePath, data) {
-  try { fs.writeFileSync(filePath, JSON.stringify(data)); } catch (_) {}
+function writeJsonSafe(filePath, data, indent) {
+  try { fs.writeFileSync(filePath, JSON.stringify(data, null, indent)); } catch (_) {}
 }
 
 function appendLine(filePath, line) {

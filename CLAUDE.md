@@ -68,6 +68,17 @@ One system for everything: scope, agent routing, and flow depth.
 **ACT without asking:** Clear bug reproduction, unambiguous single action, validation/testing, security scanning.
 **ASK before acting:** Multiple valid architectures, unclear scope, destructive ops, deployment, greenfield tech choice. Use 1-5 multiple-choice questions with defaults marked.
 
+## Behavioral Rules
+
+### Review vs Implement
+When asked to 'review', 'critique', 'audit', or 'analyze' — ONLY report findings with severity ratings. Do NOT implement changes unless explicitly told to. Present findings first, wait for approval on what to fix.
+
+### File Deletion
+Never use `rm` to delete files. Always use `mv` to a trash directory (`C:/tmp/trash/` or the project's `TRASH/` folder). The safety hook blocks `rm` — don't fight it, use alternatives.
+
+### Debugging
+When debugging failures: ALWAYS capture and show the actual error/response before hypothesizing a root cause. Never attribute blame to missing keys, wrong config, or timeout limits without empirical verification first. Sequence: observe real output → form hypothesis → verify → fix. Not: guess → implement fix → discover guess was wrong.
+
 ## Session Resume
 
 When returning to previous work, ask: "Want a recap or should we jump in?"
@@ -146,6 +157,46 @@ When autonomous (scheduled tasks, agent hooks): plan first for non-trivial work,
 ## Platform
 
 Windows 11 host, Unix shell syntax in bash (forward slashes, /dev/null not NUL). Scratchpad: `C:/tmp/claude-scratchpad/`.
+
+## Automatic Workflows
+
+These workflows fire automatically based on context. Do not wait to be asked.
+
+### Auto-Handoff (every session end)
+When the session is ending (user says "done", "wrap up", "that's it", or work is complete):
+1. Commit all pending changes with a descriptive conventional commit message
+2. Push to the current branch
+3. Generate a handoff document at `~/.claude/sessions/handoff-YYYY-MM-DD.md` with: changes summary, files modified, pending items, knowledge extracted
+4. Update memory if anything session-worthy was learned
+
+### Auto-Scraper-Debug (JobHunter project)
+When debugging scraper failures in the JobHunter project, automatically follow this protocol:
+1. Run the failing scraper in isolation — capture the raw response/error payload
+2. Show the actual output before hypothesizing root cause
+3. Verify env vars are loaded, endpoint is reachable, and SDK version is correct
+4. Implement a fix based on evidence, not assumptions
+5. Re-run the scraper to confirm the fix works before moving to the next
+6. After all scrapers pass, run the full test suite
+7. If any scraper fails after 3 fix attempts, stop and report with raw output
+
+### Auto-Parallel-Audit (system audits)
+When running a system audit (stale references, dead code, orphaned files, version mismatches), automatically parallelize:
+1. Spawn separate sub-agents for each audit domain: orphaned file references, version string mismatches, dead exports, stale TODO/FIXME comments
+2. Each agent collects findings into a structured list — NO changes yet
+3. Coordinator deduplicates findings across agents and presents a unified report
+4. Wait for approval on what to fix (follows Review vs Implement rule)
+5. Fix approved issues, run smoke tests after each batch
+6. Present final summary table: category | files changed | issues fixed
+
+### Auto-Verified-Deploy (after pushing code)
+When deploying to production (Vercel or any host), automatically verify after push:
+1. Run the full test suite locally — stop if anything fails
+2. Pre-deploy check: verify env vars referenced in code exist, no hardcoded localhost URLs, no stray console.log
+3. Commit and push
+4. Wait for deployment (90s for Vercel), then verify production URL returns 200
+5. Hit each API endpoint with a test request and verify response shape
+6. If any endpoint fails: diagnose by comparing local vs production, fix, restart from step 1
+7. Once verified, create a handoff doc noting what shipped and endpoints verified
 
 ## Graceful Degradation
 

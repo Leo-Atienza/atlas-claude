@@ -194,6 +194,58 @@ timeout 3 node "$CLAUDE_DIR/hooks/statusline.js" >/dev/null 2>&1; EXIT=$?
 [ "$EXIT" -eq 0 ] || [ "$EXIT" -eq 143 ] \
   && pass "statusline.js runs without crash" || warn "statusline.js exit code $EXIT"
 
+# ─── 12. Atlas KG Integrity ──────────────────────────────────────────
+echo "[12] Atlas KG Integrity"
+KG_DIR="$CLAUDE_DIR/atlas-kg"
+for f in entities.json triples.json; do
+  KG_PATH="$KG_DIR/$f"
+  if [ -f "$KG_PATH" ]; then
+    KG_WIN=$(cygpath -w "$KG_PATH" 2>/dev/null || echo "$KG_PATH")
+    node -e "JSON.parse(require('fs').readFileSync(String.raw\`$KG_WIN\`,'utf8'))" 2>/dev/null \
+      && pass "$f valid JSON" || fail "$f INVALID JSON"
+  else
+    warn "$f not found (KG may be empty)"
+  fi
+done
+
+# Check for orphaned triple references
+if [ -f "$KG_DIR/entities.json" ] && [ -f "$KG_DIR/triples.json" ]; then
+  ENT_WIN=$(cygpath -w "$KG_DIR/entities.json" 2>/dev/null || echo "$KG_DIR/entities.json")
+  TRP_WIN=$(cygpath -w "$KG_DIR/triples.json" 2>/dev/null || echo "$KG_DIR/triples.json")
+  node -e "
+    const fs = require('fs');
+    const e = JSON.parse(fs.readFileSync(String.raw\`$ENT_WIN\`,'utf8'));
+    const t = JSON.parse(fs.readFileSync(String.raw\`$TRP_WIN\`,'utf8'));
+    let orphans = 0;
+    for (const tr of Object.values(t)) {
+      if (!e[tr.subject]) orphans++;
+      if (!e[tr.object]) orphans++;
+    }
+    if (orphans > 0) { console.log(orphans + ' orphaned refs'); process.exit(1); }
+  " 2>/dev/null && pass "No orphaned triple references" || warn "Orphaned triple refs found"
+
+  # Check for unknown-type entities
+  node -e "
+    const e = JSON.parse(require('fs').readFileSync(String.raw\`$ENT_WIN\`,'utf8'));
+    const unknowns = Object.values(e).filter(x => x.type === 'unknown');
+    if (unknowns.length > 0) { console.log(unknowns.length + ' unknown-type entities'); process.exit(1); }
+  " 2>/dev/null && pass "All entities have types" || warn "Unknown-type entities found"
+fi
+
+# ─── 13. Memory System ──────────────────────────────────────────────
+echo "[13] Memory System"
+MEMORY_DIR="$CLAUDE_DIR/projects/C--Users-leooa--claude/memory"
+if [ -f "$MEMORY_DIR/MEMORY.md" ]; then
+  pass "MEMORY.md exists"
+  BROKEN_REFS=""
+  while IFS= read -r ref; do
+    [ -f "$MEMORY_DIR/$ref" ] || BROKEN_REFS="${BROKEN_REFS} $ref"
+  done < <(grep -oP '\[.*?\]\(\K[^)]+' "$MEMORY_DIR/MEMORY.md" 2>/dev/null || true)
+  [ -z "$BROKEN_REFS" ] && pass "All MEMORY.md refs resolve" || warn "Broken memory refs:$BROKEN_REFS"
+else
+  warn "MEMORY.md not found"
+fi
+
 # ─── Summary ────────────────────────────────────────────────────────
 echo ""
 echo "=== Results: $PASS passed, $FAIL failed, $WARN warnings ==="

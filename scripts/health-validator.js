@@ -21,9 +21,8 @@ const CLAUDE_DIR = path.join(os.homedir(), '.claude');
 const SKILLS_DIR = path.join(CLAUDE_DIR, 'skills');
 const MEMORY_DIR = path.join(CLAUDE_DIR, 'projects', 'C--Users-leooa--claude', 'memory');
 const MANIFEST_PATH = path.join(SKILLS_DIR, 'VERSION-MANIFEST.json');
-const INDEX_PATH = path.join(MEMORY_DIR, 'INDEX.md');
+const KNOWLEDGE_DIR_PATH = path.join(CLAUDE_DIR, 'topics', 'KNOWLEDGE-DIRECTORY.md');
 const SETTINGS_PATH = path.join(CLAUDE_DIR, 'settings.json');
-const SESSIONS_DIR = path.join(MEMORY_DIR, 'sessions');
 
 // ─── Helpers ─────────────────────────────────────────────────────────
 
@@ -54,14 +53,14 @@ function daysSince(dateStr) {
 function knowledgeStaleness() {
   const result = { total: 0, stale: 0, stale_threshold_days: 90, details: [] };
 
-  const content = safeReadFile(INDEX_PATH);
+  const content = safeReadFile(KNOWLEDGE_DIR_PATH);
   if (!content) {
-    result.details.push('INDEX.md not found');
+    result.details.push('KNOWLEDGE-DIRECTORY.md not found');
     return result;
   }
 
-  // Match table rows with ID and Date columns: | G-PAT-001 | Name | Summary | Tags | 2026-02-27 |
-  const rowRegex = /^\|\s*(G-\w+-\d+)\s*\|\s*([^|]+)\|[^|]+\|[^|]+\|\s*(\d{4}-\d{2}-\d{2})\s*\|/gm;
+  // Match 4-column table rows: | G-PAT-001 | Name | Tags | 2026-02-27 |
+  const rowRegex = /^\|\s*(G-\w+-\d+)\s*\|\s*([^|]+)\|\s*[^|]+\|\s*(\d{4}-\d{2}-\d{2})\s*\|/gm;
   let match;
 
   while ((match = rowRegex.exec(content)) !== null) {
@@ -237,49 +236,36 @@ function hookIntegrity() {
 
 function behavioralAudit() {
   const result = {
-    last_3_reflected: true,
     pending_flags: false,
-    sessions_without_security: [],
-    total_sessions: 0
+    knowledge_health: { total: 0, pages_found: 0, pages_expected: 5 },
+    memory_health: { exists: false, entries: 0 },
   };
 
   // Check pending reflection flag
   const flagPath = path.join(CLAUDE_DIR, '.pending-reflection');
   result.pending_flags = fs.existsSync(flagPath);
 
-  // Check sessions index
-  const indexPath = path.join(SESSIONS_DIR, 'sessions-index.md');
-  const indexContent = safeReadFile(indexPath);
-
-  if (!indexContent) {
-    result.last_3_reflected = false;
-    return result;
+  // Check knowledge store health (all 5 pages present)
+  const knowledgeContent = safeReadFile(KNOWLEDGE_DIR_PATH);
+  if (knowledgeContent) {
+    const rowRegex = /^\|\s*G-\w+-\d+\s*\|/gm;
+    const matches = knowledgeContent.match(rowRegex);
+    result.knowledge_health.total = matches ? matches.length : 0;
+  }
+  for (let i = 1; i <= 5; i++) {
+    const pagePath = path.join(CLAUDE_DIR, 'topics', `KNOWLEDGE-PAGE-${i}-${['patterns','solutions','errors','preferences','failures'][i-1]}.md`);
+    if (fs.existsSync(pagePath)) result.knowledge_health.pages_found++;
   }
 
-  // Parse session entries — format varies, look for date-based filenames
-  const sessionFiles = [];
-  try {
-    const files = fs.readdirSync(SESSIONS_DIR)
-      .filter(f => f.endsWith('.md') && f !== 'sessions-index.md')
-      .sort()
-      .reverse();
-    result.total_sessions = files.length;
-
-    // Check last 3 sessions for reflection (they exist = reflection happened)
-    if (files.length < 3) {
-      result.last_3_reflected = files.length > 0;
+  // Check memory system health
+  const memoryIndex = path.join(MEMORY_DIR, 'MEMORY.md');
+  if (fs.existsSync(memoryIndex)) {
+    result.memory_health.exists = true;
+    const memContent = safeReadFile(memoryIndex);
+    if (memContent) {
+      const links = memContent.match(/\[.*?\]\([^)]+\)/g);
+      result.memory_health.entries = links ? links.length : 0;
     }
-
-    // Check last 5 sessions for security scan mentions
-    const recentFiles = files.slice(0, 5);
-    for (const file of recentFiles) {
-      const content = safeReadFile(path.join(SESSIONS_DIR, file));
-      if (content && !(/security|sharp-edges|differential-review|security-scan/i.test(content))) {
-        result.sessions_without_security.push(file);
-      }
-    }
-  } catch {
-    // Sessions dir might not exist
   }
 
   return result;
