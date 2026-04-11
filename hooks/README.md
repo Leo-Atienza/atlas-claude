@@ -104,9 +104,12 @@ process.exit(0)   // JS — no stdout
 | `cctools bash_hook.py` | PreToolUse | Bash | (blocks only, no logs) |
 | `cctools file_length_limit_hook.py` | PreToolUse | Write\|Edit | (blocks only, no logs) |
 | `cctools read_env_protection_hook.py` | PreToolUse | Read | (blocks only, no logs) |
+| graphify hint (inline bash) | PreToolUse | Glob\|Grep | (stdout only — suggests graph navigation when `graphify-out/graph.json` exists) |
+| `allow_git_hook.py` | UserPromptSubmit | * | (session-scoped git approval, no logs) |
 | `auto-formatter` | PostToolUse | Write\|Edit\|MultiEdit | (no logs) |
+| `tsc-check.js` | PostToolUse | Write\|Edit\|MultiEdit | (stdout only — TS errors as additionalContext) |
 | `post-tool-monitor.js` | PostToolUse | Write\|Edit\|MultiEdit\|Bash\|Agent | `logs/failures.jsonl`, `logs/error-patterns.json`, `logs/hook-health.jsonl`, `logs/tool-call-counts.json`, `cache/efficiency-*.json` |
-| `tool-failure-handler.js` | PostToolUseFailure | * | `logs/tool-failures.jsonl`, `logs/tool-health.json` |
+| `tool-failure-handler.js` | PostToolUseFailure | * | `logs/tool-failures.jsonl`, `logs/tool-health.json` (MCP failures tagged with `is_mcp: true`) |
 | `session-start.sh` | SessionStart | * | (stdout only) |
 | `session-stop.sh` | Stop | * | `.last-session-handoff` |
 | `precompact-reflect.sh` | PreCompact | * | (stdout only) |
@@ -127,3 +130,11 @@ process.exit(0)   // JS — no stdout
 2. Register it in `settings.json` under the appropriate event
 3. Add a test to `scripts/smoke-test.sh`
 4. Prefer extending `post-tool-monitor.js` for new PostToolUse telemetry
+
+## Security: BYPASS_SAFETY_HOOKS
+
+`context-guard.js` checks for `BYPASS_SAFETY_HOOKS=1` in environment variables. When set, **all security checks are skipped** (`.env` write detection, AWS key blocking, context budget enforcement).
+
+- Bypass events are logged to `logs/security-bypass.jsonl`
+- **Do NOT set this in `settings.json` env vars** — use only for emergency debugging
+- This is an escape hatch, not a workflow toggle. If you need to bypass a specific check, modify the check itself

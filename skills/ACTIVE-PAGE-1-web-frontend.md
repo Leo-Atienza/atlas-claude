@@ -15,14 +15,11 @@
 | SK-029 | Next.js Best Practices | `skills/next-best-practices/SKILL.md` | RSC patterns, async APIs, App Router conventions, data fetching strategies |
 | SK-030 | Next.js Cache & PPR | `skills/next-cache-components/SKILL.md` | Cache Components, Partial Prerendering, use cache, cacheLife, cacheTag |
 | SK-031 | Next.js Upgrade Guide | `skills/next-upgrade/SKILL.md` | Step-by-step Next.js version migration with breaking change resolution |
-| SK-032 | React Composition Patterns | `skills/vercel-composition-patterns/SKILL.md` | Scalable React component composition patterns from Vercel Engineering |
-| SK-033 | React Performance (Vercel) | `skills/vercel-react-best-practices/SKILL.md` | React/Next.js performance optimization from Vercel Engineering |
 | SK-034 | Web Interface Guidelines | `skills/web-design-guidelines/SKILL.md` | Web design compliance review and interface quality checks |
 | SK-045 | Advanced JavaScript & TypeScript | `skills/advanced-javascript/SKILL.md` | TC39 (ES2025+), V8 optimization, concurrency patterns, advanced TypeScript |
 | SK-054 | Web Platform APIs | `skills/web-platform-apis/SKILL.md` | View Transitions, Popover API, Anchor Positioning, Scroll-Driven Animations, WebGPU |
 | SK-055 | TanStack Ecosystem | `skills/tanstack-ecosystem/SKILL.md` | TanStack Query + Form + Router for React applications |
 | FS-002 | TypeScript Expert | `skills/fullstack-dev/typescript-pro/SKILL.md` | Strict TypeScript, generics, conditional types, type safety patterns |
-| FS-003 | JavaScript Expert | `skills/fullstack-dev/javascript-pro/SKILL.md` | Modern JavaScript patterns, ES2025+, async patterns |
 | FS-020 | Next.js Developer | `skills/fullstack-dev/nextjs-developer/SKILL.md` | Next.js App Router, RSC, SSR, middleware, route handlers |
 | FS-021 | React Expert | `skills/fullstack-dev/react-expert/SKILL.md` | React component patterns, hooks, state management, performance |
 
@@ -70,14 +67,12 @@
 | ID | Name | Path | Description |
 |----|------|------|-------------|
 | SK-006 | UX Design Intelligence | `skills/ui-design-stack/SKILL.md` | UX strategy with 67 design styles, 161 palettes, BM25 semantic search |
-| SK-075 | Canvas Design | `skills/canvas-design/SKILL.md` | Visual art creation via design philosophy manifestos → canvas expression (.pdf/.png) |
 
 ## Testing & Quality
 
 | ID | Name | Path | Description |
 |----|------|------|-------------|
 | SK-056 | Vitest Testing Framework | `skills/vitest-testing/SKILL.md` | Fast unit testing + Testing Library + test pyramid patterns |
-| CE-003 | Reflexion | `skills/context-engineering-kit/reflexion/` | Auto-refinement loops (sub-skills: critique/, memorize/, reflect/) |
 | CE-005 | Code Review | `skills/context-engineering-kit/code-review/` | Unified code review (sub-skills: review-local-changes/, review-pr/) |
 
 ## Design QA Pipeline

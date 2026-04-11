@@ -63,12 +63,13 @@ plugins/marketplaces/
 session-env/
 downloads/
 flow-knowledge/
+usage-data/
+scheduled-tasks/
 
-# Atlas Intelligence Layer — runtime KG data (user-specific, changes every session)
-atlas-kg/
+# Temp/corrupt files
+*.tmp
+*.corrupt.*
 
-# Graphify output (project-specific, generated per-repo)
-graphify-out/
-
-# Stale hooks moved to TRASH during cleanup
-hooks/TRASH/
+# TRASH
+TRASH/
+TRASH-FILES.md

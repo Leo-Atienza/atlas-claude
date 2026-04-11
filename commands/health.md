@@ -35,59 +35,45 @@ Use the validator's `hooks` output. Also verify prompt/agent hooks are configure
 - Stop event should have an agent hook for task completion verification
 - PreToolUse Write should have a prompt hook for security gating
 
-## 2. Registry Integrity
+## 2. Skills Directory Integrity
 
-Use the validator's `registry` output. Additionally, run a DIRECT disk validation:
+Verify active skills exist on disk:
 
 ```bash
-# Extract all paths from REGISTRY.md and check each exists
-grep -oP '`[^`]+SKILL\.md`|`[^`]+\.md`' ~/.claude/skills/REGISTRY.md | tr -d '`' | while read p; do
-  full="$HOME/.claude/$p"
-  if [ ! -f "$full" ]; then
-    echo "MISSING: $p"
-  fi
-done
+# Count skills listed in ACTIVE-DIRECTORY.md vs actual skill dirs
+grep -c "^| " ~/.claude/skills/ACTIVE-DIRECTORY.md 2>/dev/null
+ls -d ~/.claude/skills/*/SKILL.md 2>/dev/null | wc -l
 ```
 
-For each missing path:
-1. Check if the file was moved (search with Glob for the filename)
-2. If genuinely deleted/never existed: offer to remove the entry from `~/.claude/skills/REGISTRY.md`
-3. If moved: offer to update the path in REGISTRY.md
-4. **Count and report**: "Registry: X paths verified, Y missing"
+For missing skills: check if moved or archived. Report mismatches.
 
 ## 3. Knowledge Consistency
 
-Check INDEX.md ↔ topics/ alignment:
+Check KNOWLEDGE-DIRECTORY.md ↔ Knowledge Pages alignment:
 
 ```bash
-# Count INDEX.md entries
-grep -c "^| G-\|^| L-" ~/.claude/projects/C--Users-leooa--claude/memory/INDEX.md
+# Count KNOWLEDGE-DIRECTORY.md entries
+grep -c "^| G-" ~/.claude/topics/KNOWLEDGE-DIRECTORY.md 2>/dev/null
 
-# Count topic files
-ls ~/.claude/projects/C--Users-leooa--claude/memory/topics/*.md 2>/dev/null | wc -l
+# Count entries across all Knowledge Pages
+grep -c "^## G-" ~/.claude/topics/KNOWLEDGE-PAGE-*.md 2>/dev/null
 ```
 
-**Cross-check**: For each ID in INDEX.md, verify a matching topic file exists. Report orphans and missing files.
+**Cross-check**: Verify all 5 Knowledge Pages exist and entry counts match the directory.
 
-## 4. Unresolved Conflicts
-
-```bash
-grep -c "^## CONFLICT-" ~/.claude/projects/C--Users-leooa--claude/memory/conflicts.md 2>/dev/null || echo "0"
-```
-
-## 5. Sessions Health
+## 4. Memory System Health
 
 ```bash
-ls ~/.claude/projects/C--Users-leooa--claude/memory/sessions/*.md 2>/dev/null | wc -l
-ls -t ~/.claude/projects/C--Users-leooa--claude/memory/sessions/*.md 2>/dev/null | head -1
+test -f ~/.claude/projects/C--Users-leooa--claude/memory/MEMORY.md && echo "OK: MEMORY.md exists" || echo "MISSING: MEMORY.md"
 test -f ~/.claude/.pending-reflection && echo "PENDING: Reflection missed" || echo "OK: No pending reflections"
 ```
 
-## 6. Behavioral Audit
+## 5. Behavioral Audit
 
 Use the validator's `behavior` output:
-- **Reflection compliance**: Were the last 3 sessions reflected? Is there a pending reflection flag?
-- **Security scan gaps**: List sessions that didn't mention security scanning. Recommend running `sharp-edges` or `differential-review` on those sessions' changes.
+- **Knowledge health**: Are all 5 Knowledge Pages present? Does entry count match directory?
+- **Memory health**: Does MEMORY.md exist? How many memory entries?
+- **Pending flags**: Is there a pending reflection?
 
 ## 7. Disk Usage
 
@@ -121,14 +107,14 @@ Read `~/.claude/settings.json` and report enabled vs disabled plugins.
 Use the validator's `knowledge` output for staleness. Also count by category:
 
 ```bash
-echo "Patterns:"; grep -c "^| G-PAT" ~/.claude/projects/C--Users-leooa--claude/memory/INDEX.md 2>/dev/null
-echo "Solutions:"; grep -c "^| G-SOL" ~/.claude/projects/C--Users-leooa--claude/memory/INDEX.md 2>/dev/null
-echo "Mistakes:"; grep -c "^| G-ERR" ~/.claude/projects/C--Users-leooa--claude/memory/INDEX.md 2>/dev/null
-echo "Preferences:"; grep -c "^| G-PREF" ~/.claude/projects/C--Users-leooa--claude/memory/INDEX.md 2>/dev/null
-echo "Failed Approaches:"; grep -c "^| G-FAIL" ~/.claude/projects/C--Users-leooa--claude/memory/INDEX.md 2>/dev/null
+echo "Patterns:"; grep -c "^| G-PAT" ~/.claude/topics/KNOWLEDGE-DIRECTORY.md 2>/dev/null
+echo "Solutions:"; grep -c "^| G-SOL" ~/.claude/topics/KNOWLEDGE-DIRECTORY.md 2>/dev/null
+echo "Mistakes:"; grep -c "^| G-ERR" ~/.claude/topics/KNOWLEDGE-DIRECTORY.md 2>/dev/null
+echo "Preferences:"; grep -c "^| G-PREF" ~/.claude/topics/KNOWLEDGE-DIRECTORY.md 2>/dev/null
+echo "Failed Approaches:"; grep -c "^| G-FAIL" ~/.claude/topics/KNOWLEDGE-DIRECTORY.md 2>/dev/null
 ```
 
-For stale entries (>90 days old): ask the user if each is still relevant. If yes, update the Date column in INDEX.md to today. If no, remove the entry and its topic file.
+For stale entries (>90 days old): ask the user if each is still relevant. If yes, update the Date column in KNOWLEDGE-DIRECTORY.md to today. If no, remove the entry from the directory and its Knowledge Page.
 
 ## 12. Version Updates & Auto-Updater
 

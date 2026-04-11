@@ -50,7 +50,7 @@ Check if today's session file already exists in `~/.claude/projects/*/memory/ses
 - If YES: skip — reflection already captured this session
 - If NO: write a minimal session note to the appropriate project memory sessions directory as `{YYYY-MM-DD}-pre-compact.md`
 
-Keep it brief — 1-3 bullet points of what was learned or accomplished. This is NOT a full /reflect. No IDs, no INDEX.md updates, no conflict detection.
+Keep it brief — 1-3 bullet points of what was learned or accomplished. This is NOT a full /reflect. No IDs, no KNOWLEDGE-DIRECTORY.md updates.
 
 ## Step 5 — Report and compact
 

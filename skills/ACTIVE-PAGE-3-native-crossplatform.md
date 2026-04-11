@@ -19,7 +19,6 @@
 | ID | Name | Path | Description |
 |----|------|------|-------------|
 | SK-089 | Device Hardware Bridge | `skills/device-hardware-bridge/SKILL.md` | Unified camera (Vision Camera v5), scanning, biometrics, NFC, sensors across RN/Expo and Tauri |
-| FS-065 | Motion iOS Config | `skills/fullstack-dev/motion-ios/SKILL.md` | Spring configs, haptics, gestures, 60fps targeting, skeleton loading |
 
 ## Data & Sync
 
@@ -52,4 +51,3 @@
 
 | ID | Name | Path | Description |
 |----|------|------|-------------|
-| SK-027 | E2E Testing (AI-Powered) | `skills/e2e-testing/SKILL.md` | AI-powered E2E testing across 8 platforms including mobile and desktop |

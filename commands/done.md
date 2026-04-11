@@ -4,13 +4,9 @@ Wrap up this session completely. Execute every step automatically.
 
 ---
 
-## Step 1 — Handle uncommitted changes
+## Step 1 — Auto-handoff (commit, push, handoff doc)
 
-Run `git status` in the current directory.
-
-- If there are uncommitted changes → ask: "Commit before wrapping up? [y/n]"
-- If yes → run `/commit-commands:commit`
-- If no → skip
+Run `/handoff` automatically. This commits all pending changes, pushes, and creates a session handoff document. Do not ask — just execute it.
 
 ## Step 2 — Quick Reflect (automatic, never skip)
 
@@ -29,13 +25,7 @@ If a genuinely reusable pattern (G-PAT) or solution (G-SOL) was discovered:
 1. Same process — read directory, get next ID, write topic file, update directory and page
 Only capture what would genuinely help future sessions. Skip if nothing notable.
 
-### c. Update session index
-Write a one-line entry to `~/.claude/projects/C--Users-leooa--claude/memory/sessions/sessions-index.md`:
-```
-| {date} | {project} | {1-line summary} | {IDs captured, or "none"} |
-```
-
-### d. Update project state
+### c. Update project state
 If `.flow/state.yaml` exists → update phase status.
 If `.planning/STATE.md` exists → update progress.
 
@@ -44,8 +34,7 @@ If `.planning/STATE.md` exists → update progress.
 Check `~/.claude/cache/dream-last-run`:
 - If file doesn't exist OR timestamp is 7+ days old → run a lightweight dream:
   1. Scan `~/.claude/topics/KNOWLEDGE-DIRECTORY.md` for obvious issues (duplicate IDs, missing pages)
-  2. Check `~/.claude/projects/C--Users-leooa--claude/memory/sessions/sessions-index.md` — if > 30 sessions, prune oldest beyond 30
-  3. Write current timestamp to `~/.claude/cache/dream-last-run`
+  2. Write current timestamp to `~/.claude/cache/dream-last-run`
 - If dream ran within 7 days → skip entirely
 
 ## Step 4 — Session summary

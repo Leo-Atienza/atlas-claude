@@ -26,7 +26,7 @@ Also activate from REGISTRY.md: SK-005, SK-029, FS-002, FS-020, FS-021.
 
 ## Step 3 — Apply known lessons (auto-load from knowledge base)
 
-Read `~/.claude/projects/C--Users-leooa--claude/memory/INDEX.md` and scan for tags matching: `#nextjs`, `#tailwind`, `#css`, `#framer-motion`, `#daisy-ui`, `#animation`, `#performance`, `#scroll`.
+Read `~/.claude/topics/KNOWLEDGE-DIRECTORY.md` and scan for tags matching: `#nextjs`, `#tailwind`, `#css`, `#framer-motion`, `#daisy-ui`, `#animation`, `#performance`, `#scroll`.
 
 For every matching G-ERR and G-FAIL topic, read the topic file and apply the lesson proactively. Key known issues:
 

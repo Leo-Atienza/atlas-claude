@@ -31,10 +31,8 @@
 
 | ID | Name | Path | Description |
 |----|------|------|-------------|
-| SK-038 | Self-Evolve | `skills/self-evolve/SKILL.md` | Detect capability gaps, create skills, add MCP servers autonomously |
 | SK-039 | Smart Swarm | `skills/smart-swarm/SKILL.md` | Auto-organize multi-agent teams based on 5D complexity scoring |
 | SK-040 | Dream Consolidation | `skills/dream/SKILL.md` | Multi-phase memory consolidation — orient, merge, prune knowledge |
-| SK-041 | Project Init | `skills/project-init/SKILL.md` | Auto-generate project CLAUDE.md from stack-detected templates |
 
 ## Research & Subagent Workflow
 
@@ -56,16 +54,12 @@
 |----|------|------|-------------|
 | SK-070 | TDD (mattpocock) | `skills/tdd/SKILL.md` | Red-green-refactor loop for test-first development |
 | SK-071 | Triage Issue | `skills/triage-issue/SKILL.md` | Bug investigation with root cause analysis + TDD fix plans |
-| SK-072 | Write a PRD | `skills/write-a-prd/SKILL.md` | PRD generation through interactive interviews and codebase exploration |
-| SK-073 | PRD to Plan | `skills/prd-to-plan/SKILL.md` | Convert PRDs into phased implementation plans (tracer bullet slices) |
-| SK-074 | Grill Me | `skills/grill-me/SKILL.md` | Interview-driven plan/design validation until full clarity |
 
 ## Design & Content
 
 | ID | Name | Path | Description |
 |----|------|------|-------------|
-| SK-010 | ClaudeKit Design | `skills/ckm/SKILL.md` | Brand assets, logos, CIP, banners, slides, icons, social media |
 | SK-011 | MCP Server Builder | `skills/mcp-builder/SKILL.md` | Guide for creating MCP servers (Python FastMCP / Node TypeScript) |
 | SK-013 | Theme Factory | `skills/theme-factory/SKILL.md` | Apply themes to any artifact (10 presets + custom theming) |
-| SK-050 | Nano Banana (Gemini Image) | `skills/nano-banana/SKILL.md` | AI image generation and editing via Google Gemini |
 | SK-053 | Anti-Slop Writing | `skills/stop-slop/SKILL.md` | Remove AI writing patterns — banned phrases, scoring rubric |
+| SK-101 | Personal Wiki Manager | `skills/wiki-manage/SKILL.md` | Ingest/query/lint personal + project wikis — Obsidian vault |

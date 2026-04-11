@@ -105,3 +105,30 @@
 | SK-073 | PRD to Plan | PRD → phased implementation plans (overlaps Flow) | Workflow & Meta | 6 |
 | SK-074 | Grill Me | Interview-driven plan/design validation | Workflow & Meta | 6 |
 | SK-075 | Canvas Design | Visual art creation via design philosophy | Dormant — Document & Media | 7 |
+| SK-006 | UX Design Intelligence | UX strategy, 67 design styles, 161 palettes, BM25 search | Web (archived) | N/A |
+| SK-031 | Next.js Upgrade Guide | Upgrade Next.js to latest with migration steps | Web (archived) | N/A |
+| SK-034 | Web Interface Guidelines | Web design compliance review | Web (archived) | N/A |
+| SK-040 | Dream Consolidation | Multi-phase memory consolidation — orient, merge, prune | Workflow & Meta | 6 |
+| SK-044 | GSAP Advanced (ScrollTrigger) | ScrollTrigger, Flip, Draggable, SplitText | Web (archived) | N/A |
+| SK-077 | Subagent-Driven Dev | Task dispatch → fresh subagent → two-stage review | Workflow & Meta | 6 |
+| SK-084 | CSS-First UI Engine | Container Queries, :has(), @layer, Popover+Anchor, OKLCH | Web (archived) | N/A |
+| SK-085 | Streaming & Cache Architecture | Compositional cache, Activity, ViewTransition | Web (archived) | N/A |
+| SK-087 | Modern Build Pipeline | Biome 2.0, Lightning CSS, Turbopack | Web (archived) | N/A |
+| SK-088 | Tauri Desktop Engine | Rust-backed desktop apps, IPC, plugins, security | Desktop (archived) | N/A |
+| SK-089 | Device Hardware Bridge | Unified camera, scanning, biometrics, sensors | Mobile & Native | 5 |
+| SK-090 | Local-First Architecture | Offline-first CRDT sync — PowerSync, TinyBase | Mobile & Native | 5 |
+| SK-091 | Edge Intelligence | On-device AI/ML: llama.rn, MediaPipe, sqlite-vec | Mobile & Native | 5 |
+| SK-092 | Cross-Platform Monorepo | Turborepo for mobile + desktop + web code sharing | Mobile & Native | 5 |
+| SK-093 | Anime.js v4 | Modular lightweight animation — stagger, text, scroll | Web (archived) | N/A |
+| SK-094 | Barba.js Page Transitions | MPA smooth page transitions — GSAP orchestration | Web (archived) | N/A |
+| SK-095 | Spline 3D Runtime | Design-to-web 3D — lazy loading, events, React/Next.js | Web (archived) | N/A |
+| SK-096 | Cinematic Web Engine | Unified animation orchestration — SALA, Motion Tokens | Web (archived) | N/A |
+| SK-097 | Native Motion Engine | Reanimated 4, Gesture Handler, Moti — 60fps native | Mobile & Native | 5 |
+| SK-098 | Native Visual Canvas | Skia (GPU 2D), R3F native (3D), Rive, Lottie | Mobile & Native | 5 |
+| SK-099 | Native Transition & Scroll | Shared elements, FlashList v2, Legend List | Mobile & Native | 5 |
+| SK-100 | Native Sensory Design System | Motion tokens, haptic palette, sound design | Mobile & Native | 5 |
+| FS-012 | SQL Expert | SQL optimization, strategic indexes | Data & ML | 4 |
+| FS-028 | API Designer | REST, OpenAPI 3.1, RFC 7807 errors | Enterprise | 3 |
+| FS-033 | Testing Strategist | Testing strategies and patterns | Enterprise | 3 |
+| FS-035 | Debugging Expert | Systematic debugging | Enterprise | 3 |
+| FS-052 | PostgreSQL Expert | PostgreSQL optimization and admin | Data & ML | 4 |

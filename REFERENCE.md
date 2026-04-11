@@ -33,33 +33,68 @@
 
 | Task | Skill |
 |---|---|
+| **Web Frameworks** | |
+| Build a premium website | Vanguard (SK-083) — Render Tiers, CSS-First, streaming pipeline |
+| Next.js best practices | Next.js Best Practices (SK-029) + Cache & PPR (SK-030) |
+| Upgrade Next.js | Next.js Upgrade Guide (SK-031) |
+| Advanced JS/TS patterns | Advanced JavaScript (SK-045) — TC39, V8, TypeScript |
+| CSS-first UI (zero-JS) | CSS-First UI Engine (SK-084) — Container Queries, :has(), @layer |
+| Streaming & cache architecture | Streaming & Cache (SK-085) — compositional cache, ViewTransition |
+| AI-powered UI | AI-Native UI (SK-086) — streamText, useChat, generative UI |
+| Modern build tooling | Build Pipeline (SK-087) — Biome 2.0, Lightning CSS, Turbopack |
+| Use new browser API | Web Platform APIs (SK-054) — popover, view transitions, WebGPU |
+| Fetch server data / cache | TanStack Query (SK-055) — caching, mutations, optimistic |
+| UX design intelligence | UX Design Stack (SK-006) — 67 styles, 161 palettes, BM25 search |
+| Web design review | Web Interface Guidelines (SK-034) |
+| **Animation & Motion** | |
 | Animate in React | Motion (SK-047) — springs, layout, gestures, exit |
 | Animate (non-React / timelines) | GSAP (SK-042/SK-044) — timelines, ScrollTrigger, SVG |
 | Smooth scroll | Lenis (SK-048) — momentum scroll + GSAP integration |
-| Fetch server data / cache | TanStack Query (SK-055) — caching, mutations, optimistic |
-| Unit/component test | Vitest (SK-056) + Testing Library |
-| Use new browser API | Web Platform APIs (SK-054) — popover, view transitions |
-| Advanced JS/TS patterns | Advanced JavaScript (SK-045) — TC39, V8, TypeScript |
-| Build a premium website | Vanguard (SK-083) — Render Tiers, CSS-First, streaming pipeline |
-| CSS-first UI (zero-JS) | CSS-First UI Engine (SK-084) — Container Queries, :has(), @layer, Popover+Anchor |
-| Streaming & cache architecture | Streaming & Cache (SK-085) — compositional cache, Activity, ViewTransition |
-| AI-powered UI | AI-Native UI (SK-086) — streamText, useChat, tool→component, generative UI |
-| Modern build tooling | Build Pipeline (SK-087) — Biome 2.0, Lightning CSS, Turbopack |
-| Build a premium mobile app | Universal Conductor (SK-058) — routes to all native/cross-platform skills |
-| Build a desktop app | Tauri Desktop (SK-088) — Rust backend, system WebView, 30+ plugins |
-| Access device hardware | Hardware Bridge (SK-089) — camera, scanning, biometrics, NFC, sensors |
-| Build offline-first app | Local-First (SK-090) — CRDT sync, PowerSync, TinyBase, Legend State |
-| On-device AI/ML | Edge Intelligence (SK-091) — llama.rn, MediaPipe, sqlite-vec, RAG pipeline |
-| Multi-platform monorepo | Monorepo (SK-092) — Turborepo for mobile + desktop + web |
-| Design QA pipeline | `/critique` → `/audit` → `/polish` (SK-078/079/080) |
-| Map a codebase (graph) | Codebase Knowledge Graph (SK-081) — AST + semantic → queryable graph |
-| Review with blast radius | Graph-Aware Code Review (SK-082) — dependency-traced minimal file sets |
-| Batch stagger reveals / text effects | Anime.js (SK-093) — lightweight modular animation, WAAPI engine |
+| Batch stagger reveals / text effects | Anime.js (SK-093) — lightweight modular animation, WAAPI |
 | MPA page transitions | Barba.js (SK-094) — GSAP-orchestrated cross-page transitions |
+| Multi-library animation | Cinematic Web Engine (SK-096) — SALA, Layer Ownership, Motion Tokens |
+| **3D & Immersive** | |
 | Design-driven 3D | Spline (SK-095) — visual 3D editor → web runtime |
 | 3D with code (React) | Three.js / R3F (SK-007) — WebGL/WebGPU, Drei helpers |
-| Multi-library animation | Cinematic Web Engine (SK-096) — SALA, Layer Ownership, Motion Tokens |
-| Manage personal/project wiki | wiki-manage (SK-101) — ingest/query/lint/evolve/scaffold |
+| **Backend & Database** | |
+| Supabase integration | Supabase Expert (FS-060) — Auth, RLS, Storage, Edge Functions |
+| Stripe payments | Stripe Expert (FS-061) — Checkout, Subscriptions, Webhooks |
+| SQL optimization | SQL Expert (FS-012) — strategic indexes, query planning |
+| PostgreSQL admin | PostgreSQL Expert (FS-052) — optimization, extensions |
+| API design | API Designer (FS-028) — REST, OpenAPI 3.1, RFC 7807 errors |
+| **Testing & Quality** | |
+| Unit/component test | Vitest (SK-056) + Testing Library |
+| E2E browser test | Playwright (SK-009) — Chromium/Firefox/WebKit |
+| AI-powered E2E test | E2E Testing (SK-027) — mobile and desktop |
+| Test-first development | TDD (SK-070) — red-green-refactor loop |
+| Testing strategy | Testing Strategist (FS-033) — patterns, coverage |
+| Debug systematically | Debugging Expert (FS-035) — root cause analysis |
+| Design QA pipeline | `/critique` → `/audit` → `/polish` (SK-078/079/080) |
+| **Native & Cross-Platform** | |
+| Build a premium mobile app | Universal Conductor (SK-058) — routes to all native skills |
+| Build a desktop app | Tauri Desktop (SK-088) — Rust backend, 30+ plugins |
+| Access device hardware | Hardware Bridge (SK-089) — camera, biometrics, NFC |
+| Build offline-first app | Local-First (SK-090) — CRDT sync, PowerSync, TinyBase |
+| On-device AI/ML | Edge Intelligence (SK-091) — llama.rn, MediaPipe, RAG |
+| Multi-platform monorepo | Monorepo (SK-092) — Turborepo mobile + desktop + web |
+| Native animations | Native Motion Engine (SK-097) — Reanimated 4, gestures |
+| Native rendering | Native Visual Canvas (SK-098) — Skia, R3F native, Rive |
+| Native transitions | Native Transition & Scroll (SK-099) — shared elements, FlashList |
+| Native design system | Native Sensory Design (SK-100) — haptics, sound, motion tokens |
+| **Workflow & Tools** | |
+| Map a codebase (graph) | Codebase Knowledge Graph (SK-081) — AST → queryable graph |
+| Review with blast radius | Graph-Aware Code Review (SK-082) — dependency tracing |
+| Multi-agent orchestration | Smart Swarm (SK-039) — 5D complexity scoring |
+| Subagent task dispatch | Subagent-Driven Dev (SK-077) — fresh subagent + review |
+| Deep research pipeline | Deep Research (SK-076) — 8 phases, citation-backed |
+| Bug investigation | Triage Issue (SK-071) — root cause + TDD fix plans |
+| Deploy to Vercel | Deploy to Vercel (SK-028) |
+| Build MCP server | MCP Server Builder (SK-011) — Python FastMCP / Node TS |
+| Apply themes | Theme Factory (SK-013) — 10 presets + custom |
+| Remove AI slop | Anti-Slop Writing (SK-053) — banned phrases, scoring |
+| Manage wiki | wiki-manage (SK-101) — ingest/query/lint Obsidian vault |
+| Consolidate memory | Dream (SK-040) — orient, merge, prune knowledge |
+| Frontend design system | Frontend Design (SK-005) — production-grade interfaces |
 
 ---
 
@@ -75,12 +110,22 @@
 - `/flow:plan` → `/flow:go` — Plan then execute in waves
 - `/flow:quick [desc]` — Minimal ceremony, plan + execute
 - `/flow:auto [desc]` — Full autonomous pipeline: plan → go → review → ship
+- `/flow:smart-swarm [desc]` — Multi-agent swarm with complexity scoring
 - `/flow:swarm [desc]` — Swarm pipeline: plan → parallel swarm → review → ship
 - `/flow:debug "desc"` — Scientific debugging
 - `/flow:verify` — Goal-backward verification
 - `/flow:complete` — Archive milestone, retro, compound
 - `/flow:status` — Current position + next action
 - `/flow:map` — Parallel codebase mapping
+- `/flow:brainstorm` — Divergent idea generation
+- `/flow:compound` — Extract reusable solution patterns
+- `/flow:discover` — External + internal research
+- `/flow:ground` — Ground plans in codebase reality
+- `/flow:retro` — Retrospective on completed work
+- `/flow:review` — Code review workflow
+- `/flow:ship` — Ship code (commit + push + PR)
+- `/flow:team` — Multi-agent team coordination
+- `/flow:test` — Test execution workflow
 
 ### Session
 - `/done` — Wrap up, reflect, end session
@@ -125,10 +170,10 @@ Every generator has a validator. Always run both.
 |---|---|---|
 | TypeScript | FS-002 | Strict TS, proper generics, type safety |
 | React/Next.js | FS-020 + FS-021 + Context7 | Server components, hooks patterns |
-| Go | FS-004 `[ARCHIVED]` | Error handling, goroutines, interfaces |
-| Rust | FS-005 `[ARCHIVED]` | Ownership, lifetimes, error handling |
-| SQL/Database | FS-027 `[ARCHIVED]` | EXPLAIN before optimizing, strategic indexes |
+| SQL/PostgreSQL | FS-012 + FS-052 | EXPLAIN before optimizing, strategic indexes |
 | API Design | FS-028 | REST principles, OpenAPI 3.1, RFC 7807 errors |
+| Supabase | FS-060 + Context7 | Auth, RLS, Edge Functions, TypeScript types |
+| Stripe | FS-061 | Checkout, Subscriptions, Webhooks |
 
 ---
 

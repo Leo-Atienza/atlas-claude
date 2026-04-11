@@ -135,6 +135,22 @@ export async function getData() {
 'use cache: private'          // For compliance, allows runtime APIs
 ```
 
+### `use cache: remote` — Platform Cache
+
+For serverless deployments (Vercel, Cloudflare) where in-memory cache doesn't persist:
+
+```tsx
+async function getPopularProducts() {
+  'use cache: remote'  // Uses platform cache (Redis, KV store)
+  cacheLife('hours')
+  cacheTag('popular')
+
+  return db.products.findMany({ orderBy: { sales: 'desc' }, take: 20 });
+}
+```
+
+Use `remote` for: serverless, edge, multi-region. Use default `use cache` for: long-running Node.js.
+
 ### `cacheLife()` - Custom Lifetime
 
 ```tsx
@@ -384,6 +400,78 @@ Key differences:
 - **Tags** - Replace `options.tags` with `cacheTag()` calls inside the function.
 - **Revalidation** - Replace `options.revalidate` with `cacheLife({ revalidate: N })` or a built-in profile like `cacheLife('minutes')`.
 - **Dynamic data** - `unstable_cache` did not support `cookies()` or `headers()` inside the callback. The same restriction applies to `use cache`, but you can use `'use cache: private'` if needed.
+
+---
+
+## Compositional Cache Slots
+
+A cached component can accept `children` and other `ReactNode` props. The cached shell renders once, but dynamic children stream independently — no cache key pollution.
+
+```tsx
+async function CachedLayout({ children }: { children: React.ReactNode }) {
+  'use cache'
+  cacheLife('days')
+
+  const nav = await db.navigation.findMany();
+  return (
+    <div className="layout">
+      <Sidebar items={nav} />
+      <main>{children}</main>  {/* Children stream through the cached shell */}
+    </div>
+  );
+}
+
+export default function Page() {
+  return (
+    <CachedLayout>
+      <CachedStats />  {/* T1: cached separately */}
+      <Suspense fallback={<Skeleton />}>
+        <UserContent />  {/* T2: dynamic, streams in */}
+      </Suspense>
+    </CachedLayout>
+  );
+}
+```
+
+> For full compositional cache architecture patterns, load `streaming-cache` (SK-085).
+
+---
+
+## Cache Lifetime Bubbling
+
+When cache boundaries are nested, the most conservative (shortest) lifetime wins:
+
+```tsx
+async function OuterCache() {
+  'use cache'
+  cacheLife('days')  // Wants to cache for days...
+
+  return <InnerCache />;  // ...but inner cache pulls it down
+}
+
+async function InnerCache() {
+  'use cache'
+  cacheLife('seconds')  // This wins — outer cache also revalidates in seconds
+}
+```
+
+**Fix:** Use Suspense to isolate volatile data instead of nesting short-lived caches:
+
+```tsx
+async function OuterCache() {
+  'use cache'
+  cacheLife('days')  // Stays cached for days
+
+  return (
+    <div>
+      <StaticContent />
+      <Suspense fallback={<Skeleton />}>
+        <VolatileContent />  {/* Dynamic — doesn't affect outer cache */}
+      </Suspense>
+    </div>
+  );
+}
+```
 
 ---
 

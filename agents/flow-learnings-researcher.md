@@ -34,14 +34,14 @@ If the prompt contains a `<files_to_read>` block, you MUST use the `Read` tool t
 
 1. **Local project solutions:** `.flow/solutions/` — Solutions documented in THIS project
 2. **Global knowledge base:** `~/.claude/flow-knowledge/` — Solutions from ALL projects
-3. **Progressive Learning:** `~/.claude/projects/*/memory/` — INDEX.md and topics/ files
+3. **Progressive Learning:** `~/.claude/topics/` — KNOWLEDGE-DIRECTORY.md and KNOWLEDGE-PAGE-{1-5}.md files
 4. **Debug history:** `.flow/debug/` — Past debug sessions in this project
 
 ```bash
 # Check what knowledge stores exist
 ls .flow/solutions/ 2>/dev/null
 ls ~/.claude/flow-knowledge/ 2>/dev/null
-ls ~/.claude/projects/*/memory/INDEX.md 2>/dev/null
+ls ~/.claude/topics/KNOWLEDGE-DIRECTORY.md 2>/dev/null
 ls .flow/debug/ 2>/dev/null
 ```
 </project_context>
@@ -103,11 +103,11 @@ grep -l "tags:.*{tag}" ~/.claude/flow-knowledge/**/*.md 2>/dev/null
 Search `~/.claude/projects/*/memory/` — knowledge captured from past sessions.
 
 ```bash
-# Scan global INDEX.md for relevant entries
-grep -i "{keyword}" ~/.claude/projects/*/memory/INDEX.md 2>/dev/null
+# Scan KNOWLEDGE-DIRECTORY.md for relevant entries
+grep -i "{keyword}" ~/.claude/topics/KNOWLEDGE-DIRECTORY.md 2>/dev/null
 
-# Search topic files
-grep -rl "{keyword}" ~/.claude/projects/*/memory/topics/ 2>/dev/null
+# Search Knowledge Pages for details
+grep -rl "{keyword}" ~/.claude/topics/KNOWLEDGE-PAGE-*.md 2>/dev/null
 ```
 
 ### 4. Debug History (Low Priority, High Relevance for Debugging)

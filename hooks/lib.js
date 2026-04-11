@@ -32,7 +32,7 @@ try { fs.mkdirSync(paths.cache, { recursive: true }); } catch (_) {}
 // Profile gates: Only JS hooks calling isHookEnabled() respect profiles.
 // Bash/Python hooks (session-start/stop, precompact-reflect, auto-formatter,
 // cctools-*, claudio) always run regardless of profile setting.
-const ALL_HOOKS = ['context-guard', 'post-tool-monitor', 'tool-failure-handler', 'session-start', 'session-stop', 'precompact-reflect', 'auto-formatter', 'statusline', 'cctools-bash', 'cctools-file-length', 'cctools-env-protection', 'claudio'];
+const ALL_HOOKS = ['context-guard', 'post-tool-monitor', 'tool-failure-handler', 'tsc-check', 'session-start', 'session-stop', 'precompact-reflect', 'auto-formatter', 'statusline', 'cctools-bash', 'cctools-file-length', 'cctools-env-protection', 'claudio'];
 const HOOK_PROFILES = {
   minimal: new Set(['context-guard']),
   standard: new Set(ALL_HOOKS),

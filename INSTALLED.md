@@ -15,11 +15,12 @@ Source: https://github.com/NeoLabHQ/context-engineering-kit
 Key plugins: sdd (Spec-Driven Development), reflexion, code-review, kaizen, tdd, git, ddd, docs, fpf, sadd, customaize-agent, mcp, tech-stack
 Note: fpf plugin is ~600k tokens, loads in subagent
 
-### cc-devops/ (31 skills)
+### cc-devops/ (31 skills) — ARCHIVED to skills/skills-archive/cc-devops/
 Source: https://github.com/akin-ozer/cc-devops-skills
 License: Apache 2.0
 Each skill has: SKILL.md, references/, scripts/, assets/
 Optional deps: terraform, tflint, terragrunt, ansible, docker, hadolint, helm, kubectl, shellcheck, promtool, etc.
+Note: All 31 skills archived (0 active references). Moved 2026-04-11 to reduce search noise (7.7MB, 762 files).
 
 ### compound-engineering/ (19 skills, 5 agent groups, 18 commands)
 Source: https://github.com/EveryInc/compound-engineering-plugin

@@ -56,8 +56,8 @@
         "hooks": [
           {
             "type": "command",
-            "command": "(test -f tsconfig.json && npx tsc --noEmit 2>&1 | head -20) || true",
-            "timeout": 30
+            "command": "node ~/.claude/hooks/tsc-check.js",
+            "timeout": 15
           }
         ]
       },

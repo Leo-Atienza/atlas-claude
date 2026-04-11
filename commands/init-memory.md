@@ -25,7 +25,7 @@ If it exists, report "Local memory already initialized" and stop.
 ## 2. Create directory structure
 
 ```bash
-mkdir -p .claude/memory/sessions .claude/memory/topics
+mkdir -p .claude/memory/topics
 ```
 
 ## 3. Create INDEX.md
@@ -42,54 +42,31 @@ Write `.claude/memory/INDEX.md`:
 
 ## Patterns
 
-| ID | Name | Summary | Tags | Date |
-|----|------|---------|------|------|
+| ID | Name | Tags | Date |
+|----|------|------|------|
 
 ## Solutions
 
-| ID | Name | Summary | Tags | Date |
-|----|------|---------|------|------|
+| ID | Name | Tags | Date |
+|----|------|------|------|
 
 ## Mistakes
 
-| ID | Name | Summary | Tags | Date |
-|----|------|---------|------|------|
+| ID | Name | Tags | Date |
+|----|------|------|------|
 
 ## Preferences
 
-| ID | Name | Summary | Tags | Date |
-|----|------|---------|------|------|
+| ID | Name | Tags | Date |
+|----|------|------|------|
 
 ## Failed Approaches
 
-| ID | Name | Summary | Tags | Date |
-|----|------|---------|------|------|
+| ID | Name | Tags | Date |
+|----|------|------|------|
 ```
 
-## 4. Create sessions-index.md
-
-Write `.claude/memory/sessions/sessions-index.md`:
-
-```markdown
-# Local Sessions Index — {project name}
-
-> Session logs specific to this project. Auto-pruned after 30 entries.
-
-| Date | Summary | Learnings |
-|------|---------|-----------|
-```
-
-## 5. Create conflicts.md
-
-Write `.claude/memory/conflicts.md`:
-
-```markdown
-# Local Conflicts — {project name}
-
-> Project-specific contradictions. Resolved at session start.
-```
-
-## 6. Report
+## 4. Report
 
 ```
 Local memory initialized for: {project name}
@@ -97,9 +74,6 @@ Local memory initialized for: {project name}
 Structure created:
   .claude/memory/
   ├── INDEX.md
-  ├── conflicts.md
-  ├── sessions/
-  │   └── sessions-index.md
   └── topics/
 
 Ready to capture local learnings with L- prefix IDs.

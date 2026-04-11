@@ -239,7 +239,7 @@ def extract_subshell_commands(command: str) -> list[str]:
         - `...` backtick command substitution (legacy syntax)
 
     This is a security measure to detect dangerous commands hidden inside
-    subshells, e.g., `echo $(rm -rf /)` or `echo \`rm foo\``.
+    subshells, e.g., ``echo $(rm -rf /)`` or ``echo `rm foo```.
 
     Uses balanced parenthesis scanning to correctly handle nested $()
     subshells like `$(echo $(rm foo))`.

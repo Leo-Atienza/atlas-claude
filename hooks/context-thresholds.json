@@ -23,10 +23,10 @@
     }
   },
   "statusline_colors": {
-    "green_below_used": 56,
-    "yellow_below_used": 75,
-    "orange_below_used": 90,
-    "red_at_or_above": 90
+    "green_below_used": 60,
+    "yellow_below_used": 70,
+    "orange_below_used": 78,
+    "red_at_or_above": 78
   },
   "stale_seconds": 120,
   "debounce_calls": 5

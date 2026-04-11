@@ -1,5 +1,46 @@
 # System Changelog
 
+## [6.6.1] — 2026-04-11
+### Auto-System-Docs workflow
+- Added `Auto-System-Docs` to CLAUDE.md Automatic Workflows — system infrastructure changes now auto-trigger documentation updates (ARCHITECTURE.md, hooks/README.md, SYSTEM_VERSION/CHANGELOG, INSTALLED.md) as part of the Deliver phase
+- Closes the gap where doc updates only happened when explicitly requested
+
+## [6.6.0] — 2026-04-11
+### System Critique Fixes — 5 targeted improvements across hooks, persistence, skills
+
+**tsc-check: smart TypeScript checking**
+- New `hooks/tsc-check.js` — reads file_path from stdin, only runs `tsc --noEmit` on `.ts/.tsx/.mts/.cts` files
+- Replaces blanket `(test -f tsconfig.json && npx tsc --noEmit) || true` that fired on every Write/Edit (including CSS, MD, JSON)
+- Timeout reduced 30s → 15s; registered in hook profiles via lib.js
+- Non-TS edits now skip type-checking entirely (was: 30s block on every save)
+
+**Persistence layer boundaries defined**
+- `session-stop.sh`: removed `worked_on` (branch) and `last_commit` captures from atlas-kg — git data belongs in git
+- Pruned 22 stale git-derived triples from `atlas-kg/triples.json`
+- `ARCHITECTURE.md`: added "Persistence Layer Boundaries" table — Memory vs Knowledge Store vs Atlas KG with clear "stores" / "does NOT store" columns
+
+**MCP health classification**
+- `tool-failure-handler.js`: MCP-specific failure detection — `ECONNREFUSED`/`ECONNRESET`/`spawn ENOENT` on `mcp__*` tools now produce `MCP SERVER DOWN:` messages with actionable advice
+- MCP timeouts classified separately from generic timeouts
+- Health records tagged with `is_mcp: true` for downstream grouping
+- `session-start.sh`: health summary now groups MCP tools separately with "consider disabling in .mcp.json" advice
+
+**Settings dedup**
+- Emptied `.claude/.claude/settings.json` — duplicate graphify PreToolUse hook already in root `settings.json`
+
+**Skill archive (14.2MB, 934 files archived)**
+- Moved `cc-devops/` (7.7MB, 762 files) and `ckm/` (6.5MB, 172 files) to `skills/skills-archive/`
+- Both had 0 active skill references; all skills already in ARCHIVE-DIRECTORY metadata
+- Updated INSTALLED.md, ARCHITECTURE.md
+
+**CLAUDE.md process fixes**
+- Added "Auto-History-Check" workflow: review/audit tasks must check git log before surfacing findings
+- Strengthened "Review vs Implement" rule: mandatory git history check before presenting findings
+
+**Files**: 1 created (tsc-check.js), 8 modified, 2 directories archived
+
+---
+
 ## [6.5.0] — 2026-04-08
 ### Deep Audit — 8 fixes across 13 files
 
