@@ -8,6 +8,10 @@ Every task follows this sequence. Claude determines the right depth automaticall
 
 ### 1. Analyze & Understand
 - Scan codebase and project CLAUDE.md first — understand what exists before researching externally
+- **Project wiki check:** If `wiki/index.md` exists in the project root, read it — it contains past decisions, architectural context, and synthesis from previous sessions. This is faster and more reliable than re-deriving context from code.
+- **Knowledge graph check (non-trivial codebase tasks):** Before any file exploration, check `[ -f graphify-out/graph.json ]`:
+  - **Graph exists** → read `graphify-out/GRAPH_REPORT.md` first for god nodes and community structure. Use `python -m graphify query "<question>"` instead of Glob/Grep for architecture/dependency questions. Use `python -m graphify path "A" "B"` to trace connections between components.
+  - **No graph, Large/Medium task with 20+ files** → offer to build: `python -m graphify .` (minutes, 71.5x token savings on all subsequent queries in this project).
 - **System lookup (non-trivial tasks):** Before planning, check what the system already has for this task:
   - `skills/ACTIVE-DIRECTORY.md` — find matching skills by technology, pattern, or domain. Load the relevant page.
   - `topics/KNOWLEDGE-DIRECTORY.md` — find matching G-PAT (patterns), G-SOL (solutions), G-ERR (mistakes to avoid), G-FAIL (approaches that failed before). Load the relevant page.
@@ -149,6 +153,8 @@ Read state files in order: `.flow/state.yaml` → `session-state.md` → `~/.cla
 - **Knowledge**: Read `topics/KNOWLEDGE-DIRECTORY.md` → load relevant page. **Check G-ERR and G-FAIL entries before implementing** — they document known mistakes and failed approaches. Save only genuinely novel patterns (G-PAT), solutions (G-SOL), mistakes (G-ERR), preferences (G-PREF), or failed approaches (G-FAIL).
 - **Reference**: Read `REFERENCE.md` for slash commands, MCP patterns, security triggers, DevOps generators. **When generating IaC/Docker/CI:** use the generator+validator pairs (always run both).
 - **MCP**: Prefer MCP over CLI. TOOL_SEARCH discovers tools on-demand. **Context7 is mandatory for framework tasks** — resolve-library-id → get-library-docs before writing framework-specific code.
+- **Graphify**: For codebase navigation, `python -m graphify query` is cheaper than Glob/Grep sweeps when a graph exists. Check `graphify-out/graph.json` before exploring large codebases. Build: `python -m graphify .` | Query: `python -m graphify query "<q>"` | Path: `python -m graphify path "A" "B"` | Update: `python -m graphify --update`
+- **Personal Wiki**: Dedicated Obsidian vault at `Documents/Wiki/` — personal knowledge wiki (Karpathy LLM Wiki pattern). `/wiki-ingest` (add articles/notes), `/wiki-query` (search wiki), `/wiki-lint` (health check). Wiki = external world knowledge. ATLAS topics = engineering patterns. Don't duplicate. Per-project wikis auto-scaffold on `/new` and `/flow:start`.
 
 ## Auto Mode
 
@@ -161,6 +167,14 @@ Windows 11 host, Unix shell syntax in bash (forward slashes, /dev/null not NUL).
 ## Automatic Workflows
 
 These workflows fire automatically based on context. Do not wait to be asked.
+
+### Auto-Graph-Navigation (codebase tasks)
+When starting any non-trivial task in a project directory:
+1. Check `[ -f graphify-out/graph.json ]` — do this before any Glob/Grep
+2. **Graph found:** read `graphify-out/GRAPH_REPORT.md` (god nodes, communities, surprising connections). Navigate by graph structure, not file guessing. Prefer `python -m graphify query` over broad Glob/Grep sweeps.
+3. **No graph, 20+ files in scope:** offer one line — *"No knowledge graph found. Run `python -m graphify .` to build one (minutes, 71.5x token savings). Want me to build it first?"* — then proceed with or without based on response.
+4. **After editing code files in a session:** run `python -m graphify --update` once at end of session to keep graph current (code-only, no LLM cost, <2s).
+5. **Flow integration:** before `/flow:map` or `/flow:discover`, check for graph. If found, pass GRAPH_REPORT.md to map/discover agents as pre-loaded structure. If not, offer to build before spawning agents.
 
 ### Auto-Handoff (every session end)
 When the session is ending (user says "done", "wrap up", "that's it", or work is complete):
@@ -198,6 +212,35 @@ When deploying to production (Vercel or any host), automatically verify after pu
 6. If any endpoint fails: diagnose by comparing local vs production, fix, restart from step 1
 7. Once verified, create a handoff doc noting what shipped and endpoints verified
 
+### Auto-Wiki-Context (session start in any project)
+When starting a session in a project directory that has a `wiki/` folder:
+1. Read `wiki/index.md` — scan for decisions and context pages
+2. If the session's task relates to an existing decision or context page, read those pages first
+3. This replaces re-reading code to reconstruct "why did we do X?" — the answer is pre-compiled in the wiki
+
+### Auto-Wiki-Decision (after making significant decisions)
+When making a significant architectural decision during a session (tech stack choice, pattern selection, approach rejection, schema design, deployment strategy):
+1. Write it to `wiki/decisions/YYYY-MM-DD-{slug}.md` with frontmatter:
+   ```yaml
+   ---
+   title: "Decision title"
+   type: decision
+   related: []
+   created: YYYY-MM-DD
+   updated: YYYY-MM-DD
+   ---
+   ```
+2. Content structure: **Context** (what prompted the decision), **Options Considered** (what was evaluated), **Decision** (what was chosen and why), **Consequences** (trade-offs accepted)
+3. Update `wiki/index.md` — add row to Decisions table
+4. Append to `wiki/log.md`
+5. **What qualifies**: choosing a library over alternatives, picking an auth strategy, designing a data model, rejecting an approach, making a performance/simplicity trade-off. **What doesn't**: routine implementation details, code style, bug fixes.
+
 ## Graceful Degradation
 
 If a skill, hook, or script is missing or fails: continue without it, note the failure, suggest a fix.
+
+## Skills Registry
+
+- **graphify** (`~/.claude/skills/graphify/SKILL.md`) - Turn any folder into a queryable knowledge graph. Trigger: `/graphify`
+
+When the user types `/graphify`, invoke the Skill tool with `skill: "graphify"` before doing anything else.

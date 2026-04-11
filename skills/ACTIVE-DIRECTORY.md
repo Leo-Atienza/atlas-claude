@@ -3,7 +3,7 @@
 > Lookup: scan this table → find the skill → note its Page → open that page for full details.
 > Loading: read the relevant page on-demand, never all at start.
 > Tiers: **Core** = weekly use, prioritize in suggestions. **Available** = on-demand when task matches.
-> Total active skills: **65** (15 Core + 50 Available) — last updated 2026-04-07
+> Total active skills: **66** (15 Core + 51 Available) — last updated 2026-04-07
 
 ## Core Skills
 
@@ -79,3 +79,4 @@
 | SK-098 | Native Visual Canvas | Skia (GPU 2D), R3F native (3D), Rive (state machines), Lottie | 3 |
 | SK-099 | Native Transition & Scroll | Shared elements, FlashList v2, Legend List, scroll-linked effects | 3 |
 | SK-100 | Native Sensory Design System | Motion tokens, haptic palette, sound design, animation tiers (T0-T3) | 3 |
+| SK-101 | Personal Wiki Manager | Ingest/query/lint personal + project wikis — Obsidian vault | 2 |

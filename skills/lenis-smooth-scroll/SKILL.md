@@ -3,7 +3,7 @@ id: SK-048
 name: lenis-smooth-scroll
 description: Lenis — lightweight smooth scroll library (3KB) with GSAP and framework integration
 keywords: lenis, smooth-scroll, momentum-scroll, scroll, gsap-integration, scroll-trigger, horizontal-scroll, virtual-scroll
-version: 1.0.0
+version: 1.1.0
 -->
 
 ## When to Use This Skill
@@ -214,4 +214,56 @@ const lenis = new Lenis({ infinite: true });
 ```js
 const isMobile = window.matchMedia('(max-width: 768px)').matches;
 const lenis = new Lenis({ smoothWheel: !isMobile });
+```
+
+## ReactLenis Wrapper (Official)
+
+The official React wrapper from `lenis/react`. Use with `autoRaf: false` when integrating with GSAP (SALA pattern).
+
+```tsx
+'use client';
+import { useEffect, useRef } from 'react';
+import gsap from 'gsap';
+import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import { ReactLenis } from 'lenis/react';
+import type { LenisRef } from 'lenis/react';
+
+gsap.registerPlugin(ScrollTrigger);
+
+export function SmoothScrollProvider({ children }: { children: React.ReactNode }) {
+  const lenisRef = useRef<LenisRef>(null);
+
+  useEffect(() => {
+    function update(time: number) {
+      lenisRef.current?.lenis?.raf(time * 1000);
+    }
+    gsap.ticker.add(update);
+    gsap.ticker.lagSmoothing(0);
+    return () => gsap.ticker.remove(update);
+  }, []);
+
+  return (
+    <ReactLenis root options={{ autoRaf: false }} ref={lenisRef}>
+      {children}
+    </ReactLenis>
+  );
+}
+```
+
+**Critical:** `autoRaf: false` prevents Lenis from running its own RAF loop — GSAP's ticker drives it instead (Single Animation Loop Architecture). See **cinematic-web-engine** (SK-096) for the full SALA pattern.
+
+### useLenis Hook
+
+Access the Lenis instance inside any component:
+
+```tsx
+import { useLenis } from 'lenis/react';
+
+function ScrollProgress() {
+  useLenis(({ scroll, progress, velocity }) => {
+    // Runs on every scroll frame
+    console.log({ scroll, progress, velocity });
+  });
+  return null;
+}
 ```

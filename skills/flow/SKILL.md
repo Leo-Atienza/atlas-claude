@@ -111,6 +111,7 @@ Before `/flow:start` runs:
 - Check `topics/KNOWLEDGE-DIRECTORY.md` for relevant past patterns/solutions
 - Check `skills/ACTIVE-DIRECTORY.md` → load relevant skills from pages (silently)
 - If not in Active → check `skills/ARCHIVE-DIRECTORY.md` → load from archive page
+- **Wiki scaffold**: if no `wiki/` dir exists in project root, auto-scaffold project wiki (wiki-manage SK-101 scaffold mode — creates wiki/index.md, wiki/log.md, wiki/decisions/, wiki/context/, wiki/synthesis/, raw/.gitkeep)
 
 ### BUILD enhancements
 During execution:

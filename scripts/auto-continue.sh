@@ -91,13 +91,16 @@ if [ -f "$BRIDGE_FILE" ]; then
 fi
 
 if [[ "${OSTYPE:-}" == "msys" || "${OSTYPE:-}" == "cygwin" || "${OS:-}" == "Windows_NT" ]]; then
-  # Windows (Git Bash / MSYS2 / Cygwin): use cmd start for process detachment
-  ESCAPED_PROMPT=$(printf '%s' "$PROMPT" | sed 's/"/\\"/g' | tr '\n' ' ')
+  # Windows (Git Bash / MSYS2 / Cygwin): write prompt to temp file to avoid
+  # cmd.exe special character issues (%, ^, !, &, |, <, > in commit messages/paths)
+  PROMPT_FILE="/tmp/claude-continue-prompt-${SESSION_ID}.txt"
+  printf '%s' "$PROMPT" > "$PROMPT_FILE"
   if [ -n "$RESUME_SESSION" ]; then
-    # Try --resume first for session continuity
-    cmd //c "start /B claude --resume \"${RESUME_SESSION}\" -p \"${ESCAPED_PROMPT}\"" > /dev/null 2>&1 &
+    nohup bash -c "claude --resume '$RESUME_SESSION' -p \"\$(cat '$PROMPT_FILE')\" ; rm -f '$PROMPT_FILE'" \
+      > "/tmp/claude-continue-${SESSION_ID}.log" 2>&1 &
   else
-    cmd //c "start /B claude -p \"${ESCAPED_PROMPT}\"" > /dev/null 2>&1 &
+    nohup bash -c "claude -p \"\$(cat '$PROMPT_FILE')\" ; rm -f '$PROMPT_FILE'" \
+      > "/tmp/claude-continue-${SESSION_ID}.log" 2>&1 &
   fi
 else
   # Unix: use nohup for proper detachment

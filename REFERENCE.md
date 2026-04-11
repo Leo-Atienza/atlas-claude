@@ -23,6 +23,9 @@
 | Research a library/framework | Ask directly (Context7 + WebSearch auto-activate) |
 | Create a new skill | `/skill-creator` |
 | Schedule a recurring task | `/schedule` |
+| Add an article/note to my wiki | `/wiki-ingest [source]` (SK-101) |
+| Search my wiki | `/wiki-query [topic]` (SK-101) |
+| Check wiki health | `/wiki-lint` (SK-101) |
 
 ---
 
@@ -56,6 +59,7 @@
 | Design-driven 3D | Spline (SK-095) — visual 3D editor → web runtime |
 | 3D with code (React) | Three.js / R3F (SK-007) — WebGL/WebGPU, Drei helpers |
 | Multi-library animation | Cinematic Web Engine (SK-096) — SALA, Layer Ownership, Motion Tokens |
+| Manage personal/project wiki | wiki-manage (SK-101) — ingest/query/lint/evolve/scaffold |
 
 ---
 
@@ -70,6 +74,8 @@
 - `/flow:start [desc]` — Auto-detect depth, create project
 - `/flow:plan` → `/flow:go` — Plan then execute in waves
 - `/flow:quick [desc]` — Minimal ceremony, plan + execute
+- `/flow:auto [desc]` — Full autonomous pipeline: plan → go → review → ship
+- `/flow:swarm [desc]` — Swarm pipeline: plan → parallel swarm → review → ship
 - `/flow:debug "desc"` — Scientific debugging
 - `/flow:verify` — Goal-backward verification
 - `/flow:complete` — Archive milestone, retro, compound
@@ -191,7 +197,7 @@ Every generator has a validator. Always run both.
 |---|---|
 | `CLAUDE.md` | Master instructions (self-contained) |
 | `settings.json` | Hooks, permissions, env vars |
-| `skills/ACTIVE-DIRECTORY.md` | Active skill index (65 skills: 15 Core + 50 Available) |
+| `skills/ACTIVE-DIRECTORY.md` | Active skill index (66 skills: 15 Core + 51 Available) |
 | `skills/ARCHIVE-DIRECTORY.md` | Archived skill index (7 bundles) |
 | `hooks/post-tool-monitor.js` | Central PostToolUse telemetry hub |
 | `hooks/context-guard.js` | PreToolUse context + security enforcer |

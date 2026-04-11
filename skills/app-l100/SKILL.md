@@ -1,16 +1,16 @@
 <!--
 id: SK-058
 name: app-l100
-description: L100 App — orchestration guide for building iPhone-smooth mobile apps with React Native/Expo and native iOS/Swift
-keywords: l100, mobile, app, react-native, expo, reanimated, gesture-handler, moti, flashlist, haptics, swiftui, swift, ios, android, bottom-sheet, skeleton, animation
-version: 1.0.0
+description: Universal App Conductor — orchestrates mobile (Expo/RN), desktop (Tauri), and universal apps. Routes to specialist skills for hardware, local-first, edge AI, and cross-platform monorepo. Includes premium mobile patterns (animation layer cake, springs, haptics).
+keywords: l100, mobile, desktop, universal, app, react-native, expo, tauri, reanimated, gesture-handler, moti, flashlist, haptics, swiftui, swift, ios, android, bottom-sheet, skeleton, animation, cross-platform, local-first, edge-ai, monorepo
+version: 2.0.0
 -->
 
-# L100 App — Building iPhone-Smooth Mobile Apps
+# Universal App Conductor — Building Premium Apps Across All Platforms
 
 ## When to Use This Skill
 
-**Auto-activate when:** building a mobile app, React Native screen, Expo project, iOS/Swift feature, or any mobile UI where quality matters. This is the CONDUCTOR skill for mobile — it tells you which specialist skill to load and when.
+**Auto-activate when:** building any native app — mobile (React Native/Expo), desktop (Tauri), universal (multi-platform), iOS/Swift, or any app requiring device hardware, offline-first, or on-device AI. This is the CONDUCTOR skill for all native/cross-platform development.
 
 **This skill does NOT replace specialist skills.** It orchestrates them.
 
@@ -21,6 +21,15 @@ version: 1.0.0
 | React Native performance & patterns | `react-native` | SK-016 |
 | Expo deployment & builds | `expo-deployment` | (archived, auto-activate) |
 | Expo CI/CD workflows | `expo-cicd-workflows` | (archived, auto-activate) |
+| **Tauri desktop apps** | **`tauri-desktop`** | **SK-088** |
+| **Camera, scanning, biometrics, sensors** | **`device-hardware-bridge`** | **SK-089** |
+| **Offline-first, CRDT sync** | **`local-first-architecture`** | **SK-090** |
+| **On-device AI, ML inference, RAG** | **`edge-intelligence`** | **SK-091** |
+| **Multi-platform monorepo** | **`crossplatform-monorepo`** | **SK-092** |
+| **Native animations & motion** | **`motion-native`** | **SK-097** |
+| **2D/3D visual rendering (Skia, Rive, R3F)** | **`visual-native`** | **SK-098** |
+| **Screen transitions & smooth scroll** | **`transition-native`** | **SK-099** |
+| **Sensory design (haptics + sound + motion tokens)** | **`sensory-native`** | **SK-100** |
 | Swift concurrency review | `swift-concurrency-pro` | SK-035 |
 | SwiftUI code review | `swiftui-pro` | SK-037 |
 | Swift testing | `swift-testing-pro` | SK-036 |
@@ -28,7 +37,7 @@ version: 1.0.0
 | Unit/component testing | `vitest-testing` | SK-056 |
 | Advanced JS/TS patterns | `advanced-javascript` | SK-045 |
 | Design aesthetics | `frontend-design` | SK-005 |
-| E2E browser testing | `playwright` | SK-009 |
+| E2E testing (mobile + desktop) | `e2e-testing` | SK-027 |
 
 ---
 
@@ -36,18 +45,72 @@ version: 1.0.0
 
 | Scenario | Recommendation |
 |---|---|
-| New app, team knows React | Expo (Managed Workflow) |
+| New mobile app, team knows React | Expo SDK 54 (Managed Workflow) |
 | Need custom native SDK not in Expo | Expo (Bare Workflow) with config plugins |
 | Deep native customization, existing native team | React Native bare |
 | iOS-only, premium native feel critical | Swift/SwiftUI native |
 | Universal app (web + iOS + Android) | Expo + Expo Router + NativeWind |
-| Shared codebase with Next.js web app | Turborepo monorepo + Expo + Next.js |
+| Shared codebase with Next.js web app | Turborepo monorepo + Expo + Next.js (SK-092) |
+| **Desktop app (Windows/macOS/Linux)** | **Tauri 2.0 (SK-088)** |
+| **Desktop + mobile from one codebase** | **Tauri 2.0 with mobile targets (SK-088)** |
+| **Multi-platform (mobile + desktop + web)** | **Turborepo monorepo (SK-092) + Expo + Tauri + Next.js** |
+| **Offline-first app with sync** | **Local-First Architecture (SK-090) + framework of choice** |
+| **App with on-device AI/ML** | **Edge Intelligence (SK-091) + framework of choice** |
+| **Camera/scanning/sensor-heavy app** | **Device Hardware Bridge (SK-089) + framework of choice** |
+
+---
+
+## The Full Stack (2026)
+
+```
+Mobile:        Expo SDK 54 / Expo Router v4 / React Native 0.82+ (New Architecture mandatory)
+Desktop:       Tauri 2.0 (Rust backend + system WebView, 96% smaller than Electron)
+Animation:     Reanimated 4 (mobile) / Motion + GSAP (desktop/web)
+Local-First:   PowerSync / TinyBase v5 / Legend State v3
+On-Device AI:  llama.rn / MediaPipe / sqlite-vec (on-device RAG pipeline)
+Hardware:      Vision Camera v5 / expo-camera / Tauri plugins
+State:         Zustand v5 + TanStack Query (server) + Jotai v2 (atomic)
+Monorepo:      Turborepo + shared packages
+Build:         React Compiler (default), precompiled iOS XCFrameworks
+```
+
+### Expo SDK 54 Highlights
+
+- **Precompiled React Native for iOS** — XCFrameworks reduce clean build ~120s → ~10s
+- **React Compiler enabled by default** — automatic memoization
+- **sqlite-vec** — on-device vector search for RAG pipelines
+- **TextDecoderStream** — streaming AI responses (local or remote)
+- **expo-app-integrity** — DeviceCheck (iOS) + Play Integrity (Android)
+- **Liquid Glass (iOS 26)** — `expo-glass-effect`, native tabs with glass sheen
+- **Edge-to-edge Android 16** — always enabled, cannot be disabled
+
+---
+
+## Tauri Thread Model (Desktop)
+
+```
+┌─────────────────────────┐
+│   Frontend (WebView)     │  React/Svelte/Vue — your existing web code
+│   (system WebView2/WKW)  │  Animations, UI state, user interaction
+└────────┬────────────────┘
+         │ IPC: Commands + Events + Channels
+┌────────▼────────────────┐
+│   Rust Core              │  Business logic, file system, crypto, plugins
+│   (compiled, type-safe)  │  Heavy computation, system access
+└────────┬────────────────┘
+         │
+┌────────▼────────────────┐
+│   System APIs            │  OS notifications, tray, clipboard, updater
+└─────────────────────────┘
+```
+
+**Performance:** <500ms startup, 30-40MB RAM, 2-10MB bundle. See SK-088 for full Tauri guide.
 
 ---
 
 ## The Thread Model — Understand This First
 
-React Native New Architecture (default since RN 0.76, mandatory Expo SDK 53):
+React Native New Architecture (mandatory since RN 0.82, bridge permanently removed):
 
 ```
 ┌─────────────────────┐
@@ -66,7 +129,7 @@ React Native New Architecture (default since RN 0.76, mandatory Expo SDK 53):
 └─────────────────────┘
 ```
 
-**The bridge is gone.** JSI provides synchronous native calls. Impact: 43% faster cold starts, 39% faster rendering, 26% lower memory.
+**The bridge is gone.** JSI provides synchronous native calls. Hermes V1 experimental (RN 0.82+). Impact: 43% faster cold starts, 39% faster rendering, 26% lower memory.
 
 ---
 
@@ -491,7 +554,7 @@ import { FlashList } from '@shopify/flash-list';
 ```
 
 **Rules:**
-- `React.memo` every list item (until React Compiler handles RN)
+- `React.memo` every list item (React Compiler now default in SDK 54 — handles this automatically for new projects)
 - Pass primitives to items, not objects (`userId={user.id}` not `user={user}`)
 - Stable callbacks — `useCallback` for `onPress` handlers passed to items
 - `estimatedItemSize` is required — use average height across item types

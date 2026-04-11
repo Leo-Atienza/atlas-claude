@@ -67,5 +67,8 @@ flow-knowledge/
 # Atlas Intelligence Layer — runtime KG data (user-specific, changes every session)
 atlas-kg/
 
+# Graphify output (project-specific, generated per-repo)
+graphify-out/
+
 # Stale hooks moved to TRASH during cleanup
 hooks/TRASH/

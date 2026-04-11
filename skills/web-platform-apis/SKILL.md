@@ -614,133 +614,102 @@ dialog[open]::backdrop {
 
 ---
 
-## 8. Trusted Types (XSS Prevention)
+## 8. Scroll-State Queries
 
-**Chrome 83+ (enforced), others partial**
+**Chrome 133+ — progressive enhance**
 
-### Create a policy
+Detect scroll-related states without JavaScript. Replaces IntersectionObserver and scroll event listeners for common patterns.
 
-```js
-const policy = trustedTypes.createPolicy('default', {
-  createHTML: (input) => DOMPurify.sanitize(input),
-  createScriptURL: (input) => {
-    const allowedOrigins = ['https://cdn.trusted.com', 'https://static.myapp.com'];
-    const url = new URL(input, location.origin);
-    if (allowedOrigins.includes(url.origin)) return input;
-    throw new TypeError(`Blocked script URL: ${input}`);
-  },
-  createScript: () => { throw new TypeError('Inline scripts not allowed'); },
-});
+### Sticky Header Detection
 
-// Usage
-element.innerHTML = policy.createHTML(userInput);   // Sanitized
-script.src = policy.createScriptURL('/my-script.js'); // Allowlisted
+```css
+.sticky-header {
+  container-type: scroll-state;
+  position: sticky;
+  top: 0;
+}
+
+/* Add shadow and backdrop when stuck */
+@container scroll-state(stuck: top) {
+  .sticky-header {
+    background: oklch(0.99 0 0 / 0.95);
+    backdrop-filter: blur(12px);
+    box-shadow: 0 1px 3px oklch(0 0 0 / 0.1);
+  }
+}
 ```
 
-### Enforcement via CSP
+### Scroll Direction Indicators
 
+```css
+.scroll-container {
+  container-type: scroll-state;
+  overflow-y: auto;
+}
+
+/* Show indicators when more content is scrollable */
+@container scroll-state(scrollable: top) {
+  .scroll-indicator-up { display: block; }
+}
+
+@container scroll-state(scrollable: bottom) {
+  .scroll-indicator-down { display: block; }
+}
 ```
-Content-Security-Policy: require-trusted-types-for 'script'; trusted-types default
+
+### Snap Detection
+
+```css
+.carousel {
+  container-type: scroll-state;
+  scroll-snap-type: x mandatory;
+}
+
+@container scroll-state(snapped: x) {
+  .carousel-item { opacity: 1; transform: scale(1); }
+}
 ```
 
-### Report-only mode (safe rollout)
+### Feature Detection
 
-```
-Content-Security-Policy-Report-Only: require-trusted-types-for 'script'; report-uri /csp-report
-```
-
-### Feature detection
-
-```js
-if (window.trustedTypes && trustedTypes.createPolicy) {
-  // Apply policy
+```css
+@supports (container-type: scroll-state) {
+  /* Use scroll-state queries */
 }
 ```
 
 ---
 
-## 9. WebGPU Compute
+## 9. Container Queries (Quick Reference)
 
-**Chrome 113+, Edge, Firefox 141+, Safari 26+. ~70% global coverage**
+> For full architecture patterns, load `css-first-ui` (SK-084).
 
-### Device setup
+**Baseline 2023 (size queries) — use everywhere**
 
-```js
-async function initWebGPU() {
-  if (!navigator.gpu) throw new Error('WebGPU not supported');
+```css
+.card-wrapper {
+  container-type: inline-size;
+  container-name: card;
+}
 
-  const adapter = await navigator.gpu.requestAdapter({
-    powerPreference: 'high-performance',
-  });
-  if (!adapter) throw new Error('No GPU adapter found');
-
-  const device = await adapter.requestDevice();
-  device.lost.then((info) => {
-    console.error('GPU device lost:', info.message);
-    if (info.reason !== 'destroyed') initWebGPU(); // Recover
-  });
-
-  return device;
+@container card (min-width: 400px) {
+  .card { grid-template-columns: 200px 1fr; }
 }
 ```
 
-### Compute shader (double array values)
-
-```js
-const device = await initWebGPU();
-
-const module = device.createShaderModule({
-  code: `
-    @group(0) @binding(0) var<storage, read_write> data: array<f32>;
-
-    @compute @workgroup_size(64)
-    fn main(@builtin(global_invocation_id) id: vec3<u32>) {
-      let i = id.x;
-      if (i >= arrayLength(&data)) { return; }
-      data[i] = data[i] * 2.0;
-    }
-  `,
-});
-
-const pipeline = device.createComputePipeline({
-  layout: 'auto',
-  compute: { module, entryPoint: 'main' },
-});
-
-// Upload data
-const inputData = new Float32Array([1, 2, 3, 4, 5, 6, 7, 8]);
-const buffer = device.createBuffer({
-  size: inputData.byteLength,
-  usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_SRC | GPUBufferUsage.COPY_DST,
-});
-device.queue.writeBuffer(buffer, 0, inputData);
-
-// Dispatch
-const bindGroup = device.createBindGroup({
-  layout: pipeline.getBindGroupLayout(0),
-  entries: [{ binding: 0, resource: { buffer } }],
-});
-
-const encoder = device.createCommandEncoder();
-const pass = encoder.beginComputePass();
-pass.setPipeline(pipeline);
-pass.setBindGroup(0, bindGroup);
-pass.dispatchWorkgroups(Math.ceil(inputData.length / 64));
-pass.end();
-device.queue.submit([encoder.finish()]);
-```
-
-### Use cases
-
-- On-device LLM inference (WebLLM, transformers.js)
-- Real-time image processing and filters
-- Physics simulation
-- Data visualization and point cloud rendering
-- Neural style transfer
+Three types: **size queries** (Baseline 2023), **style queries** (Chrome 111+), **scroll-state queries** (Chrome 133+). See SK-084 for complete patterns.
 
 ---
 
-## 10. Browser Support Decision Guide
+## 10. Trusted Types & WebGPU
+
+Moved to reference files for focused access:
+- [Trusted Types (XSS Prevention)](references/trusted-types.md) — Chrome 83+, CSP enforcement, policy creation
+- [WebGPU Compute](references/webgpu.md) — Chrome 113+, device setup, compute shaders, use cases
+
+---
+
+## 11. Browser Support Decision Guide
 
 | API | Baseline | Polyfill? | Use Today? |
 |-----|----------|-----------|------------|
@@ -752,6 +721,9 @@ device.queue.submit([encoder.finish()]);
 | CSS Anchor Positioning | Partial | Not yet | Progressive enhance |
 | Speculation Rules | Chrome only | No | Yes (progressive) |
 | Navigation API | Chrome/Edge | Polyfill available | Cautious |
+| Scroll-State Queries | Chrome 133+ | No | Progressive enhance |
+| Container Queries (size) | 2023 | Not needed | Yes — always |
+| Container Queries (style) | Chrome 111+ | No | Progressive enhance |
 | Trusted Types | Chrome | No | Defense-in-depth |
 | WebGPU | ~70% | No | Feature-detect required |
 
@@ -806,7 +778,7 @@ if (navigator.gpu) {
 
 ---
 
-## 11. API Replacement Matrix
+## 12. API Replacement Matrix
 
 | Old pattern | Native replacement | Since |
 |-------------|-------------------|-------|
@@ -820,7 +792,7 @@ if (navigator.gpu) {
 
 ---
 
-## 12. Common Pitfalls
+## 13. Common Pitfalls
 
 **View Transitions**
 - `view-transition-name` must be unique per page at the time of transition — remove duplicate names before calling `startViewTransition`

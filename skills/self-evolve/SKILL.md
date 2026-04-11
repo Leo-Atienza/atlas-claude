@@ -13,7 +13,7 @@ The system's meta-skill. When Claude detects it lacks a capability needed for th
 Activate self-evolve when ANY of these occur:
 
 1. **Missing tool**: A task requires an integration or tool that isn't available (e.g., "connect to Jira" but no Jira MCP)
-2. **Repeated pattern**: The same multi-step workflow has been executed 3+ times across sessions — check `~/.claude/logs/failures.jsonl` and memory `INDEX.md` for patterns
+2. **Repeated pattern**: The same multi-step workflow has been executed 3+ times across sessions — check `~/.claude/logs/failures.jsonl` and `~/.claude/topics/KNOWLEDGE-DIRECTORY.md` for patterns
 3. **Explicit request**: User says "can you learn to do X", "there should be a skill for this", "add a tool for X"
 4. **Tool failure**: A tool call fails because the capability doesn't exist, not because of a bug
 5. **Inefficiency signal**: Claude catches itself doing >5 manual steps that could be automated

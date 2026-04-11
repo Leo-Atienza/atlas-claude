@@ -1,5 +1,28 @@
 # System Changelog
 
+## [6.5.0] — 2026-04-08
+### Deep Audit — 8 fixes across 13 files
+
+**Atlas KG improvements**
+- Predicate-based entity type inference (0 unknowns)
+- `invalidateByPredicate` + `prune` commands added
+- session-stop now invalidates old `last_commit` triples before writing new ones
+
+**Tool health upgraded**
+- Timestamped failure arrays + 48h-window health summary (replaces meaningless all-time counters)
+
+**Hook fixes**
+- PreCompact: JSON serialization via node (fixes silent failure on special chars)
+- Context guard: `Skill` added to ALWAYS_ALLOWED tools
+- Strict hook profile removed (dead code, never used)
+- Auto-continuation: Windows prompt via temp file (fixes cmd.exe special char breakage)
+
+**Testing & monitoring**
+- Smoke test: +2 sections (KG integrity, memory system validation)
+- Statusline: fallback partial-session matching for todo files
+
+---
+
 ## [6.4.0] — 2026-04-07
 ### System Effectiveness Audit — fix 12 underutilized/broken components
 

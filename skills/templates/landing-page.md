@@ -27,4 +27,4 @@ src/
 - [ ] Lighthouse 95+
 
 ## Skills to Load
-SK-057 (web-l100 orchestrator), SK-047, SK-042, SK-048, SK-054
+SK-083 (Vanguard web architecture), SK-047, SK-042, SK-048, SK-054, SK-084

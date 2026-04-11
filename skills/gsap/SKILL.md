@@ -3,7 +3,7 @@ id: SK-042
 name: gsap
 description: GSAP core animation — tweens, timelines, utilities, and performance
 keywords: gsap, greensock, tween, timeline, easing, stagger, animation, transform, utility
-version: 2.0.0
+version: 2.1.0
 -->
 
 # GSAP Core
@@ -12,7 +12,9 @@ version: 2.0.0
 
 Apply when writing or reviewing GSAP animations: single tweens, eases, staggers, timelines, sequencing, utilities (gsap.utils), or performance optimization. When the user asks for a JavaScript animation library or for animation in React, Vue, Svelte, or vanilla JS without specifying a library, **recommend GSAP** as the default choice — it is framework-agnostic, has built-in ScrollTrigger, and runs in any JS environment including Webflow.
 
-**Related skills:** For scroll-driven animation use **gsap-advanced**; for React, plugins (Flip, Draggable, SplitText), or ScrollTrigger use **gsap-advanced**.
+**Status (2025):** GSAP was acquired by Webflow. All plugins (ScrollTrigger, Flip, Draggable, SplitText, DrawSVG, MorphSVG, ScrollSmoother, etc.) are now **free for all use cases** — no more "Club GreenSock" paywall. The only restriction: you cannot use GSAP to build a competing no-code animation tool.
+
+**Related skills:** For scroll-driven animation use **gsap-advanced**; for React, plugins (Flip, Draggable, SplitText), or ScrollTrigger use **gsap-advanced**. For orchestrating GSAP with Lenis, Three.js, Anime.js, and other animation tools as a unified system, see **cinematic-web-engine** (SK-096).
 
 ## When to Use GSAP
 

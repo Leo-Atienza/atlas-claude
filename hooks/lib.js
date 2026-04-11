@@ -17,6 +17,11 @@ const paths = {
   tmp: os.tmpdir(),
 };
 
+// ── Bootstrap: ensure critical directories exist at module load ────
+// All hooks depend on logs/ and cache/ — create once here, not per-hook.
+try { fs.mkdirSync(paths.logs, { recursive: true }); } catch (_) {}
+try { fs.mkdirSync(paths.cache, { recursive: true }); } catch (_) {}
+
 // ── Hook Profiles ──────────────────────────────────────────────────
 // ATLAS_HOOK_PROFILE=minimal|standard (default: standard)
 // ATLAS_DISABLED_HOOKS=comma-separated hook identifiers to skip
@@ -60,7 +65,12 @@ function loadThresholds() {
 
 // ── File operations ────────────────────────────────────────────────
 function ensureDir(dir) {
-  try { fs.mkdirSync(dir, { recursive: true }); } catch (_) {}
+  try {
+    fs.mkdirSync(dir, { recursive: true });
+  } catch (err) {
+    // Permission or disk errors — stderr is the last-resort channel
+    process.stderr.write(`[ATLAS] ensureDir failed: ${dir} — ${err.code || err.message}\n`);
+  }
 }
 
 function readJsonSafe(filePath, fallback) {
@@ -72,11 +82,20 @@ function readJsonSafe(filePath, fallback) {
 }
 
 function writeJsonSafe(filePath, data, indent) {
-  try { fs.writeFileSync(filePath, JSON.stringify(data, null, indent)); } catch (_) {}
+  try {
+    fs.writeFileSync(filePath, JSON.stringify(data, null, indent));
+  } catch (err) {
+    // Fail-open: don't crash. Log to stderr (not to logs dir — avoids circular failure)
+    process.stderr.write(`[ATLAS] writeJsonSafe failed: ${filePath} — ${err.code || err.message}\n`);
+  }
 }
 
 function appendLine(filePath, line) {
-  try { fs.appendFileSync(filePath, line + '\n'); } catch (_) {}
+  try {
+    fs.appendFileSync(filePath, line + '\n');
+  } catch (err) {
+    process.stderr.write(`[ATLAS] appendLine failed: ${filePath} — ${err.code || err.message}\n`);
+  }
 }
 
 function rotateIfLarge(filePath, maxBytes = 2_000_000) {
@@ -84,7 +103,10 @@ function rotateIfLarge(filePath, maxBytes = 2_000_000) {
     if (fs.existsSync(filePath) && fs.statSync(filePath).size > maxBytes) {
       fs.renameSync(filePath, filePath + '.bak');
     }
-  } catch (_) {}
+  } catch (err) {
+    // Windows EBUSY (file locked) or permission errors — log and continue
+    process.stderr.write(`[ATLAS] rotateIfLarge failed: ${filePath} — ${err.code || err.message}\n`);
+  }
 }
 
 // ── Stdin reader ───────────────────────────────────────────────────
@@ -96,8 +118,10 @@ function readStdin(callback) {
   process.stdin.on('end', () => {
     try {
       callback(JSON.parse(input));
-    } catch (_) {
-      process.exit(0); // Fail open — never block on parse errors
+    } catch (err) {
+      // Fail open — never block on parse errors, but leave a trace for debugging
+      process.stderr.write(`[ATLAS] readStdin JSON parse failed: ${err.message} (${input.length} bytes)\n`);
+      process.exit(0);
     }
   });
 }

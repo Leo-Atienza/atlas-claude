@@ -3,14 +3,16 @@ id: SK-044
 name: gsap-advanced
 description: GSAP advanced — ScrollTrigger, plugins (Flip, Draggable, SplitText), React/framework integration
 keywords: scrolltrigger, flip, draggable, splittext, usegsap, gsap react, gsap vue, gsap svelte, scroll animation
-version: 2.0.0
+version: 2.1.0
 -->
 
 # GSAP Advanced
 
 ## When to Use This Skill
 
-Apply when building scroll-driven animations (ScrollTrigger), using GSAP plugins (Flip, Draggable, SplitText, DrawSVG, MorphSVG, etc.), or integrating GSAP in React, Vue, or Svelte. For core tweens, timelines, and utilities see **gsap** (SK-042).
+Apply when building scroll-driven animations (ScrollTrigger), using GSAP plugins (Flip, Draggable, SplitText, DrawSVG, MorphSVG, etc.), or integrating GSAP in React, Vue, or Svelte. For core tweens, timelines, and utilities see **gsap** (SK-042). For MPA page transitions with GSAP timeline hooks, see **barba-js** (SK-094).
+
+**Status (2025):** GSAP was acquired by Webflow. All plugins are now **free for all use cases** — no more "Club GreenSock" paywall.
 
 ---
 
@@ -227,6 +229,8 @@ gsap.to(scrollContainer, { duration: 1, scrollTo: { x: "max" } });
 ```
 
 ### ScrollSmoother
+
+> **2026 recommendation:** Prefer **Lenis** (SK-048, 3KB gzipped) over ScrollSmoother (~24KB) for smooth scrolling. Lenis uses native scroll, preserves `position: sticky`, and has better community support. Both integrate with GSAP's ticker — see **cinematic-web-engine** (SK-096) for the canonical SALA pattern.
 
 Smooth scroll wrapper. Requires ScrollTrigger and specific DOM structure:
 

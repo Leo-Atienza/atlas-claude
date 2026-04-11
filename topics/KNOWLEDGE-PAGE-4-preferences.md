@@ -25,6 +25,23 @@ Interested in applying community best practices to Claude Code setup: hook patte
 
 ---
 
+## G-PREF-007: Pending Web Libraries (npm)
+**Date**: 2026-04-09 | **Tags**: #web #libraries #react #next.js
+
+Libraries the user wants to add to web projects when the time comes. Do not install automatically — suggest when the use case arises.
+
+| Library | Purpose | Notes |
+|---------|---------|-------|
+| `sonner` | Toast notifications (React) | 12.2k stars, MIT, actively maintained by emilkowalski |
+| `vaul` | Drawer/bottom-sheet (React) | 8.3k stars, MIT, **officially unmaintained** — use with awareness |
+| `popper.js` | Tooltip/popover positioning | Industry standard, used under the hood by many UI libs |
+| `animate-on-scroll` (AOS) | Scroll-triggered CSS animations | Lightweight, good for marketing pages |
+| `chart.js` | Canvas-based charting | Best for simple charts; react-chartjs-2 is the React wrapper |
+| `luxon` | Date/time manipulation | Modern successor to moment.js; timezone-aware |
+| `sweetalert2` | Styled modal/alert dialogs | Rich replacement for browser alert/confirm/prompt |
+
+---
+
 ## G-PREF-008: Done Workflow Commit+Reflect
 **Date**: 2026-03-08 | **Tags**: #workflow #git #reflection
 

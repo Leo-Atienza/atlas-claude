@@ -1,9 +1,21 @@
----
+<!--
+id: SK-007
 name: threejs
-description: Complete Three.js guide — scene setup, geometry, materials, lighting, textures, loaders, animation, shaders, post-processing, interaction. Use when working with any Three.js or 3D web development task.
----
+description: Three.js 3D graphics — scene, geometry, materials, shaders, animation, React Three Fiber (R3F), Drei helpers, WebGPU renderer, performance patterns
+keywords: threejs, three, 3d, webgl, webgpu, r3f, react-three-fiber, drei, shader, glb, gltf, 3d-animation, scene, canvas
+version: 2.0.0
+-->
 
 # Three.js Complete Guide
+
+## When to Use This Skill
+
+Apply when building 3D web experiences with Three.js, React Three Fiber (R3F), or WebGPU. For **design-driven 3D** (hero scenes from a visual tool), see **spline-3d** (SK-095). For orchestrating 3D with scroll animations and page transitions, see **cinematic-web-engine** (SK-096).
+
+**Choose your path:**
+- **React/Next.js project** → Use React Three Fiber (R3F) + Drei (see R3F section below)
+- **Vanilla JS / non-React** → Use Three.js directly (this guide's core sections)
+- **Both** → R3F IS Three.js — all vanilla Three.js knowledge applies inside R3F
 
 ## Table of Contents
 
@@ -17,6 +29,10 @@ description: Complete Three.js guide — scene setup, geometry, materials, light
 8. [Shaders](#shaders) — GLSL, ShaderMaterial, custom effects
 9. [Post-Processing](#post-processing) — EffectComposer, bloom, DOF, custom passes
 10. [Interaction](#interaction) — Raycasting, controls, input, selection
+11. [React Three Fiber (R3F)](#react-three-fiber) — Declarative 3D in React
+12. [Drei Helpers](#drei-helpers) — 200+ ready-made R3F components
+13. [WebGPU Renderer](#webgpu-renderer) — Next-gen rendering (production-ready since r171)
+14. [Performance Patterns](#performance-patterns) — DPR cap, frameloop, lazy loading, monitoring
 
 ---
 
@@ -1214,3 +1230,336 @@ function update() {
 8. **Post-processing**: Limit passes, reduce resolution for blur, disable unused effects
 9. **Raycasting**: Throttle mousemove, use layers to filter, simple collision meshes
 10. **General**: `renderer.info` for stats, LOD for distance, frustum culling (default on)
+
+---
+
+## React Three Fiber (R3F)
+
+R3F (28K stars, MIT) is Three.js rendered through React's reconciler. Zero performance overhead — every R3F component maps 1:1 to a Three.js object. Use R3F when you're already in React/Next.js.
+
+### Installation
+
+```bash
+npm install three @react-three/fiber @react-three/drei
+```
+
+### Basic Scene
+
+```tsx
+'use client';
+import { Canvas } from '@react-three/fiber';
+
+function Box() {
+  return (
+    <mesh rotation={[0.5, 0.5, 0]}>
+      <boxGeometry args={[1, 1, 1]} />
+      <meshStandardMaterial color="orange" />
+    </mesh>
+  );
+}
+
+export default function Scene() {
+  return (
+    <Canvas camera={{ position: [0, 0, 5], fov: 75 }} dpr={[1, 1.5]}>
+      <ambientLight intensity={0.5} />
+      <directionalLight position={[5, 5, 5]} />
+      <Box />
+    </Canvas>
+  );
+}
+```
+
+### useFrame (Animation Loop)
+
+```tsx
+import { useFrame } from '@react-three/fiber';
+import { useRef } from 'react';
+import type { Mesh } from 'three';
+
+function SpinningBox() {
+  const ref = useRef<Mesh>(null!);
+  useFrame((state, delta) => {
+    ref.current.rotation.x += delta;
+    ref.current.rotation.y += delta * 0.5;
+  });
+  return (
+    <mesh ref={ref}>
+      <boxGeometry />
+      <meshStandardMaterial color="hotpink" />
+    </mesh>
+  );
+}
+```
+
+**Never allocate objects inside useFrame** — create refs, vectors, and materials outside the loop.
+
+### useThree (Access Internals)
+
+```tsx
+import { useThree } from '@react-three/fiber';
+
+function CameraLogger() {
+  const { camera, gl, scene, size } = useThree();
+  // Access any Three.js internal
+  return null;
+}
+```
+
+### Loading Models
+
+```tsx
+import { useLoader } from '@react-three/fiber';
+import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader';
+import { DRACOLoader } from 'three/examples/jsm/loaders/DRACOLoader';
+import { Suspense } from 'react';
+
+function Model() {
+  const gltf = useLoader(GLTFLoader, '/model.glb', (loader) => {
+    const draco = new DRACOLoader();
+    draco.setDecoderPath('https://www.gstatic.com/draco/versioned/decoders/1.5.6/');
+    loader.setDRACOLoader(draco);
+  });
+  return <primitive object={gltf.scene} />;
+}
+
+// Always wrap in Suspense
+<Suspense fallback={null}>
+  <Model />
+</Suspense>
+```
+
+### Events (Direct on Meshes)
+
+```tsx
+<mesh
+  onClick={(e) => { e.stopPropagation(); console.log(e.point); }}
+  onPointerOver={() => document.body.style.cursor = 'pointer'}
+  onPointerOut={() => document.body.style.cursor = 'default'}
+>
+  <boxGeometry />
+  <meshStandardMaterial />
+</mesh>
+```
+
+### frameloop Control
+
+```tsx
+// Static scene — only render when state changes (saves GPU)
+<Canvas frameloop="demand">
+
+// Manual control — for SALA integration with GSAP ticker
+<Canvas frameloop="never">
+  {/* Call gl.advance() from GSAP ticker */}
+</Canvas>
+```
+
+### Next.js Integration
+
+```tsx
+// components/Scene.tsx — must be a client component
+'use client';
+import { Canvas } from '@react-three/fiber';
+// ... scene code
+
+// app/page.tsx — lazy load to avoid SSR issues
+import dynamic from 'next/dynamic';
+const Scene = dynamic(() => import('@/components/Scene'), { ssr: false });
+```
+
+---
+
+## Drei Helpers
+
+Drei (9.5K stars) provides 200+ ready-made R3F helpers. Import only what you need.
+
+```tsx
+import {
+  Environment, OrbitControls, PerspectiveCamera,
+  Html, Float, useGLTF, Preload, PerformanceMonitor,
+  MeshDistortMaterial, MeshWobbleMaterial, Text, Bvh,
+} from '@react-three/drei';
+```
+
+### Essential Helpers
+
+```tsx
+{/* Environment lighting (IBL) — replaces manual PMREM setup */}
+<Environment preset="sunset" /> {/* city, dawn, forest, lobby, night, park, studio, sunset, warehouse */}
+<Environment files="/custom.hdr" />
+
+{/* Camera with damping */}
+<PerspectiveCamera makeDefault fov={75} position={[0, 0, 5]} />
+<OrbitControls enableDamping dampingFactor={0.05} />
+
+{/* Mix DOM elements inside 3D */}
+<Html position={[0, 2, 0]} center transform>
+  <div className="label">Hello 3D</div>
+</Html>
+
+{/* Floating animation */}
+<Float speed={2} rotationIntensity={0.5} floatIntensity={1}>
+  <mesh><boxGeometry /><meshStandardMaterial /></mesh>
+</Float>
+
+{/* GLTF with Draco (auto-configured) */}
+function Model() {
+  const { scene } = useGLTF('/model.glb');
+  return <primitive object={scene} />;
+}
+useGLTF.preload('/model.glb');
+
+{/* Preload all assets */}
+<Preload all />
+```
+
+### Special Materials
+
+```tsx
+{/* Organic distortion */}
+<MeshDistortMaterial color="purple" speed={2} distort={0.5} radius={1} />
+
+{/* Wobble effect */}
+<MeshWobbleMaterial color="blue" factor={1} speed={2} />
+
+{/* 3D Text (troika-based, no font loading boilerplate) */}
+<Text fontSize={1} color="white" anchorX="center" anchorY="middle">
+  Hello World
+</Text>
+```
+
+---
+
+## WebGPU Renderer
+
+Production-ready since Three.js r171 (Sep 2025). 2-10x performance gains in complex scenes. ~95% browser coverage with automatic WebGL 2 fallback.
+
+### Setup (Vanilla)
+
+```javascript
+import * as THREE from 'three';
+import WebGPURenderer from 'three/addons/renderers/webgpu/WebGPURenderer.js';
+
+const renderer = new WebGPURenderer({ antialias: true });
+renderer.setSize(window.innerWidth, window.innerHeight);
+renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+document.body.appendChild(renderer.domElement);
+
+await renderer.init(); // WebGPU requires async init
+// Falls back to WebGL 2 automatically if WebGPU unavailable
+```
+
+### Three Shading Language (TSL)
+
+WebGPU uses TSL instead of GLSL for node-based shader authoring:
+
+```javascript
+import { color, uniform, vec3, sin, timerLocal } from 'three/tsl';
+
+const time = timerLocal();
+const material = new THREE.MeshStandardNodeMaterial();
+material.colorNode = color(0xff0000).mix(color(0x0000ff), sin(time));
+```
+
+### Feature Detection
+
+```javascript
+if (navigator.gpu) {
+  // WebGPU available — use WebGPURenderer
+} else {
+  // Fallback to WebGLRenderer
+}
+```
+
+---
+
+## Performance Patterns
+
+### DPR Capping
+
+```tsx
+// Never render at full 4K — cap at 1.5x for HiDPI screens
+<Canvas dpr={[1, 1.5]}>
+
+// Vanilla
+renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.5));
+```
+
+### On-Demand Rendering
+
+```tsx
+// Static scenes — only re-render when something changes
+<Canvas frameloop="demand">
+
+// Trigger re-render manually
+import { invalidate } from '@react-three/fiber';
+invalidate(); // Request single frame
+```
+
+### Adaptive Quality (Drei)
+
+```tsx
+import { PerformanceMonitor, AdaptiveDpr } from '@react-three/drei';
+
+<Canvas>
+  <PerformanceMonitor
+    onIncline={() => setDpr(1.5)}
+    onDecline={() => setDpr(0.75)}
+  >
+    <AdaptiveDpr pixelated />
+    {/* Scene content */}
+  </PerformanceMonitor>
+</Canvas>
+```
+
+### BVH Acceleration (Drei)
+
+```tsx
+// Wrap scene in Bvh for faster raycasting on complex geometry
+import { Bvh } from '@react-three/drei';
+
+<Bvh firstHitOnly>
+  <Scene />
+</Bvh>
+```
+
+### Lazy Loading (Next.js)
+
+```tsx
+import dynamic from 'next/dynamic';
+
+// Code-split the entire 3D scene — zero JS on initial load
+const Scene3D = dynamic(() => import('@/components/Scene3D'), {
+  ssr: false,
+  loading: () => <div className="h-[600px] bg-black" />,
+});
+```
+
+### Draco Compression
+
+Always use Draco-compressed GLB files. Reduces model size 60-90%:
+
+```bash
+npx gltf-pipeline -i model.glb -o model-draco.glb --draco.compressionLevel 7
+```
+
+### SALA Integration (GSAP Ticker Sync)
+
+For the Cinematic Web Engine — sync R3F with GSAP's single animation loop:
+
+```tsx
+<Canvas frameloop="never">
+  <SALASync />
+  {/* Scene content */}
+</Canvas>
+
+function SALASync() {
+  const { advance } = useThree();
+  useEffect(() => {
+    gsap.ticker.add(() => advance(performance.now() / 1000));
+    return () => gsap.ticker.remove(advance);
+  }, [advance]);
+  return null;
+}
+```
+
+See **cinematic-web-engine** (SK-096) for the full SALA pattern.

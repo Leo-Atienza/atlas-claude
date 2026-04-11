@@ -19,8 +19,7 @@ You are performing a **dream** — a reflective pass over your memory files. Syn
 1. `ls` the memory directory to see what exists
 2. Read `MEMORY.md` (the index) to understand current structure
 3. Skim existing topic files and category rollups (`patterns.md`, `mistakes.md`, `solutions.md`, `preferences.md`, `failed-approaches.md`) — improve them, don't duplicate
-4. Check `sessions/sessions-index.md` for recent session logs
-5. Check `conflicts.md` for unresolved contradictions
+4. Check `~/.claude/topics/KNOWLEDGE-DIRECTORY.md` for knowledge store health
 
 ## Phase 2 — Gather Recent Signal
 
@@ -34,7 +33,7 @@ Look for new information worth persisting. Sources in priority order:
    grep -rn "<narrow term>" ~/.claude/projects/*/  --include="*.jsonl" | tail -50
    ```
    Don't exhaustively read transcripts. Look only for things you already suspect matter.
-5. **Evolution log** (`memory/evolution.md`) — check for pending promotions or maturity milestones
+5. **Knowledge Pages** (`~/.claude/topics/KNOWLEDGE-PAGE-{1-5}.md`) — check for entries needing maturity promotion
 
 ## Phase 3 — Consolidate
 
@@ -46,7 +45,7 @@ For each thing worth remembering, write or update a memory file following the au
 - Delete contradicted facts — if today's investigation disproves an old memory, fix it at the source
 - Respect the type system: `user`, `feedback`, `project`, `reference`
 - For knowledge store entries (G-PAT, G-SOL, G-ERR, G-FAIL, G-PREF): update the matching topic file in `topics/` and its category rollup
-- Move resolved items out of `conflicts.md`
+- Remove outdated or superseded entries from Knowledge Pages
 
 **Do NOT save**:
 - Code patterns derivable from reading the project
@@ -68,11 +67,11 @@ Scan topic files in `topics/` for maturity promotion. Knowledge earns trust thro
 | `proven` | No further promotion needed | — |
 
 **Process**:
-1. Read `INDEX.md` — scan for topics still at `initial` or `established` maturity
-2. For each candidate, check its topic file for `Confirmed:` count and `Projects:` list
+1. Read `KNOWLEDGE-DIRECTORY.md` — scan for topics still at `initial` or `established` maturity
+2. For each candidate, check its Knowledge Page entry for confirmation evidence
 3. If graduation criteria are met:
-   - Update the topic file's `Maturity:` field
-   - Log the promotion in `evolution.md`: `- [YYYY-MM-DD] GRADUATED: {ID} ({name}) → {new_maturity} (confirmed {N} times)`
+   - Update the entry's maturity in the Knowledge Page: add `**Maturity**: {new_level}`
+   - Update the date in KNOWLEDGE-DIRECTORY.md
 4. Report promotions in the dream summary under `**Graduated**:`
 
 **If no topics qualify**, skip silently — graduation is earned, not forced.
@@ -86,9 +85,7 @@ Update `MEMORY.md` so it stays **under 200 lines** and **under 25KB**.
 - Demote verbose entries: if an index line > 200 chars, move detail to the topic file
 - Add pointers to newly important memories
 - Resolve contradictions: if two files disagree, fix the wrong one
-- Update `INDEX.md` if knowledge store entries changed (sequential IDs, proper categories)
-
-Update `evolution.md` with a timestamped entry recording what changed.
+- Update `KNOWLEDGE-DIRECTORY.md` if knowledge store entries changed (sequential IDs, proper categories)
 
 ## Phase 5 — Knowledge Graph Sync (if MCP available)
 
@@ -111,15 +108,6 @@ If Memory Graph MCP tools are accessible (`create_entities`, `create_relations`)
 3. **Cross-reference**: Create `related_to` relations between entries that share 2+ tags
 
 If Memory Graph MCP is NOT available, skip silently. File-based memory is primary.
-
-## Phase 6 — Skill Evolution Check
-
-Run skill improvement analysis:
-```bash
-node ~/.claude/scripts/skill-improver.js
-```
-
-If candidates are generated, include them in the dream summary.
 
 ---
 

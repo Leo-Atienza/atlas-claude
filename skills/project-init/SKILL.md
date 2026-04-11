@@ -228,6 +228,7 @@ After Step 1 (scope classification), before Step 2 (workflow execution):
 1. Check if `./CLAUDE.md` exists in the target project directory
 2. If NO: detect stack → generate from template → write `./CLAUDE.md`
 3. If YES: skip (never overwrite existing project CLAUDE.md)
+4. **Wiki scaffold**: if no `wiki/` dir exists, auto-scaffold project wiki (wiki-manage SK-101 scaffold mode — creates wiki/index.md, wiki/log.md, wiki/decisions/, wiki/context/, wiki/synthesis/, raw/.gitkeep)
 
 The generated CLAUDE.md is a starting point. The user can customize it.
 Any project-level CLAUDE.md automatically overrides global defaults.

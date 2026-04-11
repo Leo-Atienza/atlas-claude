@@ -3,6 +3,7 @@
 > Master index of all accumulated knowledge entries.
 > Read this FIRST, then jump to the relevant Knowledge Page for full details.
 >
+> **Total entries: 67** (28 PAT + 16 SOL + 9 ERR + 8 PREF + 6 FAIL)
 > **ID format**: `G-{CAT}-{###}` for global
 > **Categories**: PAT (pattern), SOL (solution), ERR (mistake), PREF (preference), FAIL (failed approach)
 > **Pages**: PAGE-1 (patterns), PAGE-2 (solutions), PAGE-3 (errors), PAGE-4 (preferences), PAGE-5 (failures)
@@ -88,6 +89,7 @@
 | G-PREF-009 | Bundle Related Commits | #git #commits | 2026-03-08 |
 | G-PREF-010 | Premium Non-Generic UI | #design #ui #magic-ui | 2026-03-10 |
 | G-PREF-012 | Full Codebase Scan Before Implementation | #workflow #discovery | 2026-03-31 |
+| G-PREF-007 | Pending Web Libraries (npm) | #web #libraries #react #next.js | 2026-04-09 |
 
 ## Failed Approaches (G-FAIL) — Page 5
 
@@ -102,4 +104,4 @@
 
 ---
 
-**Totals**: 28 patterns + 16 solutions + 9 errors + 7 preferences + 6 failures = **66 entries**
+**Totals**: 28 patterns + 16 solutions + 9 errors + 8 preferences + 6 failures = **67 entries**

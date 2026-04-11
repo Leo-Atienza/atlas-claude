@@ -1,88 +1,184 @@
 <!--
-id: SK-057
+id: SK-083
 name: web-l100
-description: L100 Web — orchestration guide for building iPhone-smooth websites using Motion, GSAP, Lenis, View Transitions, and modern APIs
-keywords: l100, premium-web, animation-architecture, smooth, iphone, apple, motion-gsap, scroll-animation, page-transition, skeleton, hero, landing-page, awwwards
-version: 1.0.0
+description: Vanguard Web Architecture — orchestrates the entire web stack through Render Tiers (Static → Cached → Dynamic → Interactive → Generative). CSS-First principle, streaming pipeline, automated CWV. Load this for ANY web project.
+keywords: vanguard, l100, web-architecture, render-tiers, css-first, streaming, ppr, animation, performance, cwv, premium-web, landing-page, dashboard, website
+version: 2.1.0
 -->
 
-# L100 Web — Building iPhone-Smooth Websites
+# Vanguard Web Architecture
 
-## When to Use This Skill
+## The Thesis
 
-**Auto-activate when:** building a website, landing page, product page, dashboard, or any web UI where quality matters. This is the CONDUCTOR skill — it tells you which specialist skill to load and when.
+The web platform hit an inflection point. Three converging trends killed the old model:
 
-**This skill does NOT replace specialist skills.** It orchestrates them. Load this first, then load the specialist skill for the specific technique you need.
+1. **CSS Ascendancy** — CSS now handles popovers, anchor positioning, scroll animations, container responsiveness, parent-aware styling, and specificity architecture. JavaScript is retreating to business logic.
+2. **Streaming Everything** — PPR streams static shells instantly. Suspense streams dynamic content. AI SDK streams text, objects, and components. Everything is incremental and progressive.
+3. **Zero-JS First** — Ship zero JavaScript by default. Add it only for genuine interactivity. Every byte of JS you ship is a byte the user pays for.
 
-## The Skill Map
-
-| Task | Load Skill | ID |
-|------|-----------|-----|
-| React component animations | `motion-animation` | SK-047 |
-| Scroll timelines, pins, SplitText | `gsap` + `gsap-advanced` | SK-042/044 |
-| Smooth momentum scroll | `lenis-smooth-scroll` | SK-048 |
-| Native browser APIs (popover, dialog, view transitions) | `web-platform-apis` | SK-054 |
-| Data fetching, caching, mutations | `tanstack-ecosystem` | SK-055 |
-| Unit/component testing | `vitest-testing` | SK-056 |
-| Advanced JS/TS patterns | `advanced-javascript` | SK-045 |
-| Next.js architecture | `next-best-practices` | SK-029 |
-| React performance (62 rules) | `vercel-react-best-practices` | SK-033 |
-| Design aesthetics, typography, color | `frontend-design` | SK-005 |
-| shadcn components | shadcn MCP | MCP-002 |
-| Deployment | `deploy-to-vercel` | SK-028 |
+**This skill is the CONDUCTOR.** It tells you which specialist skill to load and when. Load this first, then load the specialist skill for the specific technique you need.
 
 ---
 
-## The Layer Cake — Which Tool Owns Which Layer
+## The Decision System
 
-Every animated element belongs to exactly ONE layer. Never let two tools fight over the same element.
+Run this at the START of every web task.
+
+### Step 1: Classify Every Component by Render Tier
+
+| Tier | Renders | JS Shipped | Example |
+|------|---------|-----------|---------|
+| **T0: Static** | Build time, CDN forever | None | Nav, footer, marketing copy, icons |
+| **T1: Cached** | Server, `use cache` + cacheLife | None | Blog posts, product cards, stats, catalog |
+| **T2: Dynamic** | Request time, Suspense-wrapped | None (server) | User prefs, notifications, cart count |
+| **T3: Interactive** | Client hydration | Minimal | Animations, forms, drag-and-drop, charts |
+| **T4: Generative** | AI streaming, progressive | AI SDK | Chat, generated summaries, smart search |
+
+**Classification rules:**
+- Does it read cookies/headers/searchParams? → **T2** minimum
+- Does it use useState/useEffect/onClick? → **T3** minimum
+- Does it call streamText/useChat? → **T4**
+- Does it fetch data that changes? → **T1** with cacheLife
+- None of the above? → **T0**
+
+**Cardinal rule: Start at T0, only escalate when forced.**
+
+### Step 2: CSS-First Check (for would-be T3 components)
+
+Before making a component T3 (client-side), ask:
+
+| Can CSS do it? | How | Tier drops to |
+|---|---|---|
+| Parent-aware styling | `:has()` selector | T0 |
+| Component-responsive layout | Container Queries `@container` | T0 |
+| Dropdown / tooltip / menu | Popover API + Anchor Positioning | T0 |
+| Scroll detection (sticky, scrollable) | scroll-state queries | T0 |
+| Modal with focus trap | `<dialog>` + `showModal()` | T0 |
+| Scroll reveal / parallax | `animation-timeline: view()` | T0 |
+| Dark mode toggle | `light-dark()` + `color-scheme` | T0 |
+| Height animation | `grid-template-rows` transition | T0 |
+
+If none apply → T3 is correct. Load the appropriate specialist skill.
+
+### Step 3: Streaming Architecture
+
+Arrange tiers in the page, outermost to innermost:
+
+```
+T0 Static Shell (instant from CDN — nav, layout, footer)
+  └─ T1 Cache Slots (use cache boundaries — content, stats)
+      └─ T2 Suspense Boundaries (skeleton → streamed content)
+          └─ T3 Client Islands (hydrated interactive components)
+              └─ T4 AI Streams (progressive token-by-token rendering)
+```
+
+- Use `<Activity mode="hidden">` to pre-render anticipated T2/T3 content offscreen
+- Use `<ViewTransition>` for smooth navigation between pages
+- Use Speculation Rules for near-zero-latency predicted navigations
+
+### Step 4: Animation Layer (T3 components only)
+
+Use the Layer Cake to assign one animation tool per element:
 
 ```
 Layer 5 — 3D / WebGL / Canvas
-  → Three.js + React Three Fiber + GSAP driving shader uniforms
-  → Product visualizers, backgrounds, particle effects
-  → Canvas/SVG text layout: @chenglou/pretext (off-DOM measurement, no reflow)
+  → Three.js / R3F + Drei (SK-007) for code-driven 3D
+  → Spline (SK-095) for design-driven 3D
+  → GSAP driving shader uniforms, frameloop synced via SALA
 
 Layer 4 — Complex Scroll Timelines
-  → GSAP ScrollTrigger + Lenis
-  → Pinned sections, scrubbed timelines, parallax, SplitText reveals
+  → GSAP ScrollTrigger + Lenis (SK-042/044 + SK-048)
+  → Pinned sections, scrubbed timelines, SplitText reveals
 
-Layer 3 — Scroll Reveals (simple)
-  → CSS Scroll-Driven Animations (zero JS, GPU-composited)
+Layer 3 — Scroll Reveals & Batch Animation
+  → CSS animation-timeline: view() (zero JS, GPU-composited) — THIS IS T0!
+  → Anime.js (SK-093) for >20 element stagger reveals, text effects
   → OR ScrollTrigger.batch() for staggered reveals
-  → Fade-ins, content reveals, progress bars
 
 Layer 2 — React Component Animations
-  → Motion (framer-motion)
-  → Modals, drawers, tabs, card hovers, list reorders, entrances
+  → Motion (SK-047) — modals, drawers, tabs, hovers, list reorders, entrances, layoutId
 
 Layer 1 — Micro-interactions
-  → Pure CSS transitions on transform + opacity
-  → Button hovers, focus rings, skeleton pulses, nav highlights
+  → Pure CSS transitions on transform + opacity — THIS IS T0!
 
 Layer 0 — Page Transitions
-  → View Transitions API (progressive) + Motion AnimatePresence (fallback)
+  → MPA: Barba.js (SK-094) — GSAP timeline hooks, prefetch
+  → SPA/Next.js: View Transitions API + Motion AnimatePresence (fallback)
+
+→ For multi-library orchestration, load **cinematic-web-engine** (SK-096) — SALA, Layer Ownership, Motion Tokens
 ```
 
-**Rule:** GSAP and Motion both write to `element.style`. If both animate the same property on the same element, the last write wins = flickering. Assign one tool per element.
+**Rule:** GSAP and Motion both write to `element.style`. Never let two tools animate the same property on the same element. One tool per element.
 
 ---
 
-## The Animation Decision Matrix
+## The Skill Map
+
+| Tier | Task | Load Skill | ID |
+|------|------|-----------|-----|
+| T0 | CSS-first components, :has(), @layer, container queries | `css-first-ui` | SK-084 |
+| T0-T1 | Cache architecture, `use cache`, cacheLife, cacheTag | `next-cache-components` | SK-030 |
+| T1-T2 | Streaming, `<Activity>`, `<ViewTransition>`, cache hierarchy | `streaming-cache` | SK-085 |
+| T3 | React component animations (springs, layout, gestures) | `motion-animation` | SK-047 |
+| T3 | Scroll timelines, pins, SplitText, Flip | `gsap` + `gsap-advanced` | SK-042/044 |
+| T3 | Smooth momentum scroll | `lenis-smooth-scroll` | SK-048 |
+| T3 | Data fetching, caching, mutations | `tanstack-ecosystem` | SK-055 |
+| T4 | AI streaming UI, tool→component, generative UI | `ai-native-ui` | SK-086 |
+| T3 | Batch stagger reveals, text effects | `anime-js` | SK-093 |
+| T3 | MPA page transitions (GSAP orchestrated) | `barba-js` | SK-094 |
+| T3 | Design-driven 3D scenes (Spline editor) | `spline-3d` | SK-095 |
+| All | Multi-library animation orchestration | `cinematic-web-engine` | SK-096 |
+| All | Native browser APIs (popover, dialog, view transitions) | `web-platform-apis` | SK-054 |
+| All | Design aesthetics, typography, color, anti-slop | `frontend-design` | SK-005 |
+| All | Next.js App Router conventions | `next-best-practices` | SK-029 |
+| All | React composition patterns | `vercel-composition-patterns` | SK-032 |
+| All | React/Next.js performance (62 rules) | `vercel-react-best-practices` | SK-033 |
+| All | Testing | `vitest-testing` | SK-056 |
+| All | Build tooling (Biome, Lightning CSS, Turbopack) | `modern-build-pipeline` | SK-087 |
+| All | shadcn components | shadcn MCP | MCP |
+| All | Deployment | `deploy-to-vercel` | SK-028 |
+
+---
+
+## CSS-First Replacement Matrix
+
+Before reaching for a JS library, check if CSS can do it natively.
+
+| Old JS Pattern | CSS-First Replacement | JS Savings |
+|---|---|---|
+| Floating UI / Popper.js / Tippy.js | Popover API + CSS Anchor Positioning | ~15KB |
+| Custom dropdown positioning | `position-anchor` + `position-area` + `position-try-fallbacks` | ~15KB |
+| IntersectionObserver scroll reveals (AOS) | `animation-timeline: view()` | ~8KB |
+| Custom modal + focus trap library | `<dialog>` + `showModal()` | ~5KB |
+| JS responsive logic / resize observer | Container Queries `@container` | varies |
+| JS parent-aware class toggling | `:has()` selector | varies |
+| JS scroll detection (header shrink, etc.) | scroll-state queries `@container scroll-state(stuck)` | varies |
+| JS specificity management | `@layer` architecture | 0 (architecture) |
+| JS color mode toggle | `light-dark()` + `color-scheme` property | ~2KB |
+| CSS-in-JS runtime (styled-components) | Tailwind CSS v4 + CSS Nesting | ~20KB runtime |
+| PostCSS + autoprefixer + cssnano | Lightning CSS | faster builds |
+| ESLint + Prettier (2 configs) | Biome 2.0 (1 config, 100x faster) | faster DX |
+| `<link rel="prefetch">` | Speculation Rules API | smarter prefetching |
+| `history.pushState` + `popstate` | Navigation API (progressive) | cleaner API |
+
+---
+
+## Animation Decision Matrix
 
 | Situation | Tool | Why |
 |---|---|---|
 | React component entrance | Motion `initial/animate` | Spring physics, declarative |
-| Button/card hover | Motion `whileHover` + spring | No refs needed, springs |
+| Button/card hover | Motion `whileHover` + spring | No refs, springs |
 | Modal/drawer open/close | Motion `AnimatePresence` | Exit animations built-in |
 | List reorder / layout shift | Motion `layout` prop | Automatic measurement |
-| Page transition | `template.tsx` AnimatePresence + View Transitions API | Cross-browser |
-| Parallax in React | Motion `useScroll` + `useTransform` | No re-renders |
-| Text character/word reveal | GSAP `SplitText` | Can't do this in Motion |
+| Shared element between routes | Motion `layoutId` | Cross-component animation |
+| Page transition | `<ViewTransition>` + AnimatePresence fallback | Native + progressive |
+| Parallax in React | Motion `useScroll` + `useTransform` | Zero re-renders |
+| Text character/word reveal | GSAP `SplitText` + `autoSplit` | Can't do in Motion |
 | Pinned scroll section | GSAP `ScrollTrigger` + Lenis | Full timeline control |
 | Multi-element scroll choreography | GSAP timeline + `ScrollTrigger` | Sequencing |
-| "Animate once on enter" (many elements) | `ScrollTrigger.batch()` | Efficient batching |
-| Simple fade-in (no JS needed) | CSS `animation-timeline: view()` | Zero bundle cost |
+| Batch entrance reveals | `ScrollTrigger.batch()` | Efficient batching |
+| Simple fade-in (no JS needed) | CSS `animation-timeline: view()` | **Zero bundle cost** |
 | Smooth scroll momentum | Lenis | 3KB, native scrollTo |
 | WebGL shader animation | GSAP `ticker` driving uniforms | Precise control |
 | Mouse follower / cursor lag | `gsap.quickTo()` | 60fps with lag |
@@ -92,7 +188,7 @@ Layer 0 — Page Transitions
 
 ---
 
-## Project Setup (Next.js)
+## Project Setup
 
 ```bash
 npm install gsap @gsap/react lenis motion
@@ -144,49 +240,24 @@ export function AnimationProvider({ children }: { children: React.ReactNode }) {
 }
 ```
 
+### Lenis CSS (required)
+
 ```css
-/* globals.css — required for Lenis */
 html.lenis, html.lenis body { height: auto; }
 .lenis.lenis-smooth { scroll-behavior: auto !important; }
 .lenis.lenis-stopped { overflow: hidden; }
 .lenis.lenis-smooth [data-lenis-prevent] { overscroll-behavior: contain; }
 ```
 
-### Page Transitions
+### Disable Lenis on Touch
 
-```tsx
-// app/template.tsx — re-renders on every navigation
-'use client';
-import { motion, AnimatePresence } from 'motion/react';
-
-export default function Template({ children }: { children: React.ReactNode }) {
-  return (
-    <AnimatePresence mode="wait">
-      <motion.main
-        initial={{ opacity: 0, y: 12 }}
-        animate={{ opacity: 1, y: 0 }}
-        exit={{ opacity: 0, y: -12 }}
-        transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-      >
-        {children}
-      </motion.main>
-    </AnimatePresence>
-  );
-}
-```
-
-```css
-/* Progressive: View Transitions API when available */
-@view-transition { navigation: auto; }
-::view-transition-old(root) { animation: 200ms ease both fade-out; }
-::view-transition-new(root) { animation: 300ms ease both fade-in; }
-@keyframes fade-out { to { opacity: 0; } }
-@keyframes fade-in { from { opacity: 0; } }
+```typescript
+const lenis = new Lenis({ smoothWheel: !('ontouchstart' in window) });
 ```
 
 ---
 
-## Spring Tokens — Define Once, Use Everywhere
+## Spring Tokens
 
 ```typescript
 // lib/springs.ts
@@ -206,431 +277,81 @@ export const springs = {
 } as const;
 ```
 
-**Cardinal rule:** `springs.motion.snappy` for ALL interactive elements (buttons, toggles, cards, drawers). Never `ease-in-out` on anything a user touches.
+**Cardinal rule:** `springs.motion.snappy` for ALL interactive elements. Never `ease-in-out` on anything a user touches.
 
 ---
 
-## Hero Section Pattern
+## Performance Budget
 
-Motion handles structural entrance. GSAP handles text splitting. CSS handles decorative effects.
+> Full checklist: [references/performance-budget.md](references/performance-budget.md)
 
-```tsx
-'use client';
-import { useRef } from 'react';
-import { motion } from 'motion/react';
-import { useGSAP } from '@gsap/react';
-import gsap from 'gsap';
-import { SplitText } from 'gsap/SplitText';
-import { springs } from '@/lib/springs';
+### Core Web Vitals Targets
+- **LCP < 2.5s** — hero image `fetchPriority="high"`, inline critical CSS, PPR shell
+- **INP < 200ms** — no long tasks > 50ms, use `scheduler.yield()` for heavy operations
+- **CLS < 0.1** — `width`/`height` or `aspect-ratio` on all media, no injected content above fold
 
-gsap.registerPlugin(SplitText);
+### Bundle Targets
+- Total animation JS < 80KB gzipped
+- Tree-shake Motion: `import { motion } from 'motion/react'`
+- GSAP plugins loaded dynamically where used
+- Decorative canvas/3D via `requestIdleCallback`
 
-export function Hero() {
-  const containerRef = useRef<HTMLDivElement>(null);
-  const headingRef = useRef<HTMLHeadingElement>(null);
+### Streaming + Navigation
+- Speculation Rules for predicted navigations (Shopify: 180ms faster)
+- View Transitions for smooth visual handoff between routes
+- `<Activity mode="hidden">` for offscreen pre-rendering of likely next routes
+- `content-visibility: auto` on below-fold sections
 
-  useGSAP(() => {
-    const split = SplitText.create(headingRef.current, {
-      type: 'words,chars',
-      mask: 'chars',
-    });
-    gsap.from(split.chars, {
-      yPercent: 110,
-      stagger: { amount: 0.4, from: 'start' },
-      duration: 0.7,
-      ease: 'power3.out',
-      delay: 0.3,
-    });
-  }, { scope: containerRef });
+### React 19+
+- React Compiler enabled (`reactCompiler: true`)
+- No manual `useMemo`/`useCallback`/`React.memo` (compiler handles it)
+- Server Components for static content, Client Components only for interactivity
+- `use cache` for cacheable server functions
 
-  return (
-    <section ref={containerRef} className="hero">
-      <motion.p
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ ...springs.motion.standard, delay: 0.1 }}
-        className="hero__eyebrow"
-      >
-        Introducing v2.0
-      </motion.p>
-
-      <h1 ref={headingRef} className="hero__heading">
-        Build something extraordinary
-      </h1>
-
-      <motion.div
-        initial={{ opacity: 0, y: 16 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ ...springs.motion.snappy, delay: 0.7 }}
-      >
-        <motion.button
-          whileHover={{ scale: 1.04 }}
-          whileTap={{ scale: 0.97 }}
-          transition={springs.motion.snappy}
-          className="hero__cta"
-        >
-          Get started
-        </motion.button>
-      </motion.div>
-    </section>
-  );
-}
-```
-
----
-
-## Scroll Section Patterns
-
-### Pinned Product Showcase (GSAP)
-
-```tsx
-'use client';
-import { useRef } from 'react';
-import { useGSAP } from '@gsap/react';
-import gsap from 'gsap';
-import { ScrollTrigger } from 'gsap/ScrollTrigger';
-
-gsap.registerPlugin(ScrollTrigger);
-
-export function ProductShowcase() {
-  const containerRef = useRef<HTMLDivElement>(null);
-
-  useGSAP(() => {
-    const tl = gsap.timeline({
-      scrollTrigger: {
-        trigger: containerRef.current,
-        start: 'top top',
-        end: '+=3000',
-        pin: true,
-        scrub: 1,
-      },
-    });
-
-    tl.from('.product-3d', { y: 80, opacity: 0, duration: 1 });
-    tl.from('.feature-item', {
-      x: -40, opacity: 0, stagger: 0.15, duration: 0.6,
-    }, '<0.3');
-    tl.to('.section-bg', { backgroundColor: '#0a0a0a', duration: 0.5 }, '<');
-
-  }, { scope: containerRef });
-
-  return <section ref={containerRef} className="product-showcase">{/* ... */}</section>;
-}
-```
-
-### Staggered Card Reveals (GSAP Batch)
-
-```tsx
-useGSAP(() => {
-  ScrollTrigger.batch('.card', {
-    onEnter: (elements) =>
-      gsap.from(elements, {
-        opacity: 0, y: 30, stagger: 0.1,
-        duration: 0.6, ease: 'power2.out',
-      }),
-    start: 'top 85%',
-    once: true,
-  });
-});
-```
-
-### Simple Fade-In (CSS Only — Zero JS)
-
-```css
-@keyframes fade-in-up {
-  from { opacity: 0; transform: translateY(24px); }
-  to   { opacity: 1; transform: translateY(0); }
-}
-.reveal {
-  animation: fade-in-up linear both;
-  animation-timeline: view();
-  animation-range: entry 0% entry 40%;
-}
-```
-
-### Parallax (Motion — React)
-
-```tsx
-function ParallaxSection({ children }: { children: React.ReactNode }) {
-  const ref = useRef(null);
-  const { scrollYProgress } = useScroll({
-    target: ref,
-    offset: ['start end', 'end start'],
-  });
-  const y = useTransform(scrollYProgress, [0, 1], ['0%', '-15%']);
-
-  return (
-    <div ref={ref} style={{ overflow: 'hidden' }}>
-      <motion.div style={{ y }}>{children}</motion.div>
-    </div>
-  );
-}
-```
-
----
-
-## Component Patterns
-
-### Modal (Motion)
-
-```tsx
-<AnimatePresence>
-  {isOpen && (
-    <>
-      <motion.div
-        className="backdrop"
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        exit={{ opacity: 0 }}
-        onClick={close}
-      />
-      <motion.div
-        className="modal"
-        initial={{ opacity: 0, scale: 0.95, y: 20 }}
-        animate={{ opacity: 1, scale: 1, y: 0 }}
-        exit={{ opacity: 0, scale: 0.95, y: 20 }}
-        transition={springs.motion.snappy}
-      />
-    </>
-  )}
-</AnimatePresence>
-```
-
-### Tab Switch (Motion)
-
-```tsx
-<AnimatePresence mode="wait">
-  <motion.div
-    key={activeTab}
-    initial={{ opacity: 0, x: 20 }}
-    animate={{ opacity: 1, x: 0 }}
-    exit={{ opacity: 0, x: -20 }}
-    transition={{ duration: 0.2 }}
-  >
-    {tabContent[activeTab]}
-  </motion.div>
-</AnimatePresence>
-```
-
-### Card with Hover (Motion container, GSAP text)
-
-```tsx
-function Card({ title }: { title: string }) {
-  const textRef = useRef<HTMLHeadingElement>(null);
-
-  useGSAP(() => {
-    const split = SplitText.create(textRef.current, { type: 'lines', mask: 'lines' });
-    gsap.from(split.lines, {
-      yPercent: 100, stagger: 0.05, duration: 0.5, ease: 'power3.out',
-      scrollTrigger: { trigger: textRef.current, start: 'top 80%', once: true },
-    });
-  });
-
-  return (
-    <motion.div
-      whileHover={{ y: -6 }}
-      transition={springs.motion.snappy}
-      className="card"
-    >
-      <h3 ref={textRef}>{title}</h3>
-    </motion.div>
-  );
-}
-```
-
-### List with Layout Animation (Motion)
-
-```tsx
-<motion.ul layout>
-  <AnimatePresence>
-    {items.map(item => (
-      <motion.li
-        key={item.id}
-        layout
-        initial={{ opacity: 0, y: -10 }}
-        animate={{ opacity: 1, y: 0 }}
-        exit={{ opacity: 0, x: -200 }}
-        transition={springs.motion.standard}
-      >
-        {item.name}
-      </motion.li>
-    ))}
-  </AnimatePresence>
-</motion.ul>
-```
-
----
-
-## Loading & Perceived Performance
-
-### Skeleton Screens (CSS only, no spinners)
-
-```css
-.skeleton {
-  background: linear-gradient(90deg,
-    hsl(var(--muted)) 25%,
-    hsl(var(--muted-foreground) / 0.1) 50%,
-    hsl(var(--muted)) 75%
-  );
-  background-size: 200% 100%;
-  animation: shimmer 1.5s infinite;
-  border-radius: var(--radius);
-}
-@keyframes shimmer {
-  0%   { background-position: 200% 0; }
-  100% { background-position: -200% 0; }
-}
-```
-
-### Hero Image (BlurHash + Progressive)
-
-```tsx
-function HeroImage({ src, alt }: { src: string; alt: string }) {
-  const [loaded, setLoaded] = useState(false);
-  return (
-    <div className="relative">
-      <div className={cn('hero-blur', loaded && 'opacity-0')} />
-      <img
-        src={src} alt={alt}
-        onLoad={() => setLoaded(true)}
-        className={cn('hero-img', loaded ? 'opacity-100' : 'opacity-0')}
-        fetchPriority="high"
-        decoding="async"
-      />
-    </div>
-  );
-}
-```
-
-### Speculation Rules (Prerender Next Pages)
-
-```html
-<script type="speculationrules">
-{
-  "prerender": [{
-    "where": { "href_matches": "/products/*" },
-    "eagerness": "moderate"
-  }],
-  "prefetch": [{
-    "where": { "href_matches": "/*" },
-    "eagerness": "conservative"
-  }]
-}
-</script>
-```
-
-### Native APIs First
-
-| Old pattern | L100 replacement |
-|---|---|
-| Custom JS modal | `<dialog>` + `showModal()` |
-| JS tooltip library (Tippy, Popper) | Popover API + CSS Anchor Positioning |
-| JS scroll reveal library | CSS `animation-timeline: view()` |
-| Custom dropdown positioning | CSS `position-anchor` + `position-area` |
-| Preloading via JS | Speculation Rules API |
-
----
-
-## Responsive: Mobile Simplification
-
-Premium sites reduce animation complexity on mobile. Desktop gets full choreography; mobile gets simple entrance fades.
+### Responsive: Mobile Simplification
 
 ```typescript
 const mm = gsap.matchMedia();
-
 mm.add({
   isDesktop: '(min-width: 1024px)',
   isMobile: '(max-width: 1023px)',
   reduceMotion: '(prefers-reduced-motion: reduce)',
 }, (context) => {
   const { isDesktop, reduceMotion } = context.conditions!;
-
-  if (reduceMotion) {
-    gsap.set('.animated', { clearProps: 'all' });
-    return;
-  }
-
-  if (isDesktop) {
-    // Full: SplitText, parallax, pins, horizontal scroll
-    initDesktopAnimations();
-  } else {
-    // Mobile: fade + translateY only, no pins, no parallax
+  if (reduceMotion) { gsap.set('.animated', { clearProps: 'all' }); return; }
+  if (isDesktop) { initDesktopAnimations(); }
+  else {
     ScrollTrigger.batch('.reveal', {
       onEnter: (els) => gsap.from(els, {
         opacity: 0, y: 20, duration: 0.4, stagger: 0.08, ease: 'power2.out',
       }),
-      start: 'top 90%',
-      once: true,
+      start: 'top 90%', once: true,
     });
   }
 });
 ```
 
-```typescript
-// Disable Lenis on touch — native iOS momentum is better
-const lenis = new Lenis({
-  smoothWheel: !('ontouchstart' in window),
-});
-```
-
 ---
 
-## Performance Checklist
-
-### GPU & Rendering
-- [ ] Only animate `transform` + `opacity` (GPU-composited)
-- [ ] `will-change` only on elements animating immediately on load — remove after
-- [ ] `content-visibility: auto` on below-fold sections (call `ScrollTrigger.refresh()` when revealed)
-- [ ] No layout thrashing — never read then write DOM in a loop
-- [ ] Virtual lists: use `@chenglou/pretext` for item height measurement — avoids reflow per item
-- [ ] Canvas/SVG text: use `@chenglou/pretext` `layout()` instead of DOM `getBoundingClientRect`
-
-### Bundle
-- [ ] Total animation JS < 80KB gzipped
-- [ ] Tree-shake Motion imports: `import { motion } from 'motion/react'`
-- [ ] GSAP plugins loaded only where used (dynamic import for SplitText, MorphSVG)
-- [ ] Decorative canvas/3D initialized via `requestIdleCallback` (not on load)
-
-### Core Web Vitals
-- [ ] LCP < 2.5s — hero image `fetchPriority="high"`, inline critical CSS
-- [ ] INP < 200ms — no long tasks > 50ms, use `scheduler.yield()` in heavy operations
-- [ ] CLS < 0.1 — `width`/`height` or `aspect-ratio` on all media, no injected content above fold
-
-### Loading
-- [ ] Skeleton screens, not spinners
-- [ ] BlurHash or tiny placeholder for images
-- [ ] Optimistic updates for mutations (UI changes immediately, syncs in background)
-- [ ] Speculation Rules for predicted navigation
-
-### Accessibility
-- [ ] `prefers-reduced-motion` kills all non-essential animation
-- [ ] `gsap.matchMedia()` wraps all scroll animations
-- [ ] `[data-lenis-prevent]` on scrollable sub-containers (modals, code blocks)
-- [ ] Focus management in modals (`<dialog>` handles this natively)
-
-### React 19+
-- [ ] React Compiler enabled (`reactCompiler: true`)
-- [ ] No manual `useMemo`/`useCallback`/`React.memo` (compiler handles it)
-- [ ] Server Components for static content, Client Components only for interactivity
-- [ ] `use cache` for cacheable server functions (Next.js 16)
-
----
-
-## The Full L100 Stack Summary
+## The Full Vanguard Stack
 
 ```
-Design:       frontend-design (SK-005) — aesthetics, typography, color
-Components:   shadcn/ui + Aceternity UI + Magic UI (MCP)
-Framework:    Next.js 16 App Router (SK-029) + React 19 Compiler
-Styling:      Tailwind CSS v4
-Animation:    Motion (SK-047) + GSAP (SK-042/044) + Lenis (SK-048)
-Scroll:       Lenis foundation → GSAP ScrollTrigger orchestration → CSS Scroll-Driven for simple reveals
-Transitions:  View Transitions API (SK-054) + AnimatePresence fallback
-Data:         TanStack Query (SK-055) + Zustand (client state)
-Testing:      Vitest (SK-056) + Playwright (SK-009)
-Performance:  vercel-react-best-practices (SK-033) — 62 rules
-Modern JS:    advanced-javascript (SK-045) — TC39, TypeScript patterns
-Native APIs:  web-platform-apis (SK-054) — popover, dialog, anchor, speculation
-Text Measure: @chenglou/pretext — off-DOM height/layout for virtualization + Canvas/SVG
-Deployment:   Vercel (SK-028) or Netlify (MCP)
+Architecture:  Vanguard (SK-083) — Render Tiers, CSS-First, streaming pipeline
+Design:        frontend-design (SK-005) — aesthetics, typography, color, anti-slop
+CSS Engine:    css-first-ui (SK-084) — @layer, container queries, :has(), native components
+Components:    shadcn/ui + Aceternity UI + Magic UI (MCP)
+Framework:     Next.js 16 App Router + React 19.2 Compiler
+Streaming:     streaming-cache (SK-085) — PPR, Activity, ViewTransition, cache hierarchy
+Styling:       Tailwind CSS v4 + CSS Nesting + Lightning CSS
+Animation:     Motion (SK-047) + GSAP (SK-042/044) + Lenis (SK-048) + Anime.js (SK-093) — orchestrated by Cinematic Web Engine (SK-096)
+3D:            Three.js/R3F (SK-007) + Spline (SK-095) — lazy-loaded, SALA-synced
+Scroll:        Lenis → GSAP ScrollTrigger → CSS Scroll-Driven (simple reveals)
+Transitions:   View Transitions API + Barba.js (SK-094, MPA) + AnimatePresence fallback
+Data:          TanStack Query (SK-055) + Server Actions + Zustand (client state)
+AI:            ai-native-ui (SK-086) — streaming UI, generative components
+Testing:       Vitest (SK-056) + Playwright (SK-009)
+Performance:   vercel-react-best-practices (SK-033) + Speculation Rules + Activity
+Build:         modern-build-pipeline (SK-087) — Biome, Lightning CSS, Turbopack
+Native APIs:   web-platform-apis (SK-054) — popover, dialog, anchor, scroll-driven
+Deployment:    Vercel (SK-028)
 ```

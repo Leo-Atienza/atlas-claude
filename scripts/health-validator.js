@@ -19,7 +19,19 @@ const { execSync } = require('child_process');
 
 const CLAUDE_DIR = path.join(os.homedir(), '.claude');
 const SKILLS_DIR = path.join(CLAUDE_DIR, 'skills');
-const MEMORY_DIR = path.join(CLAUDE_DIR, 'projects', 'C--Users-leooa--claude', 'memory');
+// Find the project-scoped memory directory by scanning projects/*/memory/MEMORY.md
+// Claude Code encodes paths with -- separators (e.g. C--Users-leooa--claude)
+// which is hard to reverse-engineer cross-platform, so we glob for it instead.
+const MEMORY_DIR = (function() {
+  const projectsDir = path.join(CLAUDE_DIR, 'projects');
+  try {
+    for (const entry of fs.readdirSync(projectsDir)) {
+      const candidate = path.join(projectsDir, entry, 'memory');
+      if (fs.existsSync(path.join(candidate, 'MEMORY.md'))) return candidate;
+    }
+  } catch (_) {}
+  return path.join(projectsDir, 'unknown', 'memory');
+})();
 const MANIFEST_PATH = path.join(SKILLS_DIR, 'VERSION-MANIFEST.json');
 const KNOWLEDGE_DIR_PATH = path.join(CLAUDE_DIR, 'topics', 'KNOWLEDGE-DIRECTORY.md');
 const SETTINGS_PATH = path.join(CLAUDE_DIR, 'settings.json');
@@ -83,9 +95,9 @@ function knowledgeStaleness() {
 
 function versionManifest(skipNetwork = false) {
   const result = {
-    npm_updates: [],
-    gh_updates: [],
-    git_updates: [],
+    tool_updates: [],   // npm, go, and github-release CLI tools
+    gh_updates: [],     // GitHub skill pack updates
+    git_updates: [],    // Git-tracked skill updates
     errors: []
   };
 
@@ -108,7 +120,7 @@ function versionManifest(skipNetwork = false) {
     for (const [name, info] of Object.entries(manifest.cli_tools || {})) {
       const days = daysSince(info.last_checked);
       if (days > 14) {
-        result.npm_updates.push({ name, current: info.installed, latest: '(check needed)', days_since_check: days });
+        result.tool_updates.push({ name, current: info.installed, latest: '(check needed)', days_since_check: days });
       }
     }
     for (const [name, info] of Object.entries(manifest.skill_packs || {})) {
@@ -126,7 +138,7 @@ function versionManifest(skipNetwork = false) {
       const pkg = info.source.replace('npm:', '');
       const latest = safeExec(`npm view ${pkg} version`);
       if (latest && latest !== info.installed) {
-        result.npm_updates.push({ name, current: info.installed, latest });
+        result.tool_updates.push({ name, current: info.installed, latest });
       }
     }
     // go tools — check if go is available and tool can be queried
@@ -134,7 +146,7 @@ function versionManifest(skipNetwork = false) {
       // Go doesn't have a simple "view latest" — report days since check
       const days = daysSince(info.last_checked);
       if (days > 30) {
-        result.npm_updates.push({ name, current: info.installed, latest: '(go — manual check)', days_since_check: days });
+        result.tool_updates.push({ name, current: info.installed, latest: '(go — manual check)', days_since_check: days });
       }
     }
     // github releases
@@ -142,7 +154,7 @@ function versionManifest(skipNetwork = false) {
       const repo = info.source.replace('github:', '');
       const latest = safeExec(`gh api repos/${repo}/releases/latest --jq ".tag_name" 2>/dev/null`);
       if (latest && latest !== info.installed && latest !== `v${info.installed}`) {
-        result.npm_updates.push({ name, current: info.installed, latest, source: 'github-release' });
+        result.tool_updates.push({ name, current: info.installed, latest, source: 'github-release' });
       }
     }
   }
@@ -214,12 +226,18 @@ function hookIntegrity() {
         result.total++;
 
         // Extract script path from command string
-        // Patterns: "bash ~/.claude/hooks/foo.sh", "node ~/.claude/hooks/bar.js", "~/.claude/bin/claudio || true"
+        // Patterns: "bash ~/.claude/hooks/foo.sh", "node ~/.claude/hooks/bar.js",
+        //           "~/.claude/bin/claudio || true", "C:/Users/.claude/hooks/foo.js"
         const cmd = hook.command.replace(/\|\|.*$/, '').trim(); // strip || true fallbacks
-        const parts = cmd.split(/\s+/).filter(p => p.startsWith('~') || p.startsWith('/'));
+        const parts = cmd.split(/\s+/).filter(p =>
+          p.startsWith('~') || p.startsWith('/') || p.startsWith('$HOME') || /^[A-Z]:[/\\]/i.test(p)
+        );
 
         for (const part of parts) {
-          const resolved = part.replace(/^~/, os.homedir()).replace(/"/g, '');
+          const resolved = part
+            .replace(/^\$HOME/, os.homedir())
+            .replace(/^~/, os.homedir())
+            .replace(/"/g, '');
           if (!fs.existsSync(resolved)) {
             result.missing++;
             result.details.push(`${event}: ${part} — not found`);
