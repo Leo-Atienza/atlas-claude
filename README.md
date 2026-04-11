@@ -26,7 +26,7 @@
 
 <p align="center">
   <img src="https://img.shields.io/badge/claude_code-opus_4.6-blueviolet?style=flat-square" alt="Claude Code">
-  <img src="https://img.shields.io/badge/version-6.5.0-informational?style=flat-square" alt="Version">
+  <img src="https://img.shields.io/badge/version-6.6.1-informational?style=flat-square" alt="Version">
   <img src="https://img.shields.io/badge/skills-66_active-blue?style=flat-square" alt="Skills">
   <img src="https://img.shields.io/badge/knowledge-67_entries-teal?style=flat-square" alt="Knowledge">
   <img src="https://img.shields.io/badge/hooks-11-yellow?style=flat-square" alt="Hooks">
@@ -383,7 +383,7 @@ skills/
 ├── ARCHITECTURE.md              # System architecture reference
 ├── INSTALLED.md                 # Installed components reference
 ├── settings.json                # Hook wiring, permissions, env vars
-├── SYSTEM_VERSION.md            # Version tracking (v6.5.0)
+├── SYSTEM_VERSION.md            # Version tracking (v6.6.1)
 ├── SYSTEM_CHANGELOG.md          # Infrastructure version history
 │
 ├── hooks/                       # 11 lifecycle hooks
@@ -435,8 +435,8 @@ skills/
 │   ├── flow-debugger.md         #   Scientific debugging with state tracking
 │   └── ...                      #   mapper, UAT, researcher, synthesizer, etc.
 │
-└── scheduled-tasks/             # Automation
-    └── skill-autofix/           #   Scheduled skill improvements
+└── scheduled-tasks/             # Automation (gitignored — runtime-only)
+    └── weekly-dream/, weekly-maintenance/, monthly-evolution-report/
 ```
 
 ## State Management
@@ -481,6 +481,8 @@ Some hooks reference external components. They degrade gracefully — silent no-
 | **Heuristic auto-extractor** | Classifies session output → G-PAT/SOL/ERR/PREF/FAIL candidates | Auto-flags without forcing saves — noise prevention built in |
 | **Knowledge graph navigation** | Graphify builds queryable graph per-repo, queried before raw search | 71.5x token savings on architecture/dependency questions |
 | **Project wiki system** | Per-project decision history with auto-ADR on significant choices | Context survives compaction — never re-derive "why did we do X?" |
+| **Smart tsc-check** | TypeScript type-checking only fires on `.ts/.tsx` edits, not every save | Eliminates 30s blocks on CSS/MD/JSON edits |
+| **MCP health classification** | Tool failures from MCP servers tagged separately with actionable advice | Distinguishes "server down" from "bad input" — faster diagnosis |
 
 ---
 
@@ -498,6 +500,8 @@ Checks 13 sections: critical files, hooks, settings validity, skill pages (1-3),
 
 | Version | Date | Highlights |
 |---------|------|-----------|
+| **6.6.1** | 2026-04-11 | Auto-System-Docs workflow — infrastructure changes auto-trigger doc updates |
+| **6.6.0** | 2026-04-11 | Smart tsc-check hook, MCP health classification, persistence layer boundaries, skill archive (14.2MB archived) |
 | **6.5.0** | 2026-04-08 | KG type inference + prune, 48h-windowed health, CLAUDE.md auto-workflows, Graphify skill, wiki system, dead weight purge |
 | **6.4.0** | 2026-04-07 | Skill curation (78→65), CLAUDE.md pipeline upgrade, functional smoke tests |
 | **6.1.0** | 2026-04-07 | Living Atlas Audit — dead weight purge (22 files), orphaned refs fixed |
