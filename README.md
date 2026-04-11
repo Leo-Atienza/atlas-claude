@@ -20,14 +20,15 @@
   <a href="#autonomous-behaviors">Behaviors</a> &bull;
   <a href="#the-flow-system">Flow</a> &bull;
   <a href="#hook-lifecycle">Hooks</a> &bull;
-  <a href="#architecture">Architecture</a>
+  <a href="#architecture">Architecture</a> &bull;
+  <a href="#whats-novel">Novel</a>
 </p>
 
 <p align="center">
   <img src="https://img.shields.io/badge/claude_code-opus_4.6-blueviolet?style=flat-square" alt="Claude Code">
   <img src="https://img.shields.io/badge/version-6.5.0-informational?style=flat-square" alt="Version">
-  <img src="https://img.shields.io/badge/skills-65_active-blue?style=flat-square" alt="Skills">
-  <img src="https://img.shields.io/badge/knowledge-66_entries-teal?style=flat-square" alt="Knowledge">
+  <img src="https://img.shields.io/badge/skills-66_active-blue?style=flat-square" alt="Skills">
+  <img src="https://img.shields.io/badge/knowledge-67_entries-teal?style=flat-square" alt="Knowledge">
   <img src="https://img.shields.io/badge/hooks-11-yellow?style=flat-square" alt="Hooks">
   <img src="https://img.shields.io/badge/license-MIT-orange?style=flat-square" alt="License">
 </p>
@@ -36,7 +37,7 @@
 
 ## What is ATLAS?
 
-Most Claude Code setups are a `CLAUDE.md` with some rules. ATLAS is a **full infrastructure layer** — 11 lifecycle hooks, a self-contained brain with auto-workflows, a 66-entry knowledge store, and a unified Flow execution engine that scales from trivial fixes to multi-agent epic tasks. 65 active skills across 3 pages, pruned to signal — no bloat.
+Most Claude Code setups are a `CLAUDE.md` with some rules. ATLAS is a **full infrastructure layer** — 11 lifecycle hooks, a self-contained brain with auto-workflows, a 67-entry knowledge store, and a unified Flow execution engine that scales from trivial fixes to multi-agent epic tasks. 66 active skills across 3 pages, pruned to signal — no bloat.
 
 <table>
 <tr>
@@ -73,7 +74,7 @@ build a REST API for user management
        │  └─────┬─────┘  └─────┬─────┘    │
        │        ▼              ▼          │
        │  ┌──────────────────────────┐    │
-       │  │ 65 Skills · 66 Knowledge │    │ ← Execution
+       │  │ 66 Skills · 67 Knowledge │    │ ← Execution
        │  │ 11 Hooks  · KG · 15+ MCPs│    │
        │  └──────────┬───────────────┘    │
        │             ▼                    │
@@ -112,7 +113,7 @@ Every task follows the same 5-step sequence. ATLAS determines depth automaticall
 
 | Step | What Happens |
 |:----:|:------------|
-| **1. Analyze** | Scan codebase, search online (Context7 / WebSearch), ask if genuinely ambiguous |
+| **1. Analyze** | Scan codebase, check wiki + knowledge graph (Graphify), search online (Context7 / WebSearch), ask if genuinely ambiguous |
 | **2. Plan** | Load relevant skills on-demand, check MCPs, create plan, enter Plan mode for approval |
 | **3. Execute** | Follow all rules, TDD, make creative decisions autonomously, give milestone updates |
 | **4. Deliver** | Self-review: tests pass + build succeeds + preview works. Show proof. Never claim done without it. |
@@ -171,12 +172,37 @@ Capability gap detected?
   └─ Need knowledge  → Context7 lookup → create skill only if recurring
 ```
 
+### Knowledge Graph Navigation (Graphify)
+
+Before exploring any codebase, ATLAS checks for a knowledge graph. If found, it navigates by structure instead of brute-force search — 71.5x token savings on architecture/dependency questions.
+
+```
+Check graphify-out/graph.json
+  ├─ Graph exists  → read GRAPH_REPORT.md → query graph instead of Glob/Grep
+  ├─ No graph, 20+ files → offer to build (minutes, one command)
+  └─ After editing → auto-update graph at session end (code-only, <2s)
+```
+
+### Project Wiki System
+
+Per-project decision history that survives context compaction. Auto-scaffolded on `/new` and `/flow:start`.
+
+```
+wiki/
+├── index.md             # Decision log + context pages
+├── decisions/           # ADR-style records (auto-written on significant choices)
+└── log.md               # Chronological session log
+```
+
+**Auto-Wiki-Context**: On session start, reads `wiki/index.md` before re-deriving context from code.
+**Auto-Wiki-Decision**: After significant architectural decisions, writes ADR with context/options/decision/consequences.
+
 ### Knowledge Compounding
 
 Every non-trivial session extracts reusable patterns with confidence scoring:
 - Candidate patterns scored 1-5 — only 4+ saved (prevents noise accumulation)
 - Tag: `[HIGH]` (3+ reproductions) · `[MEDIUM]` (once) · `[LOW]` (theoretical)
-- 66 entries across 5 categories: G-PAT · G-SOL · G-ERR · G-PREF · G-FAIL
+- 67 entries across 5 categories: G-PAT · G-SOL · G-ERR · G-PREF · G-FAIL
 
 ### Defense-in-Depth Security
 
@@ -283,7 +309,6 @@ Control hook overhead via `ATLAS_HOOK_PROFILE` env var:
 |---------|-------------|----------|
 | `minimal` | context-guard only | Trivial tasks, quick edits |
 | `standard` | All hooks (default) | Normal development |
-| `strict` | Same as standard (reserved) | Future differentiation |
 
 ---
 
@@ -291,11 +316,11 @@ Control hook overhead via `ATLAS_HOOK_PROFILE` env var:
 
 ### Directory/Page Architecture
 
-Skills are indexed in two levels — scan the directory, open the page on demand. Never load all 65 at start.
+Skills are indexed in two levels — scan the directory, open the page on demand. Never load all 66 at start.
 
 ```
 skills/
-├── ACTIVE-DIRECTORY.md       # Index: 65 active skills (15 Core + 50 Available)
+├── ACTIVE-DIRECTORY.md       # Index: 66 active skills (15 Core + 51 Available)
 ├── ACTIVE-PAGE-1-*.md        # Web, animation, design, testing, security
 ├── ACTIVE-PAGE-2-*.md        # Backend, deployment, workflow
 ├── ACTIVE-PAGE-3-*.md        # Native, desktop, cross-platform
@@ -327,8 +352,9 @@ skills/
 | **Native & Desktop** | 10 | Tauri Desktop, Universal Conductor, Hardware Bridge, Local-First, Edge Intelligence, Motion/Visual/Transition/Sensory native |
 | **Backend & Data** | 5 | Supabase, Stripe, PostgreSQL, SQL, API Design |
 | **Testing & Deploy** | 5 | Playwright, E2E, Vitest, Deploy to Vercel, TDD |
-| **Workflow & Meta** | 10 | Smart Swarm, Deep Research, Dream, Self-Evolve, Design QA pipeline |
+| **Workflow & Meta** | 11 | Smart Swarm, Deep Research, Dream, Self-Evolve, Design QA pipeline, Wiki Manager |
 | **Design** | 6 | Frontend Design, UX Design, Canvas, Design Audit/Critique/Polish |
+| **Quality** | 2 | Impeccable (design polish), Taste (aesthetic judgment) |
 
 **Archive bundles** (auto-activate on project file match): Infra/DevOps · Security · Enterprise · Data/ML · Mobile/Native · Workflow/Meta · Document/Media
 
@@ -336,14 +362,14 @@ skills/
 
 ## Knowledge Store
 
-66 entries across 5 pages. Directory/Page architecture — scan the index, open a page on demand.
+67 entries across 5 pages. Directory/Page architecture — scan the index, open a page on demand.
 
 | Page | Category | Count | Content |
 |:----:|:--------:|:-----:|:--------|
 | 1 | **G-PAT** | 28 | Reusable patterns |
 | 2 | **G-SOL** | 16 | Solved problems |
 | 3 | **G-ERR** | 9 | Mistakes to avoid |
-| 4 | **G-PREF** | 7 | User preferences |
+| 4 | **G-PREF** | 8 | User preferences |
 | 5 | **G-FAIL** | 6 | Failed approaches |
 
 ---
@@ -352,10 +378,12 @@ skills/
 
 ```
 ~/.claude/
-├── CLAUDE.md                    # Self-contained brain (~8KB, all rules inline)
+├── CLAUDE.md                    # Self-contained brain (~18KB, all rules inline)
 ├── REFERENCE.md                 # Slash commands, MCP patterns, security triggers
+├── ARCHITECTURE.md              # System architecture reference
+├── INSTALLED.md                 # Installed components reference
 ├── settings.json                # Hook wiring, permissions, env vars
-├── SYSTEM_VERSION.md            # Version tracking (v5.9.0)
+├── SYSTEM_VERSION.md            # Version tracking (v6.5.0)
 ├── SYSTEM_CHANGELOG.md          # Infrastructure version history
 │
 ├── hooks/                       # 11 lifecycle hooks
@@ -372,10 +400,11 @@ skills/
 │   └── cctools-safety-hooks/    #   PreToolUse — bash, file_length, env protection
 │
 ├── skills/                      # Directory/Page architecture
-│   ├── ACTIVE-DIRECTORY.md      #   Index: 65 active skills (15 Core + 50 Available)
+│   ├── ACTIVE-DIRECTORY.md      #   Index: 66 active skills (15 Core + 51 Available)
 │   ├── ACTIVE-PAGE-1-*.md       #   Web, animation, design, testing, security
 │   ├── ACTIVE-PAGE-2-*.md       #   Backend, deployment, workflow
 │   ├── ACTIVE-PAGE-3-*.md       #   Native, desktop, cross-platform
+│   ├── graphify/                #   Knowledge graph skill (Graphify)
 │   ├── ARCHIVE-DIRECTORY.md     #   Index: 7 archive bundles
 │   ├── ARCHIVE-PAGE-1..7.md     #   Archived by domain — load on demand
 │   └── templates/               #   9 project templates (Next.js, Expo, API, Tauri, etc.)
@@ -385,12 +414,13 @@ skills/
 │   ├── KNOWLEDGE-PAGE-1-*.md    #   28 G-PAT entries (patterns)
 │   ├── KNOWLEDGE-PAGE-2-*.md    #   16 G-SOL entries (solutions)
 │   ├── KNOWLEDGE-PAGE-3-*.md    #   9 G-ERR entries (mistakes)
-│   ├── KNOWLEDGE-PAGE-4-*.md    #   7 G-PREF entries (preferences)
+│   ├── KNOWLEDGE-PAGE-4-*.md    #   8 G-PREF entries (preferences)
 │   └── KNOWLEDGE-PAGE-5-*.md    #   6 G-FAIL entries (failed approaches)
 │
-├── commands/                    # Slash commands
+├── commands/                    # Slash commands (23 + 21 flow)
 │   ├── new.md, resume.md, task.md, done.md, ship.md, dream.md
 │   ├── reflect.md, learn.md, compact.md, health.md, skill-review.md
+│   ├── handoff.md, parallel-audit.md, verified-deploy.md
 │   └── flow/                    #   21 Flow workflow commands
 │
 ├── scripts/                     # System utilities
@@ -398,7 +428,7 @@ skills/
 │   ├── session-metrics.sh       #   Session analytics report (48h windowed)
 │   └── health-validator.js      #   Health verification
 │
-├── agents/                      # 16 specialized Flow agents
+├── agents/                      # 15 Flow agents + 59 specialized agents
 │   ├── flow-planner.md          #   Plan creation with wave dependencies
 │   ├── flow-executor.md         #   Atomic commits, deviation handling
 │   ├── flow-verifier.md         #   Goal-backward verification
@@ -449,6 +479,8 @@ Some hooks reference external components. They degrade gracefully — silent no-
 | **Context budget cascade** | 4-stage threshold system with single source of truth | Graceful degradation, not abrupt failure |
 | **Temporal Knowledge Graph** | Entity-triple graph with time validity, queried at session start | Persistent facts that survive context compaction |
 | **Heuristic auto-extractor** | Classifies session output → G-PAT/SOL/ERR/PREF/FAIL candidates | Auto-flags without forcing saves — noise prevention built in |
+| **Knowledge graph navigation** | Graphify builds queryable graph per-repo, queried before raw search | 71.5x token savings on architecture/dependency questions |
+| **Project wiki system** | Per-project decision history with auto-ADR on significant choices | Context survives compaction — never re-derive "why did we do X?" |
 
 ---
 
@@ -466,7 +498,7 @@ Checks 13 sections: critical files, hooks, settings validity, skill pages (1-3),
 
 | Version | Date | Highlights |
 |---------|------|-----------|
-| **6.5.0** | 2026-04-08 | KG type inference + prune, 48h-windowed health, CLAUDE.md auto-workflows, dead weight purge |
+| **6.5.0** | 2026-04-08 | KG type inference + prune, 48h-windowed health, CLAUDE.md auto-workflows, Graphify skill, wiki system, dead weight purge |
 | **6.4.0** | 2026-04-07 | Skill curation (78→65), CLAUDE.md pipeline upgrade, functional smoke tests |
 | **6.1.0** | 2026-04-07 | Living Atlas Audit — dead weight purge (22 files), orphaned refs fixed |
 | **6.0.0** | 2026-04-07 | Atlas Intelligence Layer — temporal KG + heuristic extractor, zero deps |
