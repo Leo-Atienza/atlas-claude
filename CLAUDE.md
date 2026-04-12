@@ -30,7 +30,7 @@ Every task follows this sequence. Claude determines the right depth automaticall
 - Self-review: verify tests pass, build succeeds, preview works before declaring done
 - **Visual verification for UI work:** Use Claude Preview MCP (preview_start → preview_screenshot).
 - Show: code complete + tests passing + preview/screenshot
-- Suggest "next level" improvements proactively
+- Complete the requested task first with zero scope expansion. After delivery, optionally suggest improvements in a separate "Suggestions" block — never mixed into the main work. When the user says "just ship it," ship it immediately.
 - Never claim "done" without verification
 
 ### 4. Learn (conditional)
@@ -64,6 +64,9 @@ Never use `rm`. Always use `mv` to trash (`C:/tmp/trash/` or project `TRASH/`).
 ### Debugging
 ALWAYS capture and show actual error/response before hypothesizing root cause. Sequence: observe → hypothesize → verify → fix.
 
+### Wave-Based Fixes
+When performing audits or multi-file fixes, work in systematic waves (~5 items per wave). After each wave: run build + tests, report progress, only proceed if green. Never apply all fixes at once.
+
 ## Code Quality
 
 - Simplest solution that works correctly. No premature abstraction.
@@ -81,7 +84,7 @@ ALWAYS capture and show actual error/response before hypothesizing root cause. S
 - Always: branch → work → PR → squash merge → delete branch
 - After any file edit: run appropriate linter/formatter
 - After any code change: run targeted tests to verify
-- Before finishing any task: confirm it builds AND tests pass
+- Before any commit: run full build + all tests. Never commit with build errors or failing tests. Include test count and pass rate in the commit message body.
 
 ## On-Demand Rules
 
@@ -105,7 +108,11 @@ When autonomous (scheduled tasks, agent hooks): plan first for non-trivial work,
 
 ## Platform
 
-Windows 11 host, Unix shell syntax in bash (forward slashes, /dev/null not NUL). Scratchpad: `C:/tmp/claude-scratchpad/`.
+Windows 11 host. Claude Code's shell is bash — use Unix syntax (forward slashes, /dev/null) in Bash tool calls. But the USER's terminal is PowerShell — any instructions for the user to run manually (env vars, shell profiles, install commands) must use Windows/PowerShell syntax. Never suggest `.bashrc`, `.zshrc`, or Unix-only tools for user configuration.
+
+**Primary stack**: TypeScript, JavaScript, CSS, Markdown, JSON. Vercel for deployments (Pro plan, 300s function timeout). Always write TypeScript unless told otherwise.
+
+Scratchpad: `C:/tmp/claude-scratchpad/`.
 
 ## Automatic Workflows
 
@@ -133,17 +140,45 @@ When changes are made to hooks, settings.json, skills, or CLAUDE.md itself:
 
 ### Auto-Handoff (every session end)
 When the session is ending:
-1. Commit all pending changes with a descriptive conventional commit message
-2. Push to the current branch
-3. Generate handoff at `~/.claude/sessions/handoff-YYYY-MM-DD.md`
-4. Update memory if anything session-worthy was learned
+1. Run full build + all tests — do not commit if either fails
+2. Commit all pending changes with a descriptive conventional commit message (include test count/pass rate)
+3. Push to the current branch
+4. Generate handoff at `~/.claude/sessions/handoff-YYYY-MM-DD.md`
+5. If project has `wiki/` directory, update `wiki/session-log.md` with session summary
+6. Update memory if anything session-worthy was learned
 
 ## Graceful Degradation
 
 If a skill, hook, or script is missing or fails: continue without it, note the failure, suggest a fix.
+
+## App Development MCP Servers (2026-04-12)
+
+| Server | Purpose | Surface |
+|--------|---------|---------|
+| `storybook` | Component-level testing, story generation, a11y testing | Frontend testing |
+| `tauri-mcp` | Build, dev, test Tauri v2 projects (pairs with SK-088) | Desktop |
+| `maestro` | Mobile E2E testing with auto-healing selectors (Android on Win, iOS needs macOS) | Mobile testing |
+| `openapi` | Auto-generate MCP tools from any OpenAPI/Swagger spec | Backend / API |
+| `statsig` | Feature flags, A/B experiments, metrics (free 50M events/mo) | Lifecycle |
+| `applitools` | Visual AI regression testing on Playwright screenshots | Visual testing |
+
+### App Dev Slash Commands
+- `/new-mobile-app` — Scaffold Expo + Supabase mobile project
+- `/new-desktop-app` — Scaffold Tauri desktop project
+- `/api-design` — Design and generate API from spec
+- `/db-schema` — Design and validate database schema
+
+### App Dev Skills (Expo Official, 2026-04-12)
+Installed from `expo/skills`: expo-api-routes, expo-cicd-workflows, expo-deployment, expo-dev-client, expo-module, expo-tailwind-setup, expo-ui-jetpack-compose, expo-ui-swiftui, native-data-fetching, upgrading-expo, use-dom
 
 ## Skills Registry
 
 - **graphify** (`~/.claude/skills/graphify/SKILL.md`) - Turn any folder into a queryable knowledge graph. Trigger: `/graphify`
 
 When the user types `/graphify`, invoke the Skill tool with `skill: "graphify"` before doing anything else.
+
+- **handoff** (`~/.claude/skills/handoff/SKILL.md`) - End-of-session: build, test, commit, push, handoff doc. Trigger: `/handoff`
+- **audit** (`~/.claude/skills/audit/SKILL.md`) - Systematic codebase audit with wave-based verified fixes. Trigger: `/audit`
+
+When the user types `/handoff`, invoke the Skill tool with `skill: "handoff"` before doing anything else.
+When the user types `/audit`, invoke the Skill tool with `skill: "audit"` before doing anything else.

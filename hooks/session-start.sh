@@ -82,27 +82,56 @@ if [ -f "$EP_FILE" ]; then
 fi
 
 TH_FILE="$LOGS_DIR/tool-health.json"
+SUPPRESS_FILE="$LOGS_DIR/health-suppress.json"
 if [ -f "$TH_FILE" ]; then
   unhealthy=$(node -e '
+    const fs = require("fs");
     try {
-      const h = JSON.parse(require("fs").readFileSync(process.argv[1],"utf8"));
+      const h = JSON.parse(fs.readFileSync(process.argv[1],"utf8"));
+      const suppressPath = process.argv[2];
+      let suppress = {};
+      try { suppress = JSON.parse(fs.readFileSync(suppressPath,"utf8")); } catch(_) {}
+
       if (h.tools) {
         const cutoff = new Date(Date.now() - 48 * 3600 * 1000).toISOString();
         const bad = Object.entries(h.tools)
           .map(([t, v]) => {
             const recent = (v.failures || []).filter(ts => ts > cutoff).length;
-            return [t, recent];
+            const isMcp = v.is_mcp || /^mcp__/.test(t);
+            return [t, recent, isMcp];
           })
           .filter(([, recent]) => recent >= 3)
           .sort(([, a], [, b]) => b - a)
-          .slice(0, 3);
-        if (bad.length) {
-          const lines = bad.map(([t, n]) => "  " + t + ": " + n + " failures (last 48h)");
-          console.log("Unhealthy tools:\n" + lines.join("\n"));
+          .slice(0, 8);
+
+        // Track consecutive sessions each tool is unhealthy
+        const newSuppress = {};
+        let suppressed = 0;
+        const nativeShow = [];
+        const mcpShow = [];
+        for (const [t, n, isMcp] of bad) {
+          const prev = suppress[t] || 0;
+          const streak = prev + 1;
+          newSuppress[t] = streak;
+          if (streak >= 5) {
+            suppressed++;
+          } else if (isMcp) {
+            const server = t.split("__")[1] || "unknown";
+            mcpShow.push("  " + t + ": " + n + " failures (last 48h) [server: " + server + "]");
+          } else {
+            nativeShow.push("  " + t + ": " + n + " failures (last 48h)");
+          }
         }
+        fs.writeFileSync(suppressPath, JSON.stringify(newSuppress));
+
+        const lines = [];
+        if (nativeShow.length) lines.push("Unhealthy tools:\n" + nativeShow.join("\n"));
+        if (mcpShow.length) lines.push("Unhealthy MCP tools (consider disabling in .mcp.json if not needed):\n" + mcpShow.join("\n"));
+        if (suppressed > 0) lines.push("  (" + suppressed + " known chronic issue(s) suppressed)");
+        if (lines.length) console.log(lines.join("\n"));
       }
     } catch(e) {}
-  ' "$TH_FILE" 2>/dev/null)
+  ' "$TH_FILE" "$SUPPRESS_FILE" 2>/dev/null)
   [ -n "$unhealthy" ] && health_messages="${health_messages}${unhealthy}\n"
 fi
 
@@ -111,17 +140,91 @@ if [ -n "$health_messages" ]; then
   echo -e "$health_messages"
 fi
 
-# ─── 6. Atlas Knowledge Graph — inject recent facts ────────────────
+# ─── 6. Project wiki context ───────────────────────────────────────
+CWD=$(pwd)
+if [ -f "$CWD/wiki/index.md" ]; then
+  WIKI_PAGES=$(grep -c '|.*\.md.*|' "$CWD/wiki/index.md" 2>/dev/null || echo 0)
+  DECISION_COUNT=$(find "$CWD/wiki/decisions" -name "*.md" 2>/dev/null | wc -l)
+  echo "PROJECT_WIKI:"
+  echo "  pages: $WIKI_PAGES, decisions: $DECISION_COUNT"
+  echo "  Read wiki/index.md for past decisions and context."
+fi
+
+# ─── 7. Atlas Knowledge Graph — inject recent facts ────────────────
 KG_SUMMARY=$(node "$CLAUDE_DIR/hooks/atlas-kg.js" summary 2>/dev/null)
 if [ -n "$KG_SUMMARY" ] && [ "$KG_SUMMARY" != "Knowledge graph empty." ]; then
   echo "$KG_SUMMARY"
 fi
 
-# ─── 7a. TRASH cleanup (files older than 7 days) ──────────────────
+# ─── 7a. VERSION-MANIFEST staleness check (weekly, nag once per 7 days) ──
+MANIFEST_FILE="$CLAUDE_DIR/skills/VERSION-MANIFEST.json"
+VERSION_NAG_STATE="$CLAUDE_DIR/cache/version-nag-last"
+if [ -f "$MANIFEST_FILE" ]; then
+  LAST_NAG=$(cat "$VERSION_NAG_STATE" 2>/dev/null || echo "0")
+  if [ $(( NOW - LAST_NAG )) -ge 604800 ]; then
+    stale_count=$(node -e '
+      try {
+        const m = JSON.parse(require("fs").readFileSync(process.argv[1], "utf8"));
+        const cutoff = Date.now() - 14 * 86400000;
+        let stale = 0;
+        for (const v of Object.values(m.cli_tools || {})) {
+          if (new Date(v.last_checked || 0).getTime() < cutoff) stale++;
+        }
+        for (const v of Object.values(m.skill_packs || {})) {
+          if (new Date(v.last_checked || 0).getTime() < cutoff) stale++;
+        }
+        if (stale > 0) console.log(stale);
+      } catch(e) {}
+    ' "$MANIFEST_FILE" 2>/dev/null)
+    if [ -n "$stale_count" ] && [ "$stale_count" -gt 0 ]; then
+      echo "VERSION CHECK: $stale_count tool(s)/skill pack(s) haven't been checked in 14+ days. Run: node ~/.claude/scripts/health-validator.js --check versions"
+      echo "$NOW" > "$VERSION_NAG_STATE"
+    fi
+  fi
+fi
+
+# ─── 7a2. tool-health.json pruning (keep last 20 failure timestamps per tool)
+if [ -f "$TH_FILE" ]; then
+  node -e '
+    const fs = require("fs");
+    try {
+      const h = JSON.parse(fs.readFileSync(process.argv[1], "utf8"));
+      if (h.tools) {
+        for (const [k, v] of Object.entries(h.tools)) {
+          if (Array.isArray(v.failures) && v.failures.length > 20) {
+            v.failures = v.failures.slice(-20);
+          }
+        }
+        fs.writeFileSync(process.argv[1], JSON.stringify(h));
+      }
+    } catch(e) {}
+  ' "$TH_FILE" 2>/dev/null
+fi
+
 TRASH_DIR="$CLAUDE_DIR/TRASH"
 if [ -d "$TRASH_DIR" ]; then
-  find "$TRASH_DIR" -mindepth 1 -mtime +7 -delete 2>/dev/null || true
+  find "$TRASH_DIR" -mindepth 1 -mtime +3 -delete 2>/dev/null || true
 fi
+
+# ─── 7a3. Session cache pruning (per-project: keep last 30, delete >14 days)
+# NOTE: rm -rf is intentional here — these are system-generated UUID session dirs,
+# not user files. Moving to TRASH would add bloat for zero recovery value.
+PROJECTS_DIR="$CLAUDE_DIR/projects"
+if [ -d "$PROJECTS_DIR" ]; then
+  for proj in "$PROJECTS_DIR"/*/; do
+    [ -d "$proj" ] || continue
+    # Delete UUID session dirs older than 14 days
+    find "$proj" -maxdepth 1 -type d -name '*-*-*-*-*' -mtime +14 -exec rm -rf {} \; 2>/dev/null || true
+    # If still >30, keep only newest 30
+    SESSION_COUNT=$(find "$proj" -maxdepth 1 -type d -name '*-*-*-*-*' 2>/dev/null | wc -l)
+    if [ "$SESSION_COUNT" -gt 30 ]; then
+      ls -1td "$proj"/*-*-*-*-* 2>/dev/null | tail -n +31 | while IFS= read -r d; do rm -rf "$d" 2>/dev/null; done
+    fi
+  done
+fi
+
+# ─── 7b. Python cache cleanup ────────────────────────────────────────
+find "$CLAUDE_DIR/hooks" -type d -name "__pycache__" -exec rm -rf {} + 2>/dev/null || true
 
 # ─── 7c. Debug directory cleanup (files older than 14 days) ─────────
 DEBUG_DIR="$CLAUDE_DIR/debug"
@@ -129,10 +232,14 @@ if [ -d "$DEBUG_DIR" ]; then
   find "$DEBUG_DIR" -maxdepth 1 -name "*.txt" -mtime +14 -delete 2>/dev/null || true
 fi
 
-# ─── 7d. Shell-snapshots cleanup (files older than 30 days) ─────────
+# ─── 7d. Shell-snapshots cleanup (14-day retention + keep last 50) ───
 SNAP_DIR="$CLAUDE_DIR/shell-snapshots"
 if [ -d "$SNAP_DIR" ]; then
-  find "$SNAP_DIR" -maxdepth 1 -name "snapshot-*.sh" -mtime +30 -delete 2>/dev/null || true
+  find "$SNAP_DIR" -maxdepth 1 -name "snapshot-*.sh" -mtime +14 -delete 2>/dev/null || true
+  SNAP_COUNT=$(find "$SNAP_DIR" -maxdepth 1 -name "snapshot-*.sh" 2>/dev/null | wc -l)
+  if [ "$SNAP_COUNT" -gt 50 ]; then
+    ls -1t "$SNAP_DIR"/snapshot-*.sh 2>/dev/null | tail -n +"51" | xargs rm -f 2>/dev/null || true
+  fi
 fi
 
 # ─── 7e. Stale todos cleanup (files older than 3 days) ─────────────
@@ -146,7 +253,7 @@ PLANS_DIR="$CLAUDE_DIR/plans"
 if [ -d "$PLANS_DIR" ]; then
   PLAN_COUNT=$(find "$PLANS_DIR" -maxdepth 1 -name "*.md" -type f 2>/dev/null | wc -l)
   if [ "$PLAN_COUNT" -gt 15 ]; then
-    ls -t "$PLANS_DIR"/*.md 2>/dev/null | tail -n +16 | while read -r f; do rm -f "$f" 2>/dev/null; done
+    ls -t "$PLANS_DIR"/*.md 2>/dev/null | tail -n +16 | while IFS= read -r f; do rm -f "$f" 2>/dev/null; done
   fi
 fi
 
@@ -161,14 +268,16 @@ CACHE_DIR="$CLAUDE_DIR/cache"
 if [ -d "$CACHE_DIR" ]; then
   EFF_COUNT=$(ls -1 "$CACHE_DIR"/efficiency-*.json 2>/dev/null | wc -l)
   if [ "$EFF_COUNT" -gt 10 ]; then
-    ls -t "$CACHE_DIR"/efficiency-*.json 2>/dev/null | tail -n +11 | while read -r f; do rm -f "$f" 2>/dev/null; done
+    ls -t "$CACHE_DIR"/efficiency-*.json 2>/dev/null | tail -n +11 | while IFS= read -r f; do rm -f "$f" 2>/dev/null; done
   fi
 fi
 
 # ─── 8. Stale temp file cleanup ─────────────────────────────────────
-find /tmp -maxdepth 1 -name "claude-ctx-*.json" -mmin +1440 -delete 2>/dev/null || true
-find /tmp -maxdepth 1 -name "claude-fail-streak-*.json" -mmin +1440 -delete 2>/dev/null || true
-find /tmp -maxdepth 1 -name "claude-handoff-*.trigger" -mmin +1440 -delete 2>/dev/null || true
+# Use Node's tmpdir (matches where hooks actually write — may differ from /tmp on Windows)
+NODE_TMPDIR=$(node -e "process.stdout.write(require('os').tmpdir())" 2>/dev/null || echo "/tmp")
+find "$NODE_TMPDIR" -maxdepth 1 -name "claude-ctx-*.json" -mmin +1440 -delete 2>/dev/null || true
+find "$NODE_TMPDIR" -maxdepth 1 -name "claude-fail-streak-*.json" -mmin +1440 -delete 2>/dev/null || true
+find "$NODE_TMPDIR" -maxdepth 1 -name "claude-handoff-*.trigger" -mmin +1440 -delete 2>/dev/null || true
 
 # Scratchpad cleanup (files older than 14 days)
 SCRATCHPAD="/c/tmp/claude-scratchpad"
@@ -194,6 +303,6 @@ if [ $(( NOW - LAST_BACKUP )) -ge 604800 ]; then
   find "$BACKUP_DIR" -name "ACTIVE-DIRECTORY-*.md" -mtime +30 -delete 2>/dev/null || true
   find "$BACKUP_DIR" -name "memory-*.tar.gz" -mtime +30 -delete 2>/dev/null || true
   # Keep only the 2 most recent .claude.json backups
-  ls -t "$BACKUP_DIR"/.claude.json.backup.* 2>/dev/null | tail -n +3 | while read -r f; do [ -f "$f" ] && find "$f" -delete 2>/dev/null; done || true
+  ls -t "$BACKUP_DIR"/.claude.json.backup.* 2>/dev/null | tail -n +3 | while IFS= read -r f; do [ -f "$f" ] && rm -f "$f" 2>/dev/null; done || true
   echo "$NOW" > "$BACKUP_STATE"
 fi

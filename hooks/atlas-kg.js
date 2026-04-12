@@ -27,31 +27,54 @@ const TRIPLES_FILE = path.join(KG_DIR, "triples.json");
 
 // ── Storage ──────────────────────────────────────────────────────────
 
+let _tripleCounter = 0;
+
 function ensureDir() {
   if (!fs.existsSync(KG_DIR)) fs.mkdirSync(KG_DIR, { recursive: true });
 }
 
 function loadJSON(filepath) {
+  if (!fs.existsSync(filepath)) return {};
   try {
-    return JSON.parse(fs.readFileSync(filepath, "utf8"));
-  } catch {
+    const raw = fs.readFileSync(filepath, "utf8");
+    const parsed = JSON.parse(raw);
+    if (typeof parsed !== "object" || parsed === null) return {};
+    return parsed;
+  } catch (err) {
+    // Corruption detected — preserve the corrupt file for recovery, return empty
+    const backupPath = filepath + ".corrupt." + Date.now();
+    try { fs.copyFileSync(filepath, backupPath); } catch (_) {}
+    process.stderr.write(`[atlas-kg] Corrupt JSON detected: ${filepath} — backed up to ${backupPath}\n`);
     return {};
   }
 }
 
 function saveJSON(filepath, data) {
   ensureDir();
-  fs.writeFileSync(filepath, JSON.stringify(data, null, 2));
+  // Atomic write: write to temp file, then rename (prevents partial writes on crash)
+  const tmpPath = filepath + ".tmp";
+  fs.writeFileSync(tmpPath, JSON.stringify(data, null, 2));
+  fs.renameSync(tmpPath, filepath);
 }
 
 function entityId(name) {
-  return name.toLowerCase().replace(/['\s]+/g, "_").replace(/[^a-z0-9_-]/g, "");
+  // Hash-based ID preserves uniqueness for names like "C++", "C#", "C"
+  const normalized = name.toLowerCase().trim();
+  const slug = normalized.replace(/['\s]+/g, "_").replace(/[^a-z0-9_+#.-]/g, "");
+  // If slug would be ambiguous (too short or stripped to nothing), use hash suffix
+  if (slug.length < 2) {
+    const hash = crypto.createHash("md5").update(normalized).digest("hex").slice(0, 6);
+    return slug + "_" + hash;
+  }
+  return slug;
 }
 
 function tripleId(sub, pred, obj) {
+  // Use counter + random bytes instead of Date.now() to avoid same-millisecond collisions
+  _tripleCounter++;
   const hash = crypto
     .createHash("md5")
-    .update(`${sub}|${pred}|${obj}|${Date.now()}`)
+    .update(`${sub}|${pred}|${obj}|${_tripleCounter}|${crypto.randomBytes(4).toString("hex")}`)
     .digest("hex")
     .slice(0, 8);
   return `t_${sub}_${pred}_${obj}_${hash}`;
@@ -107,6 +130,7 @@ function addTriple(subject, predicate, object, opts = {}) {
   const entities = loadJSON(ENTITIES_FILE);
   const subType = inferType(pred, "subject") || "unknown";
   const objType = inferType(pred, "object") || "unknown";
+  let entitiesChanged = false;
 
   if (!entities[subId]) {
     entities[subId] = {
@@ -116,9 +140,11 @@ function addTriple(subject, predicate, object, opts = {}) {
       properties: {},
       created_at: new Date().toISOString(),
     };
+    entitiesChanged = true;
   } else if (entities[subId].type === "unknown" && subType !== "unknown") {
     entities[subId].type = subType;
     entities[subId].updated_at = new Date().toISOString();
+    entitiesChanged = true;
   }
   if (!entities[objId]) {
     entities[objId] = {
@@ -128,11 +154,12 @@ function addTriple(subject, predicate, object, opts = {}) {
       properties: {},
       created_at: new Date().toISOString(),
     };
+    entitiesChanged = true;
   } else if (entities[objId].type === "unknown" && objType !== "unknown") {
     entities[objId].type = objType;
     entities[objId].updated_at = new Date().toISOString();
+    entitiesChanged = true;
   }
-  saveJSON(ENTITIES_FILE, entities);
 
   // Check for existing identical active triple
   const triples = loadJSON(TRIPLES_FILE);
@@ -143,7 +170,10 @@ function addTriple(subject, predicate, object, opts = {}) {
       t.object === objId &&
       !t.valid_to
   );
-  if (existing) return existing.id;
+  if (existing) {
+    if (entitiesChanged) saveJSON(ENTITIES_FILE, entities);
+    return existing.id;
+  }
 
   // Create new triple
   const id = tripleId(subId, pred, objId);
@@ -160,6 +190,9 @@ function addTriple(subject, predicate, object, opts = {}) {
     source,
     created_at: new Date().toISOString(),
   };
+
+  // Save both atomically — entities first (referenced by triples), then triples
+  if (entitiesChanged) saveJSON(ENTITIES_FILE, entities);
   saveJSON(TRIPLES_FILE, triples);
   return id;
 }
@@ -215,7 +248,63 @@ function prune(maxAgeDays = 30) {
     }
   }
   if (pruned > 0) saveJSON(TRIPLES_FILE, triples);
-  return pruned;
+
+  // Also clean orphaned entities and git-derivable data
+  const cleaned = cleanEntities();
+  const deduped = deduplicateTriples();
+
+  return pruned + cleaned + deduped;
+}
+
+// Remove entities not referenced by any triple + git-derivable entity types
+function cleanEntities() {
+  const entities = loadJSON(ENTITIES_FILE);
+  const triples = loadJSON(TRIPLES_FILE);
+
+  // Build set of all entity IDs referenced by any triple
+  const referenced = new Set();
+  for (const t of Object.values(triples)) {
+    referenced.add(t.subject);
+    referenced.add(t.object);
+  }
+
+  // Git-derivable types that should never be stored
+  const GIT_TYPES = new Set(["commit", "branch"]);
+
+  let cleaned = 0;
+  for (const [id, entity] of Object.entries(entities)) {
+    const isOrphan = !referenced.has(id);
+    const isGitType = GIT_TYPES.has(entity.type);
+    if (isOrphan || isGitType) {
+      delete entities[id];
+      cleaned++;
+    }
+  }
+
+  if (cleaned > 0) saveJSON(ENTITIES_FILE, entities);
+  return cleaned;
+}
+
+// Remove duplicate active triples (same subject+predicate+object, both active)
+function deduplicateTriples() {
+  const triples = loadJSON(TRIPLES_FILE);
+  const seen = {};
+  let deduped = 0;
+
+  for (const t of Object.values(triples)) {
+    if (t.valid_to) continue; // Only check active triples
+    const key = `${t.subject}|${t.predicate}|${t.object}`;
+    if (seen[key]) {
+      // Keep the older one (first seen), remove the newer duplicate
+      delete triples[t.id];
+      deduped++;
+    } else {
+      seen[key] = t.id;
+    }
+  }
+
+  if (deduped > 0) saveJSON(TRIPLES_FILE, triples);
+  return deduped;
 }
 
 // ── Query Operations ─────────────────────────────────────────────────
@@ -346,11 +435,14 @@ function compactSummary(maxLines = 10) {
   const recent = recentFacts(14);
   if (recent.length === 0) return "";
 
+  // Only show active (non-ended) facts — ended triples are noise
+  const active = recent.filter((f) => f.current);
+  if (active.length === 0) return "";
+
   const lines = ["KG_RECENT:"];
-  for (const f of recent.slice(0, maxLines)) {
-    const status = f.current ? "" : " [ended]";
+  for (const f of active.slice(0, maxLines)) {
     lines.push(
-      `  ${f.subject} → ${f.predicate} → ${f.object}${status}`
+      `  ${f.subject} → ${f.predicate} → ${f.object}`
     );
   }
   return lines.join("\n");
@@ -411,7 +503,17 @@ function cli() {
     case "prune": {
       const days = parseInt(flags.days || "30", 10);
       const np = prune(days);
-      console.log(`Pruned ${np} expired triple(s) older than ${days} days`);
+      console.log(`Pruned/cleaned ${np} item(s) (expired triples, orphaned entities, duplicates, git-derivable data)`);
+      break;
+    }
+    case "clean-entities": {
+      const nc = cleanEntities();
+      console.log(`Cleaned ${nc} orphaned/git-derivable entity(ies)`);
+      break;
+    }
+    case "deduplicate": {
+      const nd = deduplicateTriples();
+      console.log(`Removed ${nd} duplicate active triple(s)`);
       break;
     }
     case "query": {
@@ -484,6 +586,8 @@ module.exports = {
   invalidate,
   invalidateByPredicate,
   prune,
+  cleanEntities,
+  deduplicateTriples,
   queryEntity,
   queryRelationship,
   timeline,

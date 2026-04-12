@@ -70,6 +70,16 @@ readStdin((data) => {
 });
 
 function classifyFailure(toolName, errorStr) {
+  const isMcp = /^mcp__/.test(toolName);
+
+  if (isMcp && /ECONNREFUSED|ECONNRESET|EPIPE|connection refused|server disconnected|transport closed|spawn.*ENOENT/i.test(errorStr)) {
+    const serverName = toolName.split('__')[1] || 'unknown';
+    return `MCP SERVER DOWN: "${serverName}" is not responding. This tool will keep failing until the server is restarted. Consider disabling it in .mcp.json if not needed, or restart the MCP server.`;
+  }
+  if (isMcp && /timeout|ETIMEDOUT/i.test(errorStr)) {
+    const serverName = toolName.split('__')[1] || 'unknown';
+    return `MCP SERVER TIMEOUT: "${serverName}" timed out. The server may be overloaded or hanging. Check if the npx process is still running.`;
+  }
   if (/timeout/i.test(errorStr)) {
     return `Tool "${toolName}" timed out. Consider: (1) simpler input, (2) breaking the operation into smaller steps, (3) increasing timeout if supported.`;
   }
@@ -84,8 +94,19 @@ function classifyFailure(toolName, errorStr) {
 
 function updateToolHealth(toolName, streakCount) {
   const healthPath = path.join(paths.logs, 'tool-health.json');
+  rotateIfLarge(healthPath, 500_000); // 500KB cap — prevents unbounded growth
   const health = readJsonSafe(healthPath, { tools: {} });
   if (!health.tools) health.tools = {};
+
+  // Cap distinct tool entries to prevent unbounded key growth
+  const toolKeys = Object.keys(health.tools);
+  if (toolKeys.length > 200 && !health.tools[toolName]) {
+    // Evict oldest tool entry
+    const oldest = toolKeys.reduce((a, b) =>
+      (health.tools[a].last_failure || '') < (health.tools[b].last_failure || '') ? a : b
+    );
+    delete health.tools[oldest];
+  }
 
   const now = new Date().toISOString();
   const t = health.tools[toolName] || { total_failures: 0, failures: [] };
@@ -95,6 +116,7 @@ function updateToolHealth(toolName, streakCount) {
   if (t.failures.length > 50) t.failures = t.failures.slice(-50);
   t.last_failure = now;
   t.consecutive_streak = streakCount;
+  t.is_mcp = /^mcp__/.test(toolName);
   health.tools[toolName] = t;
   health._meta = { last_updated: now };
 

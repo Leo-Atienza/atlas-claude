@@ -25,7 +25,15 @@ Report any issues. Fix automatically if trivial, ask if ambiguous.
 
 ## Step 3 — Wait for deployment
 
-1. Wait 90 seconds for Vercel/hosting to deploy
+**If Vercel MCP is available** (preferred):
+1. Use Vercel MCP to find the latest deployment for the current project
+2. Poll deployment status every 15 seconds until state is `READY` or `ERROR` (max 5 minutes)
+3. On `READY`: extract the deployment URL from the MCP response
+4. On `ERROR`: read build logs via Vercel MCP, report the failure, and stop
+5. Curl the deployment URL — verify HTTP 200
+
+**Fallback** (no Vercel MCP):
+1. Wait 90 seconds for hosting to deploy
 2. Curl the production URL — verify HTTP 200
 3. If not 200, wait another 60 seconds and retry once
 
@@ -57,11 +65,23 @@ If any endpoint fails:
 
 If the same endpoint fails 3 times, stop and report with all raw output.
 
-## Step 6 — Post-deploy handoff
+## Step 6 — Quality audit (optional)
+
+**If Lighthouse MCP is available**:
+1. Run a Lighthouse audit on the deployed production URL
+2. Report scores: Performance, Accessibility, SEO, Best Practices
+3. Flag any score below 90 as a warning
+4. Flag any critical accessibility violations (axe-core)
+5. Include scores in the handoff doc
+
+Skip this step if the deployment was a backend-only change with no frontend impact.
+
+## Step 7 — Post-deploy handoff
 
 Run `/handoff` to create the session handoff doc, including:
 - What was deployed
 - All endpoints verified
+- Lighthouse scores (if audit was run)
 - Any anomalies observed during verification
 
 ---

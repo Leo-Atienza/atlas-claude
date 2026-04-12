@@ -1,16 +1,15 @@
-# ATLAS System Architecture (v6.6.1)
+# ATLAS System Architecture (v6.7.0)
 
 ## Configuration Architecture
 
 1. **`~/.claude/CLAUDE.md`** — Slim core instructions (~8KB). Rules extracted to on-demand pages.
 
-2. **Skills Directory/Page System** (66 active skill entries, 88 skill dirs + 9 container packs on disk):
+2. **Skills Directory/Page System** (66 active skill entries, 98 top-level dirs on disk incl. container packs):
    - `skills/ACTIVE-DIRECTORY.md` — Index of active skills (15 Core + 51 Available)
    - `skills/ACTIVE-PAGE-1-web-frontend.md` — Web, animation, design, testing, security skills (34 skills)
    - `skills/ACTIVE-PAGE-2-backend-tools.md` — Backend, deployment, workflow skills (22 skills)
    - `skills/ACTIVE-PAGE-3-native-crossplatform.md` — Native, desktop, cross-platform skills (10 skills)
    - `skills/ARCHIVE-DIRECTORY.md` — Archived skills by domain bundle (7 archive pages)
-   - `skills/skills-archive/` — Physically archived skill packs (cc-devops, ckm) — out of search path
    - `skills/RULES-GIT.md` — On-demand git workflow rules
    - `skills/RULES-SECURITY.md` — On-demand security rules + triggers
    - `skills/RULES-TESTING.md` — On-demand testing rules
@@ -34,6 +33,7 @@ All Node hooks import `hooks/lib.js` for shared utilities. Config: `hooks/contex
 | PreToolUse | context-guard.js | Security gate + context budget |
 | PreToolUse | cctools bash/file/env hooks | Safety hooks |
 | PreToolUse | graphify hint (Glob/Grep) | Suggest graph navigation |
+| PreToolUse | pre-commit-gate.js | Build/test reminder before git commit |
 | PostToolUse | auto-formatter | Format on write |
 | PostToolUse | tsc-check.js | TypeScript check (only .ts/.tsx files, 15s timeout) |
 | PostToolUse | post-tool-monitor.js | Context, efficiency, failure tracking |
@@ -72,7 +72,9 @@ Three systems, strict boundaries — no overlap.
 Lazy discovery via TOOL_SEARCH.
 
 - **MCP_DOCKER** (bundled): Context7, GitHub, Neon, Wikipedia, Memory, Playwright, Git, Filesystem, Obsidian
-- **Standalone** (`.mcp.json`): shadcn, supabase, stripe, resend, prisma, expo, sentry, mobile, posthog, cloudflare, linear, upstash, netlify, context-mode
+- **Standalone** (`.mcp.json`): shadcn, supabase, stripe, resend, prisma, expo, sentry, mobile, posthog, cloudflare, linear, upstash, netlify, context-mode, lighthouse, firecrawl, heroui, aceternity, 21st-dev, iconify
+- **Global** (`.claude.json`): MCP_DOCKER, magicuidesign-mcp
+- **OAuth/Cloud connectors**: Gamma, Context7, Canva, Figma Dev, Gmail, BigData, Prospect Enrichment, Job Search, Social/Stocks, vercel, expo, linear, cloudflare, mcp-registry, scheduled-tasks
 - **Plugin-based**: Canva, Figma, Claude Preview, Chrome
 
 ## Key Files

@@ -107,6 +107,7 @@ process.exit(0)   // JS — no stdout
 | graphify hint (inline bash) | PreToolUse | Glob\|Grep | (stdout only — suggests graph navigation when `graphify-out/graph.json` exists) |
 | `allow_git_hook.py` | UserPromptSubmit | * | (session-scoped git approval, no logs) |
 | `auto-formatter` | PostToolUse | Write\|Edit\|MultiEdit | (no logs) |
+| `pre-commit-gate.js` | PreToolUse | Bash | (stdout only — warns if build+test not run before commit) |
 | `tsc-check.js` | PostToolUse | Write\|Edit\|MultiEdit | (stdout only — TS errors as additionalContext) |
 | `post-tool-monitor.js` | PostToolUse | Write\|Edit\|MultiEdit\|Bash\|Agent | `logs/failures.jsonl`, `logs/error-patterns.json`, `logs/hook-health.jsonl`, `logs/tool-call-counts.json`, `cache/efficiency-*.json` |
 | `tool-failure-handler.js` | PostToolUseFailure | * | `logs/tool-failures.jsonl`, `logs/tool-health.json` (MCP failures tagged with `is_mcp: true`) |

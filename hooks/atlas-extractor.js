@@ -305,7 +305,13 @@ function cli() {
     case "extract": {
       const filepath = args[1];
       if (!filepath) return console.error("Usage: atlas-extractor extract <file>");
-      const text = fs.readFileSync(filepath, "utf8");
+      let text;
+      try {
+        text = fs.readFileSync(filepath, "utf8");
+      } catch (err) {
+        console.error(`Error reading file: ${filepath} — ${err.code || err.message}`);
+        process.exit(1);
+      }
       const memories = extractMemories(text);
       if (memories.length === 0) return console.log("No extractable memories found.");
       console.log(`Extracted ${memories.length} memories:\n`);
@@ -327,7 +333,13 @@ function cli() {
     case "compact": {
       const filepath = args[1];
       if (!filepath) return console.error("Usage: atlas-extractor compact <file>");
-      const text = fs.readFileSync(filepath, "utf8");
+      let text;
+      try {
+        text = fs.readFileSync(filepath, "utf8");
+      } catch (err) {
+        console.error(`Error reading file: ${filepath} — ${err.code || err.message}`);
+        process.exit(1);
+      }
       const result = extractCompact(text);
       console.log(result || "No high-confidence memories found.");
       break;
@@ -347,8 +359,6 @@ function cli() {
 module.exports = {
   extractMemories,
   extractCompact,
-  scoreMarkers,
-  MARKERS,
 };
 
 if (require.main === module) cli();

@@ -2,7 +2,9 @@
   "env": {
     "CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS": "1",
     "ENABLE_TOOL_SEARCH": "auto",
-    "ATLAS_HOOK_PROFILE": "standard"
+    "ATLAS_HOOK_PROFILE": "standard",
+    "FIRECRAWL_API_KEY": "${FIRECRAWL_API_KEY}",
+    "TWENTY_FIRST_API_KEY": "${TWENTY_FIRST_API_KEY}"
   },
   "permissions": {
     "allow": [
@@ -101,6 +103,16 @@
           {
             "type": "command",
             "command": "CLAUDE_PLUGIN_ROOT=$HOME/.claude/hooks/cctools-safety-hooks python3 ~/.claude/hooks/cctools-safety-hooks/bash_hook.py",
+            "timeout": 5
+          }
+        ]
+      },
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node ~/.claude/hooks/pre-commit-gate.js",
             "timeout": 5
           }
         ]

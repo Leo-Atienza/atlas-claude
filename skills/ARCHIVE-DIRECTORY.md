@@ -36,15 +36,15 @@
 | SC-014 | Smart Contract Advanced | Advanced blockchain security patterns | Security | 2 |
 | SC-015 | Firebase APK Analysis | Android APK security review | Security | 2 |
 | SC-016 | YARA Rules | Malware detection rule creation | Security | 2 |
-| SC-017 | DWARF Analysis | Binary debugging information analysis | Security | 2 |
-| SC-018 | BurpSuite | Web application security testing | Security | 2 |
+| SC-017 | ~~DWARF Analysis~~ | Removed 2026-04-12 (irrelevant to stack) | Security | — |
+| SC-018 | ~~BurpSuite~~ | Removed 2026-04-12 (irrelevant to stack) | Security | — |
 | SC-019 | Modern Python Security | Python-specific security patterns | Security | 2 |
 | SC-022 | GitHub CLI Security | gh CLI security workflows | Security | 2 |
 | SC-023 | Git Cleanup | Repository cleanup and history management | Security | 2 |
 | SC-024 | Second Opinion | Cross-validation of security findings | Security | 2 |
 | SC-025 | Workflow Skill Design | Security workflow design patterns | Security | 2 |
 | SC-026 | Chrome Troubleshooting | Browser debugging and security | Security | 2 |
-| SC-027 | Culture Index | Security culture assessment | Security | 2 |
+| SC-027 | ~~Culture Index~~ | Removed 2026-04-12 (HR tool, irrelevant) | Security | — |
 | SC-028 | Debug Buttercup | Advanced debugging techniques | Security | 2 |
 | FS-004 | Go Expert | Go patterns, concurrency, stdlib | Enterprise | 3 |
 | FS-005 | Rust Engineer | Rust ownership, async, systems programming | Enterprise | 3 |
@@ -105,6 +105,7 @@
 | SK-073 | PRD to Plan | PRD → phased implementation plans (overlaps Flow) | Workflow & Meta | 6 |
 | SK-074 | Grill Me | Interview-driven plan/design validation | Workflow & Meta | 6 |
 | SK-075 | Canvas Design | Visual art creation via design philosophy | Dormant — Document & Media | 7 |
+| SK-076b | Design Taste Frontend | Senior UI/UX bias-overriding design enforcer | Workflow & Meta | 6 |
 | SK-006 | UX Design Intelligence | UX strategy, 67 design styles, 161 palettes, BM25 search | Web (archived) | N/A |
 | SK-031 | Next.js Upgrade Guide | Upgrade Next.js to latest with migration steps | Web (archived) | N/A |
 | SK-034 | Web Interface Guidelines | Web design compliance review | Web (archived) | N/A |

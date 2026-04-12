@@ -26,6 +26,18 @@
 | Add an article/note to my wiki | `/wiki-ingest [source]` (SK-101) |
 | Search my wiki | `/wiki-query [topic]` (SK-101) |
 | Check wiki health | `/wiki-lint` (SK-101) |
+| Start a new mobile app | `/new-mobile-app [name]` |
+| Start a new desktop app | `/new-desktop-app [name]` |
+| Design an API | `/api-design [desc]` |
+| Design a database schema | `/db-schema [desc]` |
+| Test a component in isolation | Storybook MCP (story generation + a11y check) |
+| Build/dev/test a Tauri app | Tauri MCP + SK-088 |
+| Consume a third-party REST API | OpenAPI MCP (set `OPENAPI_SPEC_URL`) |
+| Manage feature flags | Statsig MCP |
+| Run visual regression tests | Applitools MCP + Playwright |
+| Run mobile E2E tests | Maestro MCP (Android on Win, iOS needs macOS) |
+| Publish to app stores | Expo skills (EAS Submit) |
+| Set up CI/CD with Claude | `claude /install-github-app` (claude-code-action) |
 
 ---
 
@@ -130,6 +142,8 @@
 ### Session
 - `/done` — Wrap up, reflect, end session
 - `/resume` — Restore interrupted session
+- `/handoff` — Build, test, commit, push, create handoff doc
+- `/audit` — Systematic codebase audit with wave-based fixes
 - `/health` — System + project integrity check
 - `/claude-md-management:revise-claude-md` — Update CLAUDE.md
 
@@ -209,6 +223,58 @@ Every generator has a validator. Always run both.
 - `preview_snapshot` — accessibility tree for text/structure
 - `preview_click` / `preview_fill` — interact with running app
 
+### Vercel MCP
+- List deployments, read build logs, manage env vars, inspect domains
+- **Prefer over** `vercel` CLI for reads; use CLI for `vercel deploy`
+- Works on all Vercel plans including free Hobby
+
+### Lighthouse MCP
+- Run full Google Lighthouse audit on any URL (runs locally, no API key)
+- Returns: Performance, Accessibility, SEO, Best Practices scores + specific recommendations
+- Includes axe-core accessibility violations
+- Use after deployment for quality metrics, or in design-audit (SK-078) for runtime data
+
+### Firecrawl MCP
+- Extract clean LLM-ready markdown from any webpage (strips nav, ads, scripts)
+- **Prefer over** Chrome MCP `get_page_text` for research/content extraction
+- **Prefer** Chrome MCP for interactive page testing
+- Free tier: 500 credits; self-hostable for unlimited free usage
+
+### UI Component MCPs
+- **21st.dev Magic**: AI-generate polished components from text descriptions (100 free credits/mo)
+- **HeroUI**: Official component docs, props, theme tokens, source code (free, formerly NextUI)
+- **Aceternity UI**: Animated landing page components — search, browse, install info (free)
+- **Iconify**: 200K+ icons from 200+ icon sets — one-stop icon search (free)
+- **shadcn**: Copy-paste primitive components (existing)
+- **MagicUI**: Animated component search/browse (existing)
+
+### Storybook MCP
+- Generate stories from components, run a11y checks, visual snapshots
+- Use at component level; Playwright for page/flow level
+
+### Tauri MCP
+- `tauri dev` / `tauri build` / scaffold / plugin management
+- Always pair with SK-088 skill for architecture guidance
+
+### Maestro MCP
+- Write, run, and auto-heal mobile E2E test flows (YAML)
+- Windows: Android via WSL2 only (iOS requires macOS)
+- Complements `mobile` MCP (device interaction) with structured test authoring
+
+### OpenAPI MCP
+- Feed any OpenAPI/Swagger spec URL, get auto-generated callable tools
+- Configure per API: set `OPENAPI_SPEC_URL` env var
+
+### Statsig MCP
+- Feature flags, A/B experiments, metrics (remote HTTP, no local binary)
+- Free tier: 50M events/month
+- Note: `~/.claude/statsig/` is Claude Code internal telemetry -- unrelated
+
+### Applitools MCP
+- AI-powered visual regression testing on Playwright screenshots
+- Detects layout shifts, color changes, rendering regressions
+- Complements Lighthouse (perf/a11y) and Claude Preview (manual screenshots)
+
 ### Canonical Integrations (when duplicates exist)
 
 | Capability | Canonical | Alternative |
@@ -218,6 +284,31 @@ Every generator has a validator. Always run both.
 | Context7 | Standalone MCP | Via MCP_DOCKER |
 | Browser | Chrome MCP (interactive) | Preview MCP (headless testing) |
 | Code search | Grep/Glob (local) | GitHub `search_code` (cross-repo) |
+| Web research | Firecrawl (clean extraction) | Chrome MCP (interactive), WebFetch (raw HTTP) |
+| Component generation | 21st.dev Magic (AI text-to-component) | shadcn + manual composition |
+| Component docs | shadcn + HeroUI + Aceternity MCPs | Context7 (Mantine, Chakra, Ark, Base UI, etc.) |
+| Performance audit | Lighthouse MCP (runtime) | SK-078 Design Audit (static code analysis) |
+| Deployment mgmt | Vercel MCP (reads) | `vercel` CLI (deploys), Netlify MCP (Netlify sites) |
+| Feature flags | Statsig MCP (free 50M events) | ConfigCat (10 flags free), LaunchDarkly (paid) |
+| Visual regression | Applitools MCP (AI diff) | Claude Preview screenshots (manual) |
+| Desktop build | Tauri MCP (execution) + SK-088 (knowledge) | Electron MCP (if Electron project) |
+| Mobile E2E | Maestro MCP (auto-heal YAML) | mobile MCP + manual scripts |
+| API consumption | OpenAPI MCP (auto-generate tools) | Custom MCP server per API |
+| Component testing | Storybook MCP (isolation) | Playwright (page-level) |
+
+### P2 — Evaluate When Needed
+
+| Resource | Install command | When |
+|----------|----------------|------|
+| Apollo MCP (GraphQL) | `claude mcp add apollo-graphql -- npx -y @apollo/mcp-server` | GraphQL project |
+| k6 MCP (load testing) | `winget install k6` + configure per k6 docs | Pre-production launch |
+| Google Play Store MCP | See `github.com/devexpert-io/play-store-mcp` | Android app ready for store |
+| App Store Connect MCP | See `github.com/yuraist/appstoreconnect-mcp` | iOS app ready ($99/yr Apple Dev) |
+| Electron MCP | See `github.com/kanishka-namdeo/electron-mcp` | Electron project (not Tauri) |
+| Dart & Flutter MCP | `dart pub global activate dart_mcp_server` | Flutter project |
+| Auth0 MCP | See official Auth0 MCP docs | Enterprise SSO (Supabase Auth insufficient) |
+| Grafana MCP | `claude mcp add grafana -- npx -y @leval/mcp-grafana` | Infra metrics to monitor |
+| Amplitude MCP | `claude mcp add -t http Amplitude "https://mcp.amplitude.com/mcp"` | PostHog insufficient |
 
 ---
 
@@ -266,6 +357,7 @@ Control hook overhead via `ATLAS_HOOK_PROFILE` env var in settings.json:
 | Profile | Hooks Active | Use When |
 |---------|-------------|----------|
 | `minimal` | context-guard only | Trivial tasks, quick edits |
+| `medium` | All except tsc-check | Non-TypeScript work, faster feedback loop |
 | `standard` | All current hooks (default) | Normal development |
 
 Disable individual hooks: `ATLAS_DISABLED_HOOKS="post-tool-monitor,claudio"`

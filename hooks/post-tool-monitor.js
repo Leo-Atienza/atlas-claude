@@ -51,9 +51,9 @@ readStdin((data) => {
   ensureDir(paths.cache);
 
   // ── 1. Tool Efficiency Tracking ─────────────────────────────────
-  const counterFile = path.join(paths.cache, `efficiency-${sessionId.substring(0, 16)}.json`);
+  const counterFile = path.join(paths.cache, `efficiency-${sessionId}.json`);
   const counters = readJsonSafe(counterFile, {
-    session_id: sessionId.substring(0, 16),
+    session_id: sessionId,
     started: new Date().toISOString(),
     tools: {},
     total: 0,
@@ -101,24 +101,30 @@ readStdin((data) => {
 });
 
 // ── Failure detection ───────────────────────────────────────────────
+// Exit codes that are normal for specific tools (not real failures):
+//   Bash exit 2: grep/find/diff no-match — expected during exploration
+//   Bash exit 1: test/grep single-file no-match — often exploratory
+// These inflate the health dashboard and train users to ignore real failures.
+const BENIGN_EXIT_CODES = { Bash: new Set([1, 2]) };
+
 function detectFailure(toolName, toolResponse) {
   if (typeof toolResponse === 'object' && toolResponse !== null) {
     if (toolResponse.error) return true;
-    const exitCode = toolResponse.exitCode || toolResponse.exit_code || 0;
-    if (exitCode && parseInt(exitCode) !== 0) return true;
+    const exitCode = parseInt(toolResponse.exitCode || toolResponse.exit_code || 0);
+    if (exitCode !== 0) {
+      // Skip benign exit codes for known tools
+      if (BENIGN_EXIT_CODES[toolName]?.has(exitCode)) return false;
+      return true;
+    }
     const stderr = String(toolResponse.stderr || '');
     if (stderr && ERROR_INDICATORS.some(ind => stderr.includes(ind))) return true;
   } else if (typeof toolResponse === 'string' && ERROR_INDICATORS.some(ind => toolResponse.includes(ind))) {
     return true;
   }
 
-  const output = String(
-    (typeof toolResponse === 'object' && toolResponse !== null ? toolResponse.output : toolResponse) || ''
-  ).substring(0, 2000);
-  if (ERROR_INDICATORS.some(ind => output.includes(ind)) && ['Bash', 'Write', 'Edit', 'MultiEdit'].includes(toolName)) {
-    return true;
-  }
-
+  // Note: stdout/output is NOT scanned for error keywords — successful commands
+  // routinely contain words like "error" (e.g., "error handling improved").
+  // The checks above (explicit error, non-zero exit, stderr) are sufficient.
   return false;
 }
 
@@ -176,13 +182,11 @@ function trackSuccess(toolName, sessionId) {
     }
   }
 
-  // Track tool call counts (flush every 10th call)
+  // Track cumulative tool call counts (write every call — file is small, ~1KB)
   const countsPath = path.join(paths.logs, 'tool-call-counts.json');
   const counts = readJsonSafe(countsPath, {});
   counts[toolName] = (counts[toolName] || 0) + 1;
-  if (counts[toolName] % 10 === 0 || counts[toolName] === 1) {
-    writeJsonSafe(countsPath, counts);
-  }
+  writeJsonSafe(countsPath, counts);
 }
 
 // ── Context usage monitoring ────────────────────────────────────────
@@ -194,7 +198,7 @@ function checkContextUsage(sessionId, data, messages) {
   const now = Math.floor(Date.now() / 1000);
 
   if (metrics.timestamp && (now - metrics.timestamp) > STALE_SECONDS) {
-    messages.push(`CONTEXT MONITOR: Metrics stale (>${now - metrics.timestamp}s). Context usage unknown — statusline may not be running.`);
+    messages.push(`CONTEXT MONITOR: Metrics stale (>${STALE_SECONDS}s old). Context usage unknown — statusline may not be running.`);
     return;
   }
 

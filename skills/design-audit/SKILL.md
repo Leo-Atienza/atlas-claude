@@ -13,6 +13,15 @@ Run systematic **technical** quality checks and generate a comprehensive report.
 
 This is a code-level audit, not a design critique. Check what's measurable and verifiable in the implementation.
 
+## Runtime Audit (optional — if a deployed URL is available)
+
+If the page is deployed and accessible via URL, run a **Lighthouse MCP audit** before the code-level scan to gather runtime data:
+1. Use Lighthouse MCP to audit the URL for Performance, Accessibility, SEO, Best Practices
+2. Note the Lighthouse scores and any critical axe-core violations
+3. Use these as ground truth when scoring the code-level dimensions below — Lighthouse runtime data takes precedence over code-level guesses for Performance and Accessibility scores
+
+If no URL is available (local dev only), skip this step and proceed with code-level analysis.
+
 ## Diagnostic Scan
 
 Run comprehensive checks across 5 dimensions. Score each dimension 0-4.

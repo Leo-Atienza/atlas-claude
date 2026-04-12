@@ -28,7 +28,8 @@ const STALE_SECONDS = thresholds.stale_seconds;
 const ALWAYS_ALLOWED = new Set([
   'Read', 'Glob', 'Grep', 'TodoWrite', 'ToolSearch',
   'AskUserQuestion', 'EnterPlanMode', 'ExitPlanMode',
-  'Skill', 'SendMessage',
+  'Skill', 'SendMessage', 'NotebookRead', 'CronList',
+  'ListMcpResourcesTool', 'ReadMcpResourceTool',
 ]);
 
 // Tools that get security gate checks
@@ -55,8 +56,16 @@ const SECRET_CONTENT_RE = new RegExp([
 // ── Helpers ─────────────────────────────────────────────────────────
 function extractContent(toolInput) {
   let content = toolInput.content || toolInput.new_string || '';
-  if (toolInput.operations && Array.isArray(toolInput.operations)) {
-    content += toolInput.operations.map(o => o.new_string || '').join(' ');
+  // MultiEdit: operations[].new_string
+  if (Array.isArray(toolInput.operations)) {
+    content += ' ' + toolInput.operations.map(o => o.new_string || '').join(' ');
+  }
+  // Future-proof: scan all string values at depth 1 for secret patterns
+  // This catches schema changes without knowing the exact field name
+  for (const val of Object.values(toolInput)) {
+    if (typeof val === 'string' && val !== content && val !== toolInput.file_path) {
+      content += ' ' + val;
+    }
   }
   return content;
 }
@@ -98,14 +107,12 @@ readStdin((data) => {
       if (filePath && SENSITIVE_PATH_RE.test(filePath)) {
         blockTool(`Sensitive file path detected: ${filePath}`);
         process.exit(0);
-        return;
       }
 
       const content = extractContent(toolInput);
       if (content && SECRET_CONTENT_RE.test(content)) {
         blockTool('Potential secret detected in file content');
         process.exit(0);
-        return;
       }
     }
   }

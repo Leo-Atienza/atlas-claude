@@ -15,12 +15,10 @@ Source: https://github.com/NeoLabHQ/context-engineering-kit
 Key plugins: sdd (Spec-Driven Development), reflexion, code-review, kaizen, tdd, git, ddd, docs, fpf, sadd, customaize-agent, mcp, tech-stack
 Note: fpf plugin is ~600k tokens, loads in subagent
 
-### cc-devops/ (31 skills) — ARCHIVED to skills/skills-archive/cc-devops/
+### cc-devops/ (31 skills) — REMOVED
 Source: https://github.com/akin-ozer/cc-devops-skills
 License: Apache 2.0
-Each skill has: SKILL.md, references/, scripts/, assets/
-Optional deps: terraform, tflint, terragrunt, ansible, docker, hadolint, helm, kubectl, shellcheck, promtool, etc.
-Note: All 31 skills archived (0 active references). Moved 2026-04-11 to reduce search noise (7.7MB, 762 files).
+Note: Removed 2026-04-11 (0 active references, 15MB on disk). Available on GitHub if needed.
 
 ### compound-engineering/ (19 skills, 5 agent groups, 18 commands)
 Source: https://github.com/EveryInc/compound-engineering-plugin
@@ -91,6 +89,42 @@ Purpose: Sandboxes tool output (98% context reduction), FTS5+BM25 search for rel
 Config: Added to ~/.claude/.mcp.json as `context-mode` server
 Security audit: postinstall.mjs clean (Windows path fixes only), no telemetry, no exfiltration
 
+### MCP Servers (added 2026-04-12)
+
+| Server | Source | License | Purpose | Cost |
+|--------|--------|---------|---------|------|
+| vercel | Official (mcp.vercel.com) | Proprietary (hosted) | Deployment management, build logs, env vars, domains | Free (all plans) |
+| lighthouse | priyankark/lighthouse-mcp | MIT | Google Lighthouse audits: performance, accessibility, SEO, best practices | Free (runs locally) |
+| firecrawl | firecrawl-mcp (npm) | AGPL-3.0 / MIT | Clean web content extraction for LLM consumption | Free tier (500 credits) or self-host free |
+| heroui | @heroui/mcp (official) | MIT + Apache-2.0 | HeroUI component docs, props, types, theme tokens, examples | Free |
+| aceternity | aceternityui-mcp | MIT | Animated landing page component registry (search, browse, install) | Free |
+| iconify | iconify-mcp-server | GPL-3.0 | 200K+ icons from 200+ icon sets (Lucide, Heroicons, Phosphor, etc.) | Free |
+| 21st-dev | @21st-dev/magic (official) | Proprietary | AI-generate polished components from text descriptions | Free (100 credits/mo) |
+
+### App Development MCP Servers (added 2026-04-12)
+
+| Server | Source | License | Purpose | Cost |
+|--------|--------|---------|---------|------|
+| storybook | @storybook/addon-mcp (official) | MIT | Component-level testing, story generation, a11y testing | Free |
+| tauri-mcp | @hypothesi/tauri-mcp-server | MIT | Build, dev, test, scaffold Tauri v2 projects via MCP | Free |
+| maestro | maestro mcp (official) | Apache-2.0 | Mobile E2E testing with auto-healing selectors | Free (Cloud paid) |
+| openapi | @baryhuang/mcp-server-any-openapi | MIT | Auto-generate MCP tools from any OpenAPI/Swagger spec | Free |
+| statsig | mcp.statsig.com (official, remote HTTP) | Proprietary | Feature flags, A/B experiments, metrics | Free (50M events/mo) |
+| applitools | @applitools/mcp (official) | Proprietary | Visual AI regression testing on Playwright screenshots | **14-day trial only** (disabled) |
+
+### Expo Official Skills (added 2026-04-12)
+Source: https://github.com/expo/skills
+Install: `npx skills@latest add expo/skills -y -g`
+Skills (11): expo-api-routes, expo-cicd-workflows, expo-deployment, expo-dev-client, expo-module, expo-tailwind-setup, expo-ui-jetpack-compose, expo-ui-swiftui, native-data-fetching, upgrading-expo, use-dom
+Location: `~/.agents/skills/` (symlinked into `~/.claude/skills/`)
+Note: Opus-optimized, from official Expo team
+
+### App Development Slash Commands (added 2026-04-12)
+- `/new-mobile-app` -- Scaffold Expo + Supabase mobile project
+- `/new-desktop-app` -- Scaffold Tauri desktop project
+- `/api-design` -- Design and generate API from spec
+- `/db-schema` -- Design and validate database schema
+
 ## CLI Tools
 
 | Tool | Version | Source | Install Method |
@@ -101,6 +135,11 @@ Security audit: postinstall.mjs clean (Windows path fixes only), no telemetry, n
 | tdd-guard | latest | npm | `npm install -g` |
 | claude-squad | 1.0.14 | GitHub release | Pre-built Windows binary in ~/.local/bin/ |
 | claudio | 1.11.1 | go install | `go install claudio.click/cmd/claudio@latest` |
+| react-native-ai-debugger | latest | npm | `npm install -g react-native-ai-debugger --ignore-scripts` |
+| maestro | 2.4.0 | get.maestro.mobile.dev | Installed in Ubuntu WSL2 (`~/.maestro/bin/maestro`) |
+
+### WSL Distros
+- **Ubuntu** (added 2026-04-12) — Installed for Maestro mobile E2E testing. Has Java 21 (OpenJDK), unzip.
 
 ## Hooks in settings.json
 Active hooks: PreToolUse, PostToolUse, PostToolUseFailure, Notification, Stop, PreCompact, SessionStart
