@@ -64,7 +64,7 @@
         ]
       },
       {
-        "matcher": "Write|Edit|MultiEdit|Bash|Agent",
+        "matcher": "Read|Glob|Grep|Write|Edit|MultiEdit|Bash|Agent",
         "hooks": [
           {
             "type": "command",

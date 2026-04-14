@@ -2,6 +2,10 @@
 // PreToolUse Context Guard + Security Gate — merged into single process.
 //
 // Behavior:
+//   0. Action-graph duplicate-read advisory (Read only):
+//      - Checks atlas-action-graph state for a prior read of the same file
+//      - Emits an additionalContext warning (non-blocking) if found
+//      - Respects file mtime: skips the warning if the file changed on disk
 //   1. Security gate (Write/Edit/MultiEdit only):
 //      - Blocks sensitive file paths (.env, credentials, keys, etc.)
 //      - Blocks content containing secrets (AWS keys, API tokens, private keys, etc.)
@@ -96,6 +100,29 @@ readStdin((data) => {
 
   if (!sessionId || !toolName) {
     process.exit(0);
+  }
+
+  // ── 0. Action-Graph: Duplicate-Read Advisory (Read only) ────────
+  // Non-blocking: emits additionalContext warning and exits, so subsequent
+  // gate checks don't also fire for the same call. Read is in ALWAYS_ALLOWED
+  // anyway, so the context guard below would no-op for Read regardless.
+  if (toolName === 'Read') {
+    try {
+      const actionGraph = require('./atlas-action-graph');
+      const filePath = toolInput.file_path || '';
+      if (filePath) {
+        const check = actionGraph.isDuplicateRead(sessionId, filePath);
+        if (check.duplicate) {
+          process.stdout.write(JSON.stringify({
+            additionalContext:
+              `ACTION GRAPH: ${filePath} was already read in this session ` +
+              `(call #${check.lastCallN}, ×${check.retrievedCount}, ~${check.approxTokensSaved} tokens still in context). ` +
+              `Reference the earlier read instead of re-loading unless you believe the file changed on disk.`,
+          }));
+          process.exit(0);
+        }
+      }
+    } catch (_) { /* fail-open — duplicate detection is advisory */ }
   }
 
   // ── 1. Security Gate (Write/Edit/MultiEdit only) ────────────────
