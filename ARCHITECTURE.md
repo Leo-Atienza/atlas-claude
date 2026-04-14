@@ -4,7 +4,7 @@
 
 1. **`~/.claude/CLAUDE.md`** — Slim core instructions (~8KB). Rules extracted to on-demand pages.
 
-2. **Skills Directory/Page System** (66 active skill entries, 98 top-level dirs on disk incl. container packs):
+2. **Skills Directory/Page System** (69 active skill entries, 105 top-level dirs on disk incl. container packs):
    - `skills/ACTIVE-DIRECTORY.md` — Index of active skills (15 Core + 51 Available)
    - `skills/ACTIVE-PAGE-1-web-frontend.md` — Web, animation, design, testing, security skills (34 skills)
    - `skills/ACTIVE-PAGE-2-backend-tools.md` — Backend, deployment, workflow skills (22 skills)
@@ -14,7 +14,7 @@
    - `skills/RULES-SECURITY.md` — On-demand security rules + triggers
    - `skills/RULES-TESTING.md` — On-demand testing rules
 
-3. **Knowledge Store** (67 entries):
+3. **Knowledge Store** (72 entries):
    - `topics/KNOWLEDGE-DIRECTORY.md` — Index
    - `topics/KNOWLEDGE-PAGE-1-patterns.md` — 28 G-PAT entries
    - `topics/KNOWLEDGE-PAGE-2-solutions.md` — 16 G-SOL entries
@@ -30,18 +30,18 @@ All Node hooks import `hooks/lib.js` for shared utilities. Config: `hooks/contex
 
 | Event | Hook | Purpose |
 |-------|------|---------|
-| PreToolUse | context-guard.js | Security gate + context budget |
+| PreToolUse | context-guard.js | Duplicate-read advisory (Read) + security gate (Write/Edit/MultiEdit) + context budget (all expensive) |
 | PreToolUse | cctools bash/file/env hooks | Safety hooks |
 | PreToolUse | graphify hint (Glob/Grep) | Suggest graph navigation |
 | PreToolUse | pre-commit-gate.js | Build/test reminder before git commit |
 | PostToolUse | auto-formatter | Format on write |
 | PostToolUse | tsc-check.js | TypeScript check (only .ts/.tsx files, 15s timeout) |
-| PostToolUse | post-tool-monitor.js | Context, efficiency, failure tracking |
+| PostToolUse | post-tool-monitor.js | Context, efficiency, failure tracking + action-graph retrieval logging (Read/Glob/Grep/Write/Edit/MultiEdit/Bash/Agent) |
 | PostToolUseFailure | tool-failure-handler.js | Circuit breaker, tool health, MCP server classification |
 | UserPromptSubmit | allow_git_hook.py | Session-scoped git approval |
 | SessionStart | session-start.sh | Handoff, version, rotation, health, KG |
 | Stop | session-stop.sh | Handoff, todos, KG capture |
-| PreCompact | precompact-reflect.sh | Preserve knowledge pre-compaction |
+| PreCompact | scripts/progressive-learning/precompact-reflect.sh | Preserve KG pre-compaction + action-graph hot-set digest injection (Tier 2) |
 | Notification | claudio | Desktop notifications |
 | StatusLine | statusline.js | Context bar, task, call count |
 
@@ -66,6 +66,18 @@ Three systems, strict boundaries — no overlap.
 
 2. **`hooks/atlas-extractor.js`** — Heuristic memory auto-extractor
    - Pure regex classifier: text → G-PAT/G-SOL/G-ERR/G-PREF/G-FAIL
+
+3. **`hooks/atlas-action-graph.js`** — In-session retrieval log (JSON-backed, zero deps) — *Tier 1, added 2026-04-14*
+   - Storage: `atlas-action-graph/${session_id}.jsonl` (append-only) + `${session_id}.state.json` (priority queue, atomic)
+   - Feeds duplicate-read advisory in `context-guard.js` and receives retrieval logging from `post-tool-monitor.js`
+   - Separate storage keys per tool: `read:${path}` / `glob:${pattern}` / `grep:${pattern}` — no cross-tool collisions
+   - Skips `/tmp/**` and `os.tmpdir()` to ignore scratchpad noise; mtime-aware so stale file changes don't trigger false duplicate warnings
+   - Priority score: `0.4·log(retrieved_count)/log(6) + 0.4·(used_count/retrieved_count) + 0.2·exp(-ageMin/15)`; `pinned: true` overrides eviction
+   - Profile-gated via `isHookEnabled('atlas-action-graph')` — fails open everywhere
+   - CLI: `node atlas-action-graph.js {log|check|hot|digest|query|stats|rollup|carryover|mark-used|pin|unpin|prune}`
+   - Scope: within-session working memory (complements atlas-kg's cross-session long-term memory)
+   - **Tier 2 (2026-04-14):** reference scanner via `post-tool-monitor.js` §5 (flattens `tool_input` strings and bumps `used_count` through 3-tier `markUsed` matching — direct-key → canonical equality → substring containment with path-specificity guard); `compactDigest` survives PreCompact via `scripts/progressive-learning/precompact-reflect.sh`; state-file snapshots kept in `atlas-action-graph/snapshots/`; `used_count` capped on the writer at `retrieved_count × 3`
+   - **Tier 3 (2026-04-14):** `statsRollup` appends a one-line per-session summary to `logs/action-graph-stats.jsonl` from `session-stop.sh`; `carryoverDigest` surfaces the previous session's top-5 items at SessionStart (`hooks/session-start.sh` §7i, 48h age guard); `pruneOldSessions(7)` runs on every SessionStart
 
 ## MCP Servers
 

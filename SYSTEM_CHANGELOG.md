@@ -1,5 +1,51 @@
 # System Changelog
 
+## [6.8.0] — 2026-04-14
+### Stateful action-graph intelligence layer — Tier 1 + 2 + 3
+
+Cross-session working-memory tracker that logs every Read/Glob/Grep with priority scoring, detects reference usage from tool inputs via a 3-tier matcher, surfaces duplicate-read advisories, survives compaction via a PreCompact digest, and carries the top-N hot set into the next session at SessionStart.
+
+**Tier 1 — Baseline logger + scoring**
+- New `hooks/atlas-action-graph.js` — persistent per-session action graph with `log`/`check`/`hot`/`digest`/`query`/`stats`/`mark-used`/`pin`/`unpin` CLI commands
+- Per-session JSONL log + JSON state file under `atlas-action-graph/<session>.{jsonl,state.json}`
+- Priority formula combining read count, recency, and pin state
+- Fail-open lazy loader pattern — `lib()` only resolves on first use, catches everything
+- Gated by `isHookEnabled('atlas-action-graph')` via profile lookup
+- Wired into `post-tool-monitor.js` — PostToolUse hook logs Read/Glob/Grep targets
+
+**Tier 2 — Reference scanner + compaction survival**
+- `post-tool-monitor.js` scans Write/Edit/Bash/Agent `tool_input` values for substrings matching previously-logged paths, bumping `used_count` via a 3-tier `markUsed`: direct key → canonical path equality → substring containment with a path-specificity guard
+- Duplicate-read advisory — when a file gets read twice without any write, `context-guard.js` surfaces a one-line hint suggesting reuse
+- Writer-side `used_count` cap invariant (not caller-side) — single source of truth
+- `compactDigest(sessionId)` — produces ~2K-token hot-set digest consumed by `scripts/progressive-learning/precompact-reflect.sh` at PreCompact
+- State-file snapshots in `atlas-action-graph/snapshots/` for post-compact restoration
+- Verified self-referentially — auto-compact preserved the edit context across the boundary
+
+**Tier 3 — Cross-session carryover + stats rollup + docs**
+- `statsRollup(sessionId)` — writes one JSONL line per session to `logs/action-graph-stats.jsonl` with unique_targets, total_retrievals, duplicates, pinned, approx_tokens, hot_set size/tokens, mean_priority
+- `carryoverDigest(sessionId, n=5)` — top-N hot-set formatter used at SessionStart; reuses `hotSet(sid, 1_000_000)` to cap by count not tokens
+- New CLI commands: `rollup <session>` + `carryover <session> [--n=5]`
+- `hooks/session-stop.sh` §0 — rollup runs before handoff so a rollup failure can't corrupt handoff state
+- `hooks/session-start.sh` §7i — carryover + prune block that picks the most-recent `*.state.json` under 48h, emits the digest, and runs `pruneOldSessions(7)` on every SessionStart
+- `CLAUDE.md` — new `Auto-Action-Graph` subsection describing the full lifecycle
+- Pre-existing doc path fixes: `ARCHITECTURE.md:44` and `hooks/README.md:116` both wrongly placed `precompact-reflect.sh` in `hooks/` instead of `scripts/progressive-learning/`
+
+**Verification — 8/8 steps passed**
+- Syntax checks on all modified hooks
+- `statsRollup` unit test — seeded reads, ran `rollup $SID`, confirmed JSONL append with expected fields
+- `carryoverDigest` unit test — confirmed `top N/M` header + bullets + closing hint
+- `session-stop.sh` §0 wiring — JSONL grew by exactly 1 line, handoff still written
+- `session-start.sh` §7i live production output — real files at real priorities
+- Prune sweep — aged a state file to 10d, confirmed prune removed it while keeping fresh files
+- Cross-session smoke test — next SessionStart automatically emitted `ACTION-GRAPH CARRYOVER: previous session top 5/41` with real files at priorities 0.69–0.78
+- Doc sanity — all operative `precompact-reflect.sh` path references fixed
+
+**Files**: 1 created (`hooks/atlas-action-graph.js`), 7 modified (`CLAUDE.md`, `ARCHITECTURE.md`, `hooks/README.md`, `hooks/post-tool-monitor.js`, `hooks/session-start.sh`, `hooks/session-stop.sh`, `scripts/progressive-learning/precompact-reflect.sh`)
+
+**Note**: `SYSTEM_VERSION.md` was stale at 6.6.1 through the v6.7.0 ship (commit `14e4b01` forgot to bump it). Jumping 6.6.1 → 6.8.0 here; v6.7.0 changelog gap is tracked as a separate cleanup task.
+
+---
+
 ## [6.6.1] — 2026-04-11
 ### Auto-System-Docs workflow
 - Added `Auto-System-Docs` to CLAUDE.md Automatic Workflows — system infrastructure changes now auto-trigger documentation updates (ARCHITECTURE.md, hooks/README.md, SYSTEM_VERSION/CHANGELOG, INSTALLED.md) as part of the Deliver phase

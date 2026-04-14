@@ -1,12 +1,16 @@
 #!/usr/bin/env node
 /**
- * Consolidated PostToolUse monitor — replaces 4 separate hooks:
+ * Consolidated PostToolUse monitor — five responsibilities:
  *   1. context-monitor    → context usage warnings + auto-continuation
  *   2. mistake-capture    → failure logging + pattern detection
  *   3. hook-health-logger → hook execution time logging
  *   4. tool-efficiency    → tool call counting + efficiency warnings
+ *   5. action-graph       → retrieval tracking + reference scanner for usage scoring
  *
- * Matcher: Write|Edit|MultiEdit|Bash|Agent
+ * Matcher: Read|Glob|Grep|Write|Edit|MultiEdit|Bash|Agent
+ *   - Action-graph logging fires for all matched tools (Read/Glob/Grep → retrievals)
+ *   - Efficiency counting stays bounded to the EXPENSIVE set via a guard so
+ *     the 100/200-call warning thresholds don't shift under heavy exploration.
  */
 
 const fs = require('fs');
@@ -33,11 +37,43 @@ const DEBOUNCE_CALLS = thresholds.debounce_calls;
 
 const EFFICIENCY_WARN_AT = [100, 200];
 
+// Tools that count toward the efficiency-warning thresholds. Kept narrow
+// because the 100/200 thresholds were tuned for write/run-heavy work, not
+// read-heavy exploration.
+const MATCH_EXPENSIVE = new Set(['Write', 'Edit', 'MultiEdit', 'Bash', 'Agent']);
+
 const ERROR_INDICATORS = [
   'error', 'Error', 'ERROR', 'FAILED', 'failed', 'Traceback', 'Exception',
   'command not found', 'No such file', 'Permission denied', 'exit code',
   'ENOENT', 'EPERM', 'EACCES', 'SyntaxError', 'TypeError', 'ReferenceError',
 ];
+
+// ── Action-graph reference scanner helpers ──────────────────────────
+// Flatten an object/array into its string-valued leaves so the reference
+// scanner can look for previously-logged target paths inside tool_input.
+// Bounded: max depth 3, skips strings > 1KB (those are probably file
+// contents, not references).
+function flattenStrings(val, depth = 0, out = []) {
+  if (depth > 3 || val == null) return out;
+  if (typeof val === 'string') {
+    if (val.length <= 1024) out.push(val);
+  } else if (Array.isArray(val)) {
+    for (const v of val) flattenStrings(v, depth + 1, out);
+  } else if (typeof val === 'object') {
+    for (const v of Object.values(val)) flattenStrings(v, depth + 1, out);
+  }
+  return out;
+}
+
+// Increment values per tool for markUsed scoring. Read/Glob/Grep are
+// deliberately absent — their retrieval is already logged separately by
+// logRetrieval, so re-referencing a file through another read shouldn't
+// double-count. Edits are the strongest signal (the retrieval was
+// actually used), Bash/Agent are one tier weaker.
+const USAGE_INCREMENT = {
+  Write: 2, Edit: 2, MultiEdit: 2,
+  Bash: 1, Agent: 1,
+};
 
 // ── Main ────────────────────────────────────────────────────────────
 readStdin((data) => {
@@ -50,28 +86,34 @@ readStdin((data) => {
   ensureDir(paths.logs);
   ensureDir(paths.cache);
 
-  // ── 1. Tool Efficiency Tracking ─────────────────────────────────
-  const counterFile = path.join(paths.cache, `efficiency-${sessionId}.json`);
-  const counters = readJsonSafe(counterFile, {
-    session_id: sessionId,
-    started: new Date().toISOString(),
-    tools: {},
-    total: 0,
-  });
+  const isExpensive = MATCH_EXPENSIVE.has(toolName);
 
-  counters.tools[toolName] = (counters.tools[toolName] || 0) + 1;
-  counters.total = (counters.total || 0) + 1;
-  counters.last_tool = toolName;
-  counters.last_ts = new Date().toISOString();
-  writeJsonSafe(counterFile, counters);
+  // ── 1. Tool Efficiency Tracking (expensive tools only) ─────────
+  // Read/Glob/Grep are intentionally excluded here so the 100/200 warning
+  // thresholds stay meaningful on exploration-heavy sessions.
+  if (isExpensive) {
+    const counterFile = path.join(paths.cache, `efficiency-${sessionId}.json`);
+    const counters = readJsonSafe(counterFile, {
+      session_id: sessionId,
+      started: new Date().toISOString(),
+      tools: {},
+      total: 0,
+    });
 
-  if (EFFICIENCY_WARN_AT.includes(counters.total)) {
-    const breakdown = Object.entries(counters.tools)
-      .sort(([, a], [, b]) => b - a)
-      .slice(0, 5)
-      .map(([t, c]) => `${t}:${c}`)
-      .join(', ');
-    messages.push(`EFFICIENCY NOTE: ${counters.total} tool calls this session. Breakdown: ${breakdown}. Consider if approach can be streamlined.`);
+    counters.tools[toolName] = (counters.tools[toolName] || 0) + 1;
+    counters.total = (counters.total || 0) + 1;
+    counters.last_tool = toolName;
+    counters.last_ts = new Date().toISOString();
+    writeJsonSafe(counterFile, counters);
+
+    if (EFFICIENCY_WARN_AT.includes(counters.total)) {
+      const breakdown = Object.entries(counters.tools)
+        .sort(([, a], [, b]) => b - a)
+        .slice(0, 5)
+        .map(([t, c]) => `${t}:${c}`)
+        .join(', ');
+      messages.push(`EFFICIENCY NOTE: ${counters.total} tool calls this session. Breakdown: ${breakdown}. Consider if approach can be streamlined.`);
+    }
   }
 
   // ── 2. Mistake Capture ──────────────────────────────────────────
@@ -93,6 +135,24 @@ readStdin((data) => {
     path.join(paths.logs, 'hook-health.jsonl'),
     JSON.stringify({ ts: new Date().toISOString(), hook: 'post-tool-monitor', duration_ms: Date.now() - hookStart, tool: toolName })
   );
+
+  // ── 5. Action-Graph Logging + Reference Scanning ────────────────
+  // Logs the retrieval for duplicate-read detection + (Tier 2) hot-set
+  // survival. If the tool edits or runs things, also scans tool_input for
+  // previously-logged target paths and bumps their used_count so priority
+  // ranking reflects actual usage, not just retrieval frequency.
+  // Fails open on any error — non-critical path.
+  try {
+    const actionGraph = require('./atlas-action-graph');
+    actionGraph.logRetrieval(sessionId, toolName, toolInput, toolResponse);
+
+    const inc = USAGE_INCREMENT[toolName];
+    if (inc) {
+      for (const val of flattenStrings(toolInput)) {
+        actionGraph.markUsed(sessionId, val, inc);
+      }
+    }
+  } catch (_) { /* fail-open */ }
 
   // ── Emit collected messages ─────────────────────────────────────
   if (messages.length > 0) {

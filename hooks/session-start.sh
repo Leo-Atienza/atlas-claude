@@ -272,6 +272,30 @@ if [ -d "$CACHE_DIR" ]; then
   fi
 fi
 
+# ─── 7i. Action-graph carryover + prune (Tier 3) ────────────────────
+# Carries forward the previous session's top-5 hot items if the state file
+# is < 48h old. Also prunes action-graph files > 7 days old.
+# §7f/§7g/§7h are already taken by Plans / Session-env / Cache efficiency.
+AG_DIR="$CLAUDE_DIR/atlas-action-graph"
+if [ -d "$AG_DIR" ]; then
+  # Prune stale session files (cheap — runs every SessionStart)
+  node "$CLAUDE_DIR/hooks/atlas-action-graph.js" prune --days=7 >/dev/null 2>&1 || true
+
+  # Pick most recent state file (current session's doesn't exist yet at SessionStart)
+  PREV_STATE=$(ls -t "$AG_DIR"/*.state.json 2>/dev/null | head -1)
+  if [ -n "$PREV_STATE" ] && [ -f "$PREV_STATE" ]; then
+    MTIME=$(stat -c %Y "$PREV_STATE" 2>/dev/null || echo 0)
+    AGE=$(( NOW - MTIME ))
+    if [ "$AGE" -gt 0 ] && [ "$AGE" -lt 172800 ]; then  # 48h = 172800s
+      PREV_SID=$(basename "$PREV_STATE" .state.json)
+      CARRYOVER=$(node "$CLAUDE_DIR/hooks/atlas-action-graph.js" carryover "$PREV_SID" --n=5 2>/dev/null)
+      if [ -n "$CARRYOVER" ] && [ "$CARRYOVER" != "No carryover (action graph empty)." ]; then
+        echo "$CARRYOVER"
+      fi
+    fi
+  fi
+fi
+
 # ─── 8. Stale temp file cleanup ─────────────────────────────────────
 # Use Node's tmpdir (matches where hooks actually write — may differ from /tmp on Windows)
 NODE_TMPDIR=$(node -e "process.stdout.write(require('os').tmpdir())" 2>/dev/null || echo "/tmp")

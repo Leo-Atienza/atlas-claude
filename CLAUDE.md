@@ -147,6 +147,9 @@ When the session is ending:
 5. If project has `wiki/` directory, update `wiki/session-log.md` with session summary
 6. Update memory if anything session-worthy was learned
 
+### Auto-Action-Graph (in-session working memory)
+Every Read/Glob/Grep is logged to `~/.claude/atlas-action-graph/` with priority scoring. Write/Edit/Bash/Agent `tool_input`s are scanned for references to previously-logged paths, bumping their `used_count` via 3-tier matching (direct key → canonical equality → substring containment with a path-specificity guard). Duplicate reads on unchanged files surface an advisory through `context-guard.js`. At PreCompact, the hot set survives as a ~2K-token digest injected by `scripts/progressive-learning/precompact-reflect.sh`, alongside a state-file snapshot in `atlas-action-graph/snapshots/`. At SessionStart, the previous session's top-5 items carry over if the state file is < 48h old, and `logs/action-graph-stats.jsonl` receives one line per completed session. All behavior is automatic, fail-open, and gated by `ATLAS_HOOK_PROFILE` via `isHookEnabled`.
+
 ## Graceful Degradation
 
 If a skill, hook, or script is missing or fails: continue without it, note the failure, suggest a fix.

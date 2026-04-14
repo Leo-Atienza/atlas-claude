@@ -31,6 +31,12 @@ if ! [ -t 0 ]; then
   fi
 fi
 
+# ─── 0. Action-graph rollup (before handoff so failure can't block it) ──
+# Appends one line to logs/action-graph-stats.jsonl per session. Fail-open.
+if [ -n "$SESSION_ID" ]; then
+  node "$HOME/.claude/hooks/atlas-action-graph.js" rollup "$SESSION_ID" >/dev/null 2>&1 || true
+fi
+
 # ─── 1. Session handoff (write file + echo to terminal) ─────────────
 {
   echo "date: $TODAY"

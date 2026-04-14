@@ -100,7 +100,7 @@ process.exit(0)   // JS — no stdout
 
 | Hook | Event | Matcher | Log Files |
 |------|-------|---------|-----------|
-| `context-guard.js` | PreToolUse | Write\|Edit\|MultiEdit\|Bash\|Agent | `logs/security-bypass.jsonl`, `logs/context-guard.jsonl` |
+| `context-guard.js` | PreToolUse | Read\|Write\|Edit\|MultiEdit\|Bash\|Agent | `logs/security-bypass.jsonl`, `logs/context-guard.jsonl` (Read → duplicate-read advisory via atlas-action-graph; Write/Edit/MultiEdit → security gate; all → context budget) |
 | `cctools bash_hook.py` | PreToolUse | Bash | (blocks only, no logs) |
 | `cctools file_length_limit_hook.py` | PreToolUse | Write\|Edit | (blocks only, no logs) |
 | `cctools read_env_protection_hook.py` | PreToolUse | Read | (blocks only, no logs) |
@@ -109,13 +109,21 @@ process.exit(0)   // JS — no stdout
 | `auto-formatter` | PostToolUse | Write\|Edit\|MultiEdit | (no logs) |
 | `pre-commit-gate.js` | PreToolUse | Bash | (stdout only — warns if build+test not run before commit) |
 | `tsc-check.js` | PostToolUse | Write\|Edit\|MultiEdit | (stdout only — TS errors as additionalContext) |
-| `post-tool-monitor.js` | PostToolUse | Write\|Edit\|MultiEdit\|Bash\|Agent | `logs/failures.jsonl`, `logs/error-patterns.json`, `logs/hook-health.jsonl`, `logs/tool-call-counts.json`, `cache/efficiency-*.json` |
+| `post-tool-monitor.js` | PostToolUse | Read\|Glob\|Grep\|Write\|Edit\|MultiEdit\|Bash\|Agent | `logs/failures.jsonl`, `logs/error-patterns.json`, `logs/hook-health.jsonl`, `logs/tool-call-counts.json`, `cache/efficiency-*.json` (efficiency counts/failure logging stay bounded to expensive tools via `MATCH_EXPENSIVE` guard; Read/Glob/Grep only feed action-graph logging) |
 | `tool-failure-handler.js` | PostToolUseFailure | * | `logs/tool-failures.jsonl`, `logs/tool-health.json` (MCP failures tagged with `is_mcp: true`) |
 | `session-start.sh` | SessionStart | * | (stdout only) |
 | `session-stop.sh` | Stop | * | `.last-session-handoff` |
-| `precompact-reflect.sh` | PreCompact | * | (stdout only) |
+| `scripts/progressive-learning/precompact-reflect.sh` | PreCompact | * | (stdout only — Tier 2: action-graph digest injection + state.json snapshot) |
 | `claudio` | Notification | * | (external) |
 | `statusline.js` | StatusLine | * | `/tmp/claude-ctx-*.json` (bridge file) |
+
+### Shared modules used by hooks (not hooks themselves)
+
+| Module | Purpose | Storage |
+|--------|---------|---------|
+| `atlas-kg.js` | Temporal knowledge graph — entities, triples, validity windows | `~/.claude/atlas-kg/{entities,triples}.json` + snapshots |
+| `atlas-extractor.js` | Heuristic regex classifier: handoff text → G-PAT/G-SOL/G-ERR/G-PREF/G-FAIL candidates | (caller-managed) |
+| `atlas-action-graph.js` | In-session retrieval log + priority queue. Feeds duplicate-read advisory in `context-guard.js` and logging from `post-tool-monitor.js`. **Tier 2:** reference scanner (`post-tool-monitor.js` §5 flattens `tool_input` and calls `markUsed` with 3-tier direct/canonical/substring matching; `used_count` capped at `retrieved_count × 3`); `compactDigest` injected as `additionalContext` at PreCompact; state-file snapshots to `snapshots/`. **Tier 3:** `statsRollup` JSONL writer at session-stop; cross-session `carryoverDigest` at session-start (48h guard); `pruneOldSessions(7)` on every SessionStart. Separate keys for `read:`/`glob:`/`grep:`. Skips `/tmp/**`. mtime-aware. | `~/.claude/atlas-action-graph/${session_id}.jsonl` + `${session_id}.state.json` + `snapshots/` + `~/.claude/logs/action-graph-stats.jsonl` |
 
 ## Languages
 
