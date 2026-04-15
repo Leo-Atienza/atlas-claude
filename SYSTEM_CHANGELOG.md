@@ -46,6 +46,39 @@ Cross-session working-memory tracker that logs every Read/Glob/Grep with priorit
 
 ---
 
+## [6.7.0] — 2026-04-12
+### 2 new hooks, health dashboard, 4 new commands, 2 new skills, README rewrite
+
+**New hooks**
+- `hooks/tsc-check.js` — TypeScript-only type checking; reads `file_path` from stdin and only runs `tsc --noEmit` on `.ts/.tsx/.mts/.cts` edits (replaces blanket type-check on every Write/Edit)
+- `hooks/pre-commit-gate.js` — build/test reminder surfaced before `git commit` runs
+
+**New script**
+- `scripts/health-dashboard.js` — consolidated system health view across hooks, stats, KG, memory
+
+**New slash commands**
+- `/api-design` — design and generate API from spec
+- `/db-schema` — design and validate database schema
+- `/new-desktop-app` — scaffold Tauri desktop project
+- `/new-mobile-app` — scaffold Expo + Supabase mobile project
+
+**New skills**
+- `skills/audit/` — systematic codebase audit with wave-based verified fixes
+- `skills/handoff/` — end-of-session build/test/commit/push/handoff automation
+
+**Hook overhauls (10)**
+- `atlas-kg`, `atlas-extractor`, `context-guard`, `lib`, `post-tool-monitor`, `session-start`, `session-stop`, `statusline`, `tool-failure-handler`, plus `hooks/README.md` refresh
+- `scripts/progressive-learning/precompact-reflect.sh` — reflection prompt refinements
+
+**Core docs refreshed**
+- `CLAUDE.md`, `REFERENCE.md`, `ARCHITECTURE.md`, `INSTALLED.md`, `settings.json`
+- `README.md` completely rewritten
+- `skills/ACTIVE-DIRECTORY.md`, `skills/ARCHIVE-DIRECTORY.md`, `design-audit`, `trailofbits-security`
+
+**Files**: 32 files changed, 1873 insertions(+), 540 deletions(-) (commit `14e4b01`)
+
+---
+
 ## [6.6.1] — 2026-04-11
 ### Auto-System-Docs workflow
 - Added `Auto-System-Docs` to CLAUDE.md Automatic Workflows — system infrastructure changes now auto-trigger documentation updates (ARCHITECTURE.md, hooks/README.md, SYSTEM_VERSION/CHANGELOG, INSTALLED.md) as part of the Deliver phase
