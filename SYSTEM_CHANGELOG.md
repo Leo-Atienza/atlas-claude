@@ -1,5 +1,86 @@
 # System Changelog
 
+## [6.9.0] — 2026-04-17
+### Code-Review-Graph integration + MCP registry revival
+
+Two days of infrastructure work consolidated: CRG promoted to the primary
+code graph with auto-update wiring (2026-04-16), and the MCP registry
+cleaned up and mass-revived to user scope (2026-04-17).
+
+**Code-Review-Graph (CRG) integration — 2026-04-16**
+- Installed CRG 2.3.2 via `uv tool install code-review-graph` + registered
+  at USER scope via `claude mcp add -s user code-review-graph uvx ...`
+  (stored in `~/.claude.json`, NOT `~/.claude/.mcp.json`)
+- Tree-sitter graph over 23 languages; 30 MCP tools + 5 prompts; SQLite WAL;
+  blast-radius analysis; 8.2× token reduction vs Glob/Grep
+- `CLAUDE.md` Auto-Graph-Navigation: CRG MCP tools (`get_minimal_context`
+  → `query_graph` → `get_impact_radius`) preferred over Glob/Grep when
+  `.code-review-graph/graph.db` exists; graphify retained as fallback for
+  mixed corpora (docs + papers + images); offer `uvx code-review-graph
+  build` for 20+ code-file projects with no graph
+- `settings.json` PostToolUse: `Write|Edit|MultiEdit` fires backgrounded
+  `uvx code-review-graph update` (3s timeout, fail-open, only if graph.db
+  exists) — graph stays current without blocking edits
+- `settings.json` PreToolUse graph-hint: expanded to route between CRG
+  and graphify based on which graph file is present
+- `REFERENCE.md` / `INSTALLED.md` / `ARCHITECTURE.md`: CRG row added,
+  Codebase Knowledge Graph skill described as CRG/graphify router
+- Do NOT run `code-review-graph install` — it clobbers ATLAS skills/hooks/
+  CLAUDE.md. ATLAS wires CRG manually.
+
+**New CLAUDE.md section — Session Scope**
+- Pre-task check: does the task's subject matter match the CWD's identity?
+  A task can be out of scope even when no path is mentioned (finance
+  question in an anniversary-website repo → domain mismatch)
+- Applies at session start too: handoffs, action-graph carryovers, and
+  scheduled-task prompts must match CWD before acting on carried-over work
+- Prevents accidental cross-project work when stale context references a
+  different repo
+
+**MCP registry revival — 2026-04-17**
+- Mass promotion of 12 dormant entries from `.mcp.json` to USER scope
+  (`claude mcp add -s user ...`): `shadcn`, `prisma`, `expo`, `mobile`,
+  `posthog`, `cloudflare`, `linear`, `context-mode`, `lighthouse`, `heroui`,
+  `aceternity`, `tauri-mcp`
+- Latent parse bug fixed: `_comment_*` keys must live at the top level,
+  NOT inside `mcpServers` — strict parser had been silently blocking the
+  whole `.mcp.json` object from loading before the fix
+- Package + URL corrections: `netlify` (`@anthropic-ai/netlify-mcp-server`
+  → `@netlify/mcp`), `vercel` (`https://mcp.vercel.com/mcp` →
+  `https://mcp.vercel.com`); both now connect
+- 7 servers remain project-scoped (only visible from CWD=~/.claude/):
+  `supabase`, `resend`, `sentry`, `firecrawl`, `21st-dev`, `maestro`,
+  `netlify` — each entry carries `_activate` metadata showing the exact
+  `claude mcp add -s user -e KEY=...` command to promote
+- OAuth-pending (first-use sign-in): `cloudflare`, `linear`, `expo`,
+  `posthog`, `vercel`, `statsig`, `plugin:asana:asana`, `plugin:figma:figma`
+- Failing — needs API key only: `stripe` (`STRIPE_SECRET_KEY`), `upstash`
+  (`UPSTASH_EMAIL` + `UPSTASH_API_KEY`)
+- Failing — plugin-bundled: `plugin:github:github` needs
+  `GITHUB_PERSONAL_ACCESS_TOKEN` env var
+- Removed as not standalone-invocable: `storybook` (addon, needs project),
+  `openapi` (requires `--spec` arg)
+- `ARCHITECTURE.md` MCP Servers section: rewritten with the two-registries
+  model + current state enumerated
+- `INSTALLED.md`: registration note explains both registries; always run
+  `claude mcp list` from CWD=~/.claude/ to see the full picture
+
+**Action-graph Tier-3 refinements**
+- `hooks/atlas-action-graph.js`: `carryoverDigest` hot-set cap by count
+  (not tokens) via `hotSet(sid, 1_000_000)`
+- `hooks/session-start.sh` §7i: carryover + `pruneOldSessions(7)` on
+  every SessionStart so stale state files auto-trim
+- `hooks/session-stop.sh` §0: `statsRollup` runs before handoff so a
+  rollup failure can't corrupt handoff state
+- `scripts/auto-continue.sh`: minor updates
+
+**Runtime state added to .gitignore**
+- `atlas-action-graph/` — per-session JSONL + state.json files
+- `atlas-kg/` — entities.json + triples.json + snapshots
+- `handoffs/` — session-end handoff markdown per CWD
+- `.code-review-graph/` — CRG `graph.db` + caches
+- `graphify-out/` — graphify `graph.json` + reports + HTML viewer
+
 ## [6.8.0] — 2026-04-14
 ### Stateful action-graph intelligence layer — Tier 1 + 2 + 3
 
