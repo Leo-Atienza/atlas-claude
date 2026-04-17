@@ -66,6 +66,15 @@ flow-knowledge/
 usage-data/
 scheduled-tasks/
 
+# v6.8.0+ runtime state (cross-session working memory + session handoffs)
+atlas-action-graph/
+atlas-kg/
+handoffs/
+
+# Code-intelligence graph runtime artifacts
+.code-review-graph/
+graphify-out/
+
 # Temp/corrupt files
 *.tmp
 *.corrupt.*
