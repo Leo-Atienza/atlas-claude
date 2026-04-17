@@ -11,7 +11,7 @@ Resume work from the most recent handoff file (or the specified one).
 1. **Find the handoff file**:
    - If `$ARGUMENTS` is provided, use that path
    - Otherwise, find the most recent file matching `~/.claude/sessions/handoff-*.md`
-   - Fallback: `~/.claude/.last-session-handoff`
+   - Fallback: `~/.claude/handoffs/<cwd-slug>.md` — where `<cwd-slug>` is the current working directory with `/`, `\`, and `:` replaced by `_` (e.g. `/c/Users/leooa/.claude` → `c_Users_leooa_.claude`). This is the per-project handoff written by `session-stop.sh`; the old global `.last-session-handoff` was retired to avoid cross-project pollution.
 
 2. **Read and parse** the handoff file completely
 

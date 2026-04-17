@@ -91,6 +91,7 @@ function logFilePath(sessionId) {
 function emptyState(sessionId) {
   return {
     session: sessionId,
+    cwd: null, // stamped on first logRetrieval so carryover can filter by project
     items: {},
     total_retrieved_tokens: 0,
     call_counter: 0,
@@ -299,6 +300,11 @@ function logRetrieval(sessionId, tool, toolInput, toolResponse) {
 
   try {
     const state = loadState(sessionId);
+    // Stamp CWD once so carryover can filter by project. process.cwd() is
+    // authoritative at retrieval time — before any agent cd'ing could shift it.
+    if (!state.cwd) {
+      try { state.cwd = process.cwd(); } catch (_) { state.cwd = null; }
+    }
     state.call_counter = (state.call_counter || 0) + 1;
     const callN = state.call_counter;
 
@@ -866,6 +872,39 @@ function cli() {
       console.log(`Pruned ${n} old action-graph file(s) (> ${days} days)`);
       break;
     }
+    case "latest-for-cwd": {
+      // Find the most recent state file whose recorded cwd matches --cwd.
+      // Prints the session_id on success, nothing on no match. Used by
+      // session-start.sh §7i so carryover can't leak across projects.
+      const wantCwd = flags.cwd || process.cwd();
+      const maxAgeH = parseInt(flags.hours || "48", 10);
+      const wantCanon = canonicalPath(wantCwd);
+      const cutoff = Date.now() - maxAgeH * 3600 * 1000;
+
+      ensureDir();
+      let best = null;
+      try {
+        const files = fs.readdirSync(AG_DIR).filter((n) => /\.state\.json$/.test(n));
+        for (const name of files) {
+          const fp = path.join(AG_DIR, name);
+          let stat;
+          try { stat = fs.statSync(fp); } catch (_) { continue; }
+          if (stat.mtimeMs < cutoff) continue;
+          let parsed;
+          try { parsed = JSON.parse(fs.readFileSync(fp, "utf8")); } catch (_) { continue; }
+          if (!parsed || !parsed.cwd) continue;
+          if (canonicalPath(parsed.cwd) !== wantCanon) continue;
+          if (!best || stat.mtimeMs > best.mtime) {
+            best = {
+              sessionId: name.replace(/\.state\.json$/, ""),
+              mtime: stat.mtimeMs,
+            };
+          }
+        }
+      } catch (_) {}
+      if (best) console.log(best.sessionId);
+      break;
+    }
     default:
       console.log("atlas-action-graph — In-session retrieval tracking");
       console.log("");
@@ -882,6 +921,7 @@ function cli() {
       console.log("  pin <session> <key_or_target>                — protect from eviction");
       console.log("  unpin <session> <key_or_target>");
       console.log("  prune [--days=7]                             — clean old session files");
+      console.log("  latest-for-cwd --cwd=<path> [--hours=48]     — most-recent session_id whose state.cwd matches");
   }
 }
 

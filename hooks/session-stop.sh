@@ -2,7 +2,17 @@
 # Consolidated Stop hook
 # Sections: session handoff (file + stdout), todo capture, auto-continuation
 
-HANDOFF_FILE="$HOME/.claude/.last-session-handoff"
+# Per-CWD handoff file so two projects can't clobber each other's handoffs.
+# Slug: replace /, \, : with _; collapse repeats; strip leading/trailing _.
+#   /c/Users/leooa/.claude            -> c_Users_leooa_.claude
+#   /c/Users/leooa/Documents/Foo      -> c_Users_leooa_Documents_Foo
+cwd_slug() {
+  printf '%s' "$1" | sed -e 's|[/\\:]|_|g' -e 's|__*|_|g' -e 's|^_||' -e 's|_$||'
+}
+HANDOFFS_DIR="$HOME/.claude/handoffs"
+mkdir -p "$HANDOFFS_DIR" 2>/dev/null || true
+CWD_SLUG=$(cwd_slug "$(pwd)")
+HANDOFF_FILE="$HANDOFFS_DIR/${CWD_SLUG}.md"
 TODAY=$(date +%Y-%m-%d)
 NOW=$(date +%H:%M:%S)
 

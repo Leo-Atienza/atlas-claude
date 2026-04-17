@@ -1,6 +1,8 @@
 # Installed Third-Party Resources
 
 > Manifest of third-party skill packs, CLI tools, and integrations. Originally installed 2026-02-25 from [awesome-claude-code](https://github.com/hesreallyhim/awesome-claude-code).
+>
+> **MCP registration note (updated 2026-04-17 + follow-up):** The MCP Servers tables below document what was *planned*. For current *live* status, always run `claude mcp list` from CWD=~/.claude/. There are TWO active registries: `~/.claude.json` (user scope — global) and `~/.claude/.mcp.json` (project scope — only visible from CWD=~/.claude/). Mass revival + parse-fix on 2026-04-17 promoted 12 entries to user scope (shadcn, prisma, expo, mobile, posthog, cloudflare, linear, context-mode, lighthouse, heroui, aceternity, tauri-mcp) and fixed a latent parse bug in `.mcp.json` that had been silently blocking the whole file (`_comment_*` keys must be at top level, not inside `mcpServers`). Follow-up fixes: corrected netlify package (`@anthropic-ai/netlify-mcp-server` → `@netlify/mcp`) and vercel URL (`https://mcp.vercel.com/mcp` → `https://mcp.vercel.com`) — both now connect. 7 servers load from project scope: supabase, resend, sentry, firecrawl, 21st-dev, maestro, netlify. Remaining failures split: `stripe`/`upstash` need only their API-key env vars (package + endpoint work); `plugin:github:github` needs `GITHUB_PERSONAL_ACCESS_TOKEN` env var per its bundled config. Removed as not standalone-invocable: storybook, openapi.
 
 ## Skills/Plugins (in ~/.claude/skills/)
 
@@ -111,6 +113,17 @@ Security audit: postinstall.mjs clean (Windows path fixes only), no telemetry, n
 | openapi | @baryhuang/mcp-server-any-openapi | MIT | Auto-generate MCP tools from any OpenAPI/Swagger spec | Free |
 | statsig | mcp.statsig.com (official, remote HTTP) | Proprietary | Feature flags, A/B experiments, metrics | Free (50M events/mo) |
 | applitools | @applitools/mcp (official) | Proprietary | Visual AI regression testing on Playwright screenshots | **14-day trial only** (disabled) |
+
+### Code Intelligence (added 2026-04-16)
+
+| Tool | Version | Source | License | Purpose | Cost |
+|------|---------|--------|---------|---------|------|
+| code-review-graph (CRG) | 2.3.2 | tirth8205/code-review-graph | MIT | Tree-sitter code graph over 23 langs; 30 MCP tools + 5 prompts; SQLite WAL; blast-radius; auto-update on Write/Edit; 8.2× token reduction | Free |
+
+Install: `uv tool install code-review-graph` (CLI via `uvx`) + `claude mcp add -s user code-review-graph uvx code-review-graph serve` (MCP registration at USER scope — stored in `~/.claude.json`, NOT `~/.claude/.mcp.json`).
+Verify: `claude mcp list` → `code-review-graph ✓ Connected`.
+Replaces: graphify for code-only graphs. Graphify retained for mixed corpora (docs + papers + images).
+Do NOT run `code-review-graph install` — it clobbers ATLAS skills/hooks/CLAUDE.md. ATLAS wires CRG manually.
 
 ### Expo Official Skills (added 2026-04-12)
 Source: https://github.com/expo/skills

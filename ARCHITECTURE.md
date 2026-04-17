@@ -1,4 +1,4 @@
-# ATLAS System Architecture (v6.7.0)
+# ATLAS System Architecture (v6.8.1)
 
 ## Configuration Architecture
 
@@ -32,10 +32,11 @@ All Node hooks import `hooks/lib.js` for shared utilities. Config: `hooks/contex
 |-------|------|---------|
 | PreToolUse | context-guard.js | Duplicate-read advisory (Read) + security gate (Write/Edit/MultiEdit) + context budget (all expensive) |
 | PreToolUse | cctools bash/file/env hooks | Safety hooks |
-| PreToolUse | graphify hint (Glob/Grep) | Suggest graph navigation |
+| PreToolUse | graph hint (Glob/Grep) | Suggest CRG MCP tools (`.code-review-graph/graph.db`) or graphify (`graphify-out/graph.json`) before broad search |
 | PreToolUse | pre-commit-gate.js | Build/test reminder before git commit |
 | PostToolUse | auto-formatter | Format on write |
 | PostToolUse | tsc-check.js | TypeScript check (only .ts/.tsx files, 15s timeout) |
+| PostToolUse | CRG auto-update (Write/Edit/MultiEdit) | Incremental `uvx code-review-graph update` if `.code-review-graph/graph.db` exists (backgrounded, 3s timeout, fail-open) |
 | PostToolUse | post-tool-monitor.js | Context, efficiency, failure tracking + action-graph retrieval logging (Read/Glob/Grep/Write/Edit/MultiEdit/Bash/Agent) |
 | PostToolUseFailure | tool-failure-handler.js | Circuit breaker, tool health, MCP server classification |
 | UserPromptSubmit | allow_git_hook.py | Session-scoped git approval |
@@ -81,13 +82,23 @@ Three systems, strict boundaries — no overlap.
 
 ## MCP Servers
 
-Lazy discovery via TOOL_SEARCH.
+Lazy discovery via TOOL_SEARCH. **Two registries, both real:**
+- `~/.claude.json` (top-level `mcpServers`) — USER scope, global across all CWDs. Managed via `claude mcp add|remove -s user`.
+- `~/.claude/.mcp.json` — PROJECT scope, only loaded when CWD is `~/.claude/`. `_comment_*` keys must live at top level, NOT inside `mcpServers` (strict parser — invalid nesting silently blocks the whole object from loading, as happened before 2026-04-17).
 
-- **MCP_DOCKER** (bundled): Context7, GitHub, Neon, Wikipedia, Memory, Playwright, Git, Filesystem, Obsidian
-- **Standalone** (`.mcp.json`): shadcn, supabase, stripe, resend, prisma, expo, sentry, mobile, posthog, cloudflare, linear, upstash, netlify, context-mode, lighthouse, firecrawl, heroui, aceternity, 21st-dev, iconify
-- **Global** (`.claude.json`): MCP_DOCKER, magicuidesign-mcp
-- **OAuth/Cloud connectors**: Gamma, Context7, Canva, Figma Dev, Gmail, BigData, Prospect Enrichment, Job Search, Social/Stocks, vercel, expo, linear, cloudflare, mcp-registry, scheduled-tasks
+**Current state (2026-04-17 revival → follow-up):**
+
+- **Bundled / gateway**: `MCP_DOCKER` (Context7, GitHub, Neon, Wikipedia, Memory, Playwright, Git, Filesystem, Obsidian)
+- **✓ Connected user scope** (13): `code-review-graph` (CRG — Tree-sitter, 30 tools + 5 prompts, auto-update on Write/Edit), `magicuidesign-mcp`, `shadcn`, `prisma`, `tauri-mcp`, `lighthouse`, `heroui`, `context-mode`, `mobile`, `aceternity`, `iconify`, `plugin:firebase:firebase`
+- **✓ Connected project scope (only visible from CWD=~/.claude/)**: `supabase`, `resend`, `sentry`, `firecrawl`, `21st-dev`, `maestro`, `netlify` — loaded from `.mcp.json`. Server handshake succeeds; API calls will fail until env vars are set. Each entry's `_activate` field shows the exact `claude mcp add -s user -e KEY=...` command to promote to user scope.
+- **! OAuth-pending** (sign-in on first use): `cloudflare`, `linear`, `expo`, `posthog`, `vercel`, `statsig`, `plugin:asana:asana`, `plugin:figma:figma`
+- **✗ Failing — needs API key only** (package + endpoint work, servers exit on missing env var): `stripe` (needs `STRIPE_SECRET_KEY`), `upstash` (needs `UPSTASH_EMAIL` + `UPSTASH_API_KEY`)
+- **✗ Failing — plugin-bundled, needs user token**: `plugin:github:github` — configured to send `Authorization: Bearer ${GITHUB_PERSONAL_ACCESS_TOKEN}` header; set the env var (or use `gh auth token`) and restart Claude Code.
+- **Not standalone-invocable** (removed 2026-04-17): `storybook` (addon — needs project context), `openapi` (requires `--spec` arg). Re-register per-project if needed.
+- **OAuth/cloud connectors** (plugin-registered): Gamma, Context7, Canva, Figma Dev, Gmail, BigData, Prospect Enrichment, Job Search, Social/Stocks, mcp-registry, scheduled-tasks
 - **Plugin-based**: Canva, Figma, Claude Preview, Chrome
+
+**Verify state:** `claude mcp list` (from CWD=~/.claude/ to see both registries). **Revival memory:** `projects/*/memory/project_mcp_revival.md`.
 
 ## Key Files
 

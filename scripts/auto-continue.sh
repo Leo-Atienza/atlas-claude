@@ -38,10 +38,12 @@ fi
 # Verify handoff file exists
 if [ ! -f "$HANDOFF_PATH" ]; then
   echo "WARNING: Handoff file not found at $HANDOFF_PATH" >&2
-  # Fallback to last-session-handoff
-  HANDOFF_PATH="$HOME/.claude/.last-session-handoff"
+  # Fallback to the per-CWD handoff file written by session-stop.sh.
+  # Slug matches the one in session-stop.sh / session-start.sh.
+  FALLBACK_SLUG=$(printf '%s' "$CWD" | sed -e 's|[/\\:]|_|g' -e 's|__*|_|g' -e 's|^_||' -e 's|_$||')
+  HANDOFF_PATH="$HOME/.claude/handoffs/${FALLBACK_SLUG}.md"
   if [ ! -f "$HANDOFF_PATH" ]; then
-    echo "ERROR: No handoff file available. Cannot continue." >&2
+    echo "ERROR: No handoff file available for CWD $CWD. Cannot continue." >&2
     exit 1
   fi
 fi

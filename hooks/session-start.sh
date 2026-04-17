@@ -6,13 +6,32 @@ HOME_DIR="$HOME"
 CLAUDE_DIR="$HOME_DIR/.claude"
 NOW=$(date +%s)
 
-# ─── 1. Session context ─────────────────────────────────────────────
-HANDOFF_FILE="$CLAUDE_DIR/.last-session-handoff"
+# ─── 1. Session context (per-CWD handoff — no cross-project pollution) ─
+# Slug the CWD the same way session-stop.sh does so this session only sees
+# the handoff from the previous session *in this folder*.
+cwd_slug() {
+  printf '%s' "$1" | sed -e 's|[/\\:]|_|g' -e 's|__*|_|g' -e 's|^_||' -e 's|_$||'
+}
+HANDOFFS_DIR="$CLAUDE_DIR/handoffs"
+CWD_SLUG=$(cwd_slug "$(pwd)")
+HANDOFF_FILE="$HANDOFFS_DIR/${CWD_SLUG}.md"
 
 if [ -f "$HANDOFF_FILE" ]; then
-  echo "SESSION HANDOFF from previous session:"
+  echo "SESSION HANDOFF from previous session in this folder:"
   cat "$HANDOFF_FILE"
   echo "Use /resume to continue where you left off."
+fi
+
+# Prune stale per-CWD handoffs (14 days) so abandoned projects don't leak
+if [ -d "$HANDOFFS_DIR" ]; then
+  find "$HANDOFFS_DIR" -maxdepth 1 -name '*.md' -mtime +14 -delete 2>/dev/null || true
+fi
+
+# One-time migration: retire the old global file so nothing stale remains
+STALE_GLOBAL="$CLAUDE_DIR/.last-session-handoff"
+if [ -f "$STALE_GLOBAL" ]; then
+  mkdir -p "$CLAUDE_DIR/TRASH" 2>/dev/null || true
+  mv "$STALE_GLOBAL" "$CLAUDE_DIR/TRASH/.last-session-handoff.$(date +%s)" 2>/dev/null || true
 fi
 
 # ─── 2. Claude Code version check ───────────────────────────────────
@@ -281,17 +300,14 @@ if [ -d "$AG_DIR" ]; then
   # Prune stale session files (cheap — runs every SessionStart)
   node "$CLAUDE_DIR/hooks/atlas-action-graph.js" prune --days=7 >/dev/null 2>&1 || true
 
-  # Pick most recent state file (current session's doesn't exist yet at SessionStart)
-  PREV_STATE=$(ls -t "$AG_DIR"/*.state.json 2>/dev/null | head -1)
-  if [ -n "$PREV_STATE" ] && [ -f "$PREV_STATE" ]; then
-    MTIME=$(stat -c %Y "$PREV_STATE" 2>/dev/null || echo 0)
-    AGE=$(( NOW - MTIME ))
-    if [ "$AGE" -gt 0 ] && [ "$AGE" -lt 172800 ]; then  # 48h = 172800s
-      PREV_SID=$(basename "$PREV_STATE" .state.json)
-      CARRYOVER=$(node "$CLAUDE_DIR/hooks/atlas-action-graph.js" carryover "$PREV_SID" --n=5 2>/dev/null)
-      if [ -n "$CARRYOVER" ] && [ "$CARRYOVER" != "No carryover (action graph empty)." ]; then
-        echo "$CARRYOVER"
-      fi
+  # Pick the most recent state file whose recorded cwd matches THIS session's
+  # cwd — anything else would be cross-project pollution (e.g. Anniversary
+  # hot files leaking into a .claude session).
+  PREV_SID=$(node "$CLAUDE_DIR/hooks/atlas-action-graph.js" latest-for-cwd --cwd="$(pwd)" --hours=48 2>/dev/null)
+  if [ -n "$PREV_SID" ]; then
+    CARRYOVER=$(node "$CLAUDE_DIR/hooks/atlas-action-graph.js" carryover "$PREV_SID" --n=5 2>/dev/null)
+    if [ -n "$CARRYOVER" ] && [ "$CARRYOVER" != "No carryover (action graph empty)." ]; then
+      echo "$CARRYOVER"
     fi
   fi
 fi

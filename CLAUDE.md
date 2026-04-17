@@ -9,7 +9,7 @@ Every task follows this sequence. Claude determines the right depth automaticall
 ### 1. Analyze & Understand
 - Scan codebase and project CLAUDE.md first — understand what exists before researching externally
 - **Project wiki check:** If `wiki/index.md` exists, read it for past decisions and context.
-- **Knowledge graph check:** If `graphify-out/graph.json` exists, read `graphify-out/GRAPH_REPORT.md` first. Use `python -m graphify query` over Glob/Grep. No graph + 20+ files → offer to build.
+- **Knowledge graph check:** If `.code-review-graph/graph.db` exists, use CRG MCP tools (`get_minimal_context` → `query_graph` → `get_impact_radius`) over Glob/Grep. If only `graphify-out/graph.json` exists (mixed-corpus graph), read `GRAPH_REPORT.md` and use `python -m graphify query`. No graph + 20+ code files → offer `uvx code-review-graph build`.
 - **System lookup (non-trivial tasks):**
   - `skills/ACTIVE-DIRECTORY.md` — find matching skills
   - `topics/KNOWLEDGE-DIRECTORY.md` — check G-ERR and G-FAIL before implementing
@@ -67,6 +67,17 @@ ALWAYS capture and show actual error/response before hypothesizing root cause. S
 ### Wave-Based Fixes
 When performing audits or multi-file fixes, work in systematic waves (~5 items per wave). After each wave: run build + tests, report progress, only proceed if green. Never apply all fixes at once.
 
+### Session Scope
+The session's folder — its CWD *and* the nature of what lives there — defines its scope. Before acting on any task:
+1. At session start, form a quick understanding of what this folder is about (read CLAUDE.md, README, package.json, or fall back to the directory name). Hold that as the session's identity.
+2. For each task, check whether its subject matter fits the folder's nature. A task can be out of scope even when no path is mentioned — a finance question in a couple's-anniversary repo is out of scope because the *domain* doesn't match.
+3. If a task appears to target files, configs, or project context outside the nature of the current folder — another project by name, an absolute path elsewhere, a different domain, or files that don't belong here — STOP and warn:
+   > "This task looks like it targets `<other-folder-or-domain>`, but this session is running in `<current-cwd>`, which is `<brief-description-of-this-folder>`. Open a session in the correct folder, or explicitly confirm you want me to proceed from here anyway."
+4. Wait for explicit confirmation **before proceeding any further**. Do not research, read files, run tools, or act on the mismatched task until the user confirms. "Stop" means stop.
+5. Apply the same check at session start: if a handoff, action-graph carryover, or scheduled-task prompt points at a folder or domain that doesn't match CWD, flag the mismatch before acting on any carried-over task.
+
+Rationale: prevents accidental cross-project work when handoffs, pastes, or stale context reference the wrong repo — even when the mismatch isn't a path but a domain. Intent must match the folder's nature, not just live inside its tree.
+
 ## Code Quality
 
 - Simplest solution that works correctly. No premature abstraction.
@@ -99,7 +110,8 @@ Load these when the task requires them — not every session:
 - **Knowledge**: Read `topics/KNOWLEDGE-DIRECTORY.md` → load relevant page. Check G-ERR and G-FAIL before implementing.
 - **Reference**: Read `REFERENCE.md` for slash commands, MCP patterns, generators.
 - **MCP**: Prefer MCP over CLI. TOOL_SEARCH discovers tools on-demand. Context7 is mandatory for framework tasks.
-- **Graphify**: Check `graphify-out/graph.json` before exploring large codebases. Build: `python -m graphify .` | Query: `python -m graphify query "<q>"`
+- **Code graph (CRG)**: Check `.code-review-graph/graph.db` before exploring large codebases. Build: `uvx code-review-graph build` | Query via MCP (`get_minimal_context`, `query_graph`, `get_impact_radius`, `semantic_search_nodes`). Auto-updates on Write/Edit.
+- **Mixed-corpus graph (graphify)**: For docs + papers + images + code. Build: `python -m graphify .` | Query: `python -m graphify query "<q>"`
 - **Wiki**: Obsidian vault at `Documents/Wiki/`. `/wiki-ingest`, `/wiki-query`, `/wiki-lint`.
 
 ## Auto Mode
@@ -118,10 +130,11 @@ Scratchpad: `C:/tmp/claude-scratchpad/`.
 
 ### Auto-Graph-Navigation (codebase tasks)
 When starting any non-trivial task in a project directory:
-1. Check `[ -f graphify-out/graph.json ]` before any Glob/Grep
-2. **Graph found:** read `graphify-out/GRAPH_REPORT.md`. Prefer `python -m graphify query` over broad sweeps.
-3. **No graph, 20+ files:** offer to build. Proceed with or without based on response.
-4. **After editing code:** run `python -m graphify --update` once at end of session.
+1. Check `[ -f .code-review-graph/graph.db ]` before any Glob/Grep.
+2. **CRG graph found:** prefer CRG MCP tools — start with `get_minimal_context(task="...")` (~100 tokens), then `query_graph` for specific targets, `get_impact_radius` for change analysis. Follow `next_tool_suggestions` in every response. Fall back to Grep/Glob only when the graph doesn't cover what you need.
+3. **No CRG graph, check graphify:** `[ -f graphify-out/graph.json ]` → read `GRAPH_REPORT.md`, use `python -m graphify query`.
+4. **No graph, 20+ code files:** offer `uvx code-review-graph build` (Tree-sitter, 23 langs, ~10s for 500 files).
+5. **After editing code:** CRG auto-updates via PostToolUse hook. Graphify still needs `python -m graphify --update` at session end.
 
 ### Auto-History-Check (review/audit tasks)
 When the task is a review, critique, or audit of any system or codebase:
@@ -143,7 +156,7 @@ When the session is ending:
 1. Run full build + all tests — do not commit if either fails
 2. Commit all pending changes with a descriptive conventional commit message (include test count/pass rate)
 3. Push to the current branch
-4. Generate handoff at `~/.claude/sessions/handoff-YYYY-MM-DD.md`
+4. Print the session handoff as a copy-paste markdown block in chat (no file on disk)
 5. If project has `wiki/` directory, update `wiki/session-log.md` with session summary
 6. Update memory if anything session-worthy was learned
 

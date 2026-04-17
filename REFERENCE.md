@@ -30,12 +30,9 @@
 | Start a new desktop app | `/new-desktop-app [name]` |
 | Design an API | `/api-design [desc]` |
 | Design a database schema | `/db-schema [desc]` |
-| Test a component in isolation | Storybook MCP (story generation + a11y check) |
 | Build/dev/test a Tauri app | Tauri MCP + SK-088 |
-| Consume a third-party REST API | OpenAPI MCP (set `OPENAPI_SPEC_URL`) |
-| Manage feature flags | Statsig MCP |
-| Run visual regression tests | Applitools MCP + Playwright |
-| Run mobile E2E tests | Maestro MCP (Android on Win, iOS needs macOS) |
+| Manage feature flags | Statsig MCP (needs `console-` API key — see `.mcp.json` `_activate`) |
+| Run mobile E2E tests | Maestro MCP (WSL + Maestro install — see `.mcp.json` `_activate`) |
 | Publish to app stores | Expo skills (EAS Submit) |
 | Set up CI/CD with Claude | `claude /install-github-app` (claude-code-action) |
 
@@ -94,7 +91,7 @@
 | Native transitions | Native Transition & Scroll (SK-099) — shared elements, FlashList |
 | Native design system | Native Sensory Design (SK-100) — haptics, sound, motion tokens |
 | **Workflow & Tools** | |
-| Map a codebase (graph) | Codebase Knowledge Graph (SK-081) — AST → queryable graph |
+| Map a codebase (graph) | Codebase Knowledge Graph (SK-081) — Router: CRG (code, MCP-native) / graphify (mixed corpora) |
 | Review with blast radius | Graph-Aware Code Review (SK-082) — dependency tracing |
 | Multi-agent orchestration | Smart Swarm (SK-039) — 5D complexity scoring |
 | Subagent task dispatch | Subagent-Driven Dev (SK-077) — fresh subagent + review |
