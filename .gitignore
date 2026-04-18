@@ -5,6 +5,7 @@ settings.local.json
 
 # Runtime state
 .last-session-handoff
+handoffs/
 session-state.md
 handoff-next-session.md
 
@@ -21,6 +22,10 @@ cache/
 __pycache__/
 stats-cache.json
 mcp-needs-auth-cache.json
+
+# Knowledge graphs (per-repo, locally rebuilt)
+.code-review-graph/
+graphify-out/
 
 # Runtime history and state
 history.jsonl
@@ -66,18 +71,10 @@ flow-knowledge/
 usage-data/
 scheduled-tasks/
 
-# v6.8.0+ runtime state (cross-session working memory + session handoffs)
-atlas-action-graph/
-atlas-kg/
-handoffs/
-
-# Code-intelligence graph runtime artifacts
-.code-review-graph/
-graphify-out/
-
 # Temp/corrupt files
 *.tmp
 *.corrupt.*
+*.stackdump
 
 # TRASH
 TRASH/

@@ -181,3 +181,14 @@ if [ -n "$SESSION_ID" ]; then
     bash "$HOME/.claude/scripts/auto-continue.sh" "$SESSION_ID" &
   fi
 fi
+
+# ─── 5. Plans retention (keep 5 most recent) ────────────────────────
+# Archive older plan files to plans/archive/ on every session end. Fail-open.
+PLANS_DIR="$HOME/.claude/plans"
+if [ -d "$PLANS_DIR" ]; then
+  mkdir -p "$PLANS_DIR/archive" 2>/dev/null || true
+  # Sort by mtime (newest first), skip top 5, archive the rest.
+  ls -t "$PLANS_DIR"/*.md 2>/dev/null | tail -n +6 | while read -r oldplan; do
+    [ -f "$oldplan" ] && mv "$oldplan" "$PLANS_DIR/archive/" 2>/dev/null || true
+  done
+fi

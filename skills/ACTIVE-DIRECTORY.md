@@ -3,7 +3,12 @@
 > Lookup: scan this table → find the skill → note its Page → open that page for full details.
 > Loading: read the relevant page on-demand, never all at start.
 > Tiers: **Core** = weekly use, prioritize in suggestions. **Available** = on-demand when task matches.
-> Total active skills: **66** (15 Core + 51 Available) across 98 directories on disk (incl. container packs and archives) — last updated 2026-04-12
+> Total active skills: **66** (15 Core + 51 Available) across 98 directories on disk (incl. container packs and archives) — last updated 2026-04-18
+>
+> **Related metadata files:**
+> - `skills/SYMLINKS.md` — 30 symlinks pointing to `~/.agents/skills/` (Anthropic + community ecosystem)
+> - `skills/archived-skills-manifest.json` — detection patterns for auto-activating archived skills
+> - `skills/ARCHIVE-DIRECTORY.md` — domain-bundled archive of retired skills
 
 ## Core Skills
 

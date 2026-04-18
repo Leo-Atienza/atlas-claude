@@ -47,6 +47,14 @@ ls -d ~/.claude/skills/*/SKILL.md 2>/dev/null | wc -l
 
 For missing skills: check if moved or archived. Report mismatches.
 
+**Cross-source validation** — fails loudly if the four source-of-truth files disagree on the active-skill count:
+
+```bash
+node ~/.claude/scripts/validate-skill-counts.js
+```
+
+If drift is detected, edit the out-of-sync file(s) to match the authoritative number (usually whatever `ACTIVE-DIRECTORY.md` says).
+
 ## 3. Knowledge Consistency
 
 Check KNOWLEDGE-DIRECTORY.md ↔ Knowledge Pages alignment:

@@ -102,6 +102,7 @@ process.exit(0)   // JS — no stdout
 |------|-------|---------|-----------|
 | `context-guard.js` | PreToolUse | Read\|Write\|Edit\|MultiEdit\|Bash\|Agent | `logs/security-bypass.jsonl`, `logs/context-guard.jsonl` (Read → duplicate-read advisory via atlas-action-graph; Write/Edit/MultiEdit → security gate; all → context budget) |
 | `cctools bash_hook.py` | PreToolUse | Bash | (blocks only, no logs) |
+| `cctools rm_block_hook.py` | PreToolUse | Bash | (blocks `rm` commands — enforces CLAUDE.md "Never use `rm`. Always use `mv` to trash" rule) |
 | `cctools file_length_limit_hook.py` | PreToolUse | Write\|Edit | (blocks only, no logs) |
 | `cctools read_env_protection_hook.py` | PreToolUse | Read | (blocks only, no logs) |
 | graph hint (inline bash) | PreToolUse | Glob\|Grep | (stdout only — prefers CRG `.code-review-graph/graph.db` → MCP tools, falls back to graphify `graphify-out/graph.json` → `GRAPH_REPORT.md`) |
@@ -140,6 +141,21 @@ process.exit(0)   // JS — no stdout
 2. Register it in `settings.json` under the appropriate event
 3. Add a test to `scripts/smoke-test.sh`
 4. Prefer extending `post-tool-monitor.js` for new PostToolUse telemetry
+
+## Opt-in Safety Hooks (Unregistered by Default)
+
+The `cctools-safety-hooks/` directory contains four additional blockers that exist on disk but are **not registered** in `settings.json`. They are opt-in: enable them per-project (via a project-scope `.claude/settings.json`) or globally (append to the user-scope `settings.json` PreToolUse block) only when the extra friction is warranted.
+
+| Hook | Blocks | Rationale for opt-in |
+|------|--------|----------------------|
+| `git_add_block_hook.py` | `git add -A`, `git add .` (prompts for specific paths) | Prevents accidentally staging secrets/binaries; too noisy for rapid iteration |
+| `git_checkout_safety_hook.py` | `git checkout` on files with uncommitted changes | Blocks destructive checkouts; may block legitimate workflows (e.g. reset to HEAD) |
+| `git_commit_block_hook.py` | `git commit` without passing a project-specific gate | Project-specific — enable only where a pre-commit gate is authoritative |
+| `env_file_protection_hook.py` | Reads/writes targeting `.env*` files | Redundant with `read_env_protection_hook.py` (registered) for reads; write-side is opt-in |
+
+**To enable one globally:** append a new PreToolUse/Bash (or Read/Write) block in `~/.claude/settings.json` using the same `CLAUDE_PLUGIN_ROOT=...python3 ...` pattern as `rm_block_hook.py`.
+
+**To enable per-project:** create `<project>/.claude/settings.json` with the same hooks block — overrides layer on top of the user-scope settings.
 
 ## Security: BYPASS_SAFETY_HOOKS
 

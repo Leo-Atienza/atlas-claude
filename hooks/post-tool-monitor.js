@@ -154,6 +154,28 @@ readStdin((data) => {
     }
   } catch (_) { /* fail-open */ }
 
+  // ── 6. Subagent Stats Logging (Agent tool only) ─────────────────
+  // Appends one line per Agent invocation to logs/subagent-stats.jsonl.
+  // Parallels the action-graph stats rollup pattern. Fail-open.
+  if (toolName === 'Agent') {
+    try {
+      const statsFile = path.join(paths.logs, 'subagent-stats.jsonl');
+      const responseStr = typeof toolResponse === 'string'
+        ? toolResponse
+        : JSON.stringify(toolResponse || {});
+      appendLine(statsFile, JSON.stringify({
+        ts: new Date().toISOString(),
+        session_id: sessionId,
+        subagent_type: toolInput.subagent_type || 'general-purpose',
+        description: (toolInput.description || '').slice(0, 100),
+        prompt_len: (toolInput.prompt || '').length,
+        response_bytes: responseStr.length,
+        is_failure: isFailure,
+      }));
+      rotateIfLarge(statsFile);
+    } catch (_) { /* fail-open */ }
+  }
+
   // ── Emit collected messages ─────────────────────────────────────
   if (messages.length > 0) {
     injectContext(messages.join('\n\n'));

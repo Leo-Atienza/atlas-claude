@@ -1,5 +1,63 @@
 # System Changelog
 
+## [6.9.1] — 2026-04-18
+### System review — drift repair, safety enforcement, hygiene pass
+
+Five-wave systematic audit + fix of the drift that accumulated during the
+v6.7 → v6.9 ship cycle. Every finding resolved in one pass; no deferred items.
+
+**Wave 1 — Safety & source-of-truth**
+- Registered `cctools rm_block_hook.py` on PreToolUse/Bash — enforces the
+  CLAUDE.md "never use `rm`, always `mv` to trash" rule that had been
+  aspirational since the hook was never wired
+- `hooks/README.md`: documented the four remaining opt-in safety hooks
+  (`git_add_block`, `git_checkout_safety`, `git_commit_block`,
+  `env_file_protection`) — on disk but intentionally unregistered; per-project
+  activation path documented
+- `SYSTEM_VERSION.md`: bumped to v6.9.1 with correct counts (hooks 14,
+  rules 3, `last_health_check` 2026-04-18)
+- `ARCHITECTURE.md`: header bumped v6.8.1 → v6.9.1
+
+**Wave 2 — Public README regenerated from truth**
+- Badges: version `2.5.0` → `6.9.0`, skills `282` → `66_active`, hooks
+  `18` → `14`, added commands badge, Claude Code `opus_4.6` → `opus_4.7`
+- Architecture section rewritten to match the current three-layer persistence
+  model (Memory / Knowledge Store / Atlas KG) and real hook roster
+- Skill-count unified across all four sources (`SYSTEM_VERSION`,
+  `ARCHITECTURE`, `ACTIVE-DIRECTORY`, `REFERENCE`) at 66
+
+**Wave 3 — Hook & settings hygiene**
+- PreToolUse graph-hint hook: added `timeout: 2` (was unbounded)
+- Nested `.claude/settings.json` (empty `{}`): added `_comment` explaining
+  its placeholder role so it doesn't look abandoned
+- `scheduled-tasks@claude-plugins-official` enabled so CLAUDE.md Auto Mode
+  language becomes truthful
+- PostToolUse auto-formatter: added Python (`ruff format`) and Rust
+  (`cargo fmt`) fallbacks alongside the existing dart/bun/npm chain
+
+**Wave 4 — Cleanup & retention**
+- Moved `bash.exe.stackdump`, `history.jsonl`, `TRASH-FILES.md` to `TRASH/`
+- Added `*.stackdump` to `.gitignore`
+- New plans-retention rule in `session-stop.sh` §5 — keeps 5 most recent,
+  archives older to `plans/archive/`; ran once to archive 10 older plans
+- `ACTIVE-DIRECTORY.md`: cross-referenced `SYMLINKS.md` and
+  `archived-skills-manifest.json` so they stop looking orphaned
+- `README.md`: now links to `examples/` as the starter-settings template
+
+**Wave 5 — Upgrades & gaps**
+- `better-ccflare` confirmed at 3.4.0, `tdd-guard` at 1.4.0; SYSTEM_VERSION
+  stopped claiming upgrade available
+- Statsig memory language softened — the server is registered in `.mcp.json`
+  with an `_activate` command, so it's idle-by-design rather than "still pending"
+- `post-tool-monitor.js` §6: Agent invocations now emit one line per call to
+  `logs/subagent-stats.jsonl` (mirrors action-graph stats rollup pattern —
+  gives visibility into subagent use without needing a SubagentStop event)
+- `scripts/validate-skill-counts.js`: cross-source validator wired into
+  `/health` §2 — fails loudly on drift across the four skill-count docs
+
+**Verification**: `smoke-test.sh` 69/0/0, `health-validator.js` 0 stale,
+`validate-skill-counts.js` green at 66.
+
 ## [6.9.0] — 2026-04-17
 ### Code-Review-Graph integration + MCP registry revival
 
