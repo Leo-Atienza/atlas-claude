@@ -25,11 +25,11 @@
 
 <p align="center">
   <img src="https://img.shields.io/badge/claude_code-opus_4.7-blueviolet?style=flat-square" alt="Claude Code">
-  <img src="https://img.shields.io/badge/version-6.9.0-informational?style=flat-square" alt="Version">
+  <img src="https://img.shields.io/badge/version-6.9.1-informational?style=flat-square" alt="Version">
   <img src="https://img.shields.io/badge/skills-66_active-blue?style=flat-square" alt="Skills">
   <img src="https://img.shields.io/badge/agents-74-green?style=flat-square" alt="Agents">
   <img src="https://img.shields.io/badge/hooks-14-yellow?style=flat-square" alt="Hooks">
-  <img src="https://img.shields.io/badge/commands-43-teal?style=flat-square" alt="Commands">
+  <img src="https://img.shields.io/badge/commands-48-teal?style=flat-square" alt="Commands">
   <img src="https://img.shields.io/badge/license-MIT-orange?style=flat-square" alt="License">
 </p>
 
@@ -111,7 +111,7 @@ See [`examples/`](examples/) for a starter `settings.json` template with sensibl
 
 ## The Entry Points
 
-Everything funnels through a small set of entry commands. You never need to think about the 66 active skills, 74 agents, or 43 commands underneath.
+Everything funnels through a small set of entry commands. You never need to think about the 66 active skills, 74 agents, or 48 commands underneath.
 
 | Command | Plain English | What Happens Under the Hood |
 |:-------:|:-------------|:---------------------------|
@@ -298,7 +298,7 @@ Archived skills live under `skills/ARCHIVE-DIRECTORY.md` (7 domain bundles). Thi
 │   ├── KNOWLEDGE-PAGE-4-preferences.md #   G-PREF (8)
 │   └── KNOWLEDGE-PAGE-5-failures.md    #   G-FAIL (6)
 │
-├── commands/                    # 43 slash commands
+├── commands/                    # 48 slash commands (22 top-level + 21 flow + 5 plugin)
 │   ├── new.md, resume.md, ...   #   Top-level entry points
 │   └── flow/*.md                #   21 Flow workflow commands
 │

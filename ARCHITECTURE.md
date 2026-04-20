@@ -1,10 +1,10 @@
-# ATLAS System Architecture (v6.9.0)
+# ATLAS System Architecture (v6.9.1)
 
 ## Configuration Architecture
 
 1. **`~/.claude/CLAUDE.md`** — Slim core instructions (~8KB). Rules extracted to on-demand pages.
 
-2. **Skills Directory/Page System** (66 active skill entries, 105 top-level dirs on disk incl. container packs):
+2. **Skills Directory/Page System** (72 active skill entries, 105 top-level dirs on disk incl. container packs):
    - `skills/ACTIVE-DIRECTORY.md` — Index of active skills (15 Core + 51 Available)
    - `skills/ACTIVE-PAGE-1-web-frontend.md` — Web, animation, design, testing, security skills (34 skills)
    - `skills/ACTIVE-PAGE-2-backend-tools.md` — Backend, deployment, workflow skills (22 skills)
@@ -16,9 +16,9 @@
 
 3. **Knowledge Store** (72 entries):
    - `topics/KNOWLEDGE-DIRECTORY.md` — Index
-   - `topics/KNOWLEDGE-PAGE-1-patterns.md` — 28 G-PAT entries
-   - `topics/KNOWLEDGE-PAGE-2-solutions.md` — 16 G-SOL entries
-   - `topics/KNOWLEDGE-PAGE-3-errors.md` — 9 G-ERR entries
+   - `topics/KNOWLEDGE-PAGE-1-patterns.md` — 29 G-PAT entries
+   - `topics/KNOWLEDGE-PAGE-2-solutions.md` — 17 G-SOL entries
+   - `topics/KNOWLEDGE-PAGE-3-errors.md` — 12 G-ERR entries
    - `topics/KNOWLEDGE-PAGE-4-preferences.md` — 8 G-PREF entries
    - `topics/KNOWLEDGE-PAGE-5-failures.md` — 6 G-FAIL entries
 
@@ -86,15 +86,15 @@ Lazy discovery via TOOL_SEARCH. **Two registries, both real:**
 - `~/.claude.json` (top-level `mcpServers`) — USER scope, global across all CWDs. Managed via `claude mcp add|remove -s user`.
 - `~/.claude/.mcp.json` — PROJECT scope, only loaded when CWD is `~/.claude/`. `_comment_*` keys must live at top level, NOT inside `mcpServers` (strict parser — invalid nesting silently blocks the whole object from loading, as happened before 2026-04-17).
 
-**Current state (2026-04-17 revival → follow-up):**
+**Current state (verified 2026-04-20 via `claude mcp list`):**
 
 - **Bundled / gateway**: `MCP_DOCKER` (Context7, GitHub, Neon, Wikipedia, Memory, Playwright, Git, Filesystem, Obsidian)
 - **✓ Connected user scope** (13): `code-review-graph` (CRG — Tree-sitter, 30 tools + 5 prompts, auto-update on Write/Edit), `magicuidesign-mcp`, `shadcn`, `prisma`, `tauri-mcp`, `lighthouse`, `heroui`, `context-mode`, `mobile`, `aceternity`, `iconify`, `plugin:firebase:firebase`
-- **✓ Connected project scope (only visible from CWD=~/.claude/)**: `supabase`, `resend`, `sentry`, `firecrawl`, `21st-dev`, `maestro`, `netlify` — loaded from `.mcp.json`. Server handshake succeeds; API calls will fail until env vars are set. Each entry's `_activate` field shows the exact `claude mcp add -s user -e KEY=...` command to promote to user scope.
-- **! OAuth-pending** (sign-in on first use): `cloudflare`, `linear`, `expo`, `posthog`, `vercel`, `statsig`, `plugin:asana:asana`, `plugin:figma:figma`
+- **✓ Connected project scope (only visible from CWD=~/.claude/)** (7): `supabase`, `resend`, `sentry`, `firecrawl`, `21st-dev`, `maestro`, `netlify` — loaded from `.mcp.json` with env vars wired from `settings.json`. Actively serving calls. Each entry's `_activate` field shows the exact `claude mcp add -s user -e KEY=...` command to promote to user scope.
+- **! OAuth-pending** (sign-in on first use; interactive): `cloudflare`, `linear`, `expo`, `posthog`, `vercel`, `statsig`, `plugin:asana:asana`, `plugin:figma:figma`
 - **✗ Failing — needs API key only** (package + endpoint work, servers exit on missing env var): `stripe` (needs `STRIPE_SECRET_KEY`), `upstash` (needs `UPSTASH_EMAIL` + `UPSTASH_API_KEY`)
-- **✗ Failing — plugin-bundled, needs user token**: `plugin:github:github` — configured to send `Authorization: Bearer ${GITHUB_PERSONAL_ACCESS_TOKEN}` header; set the env var (or use `gh auth token`) and restart Claude Code.
-- **Not standalone-invocable** (removed 2026-04-17): `storybook` (addon — needs project context), `openapi` (requires `--spec` arg). Re-register per-project if needed.
+- **✗ Failing — plugin-bundled, needs user token**: `plugin:github:github` — sends `Authorization: Bearer ${GITHUB_PERSONAL_ACCESS_TOKEN}`; set the env var (or `gh auth token`) and restart Claude Code.
+- **Not standalone-invocable** (removed 2026-04-17): `storybook` (addon — needs project context), `openapi` (requires `--spec` arg), `applitools` (replaced by `Claude Preview` manual screenshot flow). Re-register per-project if needed.
 - **OAuth/cloud connectors** (plugin-registered): Gamma, Context7, Canva, Figma Dev, Gmail, BigData, Prospect Enrichment, Job Search, Social/Stocks, mcp-registry, scheduled-tasks
 - **Plugin-based**: Canva, Figma, Claude Preview, Chrome
 

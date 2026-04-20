@@ -23,11 +23,12 @@ try { fs.mkdirSync(paths.logs, { recursive: true }); } catch (_) {}
 try { fs.mkdirSync(paths.cache, { recursive: true }); } catch (_) {}
 
 // ── Hook Profiles ──────────────────────────────────────────────────
-// ATLAS_HOOK_PROFILE=minimal|standard (default: standard)
+// ATLAS_HOOK_PROFILE=minimal|medium|standard (default: standard)
 // ATLAS_DISABLED_HOOKS=comma-separated hook identifiers to skip
 //
 // Profiles control which hooks fire:
 //   minimal  — context-guard only (fastest, for trivial tasks)
+//   medium   — all hooks EXCEPT tsc-check (skip TS compile overhead in hot loops)
 //   standard — all current hooks (default behavior)
 // Profile gates: Only JS hooks calling isHookEnabled() respect profiles.
 // Bash/Python hooks (session-start/stop, precompact-reflect, auto-formatter,

@@ -101,8 +101,7 @@ process.exit(0)   // JS — no stdout
 | Hook | Event | Matcher | Log Files |
 |------|-------|---------|-----------|
 | `context-guard.js` | PreToolUse | Read\|Write\|Edit\|MultiEdit\|Bash\|Agent | `logs/security-bypass.jsonl`, `logs/context-guard.jsonl` (Read → duplicate-read advisory via atlas-action-graph; Write/Edit/MultiEdit → security gate; all → context budget) |
-| `cctools bash_hook.py` | PreToolUse | Bash | (blocks only, no logs) |
-| `cctools rm_block_hook.py` | PreToolUse | Bash | (blocks `rm` commands — enforces CLAUDE.md "Never use `rm`. Always use `mv` to trash" rule) |
+| `cctools bash_hook.py` | PreToolUse | Bash | Unified gate: runs 6 checks (rm-block, git-add, git-checkout, git-commit, env-file, secret-patterns). Imports `rm_block_hook.py` — do NOT register as a separate hook. Git checks are gated by the `allow_git_hook.py` session flag. Blocks only, no logs. |
 | `cctools file_length_limit_hook.py` | PreToolUse | Write\|Edit | (blocks only, no logs) |
 | `cctools read_env_protection_hook.py` | PreToolUse | Read | (blocks only, no logs) |
 | graph hint (inline bash) | PreToolUse | Glob\|Grep | (stdout only — prefers CRG `.code-review-graph/graph.db` → MCP tools, falls back to graphify `graphify-out/graph.json` → `GRAPH_REPORT.md`) |
@@ -142,20 +141,26 @@ process.exit(0)   // JS — no stdout
 3. Add a test to `scripts/smoke-test.sh`
 4. Prefer extending `post-tool-monitor.js` for new PostToolUse telemetry
 
-## Opt-in Safety Hooks (Unregistered by Default)
+## Unified Bash Safety Gate
 
-The `cctools-safety-hooks/` directory contains four additional blockers that exist on disk but are **not registered** in `settings.json`. They are opt-in: enable them per-project (via a project-scope `.claude/settings.json`) or globally (append to the user-scope `settings.json` PreToolUse block) only when the extra friction is warranted.
+`bash_hook.py` is the sole PreToolUse/Bash hook. It imports and runs six blockers in sequence on every Bash call:
 
-| Hook | Blocks | Rationale for opt-in |
-|------|--------|----------------------|
-| `git_add_block_hook.py` | `git add -A`, `git add .` (prompts for specific paths) | Prevents accidentally staging secrets/binaries; too noisy for rapid iteration |
-| `git_checkout_safety_hook.py` | `git checkout` on files with uncommitted changes | Blocks destructive checkouts; may block legitimate workflows (e.g. reset to HEAD) |
-| `git_commit_block_hook.py` | `git commit` without passing a project-specific gate | Project-specific — enable only where a pre-commit gate is authoritative |
-| `env_file_protection_hook.py` | Reads/writes targeting `.env*` files | Redundant with `read_env_protection_hook.py` (registered) for reads; write-side is opt-in |
+| Check | Source module | What it does |
+|-------|---------------|--------------|
+| `check_rm_command` | `rm_block_hook.py` | Blocks `rm` — enforces "Never use rm, always use mv to trash" |
+| `check_git_add_command` | `git_add_block_hook.py` | Blocks `git add -A` / `git add .` — prompts for specific paths |
+| `check_git_checkout_command` | `git_checkout_safety_hook.py` | Blocks destructive `git checkout` on files with uncommitted changes |
+| `check_git_commit_command` | `git_commit_block_hook.py` | Returns `ask` unless a session allow-flag exists |
+| `check_env_file_access` | `env_file_protection_hook.py` | Blocks reads/writes targeting `.env*` files |
+| `check_secret_patterns` | `bash_hook.py` inline | Blocks commands containing obvious secret patterns |
 
-**To enable one globally:** append a new PreToolUse/Bash (or Read/Write) block in `~/.claude/settings.json` using the same `CLAUDE_PLUGIN_ROOT=...python3 ...` pattern as `rm_block_hook.py`.
+**Session allow-flag**: `allow_git_hook.py` (UserPromptSubmit) creates a session-scoped flag file in Python's temp dir (`C:\tmp\claude\allow-git-*.{session_id}` on Windows) whenever the user's prompt mentions git. `check_git_commit_command` reads that flag and converts the `ask` decision into allow for the remainder of the session. Flags are pruned on SessionStart.
 
-**To enable per-project:** create `<project>/.claude/settings.json` with the same hooks block — overrides layer on top of the user-scope settings.
+**Do NOT register these as separate hooks in `settings.json`** — it causes each check to run twice per Bash call. `bash_hook.py` is the single entry point.
+
+**To disable all safety checks for debugging**: set `BYPASS_SAFETY_HOOKS=1` in the environment (see Security section below). Bypass events are logged to `logs/security-bypass.jsonl`.
+
+**To override per-project**: create `<project>/.claude/settings.json` with a replacement PreToolUse/Bash block. Project-scope overrides layer on top of user-scope settings.
 
 ## Security: BYPASS_SAFETY_HOOKS
 

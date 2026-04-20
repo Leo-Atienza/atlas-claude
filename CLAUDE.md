@@ -78,6 +78,20 @@ The session's folder — its CWD *and* the nature of what lives there — define
 
 Rationale: prevents accidental cross-project work when handoffs, pastes, or stale context reference the wrong repo — even when the mismatch isn't a path but a domain. Intent must match the folder's nature, not just live inside its tree.
 
+### Research Before Acting (No-Guess Mandate)
+Never guess. On any task — trivial or complex — if you're uncertain about an API, library behavior, file contents, command syntax, current state, or project convention, research BEFORE acting.
+
+**Order of research:**
+1. Read the actual project files — don't assume from memory or training data
+2. Consult `skills/ACTIVE-DIRECTORY.md`, `topics/KNOWLEDGE-DIRECTORY.md`, `REFERENCE.md`
+3. Context7 (resolve-library-id → get-library-docs) for framework/library APIs
+4. WebSearch for unfamiliar tech, recent changes, or anything training data would get wrong
+5. TOOL_SEARCH / MCP tools when an integration might cover it
+
+**When research is blocked or impossible:** say so explicitly. Never fabricate. A reasoned "I need to verify X before I can answer" beats a confident guess every time.
+
+**No "trivial" escape hatch** when there's any ambiguity about syntax, file state, version-specific behavior, or convention. The "trivial → skip to execute" shortcut applies only when the answer is genuinely obvious AND verified-in-context, not merely when the task feels small.
+
 ## Code Quality
 
 - Simplest solution that works correctly. No premature abstraction.
@@ -167,16 +181,17 @@ Every Read/Glob/Grep is logged to `~/.claude/atlas-action-graph/` with priority 
 
 If a skill, hook, or script is missing or fails: continue without it, note the failure, suggest a fix.
 
-## App Development MCP Servers (2026-04-12)
+## App Development MCP Servers
 
 | Server | Purpose | Surface |
 |--------|---------|---------|
-| `storybook` | Component-level testing, story generation, a11y testing | Frontend testing |
 | `tauri-mcp` | Build, dev, test Tauri v2 projects (pairs with SK-088) | Desktop |
 | `maestro` | Mobile E2E testing with auto-healing selectors (Android on Win, iOS needs macOS) | Mobile testing |
-| `openapi` | Auto-generate MCP tools from any OpenAPI/Swagger spec | Backend / API |
-| `statsig` | Feature flags, A/B experiments, metrics (free 50M events/mo) | Lifecycle |
-| `applitools` | Visual AI regression testing on Playwright screenshots | Visual testing |
+| `statsig` | Feature flags, A/B experiments, metrics (free 50M events/mo) — OAuth | Lifecycle |
+| `lighthouse` | Performance/a11y/SEO audits on URLs, runs locally | Runtime quality |
+| `firecrawl` | Clean markdown extraction from webpages | Research |
+| `21st-dev`, `heroui`, `aceternity`, `shadcn`, `magicuidesign`, `iconify` | Component + icon registries | UI sourcing |
+| `supabase`, `resend`, `sentry`, `netlify`, `vercel`, `prisma` | Backend + deployment + error tracking | Platform |
 
 ### App Dev Slash Commands
 - `/new-mobile-app` — Scaffold Expo + Supabase mobile project

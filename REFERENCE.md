@@ -245,10 +245,6 @@ Every generator has a validator. Always run both.
 - **shadcn**: Copy-paste primitive components (existing)
 - **MagicUI**: Animated component search/browse (existing)
 
-### Storybook MCP
-- Generate stories from components, run a11y checks, visual snapshots
-- Use at component level; Playwright for page/flow level
-
 ### Tauri MCP
 - `tauri dev` / `tauri build` / scaffold / plugin management
 - Always pair with SK-088 skill for architecture guidance
@@ -258,19 +254,10 @@ Every generator has a validator. Always run both.
 - Windows: Android via WSL2 only (iOS requires macOS)
 - Complements `mobile` MCP (device interaction) with structured test authoring
 
-### OpenAPI MCP
-- Feed any OpenAPI/Swagger spec URL, get auto-generated callable tools
-- Configure per API: set `OPENAPI_SPEC_URL` env var
-
 ### Statsig MCP
 - Feature flags, A/B experiments, metrics (remote HTTP, no local binary)
 - Free tier: 50M events/month
 - Note: `~/.claude/statsig/` is Claude Code internal telemetry -- unrelated
-
-### Applitools MCP
-- AI-powered visual regression testing on Playwright screenshots
-- Detects layout shifts, color changes, rendering regressions
-- Complements Lighthouse (perf/a11y) and Claude Preview (manual screenshots)
 
 ### Canonical Integrations (when duplicates exist)
 
@@ -287,11 +274,9 @@ Every generator has a validator. Always run both.
 | Performance audit | Lighthouse MCP (runtime) | SK-078 Design Audit (static code analysis) |
 | Deployment mgmt | Vercel MCP (reads) | `vercel` CLI (deploys), Netlify MCP (Netlify sites) |
 | Feature flags | Statsig MCP (free 50M events) | ConfigCat (10 flags free), LaunchDarkly (paid) |
-| Visual regression | Applitools MCP (AI diff) | Claude Preview screenshots (manual) |
+| Visual regression | Claude Preview screenshots (manual) | Lighthouse visual-diff snapshots |
 | Desktop build | Tauri MCP (execution) + SK-088 (knowledge) | Electron MCP (if Electron project) |
 | Mobile E2E | Maestro MCP (auto-heal YAML) | mobile MCP + manual scripts |
-| API consumption | OpenAPI MCP (auto-generate tools) | Custom MCP server per API |
-| Component testing | Storybook MCP (isolation) | Playwright (page-level) |
 
 ### P2 — Evaluate When Needed
 
@@ -330,7 +315,7 @@ Every generator has a validator. Always run both.
 |---|---|
 | `CLAUDE.md` | Master instructions (self-contained) |
 | `settings.json` | Hooks, permissions, env vars |
-| `skills/ACTIVE-DIRECTORY.md` | Active skill index (66 skills: 15 Core + 51 Available) |
+| `skills/ACTIVE-DIRECTORY.md` | Active skill index (72 skills: 15 Core + 57 Available) |
 | `skills/ARCHIVE-DIRECTORY.md` | Archived skill index (7 bundles) |
 | `hooks/post-tool-monitor.js` | Central PostToolUse telemetry hub |
 | `hooks/context-guard.js` | PreToolUse context + security enforcer |

@@ -33,7 +33,7 @@ Libraries the user wants to add to web projects when the time comes. Do not inst
 | Library | Purpose | Notes |
 |---------|---------|-------|
 | `sonner` | Toast notifications (React) | 12.2k stars, MIT, actively maintained by emilkowalski |
-| `vaul` | Drawer/bottom-sheet (React) | 8.3k stars, MIT, **officially unmaintained** — use with awareness |
+| `vaul` | Drawer/bottom-sheet (React) | 8.3k stars, MIT, actively maintained by emilkowalski through 2025–2026 |
 | `popper.js` | Tooltip/popover positioning | Industry standard, used under the hood by many UI libs |
 | `animate-on-scroll` (AOS) | Scroll-triggered CSS animations | Lightweight, good for marketing pages |
 | `chart.js` | Canvas-based charting | Best for simple charts; react-chartjs-2 is the React wrapper |

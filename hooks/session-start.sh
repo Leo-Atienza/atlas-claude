@@ -319,6 +319,16 @@ find "$NODE_TMPDIR" -maxdepth 1 -name "claude-ctx-*.json" -mmin +1440 -delete 2>
 find "$NODE_TMPDIR" -maxdepth 1 -name "claude-fail-streak-*.json" -mmin +1440 -delete 2>/dev/null || true
 find "$NODE_TMPDIR" -maxdepth 1 -name "claude-handoff-*.trigger" -mmin +1440 -delete 2>/dev/null || true
 
+# Python-written allow-git flag files (allow_git_hook.py uses tempfile.gettempdir() + "/claude")
+# On Windows this resolves to C:/tmp/claude; on POSIX to /tmp/claude. Both covered.
+PY_TMPDIR=$(python3 -c "import tempfile,os;print(os.path.join(tempfile.gettempdir(),'claude'))" 2>/dev/null \
+          || python -c "import tempfile,os;print(os.path.join(tempfile.gettempdir(),'claude'))" 2>/dev/null \
+          || echo "/tmp/claude")
+for d in "$PY_TMPDIR" "/tmp/claude" "/c/tmp/claude"; do
+  [ -d "$d" ] || continue
+  find "$d" -maxdepth 1 -name "allow-git-*" -mmin +1440 -delete 2>/dev/null || true
+done
+
 # Scratchpad cleanup (files older than 14 days)
 SCRATCHPAD="/c/tmp/claude-scratchpad"
 if [ -d "$SCRATCHPAD" ]; then

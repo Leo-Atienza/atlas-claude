@@ -646,6 +646,13 @@ function stats(sessionId) {
  */
 function statsRollup(sessionId) {
   try {
+    const sid = sanitizeId(sessionId);
+
+    // Skip test/verify sessions — they pollute production stats
+    if (/^(verify|test|smoke)[-_]/i.test(sid)) {
+      return null;
+    }
+
     const s = stats(sessionId);
     const { items, spent } = hotSet(sessionId, 2000);
     const state = loadState(sessionId);
@@ -658,7 +665,7 @@ function statsRollup(sessionId) {
     const line = {
       ts: now,
       ts_iso: new Date(now).toISOString(),
-      session: sanitizeId(sessionId),
+      session: sid,
       unique_targets: s.unique_items,
       total_retrievals: s.total_retrievals,
       duplicate_items: s.duplicate_items,
@@ -680,10 +687,22 @@ function statsRollup(sessionId) {
         "logs"
       );
     try { fs.mkdirSync(logsDir, { recursive: true }); } catch (_) {}
-    fs.appendFileSync(
-      path.join(logsDir, "action-graph-stats.jsonl"),
-      JSON.stringify(line) + "\n"
-    );
+    const statsFile = path.join(logsDir, "action-graph-stats.jsonl");
+
+    // Dedup guard: if the last line is for this same session, skip append.
+    // Prevents 4x duplicate rows observed for e2b2be95-style sessions.
+    try {
+      if (fs.existsSync(statsFile)) {
+        const buf = fs.readFileSync(statsFile, "utf8");
+        const lines = buf.split(/\r?\n/).filter(Boolean);
+        if (lines.length) {
+          const last = JSON.parse(lines[lines.length - 1]);
+          if (last && last.session === sid) return null;
+        }
+      }
+    } catch (_) { /* fall through — append anyway if read fails */ }
+
+    fs.appendFileSync(statsFile, JSON.stringify(line) + "\n");
     return line;
   } catch (err) {
     process.stderr.write(

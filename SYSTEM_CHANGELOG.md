@@ -1,5 +1,46 @@
 # System Changelog
 
+## [6.9.1] — 2026-04-20 (remediation pass 2)
+
+### Post-v6.9.1 audit → 32-finding remediation across 5 waves
+
+A second ULTRATHINK review ran three parallel Explore agents against the post-v6.9.1 state (git HEAD `40ac1a8`). 32 findings surfaced (0 critical, 3 HIGH, 10 MEDIUM, 11 LOW, 8 INFO). All resolved in one pass with zero deferred items, per the user's "perfect sync and harmony" directive.
+
+**Wave 1 — Safety-critical fixes**
+- H1: Removed duplicate `rm_block_hook.py` registration from `settings.json` — the hook was already imported by `bash_hook.py`, so every Bash call ran the rm check twice
+- H2: `hooks/README.md` rewritten — documented `bash_hook.py` as the unified gate running 6 blockers (rm, git_add, git_checkout, git_commit, env_file, secret-patterns), replacing the fictional "opt-in/unregistered" framing that contradicted actual runtime behavior
+- M1: Removed dead `storybook`/`openapi`/`applitools` references from `CLAUDE.md` and `REFERENCE.md` (removed from registries in v6.9.0/v6.9.1 but still listed as canonical)
+- M5: Synced the live `CLAUDE.md` "Research Before Acting" section (14 lines) to `~/projects/atlas-claude/` so the repo mirrors live state
+- M7: PreToolUse graph-hint hook: changed malformed `{"hookSpecificOutput":{"hookEventName":"PreToolUse","additionalContext":"..."}}` to top-level `{"additionalContext":"..."}` — output format was silently invalid under the inject-context contract
+
+**Wave 2 — Version propagation & count truth**
+- M2: Bumped version to 6.9.1 everywhere it was stuck at 6.9.0 — `SYSTEM_VERSION.md` header + metadata, `ARCHITECTURE.md` header, `README.md` badge
+- M3: Fixed stale Knowledge Store counts in `ARCHITECTURE.md` (28/16/9 → 29/17/12)
+- M4: `ACTIVE-DIRECTORY.md` + `SYMLINKS.md` corrected from 98 dirs/30 symlinks → 105/37; added 7 missing expo skills to the symlink list (data-fetching, expo-api-routes, expo-dev-client, expo-module, expo-tailwind-setup, expo-ui-jetpack-compose, expo-ui-swiftui)
+- L6: Commands count updated from 43 → 48 (22 top-level + 21 flow + 5 plugin) in README badge, prose, and ASCII tree
+
+**Wave 3 — Hook & settings hygiene**
+- M8: Added Python-tmp-aware cleanup for `allow-git-*` flag files in `session-start.sh §8` — existing cleanup only touched Node's tmpdir, leaving Python's `/tmp/claude/allow-git-*` to accumulate unboundedly across sessions
+- M9: Added dedup guard + test-session filter to `atlas-action-graph.js` `statsRollup()` — prevents the 4x duplicate rows observed for session `e2b2be95` and skips `verify-*`/`test-*`/`smoke-*` session IDs from polluting production stats
+- L1: Removed stale `rm` permissions from `settings.local.json` (`TRASH-cleanup`/`TRASH-FILES.md` targets no longer exist, and the perms contradicted the rm-block hook)
+- L2: Fixed double-slash paths `Read(//tmp/**)` / `Read(//c/Users/leooa/**)` in `settings.local.json`
+- L5: Confirmed CLAUDE.md dated section headers already cleaned in Wave 1 M1
+- L8: Documented the `medium` hook profile in `hooks/lib.js` comment (comment listed only `minimal|standard` despite `medium` being defined in `HOOK_PROFILES`)
+
+**Wave 4 — Skill & plan hygiene**
+- M6: Added 6 previously-unlisted skills to `ACTIVE-DIRECTORY.md` — `SK-102` Impeccable (Craft), `SK-103` Nano Banana (Gemini Image), `SK-104` Design-Taste Frontend, `SK-105` LinkedIn Poster, `SK-106` Project Init, `SK-107` Remotion. Total active: 66 → 72. All four source-of-truth files re-aligned at 72 via `validate-skill-counts.js`
+- L3: Archived 3 completed ATLAS plans to `plans/archive/` (idempotent-raccoon, stateless-lamport, synthetic-starfish). `help-me-create-this-melodic-boot.md` left in place — belongs to separate ScrapePipe project
+- L10: Corrected `vaul` maintenance claim in `G-PREF-007` — actually actively maintained by emilkowalski through 2025–2026 (was marked "officially unmaintained", would have steered away from a legitimate library)
+
+**Wave 5 — Live-state refresh**
+- H3: Confirmed `firecrawl` already ✓ Connected (env var wired); `vercel` remains OAuth-pending (requires interactive sign-in). Post-`.mcp.json` parser fix in v6.9.0, the revival is more complete than previously documented: 20 servers now connect cleanly (13 user + 7 project), 8 OAuth-pending, 3 env-gated. `ARCHITECTURE.md` MCP section rewritten to reflect verified 2026-04-20 state
+- L11: Rebuilt CRG graph for atlas-claude repo (`uvx code-review-graph update` — 13 files updated, 17 nodes, 88 edges, FTS index rebuilt with 3276 rows). Was 39h stale at v6.9.1 commit time
+- M10: Refreshed `Documents/Wiki/wiki/source/atlas-system.md` to v6.9.1 snapshot — includes CRG integration, auto-history-check, new MCP table, v6.9.1 hook profiles, skill registry entry for graphify/handoff/audit. Was 10 days stale (2026-04-10)
+
+**Final**
+- `/health` passed clean: all 4 skill-count sources agree at 72, 0 stale knowledge entries, 0 recurring error patterns, 0 pending reflections, MEMORY.md healthy
+- `project_mcp_revival.md` index line updated to reflect current 20-connected state
+
 ## [6.9.1] — 2026-04-18
 ### System review — drift repair, safety enforcement, hygiene pass
 

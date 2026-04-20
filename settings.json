@@ -124,16 +124,6 @@
         "hooks": [
           {
             "type": "command",
-            "command": "CLAUDE_PLUGIN_ROOT=$HOME/.claude/hooks/cctools-safety-hooks python3 ~/.claude/hooks/cctools-safety-hooks/rm_block_hook.py",
-            "timeout": 5
-          }
-        ]
-      },
-      {
-        "matcher": "Bash",
-        "hooks": [
-          {
-            "type": "command",
             "command": "node ~/.claude/hooks/pre-commit-gate.js",
             "timeout": 5
           }
@@ -164,7 +154,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "if [ -f .code-review-graph/graph.db ]; then echo '{\"hookSpecificOutput\":{\"hookEventName\":\"PreToolUse\",\"additionalContext\":\"code-review-graph: knowledge graph exists. Prefer MCP tools (get_minimal_context, query_graph, get_impact_radius, semantic_search_nodes) over Glob/Grep.\"}}'; elif [ -f graphify-out/graph.json ]; then echo '{\"hookSpecificOutput\":{\"hookEventName\":\"PreToolUse\",\"additionalContext\":\"graphify: knowledge graph exists. Read graphify-out/GRAPH_REPORT.md before broad searches.\"}}'; fi",
+            "command": "if [ -f .code-review-graph/graph.db ]; then echo '{\"additionalContext\":\"code-review-graph: knowledge graph exists. Prefer MCP tools (get_minimal_context, query_graph, get_impact_radius, semantic_search_nodes) over Glob/Grep.\"}'; elif [ -f graphify-out/graph.json ]; then echo '{\"additionalContext\":\"graphify: knowledge graph exists. Read graphify-out/GRAPH_REPORT.md before broad searches.\"}'; fi",
             "timeout": 2
           }
         ]

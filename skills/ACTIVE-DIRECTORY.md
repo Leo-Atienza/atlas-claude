@@ -3,10 +3,10 @@
 > Lookup: scan this table → find the skill → note its Page → open that page for full details.
 > Loading: read the relevant page on-demand, never all at start.
 > Tiers: **Core** = weekly use, prioritize in suggestions. **Available** = on-demand when task matches.
-> Total active skills: **66** (15 Core + 51 Available) across 98 directories on disk (incl. container packs and archives) — last updated 2026-04-18
+> Total active skills: **72** (15 Core + 57 Available) across 105 directories on disk (incl. container packs and archives) — last updated 2026-04-20
 >
 > **Related metadata files:**
-> - `skills/SYMLINKS.md` — 30 symlinks pointing to `~/.agents/skills/` (Anthropic + community ecosystem)
+> - `skills/SYMLINKS.md` — 37 symlinks pointing to `~/.agents/skills/` (Anthropic + community ecosystem)
 > - `skills/archived-skills-manifest.json` — detection patterns for auto-activating archived skills
 > - `skills/ARCHIVE-DIRECTORY.md` — domain-bundled archive of retired skills
 
@@ -79,6 +79,12 @@
 | SK-099 | Native Transition & Scroll | Shared element transitions, FlashList v2, Legend List, parallax | 3 |
 | SK-100 | Native Sensory Design System | Motion tokens, haptic palette, sound design, animation tiers | 3 |
 | SK-101 | Personal Wiki Manager | Ingest/query/lint personal + project wikis — Obsidian vault | 2 |
+| SK-102 | Impeccable (Craft) | Distinctive, production-grade frontend interfaces — craft/teach flow | 1 |
+| SK-103 | Nano Banana (Gemini Image) | Google Gemini image gen/edit — 2.5 Flash, 3 Pro, multi-turn, grounding | 1 |
+| SK-104 | Design-Taste Frontend | Senior UI/UX engineer — metric-based rules, strict component architecture | 1 |
+| SK-105 | LinkedIn Poster | Compose/publish LinkedIn posts (text, articles, images) via API | 2 |
+| SK-106 | Project Init | Auto-generate project-level CLAUDE.md from templates (Ruflo 30+) | 2 |
+| SK-107 | Remotion | Programmatic video with React — compositions, rendering, pipelines | 1 |
 | SC-003 | Insecure Defaults Detector | Hardcoded secrets, weak defaults, fail-open detection | 1 |
 | FS-012 | SQL Expert | SQL optimization, strategic indexes, query planning | 2 |
 | FS-028 | API Designer | REST API design, OpenAPI 3.1, RFC 7807 error responses | 2 |

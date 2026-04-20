@@ -2,20 +2,20 @@
 
 > Auto-updated by `/health`. Do not edit manually.
 
-**version: 6.9.0**
-**last_updated: 2026-04-18**
+**version: 6.9.1**
+**last_updated: 2026-04-20**
 
 ## Component Counts
 
 | Component | Count | Last Updated |
 |-----------|-------|-------------|
-| Hooks (files) | 14 | 2026-04-18 |
-| Commands (total) | 43 | 2026-04-18 |
-| Skills (on disk) | 105 | 2026-04-18 |
-| Skills (in ACTIVE-DIRECTORY) | 66 | 2026-04-18 |
-| Agents | 74 | 2026-04-18 |
-| Rules | 3 (RULES-GIT, RULES-SECURITY, RULES-TESTING) | 2026-04-18 |
-| Knowledge entries | 72 | 2026-04-18 |
+| Hooks (files) | 14 | 2026-04-20 |
+| Commands (total) | 48 | 2026-04-20 |
+| Skills (on disk) | 105 | 2026-04-20 |
+| Skills (in ACTIVE-DIRECTORY) | 72 | 2026-04-20 |
+| Agents | 74 | 2026-04-20 |
+| Rules | 3 (RULES-GIT, RULES-SECURITY, RULES-TESTING) | 2026-04-20 |
+| Knowledge entries | 72 | 2026-04-20 |
 
 ## Knowledge Breakdown
 
@@ -52,8 +52,8 @@
 
 | Key | Value |
 |-----|-------|
-| version | 6.9.0 |
-| last_health_check | 2026-04-18 |
+| version | 6.9.1 |
+| last_health_check | 2026-04-20 |
 | hook_event_types | 8 (Notification, PostToolUse, PostToolUseFailure, PreToolUse, PreCompact, SessionStart, Stop, UserPromptSubmit) |
 | disk_total | 351MB |
 | disk_skills | 14MB |
