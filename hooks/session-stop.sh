@@ -174,9 +174,12 @@ except Exception:
 fi
 
 # ─── 4. Auto-continuation check ─────────────────────────────────────
-# Use session_id from stdin (parsed above) instead of filesystem guessing
+# Use session_id from stdin (parsed above) instead of filesystem guessing.
+# Hooks (post-tool-monitor.js) write to Node's os.tmpdir(); on Windows that
+# differs from /tmp. Resolve it the same way session-start.sh does.
 if [ -n "$SESSION_ID" ]; then
-  TRIGGER="/tmp/claude-handoff-${SESSION_ID}.trigger"
+  NODE_TMPDIR=$(node -e "process.stdout.write(require('os').tmpdir())" 2>/dev/null || echo "/tmp")
+  TRIGGER="$NODE_TMPDIR/claude-handoff-${SESSION_ID}.trigger"
   if [ -f "$TRIGGER" ]; then
     bash "$HOME/.claude/scripts/auto-continue.sh" "$SESSION_ID" &
   fi

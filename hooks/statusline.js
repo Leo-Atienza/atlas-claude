@@ -23,11 +23,47 @@ function shortModelName(modelData) {
   return display.replace(/^Claude\s+/i, '') || display || 'Claude';
 }
 
+// Compute remaining context % from the transcript when Claude Code doesn't
+// supply context_window in the statusline payload. Reads only the tail of the
+// file (last ~200KB) to stay cheap on every statusline tick.
+function computeRemainingFromTranscript(transcriptPath) {
+  try {
+    if (!transcriptPath || !fs.existsSync(transcriptPath)) return null;
+    const stat = fs.statSync(transcriptPath);
+    const READ_BYTES = Math.min(stat.size, 200_000);
+    const fd = fs.openSync(transcriptPath, 'r');
+    const buf = Buffer.alloc(READ_BYTES);
+    fs.readSync(fd, buf, 0, READ_BYTES, Math.max(0, stat.size - READ_BYTES));
+    fs.closeSync(fd);
+    const lines = buf.toString('utf8').split('\n');
+    for (let i = lines.length - 1; i >= 0; i--) {
+      const line = lines[i].trim();
+      if (!line) continue;
+      try {
+        const obj = JSON.parse(line);
+        const u = obj.message?.usage;
+        if (u) {
+          const total = (u.input_tokens || 0)
+                      + (u.cache_read_input_tokens || 0)
+                      + (u.cache_creation_input_tokens || 0);
+          const CONTEXT_LIMIT = 200_000;
+          const usedFrac = Math.min(1, total / CONTEXT_LIMIT);
+          return Math.max(0, Math.round((1 - usedFrac) * 100));
+        }
+      } catch (_) { /* skip non-JSON or truncated line */ }
+    }
+  } catch (_) { /* fail-open */ }
+  return null;
+}
+
 readStdin((data) => {
   const model = shortModelName(data.model);
   const dir = data.workspace?.current_dir || process.cwd();
   const session = data.session_id || '';
-  const remaining = data.context_window?.remaining_percentage;
+  let remaining = data.context_window?.remaining_percentage;
+  if (remaining == null) {
+    remaining = computeRemainingFromTranscript(data.transcript_path);
+  }
 
   const ctx = buildContextBar(remaining, session);
   const task = findCurrentTask(session);
