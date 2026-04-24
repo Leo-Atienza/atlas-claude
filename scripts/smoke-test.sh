@@ -246,6 +246,26 @@ else
   warn "MEMORY.md not found"
 fi
 
+# ─── 14. G-ERR-014 Regression Guard ─────────────────────────────────
+# Detects the `node -e` path-literal antipattern that causes `C:\c\Users\...`
+# ENOENT failures on Windows Git Bash. See topics/KNOWLEDGE-PAGE-3-errors.md.
+# Scans for same-line `node -e` + quoted `/c/` or `C:/` literal,
+# excluding known-safe idioms (cygpath, String.raw, process.argv).
+# Excludes this file itself (contains the detection regex in source).
+echo "[14] G-ERR-014 Regression Guard"
+NODE_E_BAD=$(grep -rEn --exclude="smoke-test.sh" \
+  "node -e.*['\"](/c/|C:/)" \
+  "$CLAUDE_DIR/hooks" "$CLAUDE_DIR/scripts" 2>/dev/null \
+  | grep -vE "cygpath|String\.raw|process\.argv" \
+  || true)
+if [ -n "$NODE_E_BAD" ]; then
+  fail "G-ERR-014 regression: literal /c/ or C:/ inside node -e string"
+  printf '%s\n' "$NODE_E_BAD" | sed 's|^|    |'
+  echo "    Fix: argv-pass, cygpath+String.raw, or os.homedir(). See topics/KNOWLEDGE-PAGE-3-errors.md#g-err-014"
+else
+  pass "No G-ERR-014 bad patterns (hooks/ + scripts/)"
+fi
+
 # ─── Summary ────────────────────────────────────────────────────────
 echo ""
 echo "=== Results: $PASS passed, $FAIL failed, $WARN warnings ==="

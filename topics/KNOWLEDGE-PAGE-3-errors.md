@@ -102,9 +102,9 @@ const sig = await crypto.subtle.sign('HMAC', key, encoder.encode(payload))
 ---
 
 ## G-ERR-014: `node -e` with Unix `/c/` Paths Double-Drive-Prefix Bug
-**Date**: 2026-04-24 | **Tags**: #windows #node #bash #paths
+**Date**: 2026-04-24 | **Last audited**: 2026-04-24 | **Tags**: #windows #node #bash #paths
 
-When running `node -e "..."` in Git Bash on Windows, Node.js does NOT recognize Unix-style absolute paths like `/c/Users/leooa/...` — it treats `/c/` as a relative directory in the current drive, producing `C:\c\Users\leooa\...` (ENOENT). Silent failure because the tool-health log suppresses chronic Bash streaks.
+When running `node -e "..."` in Git Bash on Windows, Node.js does NOT recognize Unix-style absolute paths embedded **inside the script string** — e.g. `'/c/Users/leooa/...'` is treated as a relative path, producing `C:\c\Users\leooa\...` (ENOENT). Silent failure because the tool-health log suppresses chronic Bash streaks.
 
 **Symptoms** (from `logs/tool-failures.jsonl`):
 ```
@@ -112,23 +112,52 @@ Error: ENOENT: no such file or directory, open 'C:\c\Users\leooa\.claude\logs\ac
 ```
 Triggered by: `node -e "fs.readFileSync('/c/Users/leooa/.claude/...')"`
 
-**Fix — pass paths via env var or `$HOME`, resolved inside Node:**
+### Why argv works but string-literals don't
+
+Git Bash (MSYS2) auto-converts `/c/...` → `C:/...` when passing **argv** to native Windows executables like `node.exe`. It does NOT rewrite the contents of `-e` script strings. Verified 2026-04-24:
+
 ```bash
-# ✓ Correct — use process.env.HOME (Node normalizes it)
-node -e "const fs = require('fs'); const path = require('path'); \
-         const p = path.join(process.env.HOME || require('os').homedir(), '.claude/logs/action-graph-stats.jsonl'); \
-         console.log(fs.readFileSync(p, 'utf8'));"
-
-# ✓ Correct — pass path as argv, shell expands $HOME first
-node -e "console.log(require('fs').readFileSync(process.argv[1], 'utf8'))" "$HOME/.claude/logs/action-graph-stats.jsonl"
-
-# ✗ Wrong — literal '/c/...' inside node script string
-node -e "require('fs').readFileSync('/c/Users/leooa/.claude/...', 'utf8')"
+$ node -e 'console.log(process.argv[1])' "$HOME/.claude/logs/hook-health.jsonl"
+C:/Users/leooa/.claude/logs/hook-health.jsonl    # ← argv mangled, safe
 ```
 
-**Also wrong**: hardcoding `C:/Users/...` in a `node -e` string without escaping backslashes on Windows.
+### Safe patterns (all three verified in tree)
 
-**Prevention rule**: Never hardcode absolute paths inside `node -e` strings. Always resolve them through `os.homedir()`, `process.env.HOME`, or pass them as argv.
+```bash
+# ✓ argv-passed — Git Bash mangles /c/ → C:/ before Node sees it
+node -e "console.log(require('fs').readFileSync(process.argv[1], 'utf8'))" "$HOME/.claude/logs/x.json"
+
+# ✓ cygpath + String.raw — explicit Windows path inside template literal
+WIN_PATH=$(cygpath -w "$HOME/.claude/settings.json")
+node -e "JSON.parse(require('fs').readFileSync(String.raw\`$WIN_PATH\`,'utf8'))"
+
+# ✓ env-resolved inside Node — no path in the script
+node -e "const p = require('path').join(require('os').homedir(), '.claude/logs/x.json'); \
+         console.log(require('fs').readFileSync(p, 'utf8'))"
+```
+
+### Unsafe pattern
+
+```bash
+# ✗ Literal /c/... inside single-quoted script — no argv mangling, ENOENT
+node -e 'require("fs").readFileSync("/c/Users/leooa/.claude/x.json", "utf8")'
+
+# ✗ Hardcoded C:/... with unescaped backslashes — Node parses weirdly
+node -e "require('fs').readFileSync('C:\Users\leooa\...', 'utf8')"
+```
+
+**Prevention rule**: Never hardcode absolute paths inside `node -e` script strings. Always (a) pass via argv and read `process.argv[n]`, (b) round-trip through `cygpath -w` + `String.raw\`...\``, or (c) resolve inside Node via `os.homedir()` / `process.env.HOME`.
+
+### 2026-04-24 audit (full sweep)
+
+Scanned all `node -e` call sites in `hooks/` and `scripts/` — **19/19 safe**:
+- `hooks/session-start.sh` ×6 (all argv-passed)
+- `hooks/session-stop.sh` ×4 (argv or stdin)
+- `scripts/auto-continue.sh` ×1 (tmpdir output only, no path)
+- `scripts/progressive-learning/precompact-reflect.sh` ×2 (stdin + argv)
+- `scripts/smoke-test.sh` ×6 (cygpath + `String.raw`)
+
+Regression guard added to `scripts/smoke-test.sh` (section 10) — fails smoke if any script introduces a `/c/` or literal `C:/` path inside a `node -e` string.
 
 ---
 

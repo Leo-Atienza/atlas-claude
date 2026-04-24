@@ -1,5 +1,32 @@
 # System Changelog
 
+## [6.9.3] — 2026-04-24 (next-session picks — audit hardening + v7 scope draft)
+
+### Continuation of v6.9.2 — three "Next session picks" from the 2026-04-24 handoff
+
+Builds on v6.9.2's G-ERR-014 documentation by executing the deferred audit sweep, making the anti-pattern detectable going forward, upgrading the weekly maintenance scheduled task, and drafting the v7.0 scope.
+
+**Pick #1 — `node -e` path audit + regression guard**
+- Full audit of all 19 `node -e` call sites across `hooks/` and `scripts/`: **all safe.** Verified Git Bash (MSYS2) auto-mangles `/c/...` → `C:/...` when passing argv to native Windows executables, so argv-passed paths are safe without extra conversion. `cygpath -w` + `String.raw\`...\`` is the second approved idiom. Third is resolving paths inside Node via `os.homedir()` / `process.env.HOME`.
+- `topics/KNOWLEDGE-PAGE-3-errors.md` G-ERR-014 entry rewritten — adds explicit "why argv works" section (with verification output), three approved safe patterns, two unsafe patterns, and a 2026-04-24 audit log listing all 19 sites.
+- `scripts/smoke-test.sh` section 14 added — "G-ERR-014 Regression Guard" greps `hooks/` + `scripts/` for the bad pattern (same-line `node -e` + quoted `/c/` or `C:/` literal, excluding safe idioms). Self-excludes smoke-test.sh to avoid self-flagging on the regex source. Verified end-to-end: benign code passes, synthetic bad pattern correctly FAILs with actionable fix pointer.
+- Smoke test now 70/70 HEALTHY (up from 69/69).
+
+**Pick #2 — Weekly maintenance enhancement**
+- `scheduled-tasks/weekly-maintenance/SKILL.md` prompt upgraded to include: smoke test run with explicit section 14 regression check, skill-count parity validation across all 4 sources (SYSTEM_VERSION, ARCHITECTURE, ACTIVE-DIRECTORY, REFERENCE), proactive SKILL-PACK CHECK + VERSION CHECK nag surfacing, and a structured result summary line. (Scheduled task is gitignored — private per-user — so this change lives only in live `~/.claude/`.)
+
+**Pick #3 — v7.0 scope draft (DRAFT for Leo review)**
+- `plans/v7-scope.md` drafted, marked `<!-- keep -->` to survive plan rotation. Theme: "Consolidation & Observability." Rationale: three consecutive audit-and-remediate releases (6.9.0 / 6.9.1 / 6.9.2) indicate the system needs to watch itself rather than be audited manually. Proposes 6 waves: unified cleanup engine (replaces §7b–§7k in session-start.sh), skill-usage instrumentation, observability dashboard, scheduled-task consolidation (6 → 4), auto-drift-proposer, docs polish. Includes rejected alternatives ("Graph-Native Mode," "Self-Auditing only"), risk matrix, and 5 decision points for Leo. Lives in live `plans/` only — not mirrored (plans/ is session working dir).
+
+**Drift cleanup (caught during this pass)**
+- `SYSTEM_VERSION.md`: `better-ccflare` 3.4.0 → **3.4.13** and `tdd-guard` 1.4.0 → **1.6.5** — upgrades landed in v6.9.2 Wave 4 but the version table was never synced (INSTALLED.md was pinned to "latest" so no edit at the time).
+- `ARCHITECTURE.md` header bumped v6.9.2 → v6.9.3.
+- `SYSTEM_CHANGELOG.md` in live `~/.claude/` was missing the 6.9.2 entry — synced from mirror to repair drift.
+
+Verification: smoke test 70/70 HEALTHY, G-ERR-014 regression guard verified with positive + negative cases, `bash -n` clean on smoke-test.sh.
+
+---
+
 ## [6.9.2] — 2026-04-24 (thorough review fix pass — all 6 waves)
 
 ### Fix / upgrade / improve — drift repair since v6.9.1

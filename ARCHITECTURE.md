@@ -1,4 +1,4 @@
-# ATLAS System Architecture (v6.9.2)
+# ATLAS System Architecture (v6.9.3)
 
 ## Configuration Architecture
 

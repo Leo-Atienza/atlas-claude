@@ -2,7 +2,7 @@
 
 > Auto-updated by `/health`. Do not edit manually.
 
-**version: 6.9.2**
+**version: 6.9.3**
 **last_updated: 2026-04-24**
 
 ## Component Counts
@@ -32,8 +32,8 @@
 | Tool | Version |
 |------|---------|
 | Claude Code CLI | 2.1.118 |
-| better-ccflare | 3.4.0 |
-| tdd-guard | 1.4.0 |
+| better-ccflare | 3.4.13 |
+| tdd-guard | 1.6.5 |
 | claude-rules-doctor | 0.2.2 |
 | claudio | 1.11.1 |
 | claude-squad | 1.0.14 |
@@ -52,7 +52,7 @@
 
 | Key | Value |
 |-----|-------|
-| version | 6.9.2 |
+| version | 6.9.3 |
 | last_health_check | 2026-04-24 |
 | hook_event_types | 8 (Notification, PostToolUse, PostToolUseFailure, PreToolUse, PreCompact, SessionStart, Stop, UserPromptSubmit) |
 | disk_total | 351MB |
