@@ -3,7 +3,7 @@
 > Master index of all accumulated knowledge entries.
 > Read this FIRST, then jump to the relevant Knowledge Page for full details.
 >
-> **Total entries: 67** (28 PAT + 16 SOL + 9 ERR + 8 PREF + 6 FAIL)
+> **Total entries: 73** (29 PAT + 17 SOL + 13 ERR + 8 PREF + 6 FAIL)
 > **ID format**: `G-{CAT}-{###}` for global
 > **Categories**: PAT (pattern), SOL (solution), ERR (mistake), PREF (preference), FAIL (failed approach)
 > **Pages**: PAGE-1 (patterns), PAGE-2 (solutions), PAGE-3 (errors), PAGE-4 (preferences), PAGE-5 (failures)
@@ -42,6 +42,7 @@
 | G-PAT-033 | Single Animation Loop Architecture (SALA) | #animation #performance #gsap #architecture | 2026-04-07 |
 | G-PAT-034 | Layer Ownership Model | #animation #architecture #conflicts | 2026-04-07 |
 | G-PAT-035 | Motion Token System | #animation #design-system #easing | 2026-04-07 |
+| G-PAT-036 | Tailwind CSS v4 @theme inline Custom Properties | #tailwind #css #custom-properties #nextjs | 2026-04-12 |
 
 ## Solutions (G-SOL) — Page 2
 
@@ -63,6 +64,7 @@
 | G-SOL-016 | URL-Persisted Filters in Next.js 15 | #nextjs #filters #url-state | 2026-04-04 |
 | G-SOL-017 | Animated Component Unmount (No Library) | #react #animation #css | 2026-04-04 |
 | G-SOL-018 | Run Neon Migrations Without psql | #neon #postgres #migrations | 2026-04-04 |
+| G-SOL-019 | Timezone Abbreviation Override + SSR Hydration Guard | #javascript #timezone #intl #ssr #nextjs | 2026-04-12 |
 
 ## Errors (G-ERR) — Page 3
 
@@ -77,6 +79,10 @@
 | G-ERR-008 | Stale .next Cache from Concurrent Build+Dev | #nextjs #build #cache | 2026-03-11 |
 | G-ERR-009 | backdrop-blur on Sticky = Scroll Jank | #css #performance #backdrop-filter | 2026-03-13 |
 | G-ERR-010 | Framer Motion whileInView + animate Conflict | #framer-motion #animation #react | 2026-03-15 |
+| G-ERR-011 | firecrawl_scrape Parameter Types (array, boolean) | #mcp #firecrawl #api #parameters | 2026-04-12 |
+| G-ERR-012 | create-next-app Rejects Capital Letters in Name | #nextjs #create-next-app #naming | 2026-04-12 |
+| G-ERR-013 | Next.js Edge Runtime Cannot Use Node.js Crypto | #nextjs #edge-runtime #middleware #crypto | 2026-04-12 |
+| G-ERR-014 | `node -e` Unix /c/ Paths Double-Drive-Prefix | #windows #node #bash #paths | 2026-04-24 |
 
 ## Preferences (G-PREF) — Page 4
 
@@ -104,4 +110,4 @@
 
 ---
 
-**Totals**: 28 patterns + 16 solutions + 9 errors + 8 preferences + 6 failures = **67 entries**
+**Totals**: 29 patterns + 17 solutions + 13 errors + 8 preferences + 6 failures = **73 entries**

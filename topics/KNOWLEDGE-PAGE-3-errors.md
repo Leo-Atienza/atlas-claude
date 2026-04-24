@@ -73,3 +73,62 @@ Running `npm run build` while dev server is active corrupts `.next/chunks` → `
 
 ---
 
+## G-ERR-011: firecrawl_scrape Parameter Types
+**Date**: 2026-04-12 | **Tags**: #mcp #firecrawl #api #parameters
+
+`firecrawl_scrape` requires `formats` as an actual JSON array (`["markdown"]`), NOT a stringified array (`"[\"markdown\"]"`). Same for `onlyMainContent` — must be boolean `true`, not string `"true"`. Causes MCP error -32602 parameter validation failure. Repeated 3 times in same session before catching it.
+
+**Fix**: Always pass arrays as arrays and booleans as booleans to MCP tools — JSON types, not string representations.
+
+---
+
+## G-ERR-012: create-next-app Rejects Capital Letters in Project Name
+**Date**: 2026-04-12 | **Tags**: #nextjs #create-next-app #naming
+
+`create-next-app` refuses names with capital letters — npm naming restriction. "Anniversary" fails with: "name can no longer contain capital letters". Workaround: use lowercase temp name (`anniversary-site`), bootstrap there, then move/rename files. NOTE: `mv` to `/c/tmp/trash/` can fail with "Permission denied" if `/c/tmp/` doesn't exist — create it first with `mkdir -p`.
+
+---
+
+## G-ERR-013: Next.js Edge Runtime Cannot Use Node.js Crypto
+**Date**: 2026-04-12 | **Tags**: #nextjs #edge-runtime #middleware #crypto #security
+
+Next.js middleware runs in Edge Runtime, which does NOT have access to the Node.js `crypto` module. Attempting to use `crypto.createHmac()` etc. throws at runtime. Must use the Web Crypto API instead:
+```ts
+const key = await crypto.subtle.importKey('raw', encoder.encode(secret), {name: 'HMAC', hash: 'SHA-256'}, false, ['sign'])
+const sig = await crypto.subtle.sign('HMAC', key, encoder.encode(payload))
+```
+`crypto.subtle` is available globally in Edge Runtime.
+
+---
+
+## G-ERR-014: `node -e` with Unix `/c/` Paths Double-Drive-Prefix Bug
+**Date**: 2026-04-24 | **Tags**: #windows #node #bash #paths
+
+When running `node -e "..."` in Git Bash on Windows, Node.js does NOT recognize Unix-style absolute paths like `/c/Users/leooa/...` — it treats `/c/` as a relative directory in the current drive, producing `C:\c\Users\leooa\...` (ENOENT). Silent failure because the tool-health log suppresses chronic Bash streaks.
+
+**Symptoms** (from `logs/tool-failures.jsonl`):
+```
+Error: ENOENT: no such file or directory, open 'C:\c\Users\leooa\.claude\logs\action-graph-stats.jsonl'
+```
+Triggered by: `node -e "fs.readFileSync('/c/Users/leooa/.claude/...')"`
+
+**Fix — pass paths via env var or `$HOME`, resolved inside Node:**
+```bash
+# ✓ Correct — use process.env.HOME (Node normalizes it)
+node -e "const fs = require('fs'); const path = require('path'); \
+         const p = path.join(process.env.HOME || require('os').homedir(), '.claude/logs/action-graph-stats.jsonl'); \
+         console.log(fs.readFileSync(p, 'utf8'));"
+
+# ✓ Correct — pass path as argv, shell expands $HOME first
+node -e "console.log(require('fs').readFileSync(process.argv[1], 'utf8'))" "$HOME/.claude/logs/action-graph-stats.jsonl"
+
+# ✗ Wrong — literal '/c/...' inside node script string
+node -e "require('fs').readFileSync('/c/Users/leooa/.claude/...', 'utf8')"
+```
+
+**Also wrong**: hardcoding `C:/Users/...` in a `node -e` string without escaping backslashes on Windows.
+
+**Prevention rule**: Never hardcode absolute paths inside `node -e` strings. Always resolve them through `os.homedir()`, `process.env.HOME`, or pass them as argv.
+
+---
+

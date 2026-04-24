@@ -88,13 +88,13 @@ Lazy discovery via TOOL_SEARCH. **Two registries, both real:**
 
 **Current state (verified 2026-04-20 via `claude mcp list`):**
 
-- **Bundled / gateway**: `MCP_DOCKER` (Context7, GitHub, Neon, Wikipedia, Memory, Playwright, Git, Filesystem, Obsidian)
+- **Bundled / gateway**: `MCP_DOCKER` (Context7, GitHub, Neon, Wikipedia, Memory, Playwright, Git, Filesystem). Obsidian sub-tool is degraded (14 failures 2026-04-09 → 2026-04-10, no successful call since) — don't rely on `mcp__MCP_DOCKER__obsidian_list_files_in_vault`; use filesystem tools against `~/Documents/Wiki/` instead.
 - **✓ Connected user scope** (13): `code-review-graph` (CRG — Tree-sitter, 30 tools + 5 prompts, auto-update on Write/Edit), `magicuidesign-mcp`, `shadcn`, `prisma`, `tauri-mcp`, `lighthouse`, `heroui`, `context-mode`, `mobile`, `aceternity`, `iconify`, `plugin:firebase:firebase`
 - **✓ Connected project scope (only visible from CWD=~/.claude/)** (7): `supabase`, `resend`, `sentry`, `firecrawl`, `21st-dev`, `maestro`, `netlify` — loaded from `.mcp.json` with env vars wired from `settings.json`. Actively serving calls. Each entry's `_activate` field shows the exact `claude mcp add -s user -e KEY=...` command to promote to user scope.
 - **! OAuth-pending** (sign-in on first use; interactive): `cloudflare`, `linear`, `expo`, `posthog`, `vercel`, `statsig`, `plugin:asana:asana`, `plugin:figma:figma`
 - **✗ Failing — needs API key only** (package + endpoint work, servers exit on missing env var): `stripe` (needs `STRIPE_SECRET_KEY`), `upstash` (needs `UPSTASH_EMAIL` + `UPSTASH_API_KEY`)
 - **✗ Failing — plugin-bundled, needs user token**: `plugin:github:github` — sends `Authorization: Bearer ${GITHUB_PERSONAL_ACCESS_TOKEN}`; set the env var (or `gh auth token`) and restart Claude Code.
-- **Not standalone-invocable** (removed 2026-04-17): `storybook` (addon — needs project context), `openapi` (requires `--spec` arg), `applitools` (replaced by `Claude Preview` manual screenshot flow). Re-register per-project if needed.
+- **Not standalone-invocable** (removed 2026-04-17): `storybook` (addon — needs project context), `openapi` (requires `--spec` arg), `applitools` (14-day trial only, not free-tier — see `memory/feedback_applitools_trial.md`; replaced by `Claude Preview` manual screenshot flow). Re-register per-project if needed.
 - **OAuth/cloud connectors** (plugin-registered): Gamma, Context7, Canva, Figma Dev, Gmail, BigData, Prospect Enrichment, Job Search, Social/Stocks, mcp-registry, scheduled-tasks
 - **Plugin-based**: Canva, Figma, Claude Preview, Chrome
 

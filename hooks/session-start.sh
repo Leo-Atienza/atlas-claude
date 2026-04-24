@@ -300,6 +300,15 @@ if [ -d "$AG_DIR" ]; then
   # Prune stale session files (cheap — runs every SessionStart)
   node "$CLAUDE_DIR/hooks/atlas-action-graph.js" prune --days=7 >/dev/null 2>&1 || true
 
+  # Snapshot prune (7-day retention, mv to trash instead of delete per "never rm" rule)
+  SNAP_TRASH="/c/tmp/trash/atlas-action-graph-snapshots"
+  if [ -d "$AG_DIR/snapshots" ]; then
+    mkdir -p "$SNAP_TRASH" 2>/dev/null || true
+    find "$AG_DIR/snapshots" -maxdepth 1 -name "*.json" -mtime +7 -exec mv {} "$SNAP_TRASH/" \; 2>/dev/null || true
+    # Second pass: drop anything >30 days old from trash to keep disk bloat bounded.
+    find "$SNAP_TRASH" -maxdepth 1 -name "*.json" -mtime +30 -delete 2>/dev/null || true
+  fi
+
   # Pick the most recent state file whose recorded cwd matches THIS session's
   # cwd — anything else would be cross-project pollution (e.g. Anniversary
   # hot files leaking into a .claude session).
@@ -309,6 +318,32 @@ if [ -d "$AG_DIR" ]; then
     if [ -n "$CARRYOVER" ] && [ "$CARRYOVER" != "No carryover (action graph empty)." ]; then
       echo "$CARRYOVER"
     fi
+  fi
+fi
+
+# ─── 7j. Transcript rotation (gzip > 7d, mv > 30d) ─────────────────
+# Per-project session transcripts (projects/*/*.jsonl) grow unbounded.
+# Compress ones larger than 1MB and older than 7 days; trash compressed ones > 30 days.
+if [ -d "$PROJECTS_DIR" ]; then
+  TRANSCRIPT_TRASH="/c/tmp/trash/claude-transcripts"
+  mkdir -p "$TRANSCRIPT_TRASH" 2>/dev/null || true
+  # gzip in-place (keeps mtime — `gzip -f` overwrites old .gz)
+  find "$PROJECTS_DIR" -mindepth 2 -maxdepth 2 -name "*.jsonl" -mtime +7 -size +1M -exec gzip -f {} \; 2>/dev/null || true
+  # Move old .gz to trash
+  find "$PROJECTS_DIR" -mindepth 2 -maxdepth 2 -name "*.jsonl.gz" -mtime +30 -exec mv {} "$TRANSCRIPT_TRASH/" \; 2>/dev/null || true
+fi
+
+# ─── 7k. Plugin skill-pack freshness (weekly nag, >14 days) ─────────
+# Bundled skill packs don't auto-update. Surface a one-shot reminder when stale.
+PLUGIN_NAG_STATE="$CLAUDE_DIR/cache/plugin-skill-nag-last"
+LAST_PLUGIN_NAG=$(cat "$PLUGIN_NAG_STATE" 2>/dev/null || echo "0")
+if [ $(( NOW - LAST_PLUGIN_NAG )) -ge 604800 ] && [ -d "$CLAUDE_DIR/plugins" ]; then
+  stale_packs=$(find "$CLAUDE_DIR/plugins" -mindepth 2 -maxdepth 3 -type d -name "skills" -mtime +14 2>/dev/null | head -5)
+  if [ -n "$stale_packs" ]; then
+    stale_count=$(printf '%s\n' "$stale_packs" | wc -l | tr -d ' ')
+    echo "SKILL-PACK CHECK: $stale_count plugin skill pack(s) haven't been updated in 14+ days."
+    printf '%s\n' "$stale_packs" | sed 's|^|  |'
+    echo "$NOW" > "$PLUGIN_NAG_STATE"
   fi
 fi
 

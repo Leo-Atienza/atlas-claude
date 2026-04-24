@@ -1,10 +1,10 @@
 # System Changelog
 
-## [6.9.2] — 2026-04-24 (thorough review fix pass — Waves 1-2 of 6)
+## [6.9.2] — 2026-04-24 (thorough review fix pass — all 6 waves)
 
 ### Fix / upgrade / improve — drift repair since v6.9.1
 
-A third ULTRATHINK review audited the system and surfaced 17 findings (6 HIGH, 6 MEDIUM, 4 LOW). The first two waves — public-repo sync + retention safety, and skill-registry consolidation — land here. Remaining waves (path-bug + orphan cleanup, tool updates + cache hygiene, retention automation, polish) are tracked in `plans/i-want-you-to-moonlit-crown.md`.
+A third ULTRATHINK review audited the system and surfaced 17 findings (6 HIGH, 6 MEDIUM, 4 LOW). All six waves landed. Verification: skill-count validator green (76 across all 4 sources), smoke test 69/69 HEALTHY.
 
 **Wave 1 — Public repo sync + retention safety**
 - H1: Hackathon workflow skill synced to public repo — `skills/hackathon/` (SKILL.md + references/ + templates/), `commands/hackathon/*.md` (10 sub-commands), plus CLAUDE.md + REFERENCE.md registry updates. Landed only in live `~/.claude/` before this pass.
@@ -15,11 +15,28 @@ A third ULTRATHINK review audited the system and surfaced 17 findings (6 HIGH, 6
 - H2 follow-up: Duplicate Skills Registry block removed from `CLAUDE.md` — ACTIVE-DIRECTORY.md is now the single source of truth. Runtime routing sentences retained in CLAUDE.md so the Skill tool still dispatches on `/graphify`, `/handoff`, `/audit`, `/hackathon:*`.
 - L1: `SYSTEM_VERSION.md` drift repair — version 6.9.1 → 6.9.2, CLI 2.1.104 → 2.1.118, Hooks 14 → 24, Commands 48 → 58, Skills on disk 105 → 124, Skills in ACTIVE-DIRECTORY 72 → 76. ACTIVE-DIRECTORY.md header count synced.
 
-**Waves deferred to follow-up passes**
-- Wave 3: `/c/` double-drive path bug investigation, orphan `projects/C--/` + `projects/C--Users-leooa/` cleanup, `preview_screenshot` recovery
-- Wave 4: `better-ccflare` 3.4.0 → 3.4.10, `tdd-guard` 1.4.0 → 1.6.4, telemetry + stats-cache + mcp-needs-auth-cache prune
-- Wave 5: Automated snapshot prune + transcript rotation + skill-pack freshness check in `session-start.sh`; ARCHITECTURE.md Obsidian MCP accuracy
-- Wave 6: Applitools memory cross-ref, cctools-safety-hooks blocker counter, REFERENCE.md split-watch
+**Wave 3 — Path bug investigation + orphan cleanup + preview health**
+- H6: Root cause identified for `C:\c\Users\leooa\...` double-drive-prefix ENOENTs — `node -e` scripts that embed Unix-style `/c/Users/...` paths as literal strings. Node on Windows resolves them against the current drive, not as absolute POSIX paths. Documented as `G-ERR-014` in `topics/KNOWLEDGE-PAGE-3-errors.md` with correct/incorrect examples so future sessions avoid the antipattern. Not a hook bug — hooks themselves use `os.homedir()` and `path.join` correctly.
+- H5: Orphan project transcript dirs `projects/C--/` (Mar 30) and `projects/C--Users-leooa/` (Feb 11) moved to `/c/tmp/trash/2026-04-24-orphan-projects/` per "never rm" rule.
+- H4: `logs/health-suppress.json` zeroed out (`{}`) so new Bash/Read failures surface freshly. `preview_screenshot` recovery requires a project-scoped session (`~/projects/atlas-claude/` or anniversary site) — cross-scope preview start from `~/.claude/` would violate the session-scope rule. Noted for next project session.
+
+**Wave 4 — Tool updates + cache hygiene**
+- M1: `better-ccflare` 3.4.0 → 3.4.13, `tdd-guard` 1.4.0 → 1.6.5 via `npm install -g`. `INSTALLED.md` already pinned to "latest", no version edit needed.
+- M3: Stale caches relocated to `/c/tmp/trash/2026-04-24-stale-caches/`:
+  - `telemetry/1p_failed_events.*.json` × 3 (2 from 2026-03-28, 1 from 2026-04-18)
+  - `stats-cache.json` (45+ days stale, 2026-03-09)
+  - `mcp-needs-auth-cache.json` left in place (self-maintained by Claude Code, recent mtimes)
+
+**Wave 5 — Retention automation + MCP accuracy**
+- M4: `hooks/session-start.sh` §7i extended with snapshot prune (7-day `mv` to `/c/tmp/trash/atlas-action-graph-snapshots/`, 30-day hard delete).
+- M6: `hooks/session-start.sh` §7j added — transcript rotation: gzips `projects/*/*.jsonl` > 7 days old AND > 1MB; moves resulting `*.jsonl.gz` > 30 days old to `/c/tmp/trash/claude-transcripts/`.
+- M2: `hooks/session-start.sh` §7k added — plugin skill-pack freshness check with weekly nag state (`cache/plugin-skill-nag-last`); surfaces top-5 stale packs when any `plugins/*/skills/` dir has mtime > 14 days.
+- M5: `ARCHITECTURE.md` §MCP Servers updated — Obsidian removed from bundled MCP_DOCKER list with explicit degraded note (14 failures 2026-04-09 → 2026-04-10) pointing users to filesystem tools against `~/Documents/Wiki/`.
+
+**Wave 6 — Polish**
+- L2: `ARCHITECTURE.md` removed-services line now cross-references `memory/feedback_applitools_trial.md` so the "14-day trial, not free-tier" knowledge travels with the removal note.
+- L3: `hooks/cctools-safety-hooks/bash_hook.py` gained a `_bump_counter()` telemetry layer — increments `logs/safety-hook-counts.json` atomically per check fire (block + ask decisions, with timestamp). Verified: benign command leaves counts untouched; `rm -rf /` correctly increments `check_rm_command.block`. Fail-open, no hook behavior change.
+- L4: `REFERENCE.md` at 19.6KB, under the 25KB split threshold — no action.
 
 ---
 

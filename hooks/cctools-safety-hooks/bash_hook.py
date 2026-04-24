@@ -6,6 +6,35 @@ Supports three decision types: allow, ask (user prompt), block (deny).
 import json
 import sys
 import os
+import datetime
+
+
+# ── Blocker counter ─────────────────────────────────────────────────
+# Tracks how many times each safety check fires, so we can tune triggers
+# without adding noisy logging. Fail-open — never crash the hook.
+_COUNTS_PATH = os.path.join(os.path.expanduser('~'), '.claude', 'logs', 'safety-hook-counts.json')
+
+
+def _bump_counter(check_name, decision):
+    """Increment the [check_name][decision] counter. Fail-open, atomic write."""
+    try:
+        os.makedirs(os.path.dirname(_COUNTS_PATH), exist_ok=True)
+        try:
+            with open(_COUNTS_PATH, 'r', encoding='utf-8') as f:
+                counts = json.load(f)
+        except (FileNotFoundError, json.JSONDecodeError):
+            counts = {}
+        bucket = counts.setdefault(check_name, {"block": 0, "ask": 0, "last": None})
+        bucket[decision] = bucket.get(decision, 0) + 1
+        bucket["last"] = datetime.datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%SZ')
+        counts["_meta"] = {"last_updated": bucket["last"]}
+        tmp = _COUNTS_PATH + ".tmp"
+        with open(tmp, 'w', encoding='utf-8') as f:
+            json.dump(counts, f)
+        os.replace(tmp, _COUNTS_PATH)
+    except Exception:
+        # Telemetry must never break the hook
+        pass
 
 # Add hooks directory to Python path so we can import the other modules
 PLUGIN_ROOT = os.environ.get('CLAUDE_PLUGIN_ROOT')
@@ -90,7 +119,6 @@ def main():
         try:
             log_dir = os.path.join(os.path.expanduser('~'), '.claude', 'logs')
             os.makedirs(log_dir, exist_ok=True)
-            import datetime
             data = json.load(sys.stdin)
             entry = {
                 "ts": datetime.datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%SZ'),
@@ -145,8 +173,10 @@ def main():
         decision, reason = normalize_check_result(result)
         if decision == "block":
             block_reasons.append(reason)
+            _bump_counter(check_func.__name__, "block")
         elif decision == "ask":
             ask_reasons.append(reason)
+            _bump_counter(check_func.__name__, "ask")
 
     # Priority: block > ask > allow
     if block_reasons:
