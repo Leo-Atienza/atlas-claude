@@ -1,0 +1,57 @@
+# .hackathon/event.yaml — written by /hackathon:init
+#
+# This file is the source of truth for event metadata.
+# /hackathon:* commands read from here.
+
+name: ""                        # e.g., "AI Tinkerers SF Hackathon"
+theme: ""                       # e.g., "AI agents for daily life"
+platform: ""                    # devpost | mlh | lablab.ai | corporate | other
+event_url: ""                   # link to official page (for re-reading rules)
+
+duration_hours: 24              # total event length
+start_iso: ""                   # 2026-04-23T10:00:00-07:00
+deadline_iso: ""                # absolute submission datetime (NOT relative)
+
+team:
+  mode: solo                    # solo | team
+  size: 1
+  members: []                   # [{name, skills: [], availability_hours: 0}]
+
+judging:
+  format: live                  # live | async | hybrid
+  rubric:                       # axes + weights (sum ≈ 100)
+    technical: 25
+    design: 25
+    originality: 25
+    impact: 25
+  sponsor_prizes: []            # [{sponsor, requirement}]
+  required_tech: []             # e.g., ["anthropic-api", "vercel"]
+
+submission:
+  form_url: ""                  # devpost project URL once created
+  required_fields:
+    - description
+    - how_it_works
+    - inspiration
+    - tech_stack
+    - video_url
+    - screenshots
+  max_video_seconds: 180        # check event rules, default 180
+
+timeline:                       # reverse-engineered from deadline_iso
+  ideate_by: ""
+  scope_locked_by: ""
+  scaffold_deployed_by: ""
+  demo_moment_working_by: ""
+  polish_starts: ""
+  demo_recorded_by: ""
+  submission_by: ""
+  pitch_practiced_by: ""
+
+deploy:
+  platform: ""                  # vercel | eas | netlify
+  live_url: ""                  # captured after /hackathon:scaffold
+  final_commit_sha: ""          # frozen by /hackathon:demo
+  github_url: ""
+
+stack_preset: ""                # web-ai | saas | mobile | data-viz | agent

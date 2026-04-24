@@ -1,11 +1,11 @@
-# ATLAS System Architecture (v6.9.1)
+# ATLAS System Architecture (v6.9.2)
 
 ## Configuration Architecture
 
 1. **`~/.claude/CLAUDE.md`** — Slim core instructions (~8KB). Rules extracted to on-demand pages.
 
-2. **Skills Directory/Page System** (72 active skill entries, 105 top-level dirs on disk incl. container packs):
-   - `skills/ACTIVE-DIRECTORY.md` — Index of active skills (15 Core + 51 Available)
+2. **Skills Directory/Page System** (76 active skill entries, 124 top-level dirs on disk incl. container packs):
+   - `skills/ACTIVE-DIRECTORY.md` — Index of active skills (15 Core + 61 Available)
    - `skills/ACTIVE-PAGE-1-web-frontend.md` — Web, animation, design, testing, security skills (34 skills)
    - `skills/ACTIVE-PAGE-2-backend-tools.md` — Backend, deployment, workflow skills (22 skills)
    - `skills/ACTIVE-PAGE-3-native-crossplatform.md` — Native, desktop, cross-platform skills (10 skills)

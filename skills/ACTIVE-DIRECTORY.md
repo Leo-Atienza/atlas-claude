@@ -3,7 +3,7 @@
 > Lookup: scan this table → find the skill → note its Page → open that page for full details.
 > Loading: read the relevant page on-demand, never all at start.
 > Tiers: **Core** = weekly use, prioritize in suggestions. **Available** = on-demand when task matches.
-> Total active skills: **72** (15 Core + 57 Available) across 105 directories on disk (incl. container packs and archives) — last updated 2026-04-20
+> Total active skills: **76** (15 Core + 61 Available) across 124 directories on disk (incl. container packs and archives) — last updated 2026-04-24
 >
 > **Related metadata files:**
 > - `skills/SYMLINKS.md` — 37 symlinks pointing to `~/.agents/skills/` (Anthropic + community ecosystem)
@@ -85,6 +85,10 @@
 | SK-105 | LinkedIn Poster | Compose/publish LinkedIn posts (text, articles, images) via API | 2 |
 | SK-106 | Project Init | Auto-generate project-level CLAUDE.md from templates (Ruflo 30+) | 2 |
 | SK-107 | Remotion | Programmatic video with React — compositions, rendering, pipelines | 1 |
+| SK-108 | Hackathon Workflow | End-to-end `/hackathon:*` — init, ideate, scope (HARD-LOCK), scaffold, team, build, polish, demo, pitch, retro | 2 |
+| SK-109 | Graphify (Mixed-Corpus) | Turn any folder → queryable knowledge graph (docs + papers + images + code) via `/graphify` | 2 |
+| SK-110 | Handoff | End-of-session: build, test, commit, push, handoff doc via `/handoff` | 2 |
+| SK-111 | Audit | Wave-based codebase audit with verified fixes via `/audit` | 2 |
 | SC-003 | Insecure Defaults Detector | Hardcoded secrets, weak defaults, fail-open detection | 1 |
 | FS-012 | SQL Expert | SQL optimization, strategic indexes, query planning | 2 |
 | FS-028 | API Designer | REST API design, OpenAPI 3.1, RFC 7807 error responses | 2 |

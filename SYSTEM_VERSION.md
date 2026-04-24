@@ -2,18 +2,18 @@
 
 > Auto-updated by `/health`. Do not edit manually.
 
-**version: 6.9.1**
-**last_updated: 2026-04-20**
+**version: 6.9.2**
+**last_updated: 2026-04-24**
 
 ## Component Counts
 
 | Component | Count | Last Updated |
 |-----------|-------|-------------|
-| Hooks (files) | 14 | 2026-04-20 |
-| Commands (total) | 48 | 2026-04-20 |
-| Skills (on disk) | 105 | 2026-04-20 |
-| Skills (in ACTIVE-DIRECTORY) | 72 | 2026-04-20 |
-| Agents | 74 | 2026-04-20 |
+| Hooks (files) | 24 | 2026-04-24 |
+| Commands (total) | 58 | 2026-04-24 |
+| Skills (on disk) | 124 | 2026-04-24 |
+| Skills (in ACTIVE-DIRECTORY) | 76 | 2026-04-24 |
+| Agents | 74 | 2026-04-24 |
 | Rules | 3 (RULES-GIT, RULES-SECURITY, RULES-TESTING) | 2026-04-20 |
 | Knowledge entries | 72 | 2026-04-20 |
 
@@ -31,7 +31,7 @@
 
 | Tool | Version |
 |------|---------|
-| Claude Code CLI | 2.1.104 |
+| Claude Code CLI | 2.1.118 |
 | better-ccflare | 3.4.0 |
 | tdd-guard | 1.4.0 |
 | claude-rules-doctor | 0.2.2 |
@@ -52,8 +52,8 @@
 
 | Key | Value |
 |-----|-------|
-| version | 6.9.1 |
-| last_health_check | 2026-04-20 |
+| version | 6.9.2 |
+| last_health_check | 2026-04-24 |
 | hook_event_types | 8 (Notification, PostToolUse, PostToolUseFailure, PreToolUse, PreCompact, SessionStart, Stop, UserPromptSubmit) |
 | disk_total | 351MB |
 | disk_skills | 14MB |

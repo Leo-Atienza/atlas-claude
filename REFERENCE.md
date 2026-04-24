@@ -28,6 +28,9 @@
 | Check wiki health | `/wiki-lint` (SK-101) |
 | Start a new mobile app | `/new-mobile-app [name]` |
 | Start a new desktop app | `/new-desktop-app [name]` |
+| Join / compete in a hackathon | `/hackathon:init [event]` → `/hackathon:ideate` → `/hackathon:scope` → ... → `/hackathon:retro` |
+| Lock hackathon scope (HARD) | `/hackathon:scope` (amend requires 1-in-1-out: `/hackathon:scope --amend`) |
+| Brainstorm hackathon ideas | `/hackathon:ideate` |
 | Design an API | `/api-design [desc]` |
 | Design a database schema | `/db-schema [desc]` |
 | Build/dev/test a Tauri app | Tauri MCP + SK-088 |
@@ -91,6 +94,7 @@
 | Native transitions | Native Transition & Scroll (SK-099) — shared elements, FlashList |
 | Native design system | Native Sensory Design (SK-100) — haptics, sound, motion tokens |
 | **Workflow & Tools** | |
+| Compete in a hackathon | Hackathon (`~/.claude/skills/hackathon/`) — 10-phase workflow, hard scope lock, 5 stack presets, `/hackathon:*` commands |
 | Map a codebase (graph) | Codebase Knowledge Graph (SK-081) — Router: CRG (code, MCP-native) / graphify (mixed corpora) |
 | Review with blast radius | Graph-Aware Code Review (SK-082) — dependency tracing |
 | Multi-agent orchestration | Smart Swarm (SK-039) — 5D complexity scoring |
@@ -143,6 +147,19 @@
 - `/audit` — Systematic codebase audit with wave-based fixes
 - `/health` — System + project integrity check
 - `/claude-md-management:revise-claude-md` — Update CLAUDE.md
+
+### Hackathon (end-to-end workflow)
+- `/hackathon:init [event-name] [--team] [--duration Nh]` — Event setup + reverse-engineered timeline
+- `/hackathon:ideate` — Generate 5-10 scored ideas, tag stack preset per idea
+- `/hackathon:scope` — Lock demo moment + MUST-HAVES + 60s pitch (HARD LOCK — no silent creep)
+- `/hackathon:scope --amend` — Change scope via forced 1-in-1-out feature trade
+- `/hackathon:scaffold [--stack <preset>]` — Live URL in <15 min (5 presets: web-ai / saas / mobile / data-viz / agent)
+- `/hackathon:team` — Split MUST-HAVES across teammates (only when `--team` set on init)
+- `/hackathon:build [feature]` — Demo-moment-first atomic commits, 30-min stuck rule, 2hr checkpoints
+- `/hackathon:polish` — Visual QA + three-states (loading/empty/error) + Sentry + Lighthouse
+- `/hackathon:demo` — Screenshots + video script + README.md + frozen deploy
+- `/hackathon:pitch` — 60s speaker notes + Q&A prep + live-demo storyboard + fallbacks
+- `/hackathon:retro` — Post-event learnings → G-PAT / G-FAIL + skill self-updates
 
 ---
 
@@ -315,7 +332,7 @@ Every generator has a validator. Always run both.
 |---|---|
 | `CLAUDE.md` | Master instructions (self-contained) |
 | `settings.json` | Hooks, permissions, env vars |
-| `skills/ACTIVE-DIRECTORY.md` | Active skill index (72 skills: 15 Core + 57 Available) |
+| `skills/ACTIVE-DIRECTORY.md` | Active skill index (76 skills: 15 Core + 61 Available) |
 | `skills/ARCHIVE-DIRECTORY.md` | Archived skill index (7 bundles) |
 | `hooks/post-tool-monitor.js` | Central PostToolUse telemetry hub |
 | `hooks/context-guard.js` | PreToolUse context + security enforcer |

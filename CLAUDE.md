@@ -204,12 +204,9 @@ Installed from `expo/skills`: expo-api-routes, expo-cicd-workflows, expo-deploym
 
 ## Skills Registry
 
-- **graphify** (`~/.claude/skills/graphify/SKILL.md`) - Turn any folder into a queryable knowledge graph. Trigger: `/graphify`
+All active skills are catalogued in `skills/ACTIVE-DIRECTORY.md` (single source of truth). Runtime routing:
 
 When the user types `/graphify`, invoke the Skill tool with `skill: "graphify"` before doing anything else.
-
-- **handoff** (`~/.claude/skills/handoff/SKILL.md`) - End-of-session: build, test, commit, push, handoff doc. Trigger: `/handoff`
-- **audit** (`~/.claude/skills/audit/SKILL.md`) - Systematic codebase audit with wave-based verified fixes. Trigger: `/audit`
-
 When the user types `/handoff`, invoke the Skill tool with `skill: "handoff"` before doing anything else.
 When the user types `/audit`, invoke the Skill tool with `skill: "audit"` before doing anything else.
+When the user types `/hackathon:<phase>` (or plain-English hackathon triggers), invoke the Skill tool with `skill: "hackathon"` before running any sub-command — the SKILL.md routes to the right phase based on `.hackathon/` state.

@@ -1,5 +1,28 @@
 # System Changelog
 
+## [6.9.2] — 2026-04-24 (thorough review fix pass — Waves 1-2 of 6)
+
+### Fix / upgrade / improve — drift repair since v6.9.1
+
+A third ULTRATHINK review audited the system and surfaced 17 findings (6 HIGH, 6 MEDIUM, 4 LOW). The first two waves — public-repo sync + retention safety, and skill-registry consolidation — land here. Remaining waves (path-bug + orphan cleanup, tool updates + cache hygiene, retention automation, polish) are tracked in `plans/i-want-you-to-moonlit-crown.md`.
+
+**Wave 1 — Public repo sync + retention safety**
+- H1: Hackathon workflow skill synced to public repo — `skills/hackathon/` (SKILL.md + references/ + templates/), `commands/hackathon/*.md` (10 sub-commands), plus CLAUDE.md + REFERENCE.md registry updates. Landed only in live `~/.claude/` before this pass.
+- H3: `hooks/session-stop.sh` §5 plan retention now honors a `<!-- keep -->` first-line marker — plans with that marker are exempt from the "keep 5 most recent" archival rule. ScrapePipe Phase-1 plan (`help-me-create-this-melodic-boot.md`) restored from archive and marked to survive indefinitely.
+
+**Wave 2 — Skill registry consolidation**
+- H2: Four orphaned skills added to `skills/ACTIVE-DIRECTORY.md` — SK-108 Hackathon Workflow, SK-109 Graphify (Mixed-Corpus), SK-110 Handoff, SK-111 Audit. (Plan originally proposed SK-090..SK-093 but those IDs were already in use.)
+- H2 follow-up: Duplicate Skills Registry block removed from `CLAUDE.md` — ACTIVE-DIRECTORY.md is now the single source of truth. Runtime routing sentences retained in CLAUDE.md so the Skill tool still dispatches on `/graphify`, `/handoff`, `/audit`, `/hackathon:*`.
+- L1: `SYSTEM_VERSION.md` drift repair — version 6.9.1 → 6.9.2, CLI 2.1.104 → 2.1.118, Hooks 14 → 24, Commands 48 → 58, Skills on disk 105 → 124, Skills in ACTIVE-DIRECTORY 72 → 76. ACTIVE-DIRECTORY.md header count synced.
+
+**Waves deferred to follow-up passes**
+- Wave 3: `/c/` double-drive path bug investigation, orphan `projects/C--/` + `projects/C--Users-leooa/` cleanup, `preview_screenshot` recovery
+- Wave 4: `better-ccflare` 3.4.0 → 3.4.10, `tdd-guard` 1.4.0 → 1.6.4, telemetry + stats-cache + mcp-needs-auth-cache prune
+- Wave 5: Automated snapshot prune + transcript rotation + skill-pack freshness check in `session-start.sh`; ARCHITECTURE.md Obsidian MCP accuracy
+- Wave 6: Applitools memory cross-ref, cctools-safety-hooks blocker counter, REFERENCE.md split-watch
+
+---
+
 ## [6.9.1] — 2026-04-20 (remediation pass 2)
 
 ### Post-v6.9.1 audit → 32-finding remediation across 5 waves

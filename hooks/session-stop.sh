@@ -182,13 +182,19 @@ if [ -n "$SESSION_ID" ]; then
   fi
 fi
 
-# ─── 5. Plans retention (keep 5 most recent) ────────────────────────
+# ─── 5. Plans retention (keep 5 most recent + <!-- keep --> markers) ───
 # Archive older plan files to plans/archive/ on every session end. Fail-open.
+# Plans whose first line contains `<!-- keep -->` are exempt from archival.
 PLANS_DIR="$HOME/.claude/plans"
 if [ -d "$PLANS_DIR" ]; then
   mkdir -p "$PLANS_DIR/archive" 2>/dev/null || true
-  # Sort by mtime (newest first), skip top 5, archive the rest.
+  # Sort by mtime (newest first), skip top 5, archive the rest — unless kept.
   ls -t "$PLANS_DIR"/*.md 2>/dev/null | tail -n +6 | while read -r oldplan; do
-    [ -f "$oldplan" ] && mv "$oldplan" "$PLANS_DIR/archive/" 2>/dev/null || true
+    [ -f "$oldplan" ] || continue
+    # Skip plans with <!-- keep --> marker on the first line.
+    if head -1 "$oldplan" 2>/dev/null | grep -qF '<!-- keep -->'; then
+      continue
+    fi
+    mv "$oldplan" "$PLANS_DIR/archive/" 2>/dev/null || true
   done
 fi
