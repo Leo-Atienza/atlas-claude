@@ -1,5 +1,63 @@
 # System Changelog
 
+## [7.0.0] — 2026-04-24 (Consolidation & Observability)
+
+### Theme — the system now proposes drift fixes to the user instead of waiting to be audited
+
+Three back-to-back audit-and-remediate releases (v6.9.0 / v6.9.1 / v6.9.2) revealed that 24 hooks, 76 skills, 20 MCP servers, and 6 scheduled tasks drifted faster than ULTRATHINK audits could catch it. v7.0 inverts the loop: telemetry that was already being written (tool-health, safety-hook counts, action-graph stats) gets a consumer (`/observe`), the instrumentation gap on skills is closed, and bespoke cleanup blocks collapse into one declarative engine.
+
+**Wave A — Unified cleanup engine**
+- `hooks/cleanup-config.json` added — 13 declarative rules covering every v6.x §7a–§7k block (version-manifest nag, tool-health prune, trash prune, session-cache, python-cache, debug, shell-snapshots, stale-todos, plans rotation, session-env rotation, cache efficiency, transcripts rotation, plugin-skill-pack nag).
+- `hooks/cleanup-runner.js` added — single engine with 7 rule modes (age-prune, age-and-count, keep-last, delete-matching-dirs, age-prune-dirs, gzip-then-trash, per-project-uuid-dirs, weekly-nag, custom). Flags: `--dry-run`, `--json`, `--only=<rule>`. Writes one JSONL record per rule to `logs/cleanup.jsonl`; emits chat-visible nag messages to stdout.
+- `hooks/cleanup-rules/{check-version-manifest,prune-tool-health,check-skill-packs}.js` extracted from the corresponding inline `node -e` blocks.
+- `hooks/session-start.sh` §7a–§7k collapsed to a single `node cleanup-runner.js` call. §7i (action-graph carryover) remains inline because it emits chat output. Adding a new cleanup target is now a 3-line config change.
+- `logs/cleanup.jsonl` added to the §3 500-line log-rotation list.
+
+**Wave B — Skill-usage instrumentation**
+- `hooks/skill-usage-log.js` added — PreToolUse `Skill` hook that reads stdin and appends `{ts, skill, cwd, session_id}` per invocation.
+- `settings.json` PreToolUse array gained a `Skill` matcher (timeout 3s, fail-open).
+- `logs/skill-usage.jsonl` is the new authoritative usage log; `logs/skill-stats.json` `_meta.note` marks it superseded. `skill-usage.jsonl` is rotated at 500 lines by §3.
+
+**Wave C — Observability dashboard**
+- `scripts/observability.js` added — CLI-first markdown emitter, 6 sections: **(1)** tool health (30-day rolling + consecutive-streak warnings), **(2)** safety hooks (per-check block/ask), **(3)** skill usage (top 20 + unused-≥30d), **(4)** scheduled tasks (lastRunAt vs cron window, `⚠ drift` flag when over grace), **(5)** action graph (avg/session stats + dup-read rate), **(6)** cleanup (last-session per-rule + 7-day error tally). Empty-safe per section. `--json` and `--section=<name>` flags.
+- `commands/observe.md` added — refreshes `cache/scheduled-tasks-latest.json` via MCP, invokes the emitter, flags actionable signals.
+
+**Wave D — Scheduled-task consolidation (6 → 4)**
+- `weekly-cleanup-scan` — disabled for 1-week shadow period; its cleanup-audit responsibility moved to `/observe` section 6, now part of `weekly-maintenance` step 3.
+- `weekly-memory-maintenance` — disabled for 1-week shadow period; memory-sanity pre-check absorbed into `weekly-dream` §0 (MEMORY.md index sanity, orphan detection, stale-date warnings).
+- `skill-usage-audit` — kept enabled; SKILL.md rewritten to read from `logs/skill-usage.jsonl` (Wave B data) instead of inferring from absence.
+- `weekly-maintenance` — prompt updated to run `/observe` and audit `logs/cleanup.jsonl` for 7-day error streaks.
+
+**Wave E — Auto-drift-proposer**
+- `hooks/drift-proposer.js` added — runs as §8a of `session-start.sh`. Detects drift across 4 channels (scheduled-task drift, cleanup rule error streak, tool failure weeks, skill unused). Prints at most ONE `DRIFT: ...` advisory per session; persists proposals to `cache/last-drift-proposal.json`.
+- `hooks/drift-thresholds.json` added — thresholds: `skill_unused_days: 60`, `tool_failure_weeks: 5`, `scheduled_task_drift_hours: 6`, `cleanup_rule_error_streak: 3`. Per-kind 24h cooldown + `max_proposals_per_session: 1` + `silenced_kinds` allowlist.
+- `commands/apply-drift-fix.md` added — reads the most recent proposal and routes to the right action (archive skill / disable MCP / retrigger task / fix cleanup rule).
+
+**Wave F — Polish + docs**
+- `SYSTEM_VERSION.md` bumped to 7.0.0; hook count 24 → 30, new Scheduled-tasks + Cleanup-rules rows; v7 highlights block added.
+- `ARCHITECTURE.md` — new "Telemetry & Observability" section (cleanup engine, dashboard, drift proposer, skill-usage hook).
+- `CLAUDE.md` Pipeline §1 — adds `/observe` bullet for system-review tasks.
+- `hooks/README.md` — table includes new PreToolUse Skill matcher + §8a drift-proposer entry.
+- `topics/KNOWLEDGE-PAGE-1-patterns.md` — new G-PAT-030 "Observability over audit".
+- `scripts/smoke-test.sh` — 4 new checks (cleanup-runner dry-run, skill-usage.jsonl exists, observability.js section count, drift-proposer silent-on-clean). 74/74 target.
+
+### Acceptance (all must be true)
+- `hooks/session-start.sh` §7a–§7k collapsed to one engine call ✓
+- Scheduled tasks: 4 enabled + 2 disabled shadow ✓
+- `/observe` renders 6 sections ✓
+- PreToolUse `Skill` hook writing to `logs/skill-usage.jsonl` ✓
+- Session-start emits at most 1 drift proposal per session ✓
+- Skill count still 76/76 ✓ (Wave F `validate-skill-counts.js`)
+- `SYSTEM_VERSION.md = 7.0.0`, both repos in sync ✓ (after mirror)
+
+### Risk mitigations preserved
+- 1-week shadow period on disabled scheduled tasks — can be re-enabled instantly via MCP update.
+- `cleanup-runner.js --dry-run` for per-rule audit.
+- Drift proposer per-kind cooldown + silenced_kinds config — noise control.
+- Skill-usage log capped at 500 lines via existing §3 rotation.
+
+---
+
 ## [6.9.3] — 2026-04-24 (next-session picks — audit hardening + v7 scope draft)
 
 ### Continuation of v6.9.2 — three "Next session picks" from the 2026-04-24 handoff

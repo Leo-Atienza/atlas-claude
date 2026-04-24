@@ -48,7 +48,7 @@ fi
 # ─── 3. Log rotation (line-count cap: keep last 500 lines) ──────────
 LOGS_DIR="$CLAUDE_DIR/logs"
 if [ -d "$LOGS_DIR" ]; then
-  for logfile in "$LOGS_DIR"/failures.jsonl "$LOGS_DIR"/hook-health.jsonl "$LOGS_DIR"/tool-failures.jsonl; do
+  for logfile in "$LOGS_DIR"/failures.jsonl "$LOGS_DIR"/hook-health.jsonl "$LOGS_DIR"/tool-failures.jsonl "$LOGS_DIR"/skill-usage.jsonl "$LOGS_DIR"/cleanup.jsonl; do
     if [ -f "$logfile" ]; then
       LINES=$(wc -l < "$logfile" 2>/dev/null || echo 0)
       if [ "$LINES" -gt 500 ]; then
@@ -175,121 +175,13 @@ if [ -n "$KG_SUMMARY" ] && [ "$KG_SUMMARY" != "Knowledge graph empty." ]; then
   echo "$KG_SUMMARY"
 fi
 
-# ─── 7a. VERSION-MANIFEST staleness check (weekly, nag once per 7 days) ──
-MANIFEST_FILE="$CLAUDE_DIR/skills/VERSION-MANIFEST.json"
-VERSION_NAG_STATE="$CLAUDE_DIR/cache/version-nag-last"
-if [ -f "$MANIFEST_FILE" ]; then
-  LAST_NAG=$(cat "$VERSION_NAG_STATE" 2>/dev/null || echo "0")
-  if [ $(( NOW - LAST_NAG )) -ge 604800 ]; then
-    stale_count=$(node -e '
-      try {
-        const m = JSON.parse(require("fs").readFileSync(process.argv[1], "utf8"));
-        const cutoff = Date.now() - 14 * 86400000;
-        let stale = 0;
-        for (const v of Object.values(m.cli_tools || {})) {
-          if (new Date(v.last_checked || 0).getTime() < cutoff) stale++;
-        }
-        for (const v of Object.values(m.skill_packs || {})) {
-          if (new Date(v.last_checked || 0).getTime() < cutoff) stale++;
-        }
-        if (stale > 0) console.log(stale);
-      } catch(e) {}
-    ' "$MANIFEST_FILE" 2>/dev/null)
-    if [ -n "$stale_count" ] && [ "$stale_count" -gt 0 ]; then
-      echo "VERSION CHECK: $stale_count tool(s)/skill pack(s) haven't been checked in 14+ days. Run: node ~/.claude/scripts/health-validator.js --check versions"
-      echo "$NOW" > "$VERSION_NAG_STATE"
-    fi
-  fi
-fi
-
-# ─── 7a2. tool-health.json pruning (keep last 20 failure timestamps per tool)
-if [ -f "$TH_FILE" ]; then
-  node -e '
-    const fs = require("fs");
-    try {
-      const h = JSON.parse(fs.readFileSync(process.argv[1], "utf8"));
-      if (h.tools) {
-        for (const [k, v] of Object.entries(h.tools)) {
-          if (Array.isArray(v.failures) && v.failures.length > 20) {
-            v.failures = v.failures.slice(-20);
-          }
-        }
-        fs.writeFileSync(process.argv[1], JSON.stringify(h));
-      }
-    } catch(e) {}
-  ' "$TH_FILE" 2>/dev/null
-fi
-
-TRASH_DIR="$CLAUDE_DIR/TRASH"
-if [ -d "$TRASH_DIR" ]; then
-  find "$TRASH_DIR" -mindepth 1 -mtime +3 -delete 2>/dev/null || true
-fi
-
-# ─── 7a3. Session cache pruning (per-project: keep last 30, delete >14 days)
-# NOTE: rm -rf is intentional here — these are system-generated UUID session dirs,
-# not user files. Moving to TRASH would add bloat for zero recovery value.
-PROJECTS_DIR="$CLAUDE_DIR/projects"
-if [ -d "$PROJECTS_DIR" ]; then
-  for proj in "$PROJECTS_DIR"/*/; do
-    [ -d "$proj" ] || continue
-    # Delete UUID session dirs older than 14 days
-    find "$proj" -maxdepth 1 -type d -name '*-*-*-*-*' -mtime +14 -exec rm -rf {} \; 2>/dev/null || true
-    # If still >30, keep only newest 30
-    SESSION_COUNT=$(find "$proj" -maxdepth 1 -type d -name '*-*-*-*-*' 2>/dev/null | wc -l)
-    if [ "$SESSION_COUNT" -gt 30 ]; then
-      ls -1td "$proj"/*-*-*-*-* 2>/dev/null | tail -n +31 | while IFS= read -r d; do rm -rf "$d" 2>/dev/null; done
-    fi
-  done
-fi
-
-# ─── 7b. Python cache cleanup ────────────────────────────────────────
-find "$CLAUDE_DIR/hooks" -type d -name "__pycache__" -exec rm -rf {} + 2>/dev/null || true
-
-# ─── 7c. Debug directory cleanup (files older than 14 days) ─────────
-DEBUG_DIR="$CLAUDE_DIR/debug"
-if [ -d "$DEBUG_DIR" ]; then
-  find "$DEBUG_DIR" -maxdepth 1 -name "*.txt" -mtime +14 -delete 2>/dev/null || true
-fi
-
-# ─── 7d. Shell-snapshots cleanup (14-day retention + keep last 50) ───
-SNAP_DIR="$CLAUDE_DIR/shell-snapshots"
-if [ -d "$SNAP_DIR" ]; then
-  find "$SNAP_DIR" -maxdepth 1 -name "snapshot-*.sh" -mtime +14 -delete 2>/dev/null || true
-  SNAP_COUNT=$(find "$SNAP_DIR" -maxdepth 1 -name "snapshot-*.sh" 2>/dev/null | wc -l)
-  if [ "$SNAP_COUNT" -gt 50 ]; then
-    ls -1t "$SNAP_DIR"/snapshot-*.sh 2>/dev/null | tail -n +"51" | xargs rm -f 2>/dev/null || true
-  fi
-fi
-
-# ─── 7e. Stale todos cleanup (files older than 3 days) ─────────────
-TODOS_DIR="$CLAUDE_DIR/todos"
-if [ -d "$TODOS_DIR" ]; then
-  find "$TODOS_DIR" -maxdepth 1 -name "*.json" -mtime +3 -delete 2>/dev/null || true
-fi
-
-# ─── 7f. Plans rotation (keep last 15 by mtime, delete rest) ───────
-PLANS_DIR="$CLAUDE_DIR/plans"
-if [ -d "$PLANS_DIR" ]; then
-  PLAN_COUNT=$(find "$PLANS_DIR" -maxdepth 1 -name "*.md" -type f 2>/dev/null | wc -l)
-  if [ "$PLAN_COUNT" -gt 15 ]; then
-    ls -t "$PLANS_DIR"/*.md 2>/dev/null | tail -n +16 | while IFS= read -r f; do rm -f "$f" 2>/dev/null; done
-  fi
-fi
-
-# ─── 7g. Session-env rotation (dirs older than 7 days) ─────────────
-SESSION_ENV_DIR="$CLAUDE_DIR/session-env"
-if [ -d "$SESSION_ENV_DIR" ]; then
-  find "$SESSION_ENV_DIR" -mindepth 1 -maxdepth 1 -type d -mtime +7 -exec rm -rf {} \; 2>/dev/null || true
-fi
-
-# ─── 7h. Cache efficiency rotation (keep last 10) ──────────────────
-CACHE_DIR="$CLAUDE_DIR/cache"
-if [ -d "$CACHE_DIR" ]; then
-  EFF_COUNT=$(ls -1 "$CACHE_DIR"/efficiency-*.json 2>/dev/null | wc -l)
-  if [ "$EFF_COUNT" -gt 10 ]; then
-    ls -t "$CACHE_DIR"/efficiency-*.json 2>/dev/null | tail -n +11 | while IFS= read -r f; do rm -f "$f" 2>/dev/null; done
-  fi
-fi
+# ─── 7a. Unified cleanup engine (v7.0) ──────────────────────────────
+# Declarative cleanup rules live in hooks/cleanup-config.json. Each rule is
+# driven by hooks/cleanup-runner.js, which writes one JSONL record per rule
+# to logs/cleanup.jsonl and prints any user-visible nag messages to stdout.
+# Replaces the v6.x §7a–§7h + §7j–§7k bespoke blocks. §7i stays inline below
+# because it emits carryover text that must flow back to the session.
+node "$CLAUDE_DIR/hooks/cleanup-runner.js" 2>/dev/null || true
 
 # ─── 7i. Action-graph carryover + prune (Tier 3) ────────────────────
 # Carries forward the previous session's top-5 hot items if the state file
@@ -321,31 +213,9 @@ if [ -d "$AG_DIR" ]; then
   fi
 fi
 
-# ─── 7j. Transcript rotation (gzip > 7d, mv > 30d) ─────────────────
-# Per-project session transcripts (projects/*/*.jsonl) grow unbounded.
-# Compress ones larger than 1MB and older than 7 days; trash compressed ones > 30 days.
-if [ -d "$PROJECTS_DIR" ]; then
-  TRANSCRIPT_TRASH="/c/tmp/trash/claude-transcripts"
-  mkdir -p "$TRANSCRIPT_TRASH" 2>/dev/null || true
-  # gzip in-place (keeps mtime — `gzip -f` overwrites old .gz)
-  find "$PROJECTS_DIR" -mindepth 2 -maxdepth 2 -name "*.jsonl" -mtime +7 -size +1M -exec gzip -f {} \; 2>/dev/null || true
-  # Move old .gz to trash
-  find "$PROJECTS_DIR" -mindepth 2 -maxdepth 2 -name "*.jsonl.gz" -mtime +30 -exec mv {} "$TRANSCRIPT_TRASH/" \; 2>/dev/null || true
-fi
-
-# ─── 7k. Plugin skill-pack freshness (weekly nag, >14 days) ─────────
-# Bundled skill packs don't auto-update. Surface a one-shot reminder when stale.
-PLUGIN_NAG_STATE="$CLAUDE_DIR/cache/plugin-skill-nag-last"
-LAST_PLUGIN_NAG=$(cat "$PLUGIN_NAG_STATE" 2>/dev/null || echo "0")
-if [ $(( NOW - LAST_PLUGIN_NAG )) -ge 604800 ] && [ -d "$CLAUDE_DIR/plugins" ]; then
-  stale_packs=$(find "$CLAUDE_DIR/plugins" -mindepth 2 -maxdepth 3 -type d -name "skills" -mtime +14 2>/dev/null | head -5)
-  if [ -n "$stale_packs" ]; then
-    stale_count=$(printf '%s\n' "$stale_packs" | wc -l | tr -d ' ')
-    echo "SKILL-PACK CHECK: $stale_count plugin skill pack(s) haven't been updated in 14+ days."
-    printf '%s\n' "$stale_packs" | sed 's|^|  |'
-    echo "$NOW" > "$PLUGIN_NAG_STATE"
-  fi
-fi
+# ─── 7j/§7k migrated to cleanup-runner.js (see §7a) ─────────────────
+# Transcript rotation and plugin skill-pack nag are now declarative rules
+# (transcripts-rotation + plugin-skill-pack-nag) in hooks/cleanup-config.json.
 
 # ─── 8. Stale temp file cleanup ─────────────────────────────────────
 # Use Node's tmpdir (matches where hooks actually write — may differ from /tmp on Windows)
@@ -370,6 +240,12 @@ if [ -d "$SCRATCHPAD" ]; then
   find "$SCRATCHPAD" -maxdepth 1 -type f -mtime +14 -delete 2>/dev/null || true
   find "$SCRATCHPAD" -mindepth 1 -maxdepth 1 -type d -mtime +14 -exec rm -rf {} \; 2>/dev/null || true
 fi
+
+# ─── 8a. Auto drift-proposer (v7.0) ─────────────────────────────────
+# Reads telemetry (tool-health, scheduled-tasks cache, cleanup.jsonl, skill-usage.jsonl)
+# and prints AT MOST one `DRIFT: ...` advisory to stdout when any threshold crosses.
+# Thresholds in hooks/drift-thresholds.json. Silent when the system is clean.
+node "$CLAUDE_DIR/hooks/drift-proposer.js" 2>/dev/null || true
 
 # ─── 9. Critical file backup (weekly) ───────────────────────────────
 BACKUP_DIR="$CLAUDE_DIR/backups"

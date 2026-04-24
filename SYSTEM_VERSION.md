@@ -2,26 +2,28 @@
 
 > Auto-updated by `/health`. Do not edit manually.
 
-**version: 6.9.3**
+**version: 7.0.0**
 **last_updated: 2026-04-24**
 
 ## Component Counts
 
 | Component | Count | Last Updated |
 |-----------|-------|-------------|
-| Hooks (files) | 24 | 2026-04-24 |
+| Hooks (files) | 30 | 2026-04-24 |
 | Commands (total) | 58 | 2026-04-24 |
 | Skills (on disk) | 124 | 2026-04-24 |
 | Skills (in ACTIVE-DIRECTORY) | 76 | 2026-04-24 |
 | Agents | 74 | 2026-04-24 |
 | Rules | 3 (RULES-GIT, RULES-SECURITY, RULES-TESTING) | 2026-04-20 |
-| Knowledge entries | 72 | 2026-04-20 |
+| Knowledge entries | 73 | 2026-04-24 |
+| Scheduled tasks (enabled) | 4 | 2026-04-24 |
+| Cleanup rules | 13 | 2026-04-24 |
 
 ## Knowledge Breakdown
 
 | Category | Count |
 |----------|-------|
-| Patterns (G-PAT) | 29 |
+| Patterns (G-PAT) | 30 |
 | Solutions (G-SOL) | 17 |
 | Mistakes (G-ERR) | 12 |
 | Preferences (G-PREF) | 8 |
@@ -52,9 +54,17 @@
 
 | Key | Value |
 |-----|-------|
-| version | 6.9.3 |
+| version | 7.0.0 |
 | last_health_check | 2026-04-24 |
 | hook_event_types | 8 (Notification, PostToolUse, PostToolUseFailure, PreToolUse, PreCompact, SessionStart, Stop, UserPromptSubmit) |
 | disk_total | 351MB |
 | disk_skills | 14MB |
 | disk_projects | 266MB |
+
+## v7.0 Highlights
+
+- **Unified cleanup engine** — `hooks/cleanup-runner.js` drives 13 declarative rules from `hooks/cleanup-config.json`; replaces v6.x §7a–§7k bespoke blocks in `session-start.sh`.
+- **Skill-usage instrumentation** — new PreToolUse `Skill` hook writes `logs/skill-usage.jsonl`; `skill-stats.json` is superseded.
+- **Observability dashboard** — `/observe` renders 6 sections (tool health, safety hooks, skill usage, scheduled tasks, action graph, cleanup) from existing + new telemetry.
+- **Scheduled tasks 6→4** — `weekly-cleanup-scan` absorbed into `weekly-maintenance`; `weekly-memory-maintenance` absorbed into `weekly-dream`; both kept disabled for a 1-week shadow period.
+- **Auto-drift-proposer** — `hooks/drift-proposer.js` emits at most ONE session-start advisory when thresholds cross (skill unused, tool failures, task drift, cleanup errors). Thresholds live in `hooks/drift-thresholds.json`.

@@ -18,6 +18,7 @@ Every task follows this sequence. Claude determines the right depth automaticall
 - Context7 for library docs, WebSearch for unfamiliar tech. Don't guess — look up.
 - Ask clarifying questions for ambiguous tasks
 - ACT without asking for: tests, security scans, skill loading, obvious bug fixes
+- **Observability check:** if the task is an ATLAS system review, audit, or "how is the system doing" question, run `/observe` before surfacing findings — the 6-section dashboard is the time-series complement to `/health`'s point-in-time diagnostic.
 
 ### 2. Plan & Execute
 - Apply loaded skills and knowledge — they contain hard-won patterns and known failures.

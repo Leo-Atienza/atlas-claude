@@ -266,6 +266,90 @@ else
   pass "No G-ERR-014 bad patterns (hooks/ + scripts/)"
 fi
 
+# ─── 15. v7.0 Cleanup Engine ────────────────────────────────────────
+echo "[15] v7.0 Cleanup Engine"
+if [ -f "$CLAUDE_DIR/hooks/cleanup-runner.js" ] && [ -f "$CLAUDE_DIR/hooks/cleanup-config.json" ]; then
+  pass "cleanup-runner.js + cleanup-config.json present"
+  CFG_WIN=$(cygpath -w "$CLAUDE_DIR/hooks/cleanup-config.json" 2>/dev/null || echo "$CLAUDE_DIR/hooks/cleanup-config.json")
+  RULE_COUNT=$(node -e "console.log(JSON.parse(require('fs').readFileSync(String.raw\`$CFG_WIN\`,'utf8')).rules.length)" 2>/dev/null || echo "0")
+  if [ "$RULE_COUNT" -ge 13 ]; then
+    pass "cleanup-config.json has $RULE_COUNT rules (expected >= 13)"
+  else
+    fail "cleanup-config.json has $RULE_COUNT rules (expected >= 13)"
+  fi
+  # Dry-run exits 0
+  if node "$CLAUDE_DIR/hooks/cleanup-runner.js" --dry-run >/dev/null 2>&1; then
+    pass "cleanup-runner.js --dry-run exits 0"
+  else
+    fail "cleanup-runner.js --dry-run failed"
+  fi
+else
+  fail "cleanup-runner.js or cleanup-config.json MISSING"
+fi
+
+# ─── 16. v7.0 Skill Usage Log ───────────────────────────────────────
+echo "[16] v7.0 Skill Usage Log"
+if [ -f "$CLAUDE_DIR/hooks/skill-usage-log.js" ]; then
+  pass "skill-usage-log.js present"
+else
+  fail "skill-usage-log.js MISSING"
+fi
+# Hook must be wired in settings.json as a PreToolUse Skill matcher
+if grep -q 'skill-usage-log.js' "$CLAUDE_DIR/settings.json" 2>/dev/null; then
+  pass "settings.json wires skill-usage-log.js"
+else
+  fail "settings.json does NOT reference skill-usage-log.js"
+fi
+# Log file either exists or will be created — just verify directory writable
+if [ -d "$CLAUDE_DIR/logs" ]; then
+  pass "logs/ directory exists for skill-usage.jsonl"
+else
+  fail "logs/ directory MISSING"
+fi
+
+# ─── 17. v7.0 Observability Dashboard ───────────────────────────────
+echo "[17] v7.0 Observability Dashboard"
+if [ -f "$CLAUDE_DIR/scripts/observability.js" ]; then
+  pass "observability.js present"
+  # Run it and count rendered sections (## headers)
+  SECTION_COUNT=$(node "$CLAUDE_DIR/scripts/observability.js" 2>/dev/null | grep -c '^## ' || echo "0")
+  if [ "$SECTION_COUNT" -ge 6 ]; then
+    pass "observability.js renders $SECTION_COUNT sections (expected >= 6)"
+  else
+    fail "observability.js renders $SECTION_COUNT sections (expected >= 6)"
+  fi
+else
+  fail "observability.js MISSING"
+fi
+if [ -f "$CLAUDE_DIR/commands/observe.md" ]; then
+  pass "/observe command present"
+else
+  fail "/observe command MISSING"
+fi
+
+# ─── 18. v7.0 Drift Proposer ────────────────────────────────────────
+echo "[18] v7.0 Drift Proposer"
+if [ -f "$CLAUDE_DIR/hooks/drift-proposer.js" ] && [ -f "$CLAUDE_DIR/hooks/drift-thresholds.json" ]; then
+  pass "drift-proposer.js + drift-thresholds.json present"
+  # Thresholds JSON parse
+  THR_WIN=$(cygpath -w "$CLAUDE_DIR/hooks/drift-thresholds.json" 2>/dev/null || echo "$CLAUDE_DIR/hooks/drift-thresholds.json")
+  node -e "JSON.parse(require('fs').readFileSync(String.raw\`$THR_WIN\`,'utf8'))" 2>/dev/null \
+    && pass "drift-thresholds.json valid JSON" || fail "drift-thresholds.json INVALID JSON"
+  # Proposer exits 0 in clean system
+  if node "$CLAUDE_DIR/hooks/drift-proposer.js" >/dev/null 2>&1; then
+    pass "drift-proposer.js exits 0"
+  else
+    fail "drift-proposer.js returns non-zero"
+  fi
+else
+  fail "drift-proposer.js or drift-thresholds.json MISSING"
+fi
+if [ -f "$CLAUDE_DIR/commands/apply-drift-fix.md" ]; then
+  pass "/apply-drift-fix command present"
+else
+  fail "/apply-drift-fix command MISSING"
+fi
+
 # ─── Summary ────────────────────────────────────────────────────────
 echo ""
 echo "=== Results: $PASS passed, $FAIL failed, $WARN warnings ==="

@@ -286,3 +286,36 @@ Define 4 semantic motion tokens (snappy/standard/gentle/cinematic) with equivale
 **When to apply**: Multi-library animation projects where visual consistency across tool boundaries matters.
 
 **Source**: Cinematic Web Engine (SK-096)
+
+---
+
+## G-PAT-036: Tailwind CSS v4 Custom Properties via @theme inline
+**Date**: 2026-04-12 | **Tags**: #tailwind #css #custom-properties #nextjs
+
+Tailwind CSS v4 removed `tailwind.config.ts` extend for custom theme values. Instead, define custom properties directly in CSS using `@theme inline`:
+```css
+@theme inline {
+  --color-accent: oklch(0.65 0.18 15);
+  --font-heading: 'Playfair Display', serif;
+  --spacing-section: 5rem;
+}
+```
+These become Tailwind utility classes automatically: `text-accent`, `font-heading`, `py-section`. The `inline` keyword makes them cascade with the rest of CSS. Do NOT import/configure these in a JS config file — it no longer applies in v4.
+
+**When to apply**: Any project using Tailwind CSS v4 that needs custom colors, fonts, or spacing tokens.
+
+---
+
+## G-PAT-037: Observability over Audit
+**Date**: 2026-04-24 | **Tags**: #observability #telemetry #systems #atlas #v7 | **Confidence**: [HIGH]
+
+Build the consumer before you instrument. ATLAS v6.x added five telemetry streams — `tool-health.json`, `safety-hook-counts.json`, `action-graph-stats.jsonl`, `cleanup.jsonl`, and a placeholder for skill usage — but nothing read them. Drift was caught only when a human ran a manual ULTRATHINK audit. v7.0 inverted the loop: added a single reader (`scripts/observability.js` → `/observe`) that renders the streams as a 6-section dashboard, plus a self-surfacing layer (`drift-proposer.js`) that emits at most one DRIFT advisory per session when thresholds cross. Result: the system proposes fixes instead of waiting to be audited.
+
+**The rule:** every telemetry write must have a named consumer before it ships. If you're emitting `foo.jsonl` and no dashboard, alert, or scheduled job reads it, you're building debt, not observability. The logs are free; the discipline is naming the reader up front.
+
+**Corollary for drift proposers:** cap noise aggressively — per-session max, per-kind cooldown, silencable kinds. A noisy proposer is worse than none, because users learn to ignore it.
+
+**When to apply**: any long-running system (hooks, scheduled jobs, agent pipelines) where state drifts faster than humans can audit manually. Dashboards + self-surfacing beats periodic audits.
+
+**Related**: G-PAT-027 (Verification-Before-Completion), G-PAT-025 (Wave-Based Execution)
+**Source**: ATLAS v7.0 Consolidation & Observability release (2026-04-24)

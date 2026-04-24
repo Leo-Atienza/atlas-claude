@@ -1,4 +1,4 @@
-# ATLAS System Architecture (v6.9.3)
+# ATLAS System Architecture (v7.0.0)
 
 ## Configuration Architecture
 
@@ -34,13 +34,16 @@ All Node hooks import `hooks/lib.js` for shared utilities. Config: `hooks/contex
 | PreToolUse | cctools bash/file/env hooks | Safety hooks |
 | PreToolUse | graph hint (Glob/Grep) | Suggest CRG MCP tools (`.code-review-graph/graph.db`) or graphify (`graphify-out/graph.json`) before broad search |
 | PreToolUse | pre-commit-gate.js | Build/test reminder before git commit |
+| PreToolUse | skill-usage-log.js (Skill) | Append `{ts, skill, cwd, session_id}` per invocation to `logs/skill-usage.jsonl` — feeds `/observe` section 3 + monthly `skill-usage-audit` (v7.0) |
 | PostToolUse | auto-formatter | Format on write |
 | PostToolUse | tsc-check.js | TypeScript check (only .ts/.tsx files, 15s timeout) |
 | PostToolUse | CRG auto-update (Write/Edit/MultiEdit) | Incremental `uvx code-review-graph update` if `.code-review-graph/graph.db` exists (backgrounded, 3s timeout, fail-open) |
 | PostToolUse | post-tool-monitor.js | Context, efficiency, failure tracking + action-graph retrieval logging (Read/Glob/Grep/Write/Edit/MultiEdit/Bash/Agent) |
 | PostToolUseFailure | tool-failure-handler.js | Circuit breaker, tool health, MCP server classification |
 | UserPromptSubmit | allow_git_hook.py | Session-scoped git approval |
-| SessionStart | session-start.sh | Handoff, version, rotation, health, KG |
+| SessionStart | session-start.sh | Handoff, version, rotation, health, KG, unified cleanup engine (§7a), drift proposer (§8a) |
+| SessionStart | cleanup-runner.js | 13 declarative cleanup rules from `cleanup-config.json` (v7.0); one JSONL record per rule to `logs/cleanup.jsonl` |
+| SessionStart | drift-proposer.js | Reads telemetry, emits at most ONE `DRIFT: ...` advisory when a threshold crosses; persists to `cache/last-drift-proposal.json` (v7.0) |
 | Stop | session-stop.sh | Handoff, todos, KG capture |
 | PreCompact | scripts/progressive-learning/precompact-reflect.sh | Preserve KG pre-compaction + action-graph hot-set digest injection (Tier 2) |
 | Notification | claudio | Desktop notifications |
@@ -79,6 +82,27 @@ Three systems, strict boundaries — no overlap.
    - Scope: within-session working memory (complements atlas-kg's cross-session long-term memory)
    - **Tier 2 (2026-04-14):** reference scanner via `post-tool-monitor.js` §5 (flattens `tool_input` strings and bumps `used_count` through 3-tier `markUsed` matching — direct-key → canonical equality → substring containment with path-specificity guard); `compactDigest` survives PreCompact via `scripts/progressive-learning/precompact-reflect.sh`; state-file snapshots kept in `atlas-action-graph/snapshots/`; `used_count` capped on the writer at `retrieved_count × 3`
    - **Tier 3 (2026-04-14):** `statsRollup` appends a one-line per-session summary to `logs/action-graph-stats.jsonl` from `session-stop.sh`; `carryoverDigest` surfaces the previous session's top-5 items at SessionStart (`hooks/session-start.sh` §7i, 48h age guard); `pruneOldSessions(7)` runs on every SessionStart
+
+## Telemetry & Observability (v7.0)
+
+The system generates telemetry at five points; one consumer (`/observe`) renders the lot.
+
+| Stream | Writer | Consumer |
+|---|---|---|
+| `logs/tool-health.json` | `tool-failure-handler.js` (PostToolUseFailure) | `/observe §1` · `drift-proposer` tool-failure channel |
+| `logs/safety-hook-counts.json` | `hooks/cctools-safety-hooks/bash_hook.py::_bump_counter` | `/observe §2` |
+| `logs/skill-usage.jsonl` | `hooks/skill-usage-log.js` (PreToolUse Skill, v7.0) | `/observe §3` · `drift-proposer` skill-unused channel · `skill-usage-audit` scheduled task |
+| `cache/scheduled-tasks-latest.json` | `/observe` (via `mcp__scheduled-tasks__list_scheduled_tasks`) | `/observe §4` · `drift-proposer` scheduled-task-drift channel |
+| `logs/action-graph-stats.jsonl` | `hooks/atlas-action-graph.js::statsRollup` (Stop) | `/observe §5` |
+| `logs/cleanup.jsonl` | `hooks/cleanup-runner.js` (SessionStart, v7.0) | `/observe §6` · `drift-proposer` cleanup-error-streak channel · `weekly-maintenance` step 3 |
+
+**Consumer surfaces:**
+
+- `/observe` → `scripts/observability.js` — 6-section markdown dashboard. Flags: `--json`, `--section=<name>`. Empty-safe per section.
+- `/apply-drift-fix` — reads `cache/last-drift-proposal.json` and routes to the right action (skill archive, MCP disable, task retrigger, cleanup-rule fix).
+- `drift-proposer.js` thresholds live in `hooks/drift-thresholds.json`. Per-kind cooldown (24h) + `max_proposals_per_session: 1` + `silenced_kinds` allowlist prevent noise.
+
+**Cleanup engine:** `hooks/cleanup-runner.js` replaced `session-start.sh` §7a–§7k (10+ bespoke blocks). Config in `hooks/cleanup-config.json` declares 13 rules across 7 modes (`age-prune`, `age-and-count`, `keep-last`, `delete-matching-dirs`, `age-prune-dirs`, `gzip-then-trash`, `per-project-uuid-dirs`, `weekly-nag`, `custom`). Adding a new target is a 3-line config change.
 
 ## MCP Servers
 

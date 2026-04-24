@@ -104,6 +104,7 @@ process.exit(0)   // JS — no stdout
 | `cctools bash_hook.py` | PreToolUse | Bash | Unified gate: runs 6 checks (rm-block, git-add, git-checkout, git-commit, env-file, secret-patterns). Imports `rm_block_hook.py` — do NOT register as a separate hook. Git checks are gated by the `allow_git_hook.py` session flag. Blocks only, no logs. |
 | `cctools file_length_limit_hook.py` | PreToolUse | Write\|Edit | (blocks only, no logs) |
 | `cctools read_env_protection_hook.py` | PreToolUse | Read | (blocks only, no logs) |
+| `skill-usage-log.js` | PreToolUse | Skill | `logs/skill-usage.jsonl` (v7.0 — appends `{ts, skill, cwd, session_id}` per Skill invocation; feeds `/observe` "Skill usage" section and `drift-proposer.js` skill_unused detector; fail-open) |
 | graph hint (inline bash) | PreToolUse | Glob\|Grep | (stdout only — prefers CRG `.code-review-graph/graph.db` → MCP tools, falls back to graphify `graphify-out/graph.json` → `GRAPH_REPORT.md`) |
 | `allow_git_hook.py` | UserPromptSubmit | * | (session-scoped git approval, no logs) |
 | `auto-formatter` | PostToolUse | Write\|Edit\|MultiEdit | (no logs) |
@@ -112,7 +113,9 @@ process.exit(0)   // JS — no stdout
 | `tsc-check.js` | PostToolUse | Write\|Edit\|MultiEdit | (stdout only — TS errors as additionalContext) |
 | `post-tool-monitor.js` | PostToolUse | Read\|Glob\|Grep\|Write\|Edit\|MultiEdit\|Bash\|Agent | `logs/failures.jsonl`, `logs/error-patterns.json`, `logs/hook-health.jsonl`, `logs/tool-call-counts.json`, `cache/efficiency-*.json` (efficiency counts/failure logging stay bounded to expensive tools via `MATCH_EXPENSIVE` guard; Read/Glob/Grep only feed action-graph logging) |
 | `tool-failure-handler.js` | PostToolUseFailure | * | `logs/tool-failures.jsonl`, `logs/tool-health.json` (MCP failures tagged with `is_mcp: true`) |
-| `session-start.sh` | SessionStart | * | (stdout only) |
+| `session-start.sh` | SessionStart | * | (stdout only — v7.0 delegates §7a–§7k bespoke cleanup to `cleanup-runner.js`, and fires `drift-proposer.js` §8a after §8 stale-temp cleanup) |
+| `cleanup-runner.js` | SessionStart (§7a via session-start.sh) | * | `logs/cleanup.jsonl` (v7.0 — declarative engine, 13 rules in `cleanup-config.json`, 9 modes; `--dry-run` supported; fail-open per rule) |
+| `drift-proposer.js` | SessionStart (§8a via session-start.sh) | * | `cache/last-drift-proposal.json` (v7.0 — at most 1 DRIFT advisory per session when thresholds in `drift-thresholds.json` cross; 24h per-kind cooldown; `/apply-drift-fix` consumes) |
 | `session-stop.sh` | Stop | * | `handoffs/<cwd-slug>.md` (per-CWD — `/`, `\`, `:` → `_`) |
 | `scripts/progressive-learning/precompact-reflect.sh` | PreCompact | * | (stdout only — Tier 2: action-graph digest injection + state.json snapshot) |
 | `claudio` | Notification | * | (external) |
