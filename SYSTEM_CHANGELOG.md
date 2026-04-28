@@ -1,5 +1,32 @@
 # System Changelog
 
+## [7.0.2] — 2026-04-28 (Namespace polish — extractor + ACTIVE-DIRECTORY drift)
+
+Two follow-up items that v7.0.1 left dangling:
+
+**1. `atlas-extractor.js` taxonomy.** The session-stop tagger still emitted legacy prefixes (`G-PAT`/`G-SOL`/`G-ERR`/`G-PREF`/`G-FAIL`) in its docstring, `typeToTag()` map, and `[<TAG>]` output line. After v7.0.1 unified the knowledge namespace into `KNOWLEDGE-NNN` with a `**Type**:` field, the tagger was the last surface still vending the old vocabulary. Removed `typeToTag()` and the `atlas_tag` field; the tagger now emits `[pattern]` / `[solution]` / etc. directly from the `type` field. `hooks/session-stop.sh:121` swapped `m.atlas_tag` → `m.type` to match.
+
+**2. `skills/ACTIVE-DIRECTORY.md` post-archive drift.** Wave 1 of v7.0.1 archived 45 skill dirs to `skills/_archived/` but the directory tables kept their rows. Header claimed 76 active skills; the real number was 38. Plus two phantom rows for skills that were declared but never built (`SK-124` Supabase Expert, `SK-125` Stripe Expert — neither dir exists anywhere in `skills/`).
+
+**Files changed**
+- `hooks/atlas-extractor.js` — docstring updated, `typeToTag()` removed, `atlas_tag` field dropped, `[${m.atlas_tag}]` → `[${m.type}]`.
+- `hooks/session-stop.sh:121` — `m.atlas_tag` → `m.type`.
+- `skills/ACTIVE-DIRECTORY.md` — header `76 (15 Core + 61 Available)` → `36 (9 Core + 27 Available)`. 40 stale rows removed (38 archive-backed + 2 phantom).
+- `skills/ACTIVE-PAGE-1-web-frontend.md` — 19 archived rows removed; 6 sections collapsed (Vanguard Architecture, 3D & Immersive, CSS & Styling, Streaming & Data, Build Tooling, Design & UX).
+- `skills/ACTIVE-PAGE-2-backend-tools.md` — 6 rows removed (4 archive-backed + 2 phantom); Codebase Intelligence section collapsed.
+- `skills/ACTIVE-PAGE-3-native-crossplatform.md` — moved to `C:/tmp/trash/atlas-v7.0.2/`. Every row was archive-backed; nothing left to host. If native skills return, recreate from the SYMLINKS.md template.
+
+**Verification**
+- `grep -c '^\| SK-' skills/ACTIVE-DIRECTORY.md` → `36` (matches header).
+- Walked every `Path` column in PAGE-1 and PAGE-2 — all 33 `skills/...` paths resolve to a live dir or symlink. No `BROKEN` entries.
+- `echo "..." | node hooks/atlas-extractor.js extract-stdin | grep -cE 'atlas_tag\|G-(PAT\|SOL\|ERR\|PREF\|FAIL)'` → `0`.
+- Compact form: `[pattern] (0.8) ...` (was `[G-PAT] (0.8) ...`).
+
+**Rollback**
+`git revert <commit>` on this commit restores all five files + recreates PAGE-3. The extractor change is self-contained — no state migration. `_archived/` skill dirs are untouched, so re-adding any removed row is `mv skills/_archived/<name>/ skills/<name>/` then `git revert`.
+
+---
+
 ## [7.0.1] — 2026-04-28 (ATLAS Reduction — namespace unification + doc diet)
 
 ### Theme — fewer surfaces, one ID per registry, docs that match what ships
@@ -174,8 +201,8 @@ A third ULTRATHINK review audited the system and surfaced 17 findings (6 HIGH, 6
 - L1: `SYSTEM_VERSION.md` drift repair — version 6.9.1 → 6.9.2, CLI 2.1.104 → 2.1.118, Hooks 14 → 24, Commands 48 → 58, Skills on disk 105 → 124, Skills in ACTIVE-DIRECTORY 72 → 76. ACTIVE-DIRECTORY.md header count synced.
 
 **Wave 3 — Path bug investigation + orphan cleanup + preview health**
-- H6: Root cause identified for `C:\c\Users\leooa\...` double-drive-prefix ENOENTs — `node -e` scripts that embed Unix-style `/c/Users/...` paths as literal strings. Node on Windows resolves them against the current drive, not as absolute POSIX paths. Documented as `G-ERR-014` in `topics/KNOWLEDGE-PAGE-3-errors.md` with correct/incorrect examples so future sessions avoid the antipattern. Not a hook bug — hooks themselves use `os.homedir()` and `path.join` correctly.
-- H5: Orphan project transcript dirs `projects/C--/` (Mar 30) and `projects/C--Users-leooa/` (Feb 11) moved to `/c/tmp/trash/2026-04-24-orphan-projects/` per "never rm" rule.
+- H6: Root cause identified for `C:\c\Users\<user>\...` double-drive-prefix ENOENTs — `node -e` scripts that embed Unix-style `/c/Users/...` paths as literal strings. Node on Windows resolves them against the current drive, not as absolute POSIX paths. Documented as `G-ERR-014` in `topics/KNOWLEDGE-PAGE-3-errors.md` with correct/incorrect examples so future sessions avoid the antipattern. Not a hook bug — hooks themselves use `os.homedir()` and `path.join` correctly.
+- H5: Orphan project transcript dirs `projects/C--/` (Mar 30) and `projects/C--Users-<user>/` (Feb 11) moved to `/c/tmp/trash/2026-04-24-orphan-projects/` per "never rm" rule.
 - H4: `logs/health-suppress.json` zeroed out (`{}`) so new Bash/Read failures surface freshly. `preview_screenshot` recovery requires a project-scoped session (`~/projects/atlas-claude/` or anniversary site) — cross-scope preview start from `~/.claude/` would violate the session-scope rule. Noted for next project session.
 
 **Wave 4 — Tool updates + cache hygiene**
@@ -221,7 +248,7 @@ A second ULTRATHINK review ran three parallel Explore agents against the post-v6
 - M8: Added Python-tmp-aware cleanup for `allow-git-*` flag files in `session-start.sh §8` — existing cleanup only touched Node's tmpdir, leaving Python's `/tmp/claude/allow-git-*` to accumulate unboundedly across sessions
 - M9: Added dedup guard + test-session filter to `atlas-action-graph.js` `statsRollup()` — prevents the 4x duplicate rows observed for session `e2b2be95` and skips `verify-*`/`test-*`/`smoke-*` session IDs from polluting production stats
 - L1: Removed stale `rm` permissions from `settings.local.json` (`TRASH-cleanup`/`TRASH-FILES.md` targets no longer exist, and the perms contradicted the rm-block hook)
-- L2: Fixed double-slash paths `Read(//tmp/**)` / `Read(//c/Users/leooa/**)` in `settings.local.json`
+- L2: Fixed double-slash paths `Read(//tmp/**)` / `Read(//c/Users/<user>/**)` in `settings.local.json`
 - L5: Confirmed CLAUDE.md dated section headers already cleaned in Wave 1 M1
 - L8: Documented the `medium` hook profile in `hooks/lib.js` comment (comment listed only `minimal|standard` despite `medium` being defined in `HOOK_PROFILES`)
 

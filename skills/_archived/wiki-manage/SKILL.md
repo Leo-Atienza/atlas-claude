@@ -25,7 +25,7 @@ Input Analysis
 
 | Path | Purpose |
 |------|---------|
-| `C:\Users\leooa\Documents\Wiki\` | Vault root (bash: `/c/Users/leooa/Documents/Wiki/`) |
+| `&lt;your-wiki-path&gt;\` | Vault root (bash: `~/Documents/Wiki/`) |
 | `raw/` | Immutable source drops (articles/, papers/, clips/) |
 | `wiki/index.md` | Page catalog — read first on every query |
 | `wiki/log.md` | Append-only activity trail |
@@ -45,8 +45,8 @@ Use **native Claude Code file tools** — no Obsidian MCP required:
 | Read a wiki page | `Read` |
 | Write a new page | `Write` |
 | Update a page | `Edit` |
-| List pages in a dir | `Bash`: `ls /c/Users/leooa/Documents/Wiki/wiki/**/*.md` or `find /c/Users/leooa/Documents/Wiki/wiki -name "*.md"` |
-| Search page content | `Grep` across path `C:\Users\leooa\Documents\Wiki\wiki\` |
+| List pages in a dir | `Bash`: `ls ~/Documents/Wiki/wiki/**/*.md` or `find ~/Documents/Wiki/wiki -name "*.md"` |
+| Search page content | `Grep` across path `&lt;your-wiki-path&gt;\wiki\` |
 | Save raw source | `Write` to `raw/{subdir}/YYYY-MM-DD-{slug}.md` |
 
 Obsidian MCP (`mcp__obsidian__*` or `mcp__MCP_DOCKER__obsidian_*`) may be used as an enhancement if available, but is never required.
@@ -114,9 +114,9 @@ After ingest, verify:
 
 ### Steps
 
-1. **Check hot.md** — `Read C:\Users\leooa\Documents\Wiki\wiki\hot.md` (warm cache)
-2. **Read index.md** — `Read C:\Users\leooa\Documents\Wiki\wiki\index.md` — scan for matching titles/summaries
-3. **Search vault** — `Grep` with keyword pattern across `C:\Users\leooa\Documents\Wiki\wiki\`
+1. **Check hot.md** — `Read &lt;your-wiki-path&gt;\wiki\hot.md` (warm cache)
+2. **Read index.md** — `Read &lt;your-wiki-path&gt;\wiki\index.md` — scan for matching titles/summaries
+3. **Search vault** — `Grep` with keyword pattern across `&lt;your-wiki-path&gt;\wiki\`
 4. **Read matched pages** — `Read` each matched file path
 5. **Follow wikilinks** — if matched pages have `related:` entries, `Read` those pages one hop deep
 6. **Synthesize response** — combine knowledge from multiple pages. Always cite sources as `[[Page Title]]` wikilinks.
@@ -136,7 +136,7 @@ After ingest, verify:
 
 ### Steps
 
-1. **List all pages** — `Bash`: `find /c/Users/leooa/Documents/Wiki/wiki -name "*.md"`
+1. **List all pages** — `Bash`: `find ~/Documents/Wiki/wiki -name "*.md"`
 2. **Check each page for** (`Read` each file):
    - Valid YAML frontmatter (title, type, created, updated present)
    - `sources:` references actual files in `raw/` (not phantom)

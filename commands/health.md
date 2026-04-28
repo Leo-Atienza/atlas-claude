@@ -72,7 +72,8 @@ grep -c "^## G-" ~/.claude/topics/KNOWLEDGE-PAGE-*.md 2>/dev/null
 ## 4. Memory System Health
 
 ```bash
-test -f ~/.claude/projects/C--Users-leooa--claude/memory/MEMORY.md && echo "OK: MEMORY.md exists" || echo "MISSING: MEMORY.md"
+CWD_SLUG=$(printf '%s' "$HOME/.claude" | sed -e 's|[/\\:]|-|g' -e 's|--*|-|g' -e 's|^-||' -e 's|-$||')
+test -f ~/.claude/projects/"$CWD_SLUG"/memory/MEMORY.md && echo "OK: MEMORY.md exists" || echo "MISSING: MEMORY.md"
 test -f ~/.claude/.pending-reflection && echo "PENDING: Reflection missed" || echo "OK: No pending reflections"
 ```
 

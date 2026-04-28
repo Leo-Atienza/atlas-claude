@@ -2,12 +2,6 @@
 
 > These skills are always available. Load on-demand when a task matches their domain.
 
-## Vanguard Architecture
-
-| ID | Name | Path | Description |
-|----|------|------|-------------|
-| SK-083 | Vanguard Web Architecture | `skills/web-l100/SKILL.md` | Orchestrates web stack via Render Tiers (T0-T4), CSS-First principle, streaming pipeline |
-
 ## Web Frameworks
 
 | ID | Name | Path | Description |
@@ -16,9 +10,6 @@
 | SK-030 | Next.js Cache & PPR | `skills/next-cache-components/SKILL.md` | Cache Components, Partial Prerendering, use cache, cacheLife, cacheTag |
 | SK-031 | Next.js Upgrade Guide | `skills/next-upgrade/SKILL.md` | Step-by-step Next.js version migration with breaking change resolution |
 | SK-034 | Web Interface Guidelines | `skills/web-design-guidelines/SKILL.md` | Web design compliance review and interface quality checks |
-| SK-045 | Advanced JavaScript & TypeScript | `skills/advanced-javascript/SKILL.md` | TC39 (ES2025+), V8 optimization, concurrency patterns, advanced TypeScript |
-| SK-054 | Web Platform APIs | `skills/web-platform-apis/SKILL.md` | View Transitions, Popover API, Anchor Positioning, Scroll-Driven Animations, WebGPU |
-| SK-055 | TanStack Ecosystem | `skills/tanstack-ecosystem/SKILL.md` | TanStack Query + Form + Router for React applications |
 | SK-116 | TypeScript Expert | `skills/fullstack-dev/typescript-pro/SKILL.md` | Strict TypeScript, generics, conditional types, type safety patterns |
 | SK-118 | Next.js Developer | `skills/fullstack-dev/nextjs-developer/SKILL.md` | Next.js App Router, RSC, SSR, middleware, route handlers |
 | SK-119 | React Expert | `skills/fullstack-dev/react-expert/SKILL.md` | React component patterns, hooks, state management, performance |
@@ -29,44 +20,6 @@
 |----|------|------|-------------|
 | SK-005 | Frontend Design System | `skills/frontend-design/SKILL.md` | Production-grade frontend interfaces with animation, CSS, responsive design |
 | SK-042 | GSAP Core Animation | `skills/gsap/SKILL.md` | Tweens, timelines, utilities, GSAP performance optimization |
-| SK-044 | GSAP Advanced (ScrollTrigger) | `skills/gsap-advanced/SKILL.md` | ScrollTrigger, Flip, Draggable, SplitText, framework integration |
-| SK-047 | Motion (Framer Motion) | `skills/motion-animation/SKILL.md` | React animation: springs, layout animations, gestures, scroll, exit |
-| SK-048 | Lenis Smooth Scroll | `skills/lenis-smooth-scroll/SKILL.md` | Lightweight smooth scroll (3KB gzipped) with GSAP/ScrollTrigger integration |
-| SK-093 | Anime.js v4 | `skills/anime-js/SKILL.md` | Modular lightweight animation — stagger reveals, text effects, WAAPI engine |
-| SK-094 | Barba.js Page Transitions | `skills/barba-js/SKILL.md` | MPA smooth page transitions — GSAP timeline orchestration, view lifecycle |
-| SK-096 | Cinematic Web Engine | `skills/cinematic-web-engine/SKILL.md` | Unified animation orchestration — SALA, Layer Ownership, Motion Tokens |
-
-## 3D & Immersive
-
-| ID | Name | Path | Description |
-|----|------|------|-------------|
-| SK-007 | Three.js 3D Graphics | `skills/threejs/SKILL.md` | Scene, geometry, materials, shaders, R3F, Drei, WebGPU, 3D animation |
-| SK-095 | Spline 3D Runtime | `skills/spline-3d/SKILL.md` | Design-to-web 3D — lazy loading, events, React/Next.js, performance |
-
-## CSS & Styling
-
-| ID | Name | Path | Description |
-|----|------|------|-------------|
-| SK-084 | CSS-First UI Engine | `skills/css-first-ui/SKILL.md` | Container Queries, :has(), @layer, native Popover+Anchor, OKLCH — zero-JS UI |
-
-## Streaming & Data
-
-| ID | Name | Path | Description |
-|----|------|------|-------------|
-| SK-085 | Streaming & Cache Architecture | `skills/streaming-cache/SKILL.md` | Compositional cache, Activity, ViewTransition, selective hydration |
-| SK-086 | AI-Native UI | `skills/ai-native-ui/SKILL.md` | AI SDK streaming patterns, tool-to-component, generative UI within PPR |
-
-## Build Tooling
-
-| ID | Name | Path | Description |
-|----|------|------|-------------|
-| SK-087 | Modern Build Pipeline | `skills/modern-build-pipeline/SKILL.md` | Biome 2.0, Lightning CSS, Turbopack — Rust-powered tooling |
-
-## Design & UX
-
-| ID | Name | Path | Description |
-|----|------|------|-------------|
-| SK-006 | UX Design Intelligence | `skills/ui-design-stack/SKILL.md` | UX strategy with 67 design styles, 161 palettes, BM25 semantic search |
 
 ## Testing & Quality
 
@@ -79,11 +32,9 @@
 
 | ID | Name | Path | Description |
 |----|------|------|-------------|
-| SK-078 | Design Audit | `skills/design-audit/SKILL.md` | 5-dimension technical audit: Accessibility, Performance, Theming, Responsive, Anti-Patterns (scored /20) |
-| SK-079 | Design Critique | `skills/design-critique/SKILL.md` | 10-dimension UX evaluation: Nielsen heuristics (scored /40), persona-based red flag testing |
 | SK-080 | Design Polish | `skills/design-polish/SKILL.md` | Final quality pass: 20-item checklist across alignment, typography, color, states, motion, code quality |
 
-> **Design QA workflow**: Build → `/critique` (design quality) → fix → `/audit` (technical quality) → fix → `/polish` (final pass) → ship
+> **Design QA workflow**: Build → fix → `/polish` (final pass) → ship. (Pre-v7.0.2 critique/audit stages were absorbed into `/polish` after `design-audit/` and `design-critique/` were archived.)
 
 ## Security (Always Active on PRs)
 

@@ -5,12 +5,12 @@
  * Extracted from mempalace/general_extractor.py, evolved for ATLAS.
  *
  * Pure regex/heuristic classifier — zero LLM calls, zero dependencies.
- * Classifies text into ATLAS knowledge taxonomy:
- *   G-PAT (pattern)    — reusable approach, convention, or technique
- *   G-SOL (solution)   — specific problem + fix
- *   G-ERR (error)      — mistake to avoid, what went wrong
- *   G-PREF (preference) — user preference, style choice, "always/never" rules
- *   G-FAIL (failure)   — approach that was tried and didn't work
+ * Classifies text into the unified KNOWLEDGE-NNN taxonomy via the `type` field:
+ *   pattern    — reusable approach, convention, or technique
+ *   solution   — specific problem + fix
+ *   error      — mistake to avoid, what went wrong
+ *   preference — user preference, style choice, "always/never" rules
+ *   failure    — approach that was tried and didn't work
  *
  * Integration: session-stop (auto-extract), precompact (extract before compaction)
  */
@@ -260,7 +260,6 @@ function extractMemories(text, opts = {}) {
     memories.push({
       content: segment.trim(),
       type: maxType,
-      atlas_tag: typeToTag(maxType),
       confidence: Math.round(confidence * 100) / 100,
       preview: segment.trim().replace(/\n/g, " ").slice(0, 100),
     });
@@ -271,17 +270,6 @@ function extractMemories(text, opts = {}) {
   return memories.slice(0, maxResults);
 }
 
-function typeToTag(type) {
-  const map = {
-    pattern: "G-PAT",
-    solution: "G-SOL",
-    error: "G-ERR",
-    preference: "G-PREF",
-    failure: "G-FAIL",
-  };
-  return map[type] || "G-PAT";
-}
-
 // ── Compact Output (for hook integration) ────────────────────────────
 
 function extractCompact(text) {
@@ -290,7 +278,7 @@ function extractCompact(text) {
 
   const lines = ["EXTRACTED_MEMORIES:"];
   for (const m of memories.slice(0, 5)) {
-    lines.push(`  [${m.atlas_tag}] (${m.confidence}) ${m.preview}...`);
+    lines.push(`  [${m.type}] (${m.confidence}) ${m.preview}...`);
   }
   return lines.join("\n");
 }

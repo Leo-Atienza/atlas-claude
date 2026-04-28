@@ -162,7 +162,7 @@ Legacy GSD hooks removed (2026-03-16)
 
 ## Living Memory subsystem (Bentley plan, 2026-04-26 onwards)
 
-The memory system at `~/.claude/projects/C--Users-leooa--claude/memory/` is being upgraded from passive markdown + flat index into a self-maintaining cognitive substrate (full plan: `~/.claude/plans/i-want-you-to-purring-bentley.md`). Markdown remains the source of truth; everything below is derived/regenerable.
+The memory system at `~/.claude/projects/&lt;your-cwd-slug&gt;/memory/` is being upgraded from passive markdown + flat index into a self-maintaining cognitive substrate (full plan: `~/.claude/plans/i-want-you-to-purring-bentley.md`). Markdown remains the source of truth; everything below is derived/regenerable.
 
 ### Required runtime
 | Component | Version | Install method | Purpose |

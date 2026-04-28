@@ -4,8 +4,8 @@
 
 # Per-CWD handoff file so two projects can't clobber each other's handoffs.
 # Slug: replace /, \, : with _; collapse repeats; strip leading/trailing _.
-#   /c/Users/leooa/.claude            -> c_Users_leooa_.claude
-#   /c/Users/leooa/Documents/Foo      -> c_Users_leooa_Documents_Foo
+#   /c/Users/<user>/.claude            -> c_Users_<user>_.claude
+#   /c/Users/<user>/Documents/Foo      -> c_Users_<user>_Documents_Foo
 cwd_slug() {
   printf '%s' "$1" | sed -e 's|[/\\:]|_|g' -e 's|__*|_|g' -e 's|^_||' -e 's|_$||'
 }
@@ -118,7 +118,7 @@ if [ -f "$KG_SCRIPT" ] && [ -f "$HANDOFF_FILE" ]; then
           const items = JSON.parse(process.argv[1]).filter(m => m.confidence >= 0.5);
           if (items.length > 0) {
             console.log("ATLAS_EXTRACT: " + items.length + " candidate(s)");
-            items.slice(0,3).forEach(m => console.log("  [" + m.atlas_tag + "] " + m.preview.slice(0,80)));
+            items.slice(0,3).forEach(m => console.log("  [" + m.type + "] " + m.preview.slice(0,80)));
           }
         } catch(e) {
           process.stderr.write("atlas-extractor parse error: " + e.message + "\n");
@@ -128,6 +128,74 @@ if [ -f "$KG_SCRIPT" ] && [ -f "$HANDOFF_FILE" ]; then
         echo "$EXTRACTED" >> "$HANDOFF_FILE"
       fi
     fi
+  fi
+fi
+
+# ─── 1c. Session hot cache (L1 — per-CWD continuity for next session) ──
+# Tight ≤500-token summary read by session-start.sh. Composes deterministic
+# pieces (handoff fields, in_progress todos, action-graph hot files). No LLM
+# call — that's /reflect's job. Path: cache/session-hot/${cwd_slug}.md.
+SESSION_HOT_DIR="$HOME/.claude/cache/session-hot"
+mkdir -p "$SESSION_HOT_DIR" 2>/dev/null || true
+SESSION_HOT_FILE="$SESSION_HOT_DIR/${CWD_SLUG}.md"
+
+{
+  echo "---"
+  echo "cwd: $(pwd)"
+  echo "ended_at: ${TODAY} ${NOW}"
+  [ -n "$SESSION_ID" ] && echo "session_id: ${SESSION_ID}"
+  echo "---"
+  echo ""
+  echo "## State at end"
+  if [ -f "$HANDOFF_FILE" ]; then
+    grep -E '^(branch|uncommitted_changes|workflow_state):' "$HANDOFF_FILE" 2>/dev/null | sed 's/^/- /'
+    RECENT=$(awk '/^recent_commits:/{flag=1; next} /^$/{flag=0} flag' "$HANDOFF_FILE" 2>/dev/null | head -3)
+    if [ -n "$RECENT" ]; then
+      echo "- recent_commits:"
+      echo "$RECENT" | sed 's/^/  /'
+    fi
+  fi
+  echo ""
+
+  # Pending todos (in_progress + pending) from this session
+  if [ -d "$TODOS_DIR" ]; then
+    PENDING_FILES=$(grep -l '"in_progress"\|"pending"' "$TODOS_DIR"/*.json 2>/dev/null | head -2)
+    if [ -n "$PENDING_FILES" ]; then
+      echo "## Open"
+      for f in $PENDING_FILES; do
+        node -e '
+const fs = require("fs");
+try {
+  const todos = JSON.parse(fs.readFileSync(process.argv[1], "utf8"));
+  for (const t of todos) {
+    if (t.status === "in_progress") console.log("- [IN PROGRESS] " + (t.content || ""));
+    else if (t.status === "pending") console.log("- [PENDING] " + (t.content || ""));
+  }
+} catch(e) {}
+' "$f" 2>/dev/null
+      done
+      echo ""
+    fi
+  fi
+
+  # Action-graph hot files (top items by priority, ≤400 token budget)
+  if [ -n "$SESSION_ID" ]; then
+    DIGEST=$(node "$HOME/.claude/hooks/atlas-action-graph.js" digest "$SESSION_ID" --budget=400 2>/dev/null)
+    if [ -n "$DIGEST" ] && [ "$DIGEST" != "Action graph empty." ]; then
+      echo "## Hot files"
+      echo "$DIGEST"
+    fi
+  fi
+} > "$SESSION_HOT_FILE" 2>/dev/null
+
+# Hard cap at ~2500 chars (~500 tokens) — defense against grep/digest growth.
+if [ -f "$SESSION_HOT_FILE" ]; then
+  CHARS=$(wc -c < "$SESSION_HOT_FILE" 2>/dev/null || echo 0)
+  if [ "$CHARS" -gt 2500 ]; then
+    head -c 2500 "$SESSION_HOT_FILE" > "${SESSION_HOT_FILE}.tmp" 2>/dev/null \
+      && mv "${SESSION_HOT_FILE}.tmp" "$SESSION_HOT_FILE" 2>/dev/null
+    echo "" >> "$SESSION_HOT_FILE"
+    echo "<!-- truncated -->" >> "$SESSION_HOT_FILE"
   fi
 fi
 

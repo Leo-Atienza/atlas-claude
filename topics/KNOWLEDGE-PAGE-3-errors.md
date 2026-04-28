@@ -104,13 +104,13 @@ const sig = await crypto.subtle.sign('HMAC', key, encoder.encode(payload))
 ## KNOWLEDGE-059: `node -e` with Unix `/c/` Paths Double-Drive-Prefix Bug
 **Date**: 2026-04-24 | **Type**: error | **Last audited**: 2026-04-24 | **Tags**: #windows #node #bash #paths
 
-When running `node -e "..."` in Git Bash on Windows, Node.js does NOT recognize Unix-style absolute paths embedded **inside the script string** — e.g. `'/c/Users/leooa/...'` is treated as a relative path, producing `C:\c\Users\leooa\...` (ENOENT). Silent failure because the tool-health log suppresses chronic Bash streaks.
+When running `node -e "..."` in Git Bash on Windows, Node.js does NOT recognize Unix-style absolute paths embedded **inside the script string** — e.g. `'/c/Users/&lt;user&gt;/...'` is treated as a relative path, producing `C:\c\Users\&lt;user&gt;\...` (ENOENT). Silent failure because the tool-health log suppresses chronic Bash streaks.
 
 **Symptoms** (from `logs/tool-failures.jsonl`):
 ```
-Error: ENOENT: no such file or directory, open 'C:\c\Users\leooa\.claude\logs\action-graph-stats.jsonl'
+Error: ENOENT: no such file or directory, open 'C:\c\Users\&lt;user&gt;\.claude\logs\action-graph-stats.jsonl'
 ```
-Triggered by: `node -e "fs.readFileSync('/c/Users/leooa/.claude/...')"`
+Triggered by: `node -e "fs.readFileSync('/c/Users/&lt;user&gt;/.claude/...')"`
 
 ### Why argv works but string-literals don't
 
@@ -118,7 +118,7 @@ Git Bash (MSYS2) auto-converts `/c/...` → `C:/...` when passing **argv** to na
 
 ```bash
 $ node -e 'console.log(process.argv[1])' "$HOME/.claude/logs/hook-health.jsonl"
-C:/Users/leooa/.claude/logs/hook-health.jsonl    # ← argv mangled, safe
+C:/Users/&lt;user&gt;/.claude/logs/hook-health.jsonl    # ← argv mangled, safe
 ```
 
 ### Safe patterns (all three verified in tree)
@@ -140,10 +140,10 @@ node -e "const p = require('path').join(require('os').homedir(), '.claude/logs/x
 
 ```bash
 # ✗ Literal /c/... inside single-quoted script — no argv mangling, ENOENT
-node -e 'require("fs").readFileSync("/c/Users/leooa/.claude/x.json", "utf8")'
+node -e 'require("fs").readFileSync("/c/Users/&lt;user&gt;/.claude/x.json", "utf8")'
 
 # ✗ Hardcoded C:/... with unescaped backslashes — Node parses weirdly
-node -e "require('fs').readFileSync('C:\Users\leooa\...', 'utf8')"
+node -e "require('fs').readFileSync('C:\Users\&lt;user&gt;\...', 'utf8')"
 ```
 
 **Prevention rule**: Never hardcode absolute paths inside `node -e` script strings. Always (a) pass via argv and read `process.argv[n]`, (b) round-trip through `cygpath -w` + `String.raw\`...\``, or (c) resolve inside Node via `os.homedir()` / `process.env.HOME`.

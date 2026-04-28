@@ -4,12 +4,12 @@
 
 ## Pattern
 
-37 skills in `~/.claude/skills/` are symlinks pointing to `/c/Users/leooa/.agents/skills/`.
+37 skills in `~/.claude/skills/` are symlinks pointing to `~/.agents/skills/`.
 These are Anthropic-maintained or community skills installed via the agents ecosystem.
 
 ## Source
 
-All symlinks target: `/c/Users/leooa/.agents/skills/<skill-name>`
+All symlinks target: `~/.agents/skills/<skill-name>`
 
 ## Linked Skills
 

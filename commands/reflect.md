@@ -26,7 +26,7 @@ KNOWLEDGE_PAGES:
   PAGE_3 = ~/.claude/topics/KNOWLEDGE-PAGE-3-errors.md       (G-ERR)
   PAGE_4 = ~/.claude/topics/KNOWLEDGE-PAGE-4-preferences.md  (G-PREF)
   PAGE_5 = ~/.claude/topics/KNOWLEDGE-PAGE-5-failed-approaches.md (G-FAIL)
-GLOBAL_MEMORY   = ~/.claude/projects/C--Users-leooa--claude/memory
+GLOBAL_MEMORY   = ~/.claude/projects/&lt;your-cwd-slug&gt;/memory  (slug pattern in commands/continue.md)
 
 LOCAL_MEMORY = <cwd>/.claude/memory  (only if not already in ~/.claude)
 </constants>

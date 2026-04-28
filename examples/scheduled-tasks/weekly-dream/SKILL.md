@@ -10,7 +10,8 @@ You are running the weekly automatic memory consolidation (dream) and maintenanc
 Before dreaming, sanity-check the memory directory:
 
 ```bash
-MEM_DIR=~/.claude/projects/C--Users-leooa--claude/memory
+CWD_SLUG=$(printf '%s' "$HOME/.claude" | sed -e 's|[/\\:]|-|g' -e 's|--*|-|g' -e 's|^-||' -e 's|-$||')
+MEM_DIR=~/.claude/projects/"$CWD_SLUG"/memory
 ls "$MEM_DIR"/*.md 2>/dev/null | wc -l            # count memory files
 grep -c "^- \[" "$MEM_DIR/MEMORY.md" 2>/dev/null  # count indexed entries
 ```

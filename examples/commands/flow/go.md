@@ -31,10 +31,10 @@ Context budget: ~15% orchestrator, 100% fresh per subagent.
 $ARGUMENTS
 
 Reference files:
-@C:/Users/leooa/.claude/skills/flow/references/deviation-rules.md
-@C:/Users/leooa/.claude/skills/flow/references/checkpoints.md
-@C:/Users/leooa/.claude/skills/flow/references/background-workers.md
-@C:/Users/leooa/.claude/rules/tier-routing.md
+@~/.claude/skills/flow/references/deviation-rules.md
+@~/.claude/skills/flow/references/checkpoints.md
+@~/.claude/skills/flow/references/background-workers.md
+@~/.claude/rules/tier-routing.md
 </context>
 
 <process>

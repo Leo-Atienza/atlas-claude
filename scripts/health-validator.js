@@ -20,7 +20,7 @@ const { execSync } = require('child_process');
 const CLAUDE_DIR = path.join(os.homedir(), '.claude');
 const SKILLS_DIR = path.join(CLAUDE_DIR, 'skills');
 // Find the project-scoped memory directory by scanning projects/*/memory/MEMORY.md
-// Claude Code encodes paths with -- separators (e.g. C--Users-leooa--claude)
+// Claude Code encodes paths with -- separators (e.g. C--Users-<user>--claude)
 // which is hard to reverse-engineer cross-platform, so we glob for it instead.
 const MEMORY_DIR = (function() {
   const projectsDir = path.join(CLAUDE_DIR, 'projects');

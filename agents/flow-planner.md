@@ -766,7 +766,7 @@ Output: [Artifacts created]
 </objective>
 
 <execution_context>
-@C:/Users/leooa/.claude/flow/workflows/execute-plan.md
+@~/.claude/flow/workflows/execute-plan.md
 </execution_context>
 
 <context>

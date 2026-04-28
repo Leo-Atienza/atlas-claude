@@ -25,7 +25,7 @@
 4. **Reference**: `REFERENCE.md` — slash commands, MCP patterns, skill routing, DevOps generators
 
 5. **Living Memory** (Bentley plan, 2026-04-26 onwards) — Phase 0 + Phase 1 shipped:
-   - **Source of truth (Phase 0)**: `projects/C--Users-leooa--claude/memory/{semantic,episodic,procedural,reflection,_pending,forgotten}/*.md`
+   - **Source of truth (Phase 0)**: `projects/<cwd-slug>/memory/{semantic,episodic,procedural,reflection,_pending,forgotten}/*.md` (slug pattern documented in `commands/continue.md`)
    - **Substrate (Phase 1)**: `memory/lib/schema.sql` (11 tables), `memory/package.json` (better-sqlite3 + sqlite-vec, isolated from create-atlas-env), derived index `memory/index.db` regenerable via `/memory:rebuild`
    - **Future phases** (embedder, pipeline, retrieval ranker, decay/dream lifecycle, slash commands) — design lives in [plans/i-want-you-to-purring-bentley.md](plans/i-want-you-to-purring-bentley.md) and the 3 supporting research docs (audit, research synthesis, implementation blueprint)
 

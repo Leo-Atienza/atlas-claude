@@ -36,9 +36,9 @@ $ARGUMENTS
 - `--gaps` — Gap closure mode: create plans to fix verification failures
 
 Reference files:
-@C:/Users/leooa/.claude/skills/flow/references/state-management.md
-@C:/Users/leooa/.claude/skills/flow/references/checkpoints.md
-@C:/Users/leooa/.claude/skills/flow/references/deviation-rules.md
+@~/.claude/skills/flow/references/state-management.md
+@~/.claude/skills/flow/references/checkpoints.md
+@~/.claude/skills/flow/references/deviation-rules.md
 </context>
 
 <process>

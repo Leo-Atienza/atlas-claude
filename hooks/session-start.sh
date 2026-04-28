@@ -256,7 +256,8 @@ if [ $(( NOW - LAST_BACKUP )) -ge 604800 ]; then
   STAMP=$(date +%Y%m%d)
   cp -f "$CLAUDE_DIR/CLAUDE.md" "$BACKUP_DIR/CLAUDE-${STAMP}.md" 2>/dev/null || true
   cp -f "$CLAUDE_DIR/skills/ACTIVE-DIRECTORY.md" "$BACKUP_DIR/ACTIVE-DIRECTORY-${STAMP}.md" 2>/dev/null || true
-  MEMORY_SRC="$CLAUDE_DIR/projects/C--Users-leooa--claude/memory"
+  CWD_SLUG=$(printf '%s' "$CLAUDE_DIR" | sed -e 's|[/\\:]|-|g' -e 's|--*|-|g' -e 's|^-||' -e 's|-$||')
+  MEMORY_SRC="$CLAUDE_DIR/projects/$CWD_SLUG/memory"
   if [ -d "$MEMORY_SRC" ] && command -v tar >/dev/null 2>&1; then
     tar czf "$BACKUP_DIR/memory-${STAMP}.tar.gz" -C "$(dirname "$MEMORY_SRC")" "$(basename "$MEMORY_SRC")" 2>/dev/null || true
   fi

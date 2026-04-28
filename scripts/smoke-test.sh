@@ -234,7 +234,8 @@ fi
 
 # ─── 13. Memory System ──────────────────────────────────────────────
 echo "[13] Memory System"
-MEMORY_DIR="$CLAUDE_DIR/projects/C--Users-leooa--claude/memory"
+CWD_SLUG=$(printf '%s' "$CLAUDE_DIR" | sed -e 's|[/\\:]|-|g' -e 's|--*|-|g' -e 's|^-||' -e 's|-$||')
+MEMORY_DIR="$CLAUDE_DIR/projects/$CWD_SLUG/memory"
 if [ -f "$MEMORY_DIR/MEMORY.md" ]; then
   pass "MEMORY.md exists"
   BROKEN_REFS=""
