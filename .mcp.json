@@ -1,63 +1,7 @@
 {
-  "_comment_purpose": "PROJECT-SCOPE MCP registry for sessions with CWD=~/.claude/. IS loaded by Claude Code in this directory (confirmed 2026-04-17 — prior claim it was dormant was wrong; parsing was failing because `_comment_*` keys used to live inside `mcpServers` as strings, which broke strict JSON-schema parse of the whole object). Parsing rule: `_comment_*` keys MUST be at the top level of the JSON (siblings of `mcpServers`), NEVER inside `mcpServers`. For GLOBAL availability across all CWDs, register via `claude mcp add -s user` which writes to ~/.claude.json.",
-  "_comment_status_2026_04_17": "Audit + revival completed 2026-04-17. 12 entries promoted to ~/.claude.json user scope for global access (shadcn, prisma, expo, mobile, posthog, cloudflare, linear, context-mode, lighthouse, heroui, aceternity, tauri-mcp). Previously already promoted: iconify. Removed: storybook (Storybook addon — needs project context, not standalone), openapi (requires --spec path arg). Remaining entries below load at project scope when CWD=~/.claude/ but need auth keys to actually function. Each entry has an `_activate` field with the exact `claude mcp add -s user -e KEY=...` command to promote to user scope once the key is set.",
-  "_comment_followup_2026_04_17": "Follow-up fixes on the same day: (1) netlify package corrected from @anthropic-ai/netlify-mcp-server (never existed on npm) to @netlify/mcp@1.15.1+ — now ✓ Connected from project scope. (2) vercel removed from local scope with wrong URL, re-added at user scope as https://mcp.vercel.com (was https://mcp.vercel.com/mcp) — now ! OAuth-pending. (3) Statsig previously documented as 'silently dropped' is actually registered at user scope and shows `! Needs authentication`. (4) plugin:github:github (Claude plugins marketplace) fails because its bundled config at ~/.claude/plugins/cache/claude-plugins-official/github/unknown/.mcp.json requires GITHUB_PERSONAL_ACCESS_TOKEN env var — set it (or use gh auth token) to fix. (5) stripe/upstash are NOT package-resolution failures — packages resolve fine; they exit at boot on missing API-key env vars. These are the only two remaining true-failing entries that can't be fixed without API keys.",
-  "_comment_applitools": "Removed 2026-04-13: trial-only (14-day), no free tier. Re-add from INSTALLED.md if license acquired.",
+  "_comment_purpose": "PROJECT-SCOPE MCP registry for sessions with CWD=~/.claude/. Servers here load only for system-maintenance work in this dir; per-project servers belong in each project's own .mcp.json. Parsing rule: `_comment_*` keys MUST be at the top level (siblings of `mcpServers`), NEVER inside `mcpServers`. For GLOBAL availability across all CWDs, register via `claude mcp add -s user`.",
+  "_comment_wave2_2026_04_27": "Wave 2 prune: cut 9 project-scope servers (supabase, stripe, resend, sentry, upstash, netlify, firecrawl, 21st-dev, maestro). Each is documented in INSTALLED.md with one-command re-add for per-project use. Statsig retained at user request pending future auth.",
   "mcpServers": {
-    "supabase": {
-      "command": "npx",
-      "args": ["-y", "@supabase/mcp-server-supabase@latest"],
-      "env": { "SUPABASE_ACCESS_TOKEN": "${SUPABASE_ACCESS_TOKEN}" },
-      "_activate": "Set SUPABASE_ACCESS_TOKEN, then: claude mcp add -s user -e SUPABASE_ACCESS_TOKEN=$env:SUPABASE_ACCESS_TOKEN supabase -- npx -y @supabase/mcp-server-supabase@latest"
-    },
-    "stripe": {
-      "command": "npx",
-      "args": ["-y", "@stripe/mcp@latest"],
-      "env": { "STRIPE_SECRET_KEY": "${STRIPE_SECRET_KEY}" },
-      "_activate": "Set STRIPE_SECRET_KEY, then: claude mcp add -s user -e STRIPE_SECRET_KEY=$env:STRIPE_SECRET_KEY stripe -- npx -y @stripe/mcp@latest"
-    },
-    "resend": {
-      "command": "npx",
-      "args": ["-y", "resend-mcp"],
-      "env": { "RESEND_API_KEY": "${RESEND_API_KEY}" },
-      "_activate": "Set RESEND_API_KEY, then: claude mcp add -s user -e RESEND_API_KEY=$env:RESEND_API_KEY resend -- npx -y resend-mcp"
-    },
-    "sentry": {
-      "command": "npx",
-      "args": ["-y", "@sentry/mcp-server"],
-      "env": { "SENTRY_ACCESS_TOKEN": "${SENTRY_ACCESS_TOKEN}" },
-      "_activate": "Set SENTRY_ACCESS_TOKEN, then: claude mcp add -s user -e SENTRY_ACCESS_TOKEN=$env:SENTRY_ACCESS_TOKEN sentry -- npx -y @sentry/mcp-server"
-    },
-    "upstash": {
-      "command": "npx",
-      "args": ["-y", "@upstash/mcp-server@latest"],
-      "env": { "UPSTASH_EMAIL": "${UPSTASH_EMAIL}", "UPSTASH_API_KEY": "${UPSTASH_API_KEY}" },
-      "_activate": "Set UPSTASH_EMAIL + UPSTASH_API_KEY, then: claude mcp add -s user -e UPSTASH_EMAIL=$env:UPSTASH_EMAIL -e UPSTASH_API_KEY=$env:UPSTASH_API_KEY upstash -- npx -y @upstash/mcp-server@latest"
-    },
-    "netlify": {
-      "command": "npx",
-      "args": ["-y", "@netlify/mcp@latest"],
-      "env": { "NETLIFY_ACCESS_TOKEN": "${NETLIFY_ACCESS_TOKEN}" },
-      "_activate": "Two auth paths: (a) browser OAuth via Netlify CLI — `npm i -g netlify-cli && netlify login` (no API key needed); (b) env-var — set NETLIFY_ACCESS_TOKEN then: claude mcp add -s user -e NETLIFY_ACCESS_TOKEN=$env:NETLIFY_ACCESS_TOKEN netlify -- npx -y @netlify/mcp@latest",
-      "_fixed_2026_04_17": "Package renamed from @anthropic-ai/netlify-mcp-server (never existed on npm) to @netlify/mcp@1.15.1+ — verified via npm view. MCP handshake confirmed healthy 2026-04-17 09:16 (NetlifyUnauthError returned cleanly when get-user invoked without auth)."
-    },
-    "firecrawl": {
-      "command": "npx",
-      "args": ["-y", "firecrawl-mcp"],
-      "env": { "FIRECRAWL_API_KEY": "${FIRECRAWL_API_KEY}" },
-      "_activate": "Set FIRECRAWL_API_KEY, then: claude mcp add -s user -e FIRECRAWL_API_KEY=$env:FIRECRAWL_API_KEY firecrawl -- npx -y firecrawl-mcp"
-    },
-    "21st-dev": {
-      "command": "npx",
-      "args": ["-y", "@21st-dev/magic@latest"],
-      "env": { "TWENTY_FIRST_API_KEY": "${TWENTY_FIRST_API_KEY}" },
-      "_activate": "Set TWENTY_FIRST_API_KEY from 21st.dev/magic-chat/console, then: claude mcp add -s user -e TWENTY_FIRST_API_KEY=$env:TWENTY_FIRST_API_KEY 21st-dev -- npx -y @21st-dev/magic@latest"
-    },
-    "maestro": {
-      "command": "wsl",
-      "args": ["-d", "Ubuntu", "--", "bash", "-c", "export PATH=\"$PATH:$HOME/.maestro/bin\" && maestro mcp"],
-      "_activate": "Requires Ubuntu WSL2 + Maestro 2.4.0 at ~/.maestro/bin. Activate: claude mcp add -s user maestro -- wsl -d Ubuntu -- bash -c 'export PATH=\"$PATH:$HOME/.maestro/bin\" && maestro mcp'"
-    },
     "statsig": {
       "type": "http",
       "url": "https://api.statsig.com/v1/mcp",

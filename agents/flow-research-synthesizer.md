@@ -73,7 +73,7 @@ When sources conflict, flag and resolve:
 The planner reads your document to make implementation decisions. Every section should answer: "What should I do?"
 
 - Not: "There are 3 options for state management"
-- But: "Use Zustand for state management (matches existing `src/store/` pattern, recommended by official Next.js docs, proven in past project G-SOL-042)"
+- But: "Use Zustand for state management (matches existing `src/store/` pattern, recommended by official Next.js docs, proven in past project KNOWLEDGE-042)"
 
 </philosophy>
 

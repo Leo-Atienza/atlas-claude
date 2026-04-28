@@ -38,7 +38,7 @@ Every task follows this sequence. Claude determines the right depth automaticall
 - Only when genuinely novel: save patterns to Knowledge Store (score 4+), mistakes to G-ERR.
 - Tag confidence: `[HIGH]` (reproduced 3+), `[MEDIUM]` (once), `[LOW]` (theoretical).
 
-**Trivial tasks** (<20 lines, 1 file, obvious intent): Skip to execute. No questions, no plan.
+**Trivial tasks** = no ambiguity AND <20 lines AND 1 file. If any is uncertain, it isn't trivial — research first (see No-Guess Mandate below).
 
 ## Task Complexity
 
@@ -121,7 +121,7 @@ Load these when the task requires them — not every session:
 
 ## Skills & Knowledge
 
-- **Skills**: Read `skills/ACTIVE-DIRECTORY.md` → load the relevant page on-demand.
+- **Skills**: Read `skills/ACTIVE-DIRECTORY.md` → load the relevant page on-demand. Before creating a new skill via `/skill-creator`, check `skills/ARCHIVE-DIRECTORY.md` and `skills/_archived/` for an existing match — restore via `mv skills/_archived/<name>/ skills/<name>/` instead of duplicating.
 - **Knowledge**: Read `topics/KNOWLEDGE-DIRECTORY.md` → load relevant page. Check G-ERR and G-FAIL before implementing.
 - **Reference**: Read `REFERENCE.md` for slash commands, MCP patterns, generators.
 - **MCP**: Prefer MCP over CLI. TOOL_SEARCH discovers tools on-demand. Context7 is mandatory for framework tasks.
@@ -141,67 +141,17 @@ Windows 11 host. Claude Code's shell is bash — use Unix syntax (forward slashe
 
 Scratchpad: `C:/tmp/claude-scratchpad/`.
 
-## Automatic Workflows
+## Hook-Driven Workflows
 
-### Auto-Graph-Navigation (codebase tasks)
-When starting any non-trivial task in a project directory:
-1. Check `[ -f .code-review-graph/graph.db ]` before any Glob/Grep.
-2. **CRG graph found:** prefer CRG MCP tools — start with `get_minimal_context(task="...")` (~100 tokens), then `query_graph` for specific targets, `get_impact_radius` for change analysis. Follow `next_tool_suggestions` in every response. Fall back to Grep/Glob only when the graph doesn't cover what you need.
-3. **No CRG graph, check graphify:** `[ -f graphify-out/graph.json ]` → read `GRAPH_REPORT.md`, use `python -m graphify query`.
-4. **No graph, 20+ code files:** offer `uvx code-review-graph build` (Tree-sitter, 23 langs, ~10s for 500 files).
-5. **After editing code:** CRG auto-updates via PostToolUse hook. Graphify still needs `python -m graphify --update` at session end.
-
-### Auto-History-Check (review/audit tasks)
-When the task is a review, critique, or audit of any system or codebase:
-1. Check reference memories for a known git repo (e.g., `reference_atlas_github.md`)
-2. Run `git log --oneline -20` on that repo before writing any findings
-3. Cross-reference every finding against recent commits — skip anything already fixed
-4. If no git repo exists, note that findings reflect current state only
-
-### Auto-System-Docs (ATLAS infrastructure changes)
-When changes are made to hooks, settings.json, skills, or CLAUDE.md itself:
-1. Update `ARCHITECTURE.md` if structure or hook table changed
-2. Update `hooks/README.md` if hooks were added, removed, or modified
-3. **Only when CWD is `~/projects/atlas-claude/`:** Bump `SYSTEM_VERSION.md` + append `SYSTEM_CHANGELOG.md`
-4. Update `INSTALLED.md` if third-party resources changed
-5. Do this as part of the Deliver phase — don't wait to be asked
-
-### Auto-Handoff (every session end)
-When the session is ending:
-1. Run full build + all tests — do not commit if either fails
-2. Commit all pending changes with a descriptive conventional commit message (include test count/pass rate)
-3. Push to the current branch
-4. Print the session handoff as a copy-paste markdown block in chat (no file on disk)
-5. If project has `wiki/` directory, update `wiki/session-log.md` with session summary
-6. Update memory if anything session-worthy was learned
-
-### Auto-Action-Graph (in-session working memory)
-Every Read/Glob/Grep is logged to `~/.claude/atlas-action-graph/` with priority scoring. Write/Edit/Bash/Agent `tool_input`s are scanned for references to previously-logged paths, bumping their `used_count` via 3-tier matching (direct key → canonical equality → substring containment with a path-specificity guard). Duplicate reads on unchanged files surface an advisory through `context-guard.js`. At PreCompact, the hot set survives as a ~2K-token digest injected by `scripts/progressive-learning/precompact-reflect.sh`, alongside a state-file snapshot in `atlas-action-graph/snapshots/`. At SessionStart, the previous session's top-5 items carry over if the state file is < 48h old, and `logs/action-graph-stats.jsonl` receives one line per completed session. All behavior is automatic, fail-open, and gated by `ATLAS_HOOK_PROFILE` via `isHookEnabled`.
+Hook-driven workflows fire automatically — see ARCHITECTURE.md (Auto-Graph-Navigation, Auto-History-Check, Auto-System-Docs, Auto-Handoff, Auto-Action-Graph).
 
 ## Graceful Degradation
 
 If a skill, hook, or script is missing or fails: continue without it, note the failure, suggest a fix.
 
-## App Development MCP Servers
+## App Development
 
-| Server | Purpose | Surface |
-|--------|---------|---------|
-| `tauri-mcp` | Build, dev, test Tauri v2 projects (pairs with SK-088) | Desktop |
-| `maestro` | Mobile E2E testing with auto-healing selectors (Android on Win, iOS needs macOS) | Mobile testing |
-| `statsig` | Feature flags, A/B experiments, metrics (free 50M events/mo) — OAuth | Lifecycle |
-| `lighthouse` | Performance/a11y/SEO audits on URLs, runs locally | Runtime quality |
-| `firecrawl` | Clean markdown extraction from webpages | Research |
-| `21st-dev`, `heroui`, `aceternity`, `shadcn`, `magicuidesign`, `iconify` | Component + icon registries | UI sourcing |
-| `supabase`, `resend`, `sentry`, `netlify`, `vercel`, `prisma` | Backend + deployment + error tracking | Platform |
-
-### App Dev Slash Commands
-- `/new-mobile-app` — Scaffold Expo + Supabase mobile project
-- `/new-desktop-app` — Scaffold Tauri desktop project
-- `/api-design` — Design and generate API from spec
-- `/db-schema` — Design and validate database schema
-
-### App Dev Skills (Expo Official, 2026-04-12)
-Installed from `expo/skills`: expo-api-routes, expo-cicd-workflows, expo-deployment, expo-dev-client, expo-module, expo-tailwind-setup, expo-ui-jetpack-compose, expo-ui-swiftui, native-data-fetching, upgrading-expo, use-dom
+App-dev MCP servers, slash commands, and skills documented in INSTALLED.md.
 
 ## Skills Registry
 

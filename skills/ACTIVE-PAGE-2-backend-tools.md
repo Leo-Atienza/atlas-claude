@@ -6,11 +6,11 @@
 
 | ID | Name | Path | Description |
 |----|------|------|-------------|
-| FS-012 | SQL Expert | `skills/fullstack-dev/sql-pro/SKILL.md` | SQL optimization, strategic indexes, query planning |
-| FS-028 | API Designer | `skills/fullstack-dev/api-designer/SKILL.md` | REST API design, OpenAPI 3.1, RFC 7807 error responses |
-| FS-052 | PostgreSQL Expert | `skills/fullstack-dev/postgres-pro/SKILL.md` | PostgreSQL optimization, administration, extensions |
-| FS-060 | Supabase Expert | `skills/fullstack-dev/supabase-pro/SKILL.md` | Auth, RLS, Storage, Edge Functions, Realtime, TypeScript types |
-| FS-061 | Stripe Expert | `skills/fullstack-dev/stripe-pro/SKILL.md` | Checkout Sessions, Subscriptions, Webhooks, Customer Portal |
+| SK-117 | SQL Expert | `skills/fullstack-dev/sql-pro/SKILL.md` | SQL optimization, strategic indexes, query planning |
+| SK-120 | API Designer | `skills/fullstack-dev/api-designer/SKILL.md` | REST API design, OpenAPI 3.1, RFC 7807 error responses |
+| SK-123 | PostgreSQL Expert | `skills/fullstack-dev/postgres-pro/SKILL.md` | PostgreSQL optimization, administration, extensions |
+| SK-124 | Supabase Expert | `skills/fullstack-dev/supabase-pro/SKILL.md` | Auth, RLS, Storage, Edge Functions, Realtime, TypeScript types |
+| SK-125 | Stripe Expert | `skills/fullstack-dev/stripe-pro/SKILL.md` | Checkout Sessions, Subscriptions, Webhooks, Customer Portal |
 
 ## Deployment & Testing
 
@@ -24,8 +24,8 @@
 
 | ID | Name | Path | Description |
 |----|------|------|-------------|
-| FS-033 | Testing Strategist | `skills/fullstack-dev/test-master/SKILL.md` | Testing strategies, patterns, and coverage optimization |
-| FS-035 | Debugging Expert | `skills/fullstack-dev/debugging-wizard/SKILL.md` | Systematic debugging methodology and root cause analysis |
+| SK-121 | Testing Strategist | `skills/fullstack-dev/test-master/SKILL.md` | Testing strategies, patterns, and coverage optimization |
+| SK-122 | Debugging Expert | `skills/fullstack-dev/debugging-wizard/SKILL.md` | Systematic debugging methodology and root cause analysis |
 
 ## Workflow & System
 
@@ -45,7 +45,7 @@
 
 | ID | Name | Path | Description |
 |----|------|------|-------------|
-| SK-081 | Codebase Knowledge Graph | `skills/codebase-knowledge-graph/SKILL.md` | AST + semantic extraction → queryable knowledge graph. 71.5x token reduction. Confidence-scored relationships (EXTRACTED/INFERRED/AMBIGUOUS) |
+| SK-081 | Codebase Knowledge Graph (Router) | `skills/codebase-knowledge-graph/SKILL.md` | Router: **CRG** (`code-review-graph`, MCP-native, Tree-sitter, 23 langs, auto-update on edit, 8.2× avg reduction) for code-only. **graphify** for mixed corpora (docs + papers + images, 71.5×, confidence-scored edges) |
 | SK-082 | Graph-Aware Code Review | `skills/graph-aware-review/SKILL.md` | Blast-radius analysis for token-efficient code review. 8.2x token reduction. Computes minimal affected file sets via dependency tracing |
 
 ## Planning & Product (mattpocock)

@@ -19,9 +19,9 @@
 | SK-045 | Advanced JavaScript & TypeScript | `skills/advanced-javascript/SKILL.md` | TC39 (ES2025+), V8 optimization, concurrency patterns, advanced TypeScript |
 | SK-054 | Web Platform APIs | `skills/web-platform-apis/SKILL.md` | View Transitions, Popover API, Anchor Positioning, Scroll-Driven Animations, WebGPU |
 | SK-055 | TanStack Ecosystem | `skills/tanstack-ecosystem/SKILL.md` | TanStack Query + Form + Router for React applications |
-| FS-002 | TypeScript Expert | `skills/fullstack-dev/typescript-pro/SKILL.md` | Strict TypeScript, generics, conditional types, type safety patterns |
-| FS-020 | Next.js Developer | `skills/fullstack-dev/nextjs-developer/SKILL.md` | Next.js App Router, RSC, SSR, middleware, route handlers |
-| FS-021 | React Expert | `skills/fullstack-dev/react-expert/SKILL.md` | React component patterns, hooks, state management, performance |
+| SK-116 | TypeScript Expert | `skills/fullstack-dev/typescript-pro/SKILL.md` | Strict TypeScript, generics, conditional types, type safety patterns |
+| SK-118 | Next.js Developer | `skills/fullstack-dev/nextjs-developer/SKILL.md` | Next.js App Router, RSC, SSR, middleware, route handlers |
+| SK-119 | React Expert | `skills/fullstack-dev/react-expert/SKILL.md` | React component patterns, hooks, state management, performance |
 
 ## Animation & Motion
 
@@ -73,7 +73,7 @@
 | ID | Name | Path | Description |
 |----|------|------|-------------|
 | SK-056 | Vitest Testing Framework | `skills/vitest-testing/SKILL.md` | Fast unit testing + Testing Library + test pyramid patterns |
-| CE-005 | Code Review | `skills/context-engineering-kit/code-review/` | Unified code review (sub-skills: review-local-changes/, review-pr/) |
+| SK-115 | Code Review | `skills/context-engineering-kit/code-review/` | Unified code review (sub-skills: review-local-changes/, review-pr/) |
 
 ## Design QA Pipeline
 
@@ -89,6 +89,6 @@
 
 | ID | Name | Path | Description |
 |----|------|------|-------------|
-| SC-001 | Sharp Edges Scanner | `skills/trailofbits-security/sharp-edges/skills/sharp-edges/SKILL.md` | API footguns, dangerous defaults, fail-open patterns |
-| SC-002 | Differential Risk Review | `skills/trailofbits-security/differential-review/skills/differential-review/SKILL.md` | Risk classification on diffs, attack scenario generation |
-| SC-003 | Insecure Defaults Detector | `skills/trailofbits-security/insecure-defaults/skills/insecure-defaults/SKILL.md` | Hardcoded secrets, weak crypto defaults, fail-open detection |
+| SK-112 | Sharp Edges Scanner | `skills/trailofbits-security/sharp-edges/skills/sharp-edges/SKILL.md` | API footguns, dangerous defaults, fail-open patterns |
+| SK-113 | Differential Risk Review | `skills/trailofbits-security/differential-review/skills/differential-review/SKILL.md` | Risk classification on diffs, attack scenario generation |
+| SK-114 | Insecure Defaults Detector | `skills/trailofbits-security/insecure-defaults/skills/insecure-defaults/SKILL.md` | Hardcoded secrets, weak crypto defaults, fail-open detection |

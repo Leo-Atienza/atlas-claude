@@ -24,6 +24,11 @@
 
 4. **Reference**: `REFERENCE.md` — slash commands, MCP patterns, skill routing, DevOps generators
 
+5. **Living Memory** (Bentley plan, 2026-04-26 onwards) — Phase 0 + Phase 1 shipped:
+   - **Source of truth (Phase 0)**: `projects/C--Users-leooa--claude/memory/{semantic,episodic,procedural,reflection,_pending,forgotten}/*.md`
+   - **Substrate (Phase 1)**: `memory/lib/schema.sql` (11 tables), `memory/package.json` (better-sqlite3 + sqlite-vec, isolated from create-atlas-env), derived index `memory/index.db` regenerable via `/memory:rebuild`
+   - **Future phases** (embedder, pipeline, retrieval ranker, decay/dream lifecycle, slash commands) — design lives in [plans/i-want-you-to-purring-bentley.md](plans/i-want-you-to-purring-bentley.md) and the 3 supporting research docs (audit, research synthesis, implementation blueprint)
+
 ## Hooks
 
 All Node hooks import `hooks/lib.js` for shared utilities. Config: `hooks/context-thresholds.json`.
@@ -49,6 +54,45 @@ All Node hooks import `hooks/lib.js` for shared utilities. Config: `hooks/contex
 | Notification | claudio | Desktop notifications |
 | StatusLine | statusline.js | Context bar, task, call count |
 
+## Hook-driven workflows
+
+These behaviors fire automatically based on the hooks above, not on explicit prompts.
+
+### Auto-Graph-Navigation (codebase tasks)
+When starting any non-trivial task in a project directory:
+1. Check `[ -f .code-review-graph/graph.db ]` before any Glob/Grep.
+2. **CRG graph found:** prefer CRG MCP tools — start with `get_minimal_context(task="...")` (~100 tokens), then `query_graph` for specific targets, `get_impact_radius` for change analysis. Follow `next_tool_suggestions` in every response. Fall back to Grep/Glob only when the graph doesn't cover what you need.
+3. **No CRG graph, check graphify:** `[ -f graphify-out/graph.json ]` → read `GRAPH_REPORT.md`, use `python -m graphify query`.
+4. **No graph, 20+ code files:** offer `uvx code-review-graph build` (Tree-sitter, 23 langs, ~10s for 500 files).
+5. **After editing code:** CRG auto-updates via PostToolUse hook. Graphify still needs `python -m graphify --update` at session end.
+
+### Auto-History-Check (review/audit tasks)
+When the task is a review, critique, or audit of any system or codebase:
+1. Check reference memories for a known git repo (e.g., `reference_atlas_github.md`)
+2. Run `git log --oneline -20` on that repo before writing any findings
+3. Cross-reference every finding against recent commits — skip anything already fixed
+4. If no git repo exists, note that findings reflect current state only
+
+### Auto-System-Docs (ATLAS infrastructure changes)
+When changes are made to hooks, settings.json, skills, or CLAUDE.md itself:
+1. Update `ARCHITECTURE.md` if structure or hook table changed
+2. Update `hooks/README.md` if hooks were added, removed, or modified
+3. **Only when CWD is `~/projects/atlas-claude/`:** Bump `SYSTEM_VERSION.md` + append `SYSTEM_CHANGELOG.md`
+4. Update `INSTALLED.md` if third-party resources changed
+5. Do this as part of the Deliver phase — don't wait to be asked
+
+### Auto-Handoff (every session end)
+When the session is ending:
+1. Run full build + all tests — do not commit if either fails
+2. Commit all pending changes with a descriptive conventional commit message (include test count/pass rate)
+3. Push to the current branch
+4. Print the session handoff as a copy-paste markdown block in chat (no file on disk)
+5. If project has `wiki/` directory, update `wiki/session-log.md` with session summary
+6. Update memory if anything session-worthy was learned
+
+### Auto-Action-Graph (in-session working memory)
+Every Read/Glob/Grep is logged to `~/.claude/atlas-action-graph/` with priority scoring. Write/Edit/Bash/Agent `tool_input`s are scanned for references to previously-logged paths, bumping their `used_count` via 3-tier matching (direct key → canonical equality → substring containment with a path-specificity guard). Duplicate reads on unchanged files surface an advisory through `context-guard.js`. At PreCompact, the hot set survives as a ~2K-token digest injected by `scripts/progressive-learning/precompact-reflect.sh`, alongside a state-file snapshot in `atlas-action-graph/snapshots/`. At SessionStart, the previous session's top-5 items carry over if the state file is < 48h old, and `logs/action-graph-stats.jsonl` receives one line per completed session. All behavior is automatic, fail-open, and gated by `ATLAS_HOOK_PROFILE` via `isHookEnabled`.
+
 ## Persistence Layer Boundaries
 
 Three systems, strict boundaries — no overlap.
@@ -60,6 +104,25 @@ Three systems, strict boundaries — no overlap.
 | **Atlas KG** (`atlas-kg/`) | Facts not derivable from git, code, or files — architectural decisions, cross-project relationships, non-obvious context | Git data (branch, commits, status) — use `git log` for that |
 
 **When in doubt:** Can `git log` or `grep` answer it? → Don't store it. Is it a user correction? → Feedback memory. Is it a reusable technical pattern? → Knowledge Store.
+
+## Cache Tiers (L1 / L2 / L3)
+
+A second axis over the same artifacts. Persistence Layer Boundaries (above) classify by *kind of fact*; Cache Tiers classify by *access cadence*. Both axes apply to every entry.
+
+| Tier | Loaded | Budget | Stores |
+|------|--------|--------|--------|
+| **L1 — Always loaded** | Every session, automatically | ~10KB | `CLAUDE.md` (core rules) · `projects/*/memory/MEMORY.md` (auto-memory index) · `cache/session-hot/${cwd_slug}.md` (per-CWD session continuity, ≤500 tokens, fresh ≤7d) · skills directory listings · KG summary · action-graph carryover |
+| **L2 — On-demand** | Pulled by skill, command, or routing | unbounded | `skills/ACTIVE-PAGE-*.md` · `topics/KNOWLEDGE-PAGE-*.md` · `atlas-kg/` triples · `Documents/Wiki/wiki/` (entity/concept/source/synthesis) · `handoffs/*.md` |
+| **L3 — Cold storage** | Retrieved only when explicitly referenced | unbounded | `projects/*/*.jsonl` raw transcripts · `Documents/Wiki/raw/` ingested sources · `skills/ARCHIVE-DIRECTORY.md` retired skills · `backups/` · `TRASH/` |
+
+**Movement between tiers:**
+- Session ending → `session-stop.sh` §1c writes L1 `cache/session-hot/${cwd_slug}.md` (≤500 tokens, hard-capped at 2500 chars) + appends L2 `handoffs/${cwd_slug}.md` + KG capture. Pruned at 14d by `session-start.sh`.
+- Session starting → `session-start.sh` injects L1 hot cache + handoff + action-graph carryover (top-5 from previous session).
+- L2 stale → `cleanup-runner.js` rules promote to L3 (transcripts gzip+trash) or trim by `keep_last`.
+- Routing decisions for *new* facts → `config/routing-rules.yml` consulted by `/remember` and the context-router skill.
+- Decay thresholds per content type → `config/decay.yml` (sibling to `cleanup-config.json`, content-type axis).
+
+**Invariant:** L1 must stay under ~10KB. Anything larger is L2 by default, even if it feels "important" — importance ≠ hot.
 
 ## Atlas Intelligence Layer
 

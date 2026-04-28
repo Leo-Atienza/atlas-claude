@@ -69,18 +69,18 @@
 | Design-driven 3D | Spline (SK-095) — visual 3D editor → web runtime |
 | 3D with code (React) | Three.js / R3F (SK-007) — WebGL/WebGPU, Drei helpers |
 | **Backend & Database** | |
-| Supabase integration | Supabase Expert (FS-060) — Auth, RLS, Storage, Edge Functions |
-| Stripe payments | Stripe Expert (FS-061) — Checkout, Subscriptions, Webhooks |
-| SQL optimization | SQL Expert (FS-012) — strategic indexes, query planning |
-| PostgreSQL admin | PostgreSQL Expert (FS-052) — optimization, extensions |
-| API design | API Designer (FS-028) — REST, OpenAPI 3.1, RFC 7807 errors |
+| Supabase integration | Supabase Expert (SK-124) — Auth, RLS, Storage, Edge Functions |
+| Stripe payments | Stripe Expert (SK-125) — Checkout, Subscriptions, Webhooks |
+| SQL optimization | SQL Expert (SK-117) — strategic indexes, query planning |
+| PostgreSQL admin | PostgreSQL Expert (SK-123) — optimization, extensions |
+| API design | API Designer (SK-120) — REST, OpenAPI 3.1, RFC 7807 errors |
 | **Testing & Quality** | |
 | Unit/component test | Vitest (SK-056) + Testing Library |
 | E2E browser test | Playwright (SK-009) — Chromium/Firefox/WebKit |
 | AI-powered E2E test | E2E Testing (SK-027) — mobile and desktop |
 | Test-first development | TDD (SK-070) — red-green-refactor loop |
-| Testing strategy | Testing Strategist (FS-033) — patterns, coverage |
-| Debug systematically | Debugging Expert (FS-035) — root cause analysis |
+| Testing strategy | Testing Strategist (SK-121) — patterns, coverage |
+| Debug systematically | Debugging Expert (SK-122) — root cause analysis |
 | Design QA pipeline | `/critique` → `/audit` → `/polish` (SK-078/079/080) |
 | **Native & Cross-Platform** | |
 | Build a premium mobile app | Universal Conductor (SK-058) — routes to all native skills |
@@ -196,12 +196,12 @@ Every generator has a validator. Always run both.
 
 | Language/Framework | Skill ID | Key Enforcements |
 |---|---|---|
-| TypeScript | FS-002 | Strict TS, proper generics, type safety |
-| React/Next.js | FS-020 + FS-021 + Context7 | Server components, hooks patterns |
-| SQL/PostgreSQL | FS-012 + FS-052 | EXPLAIN before optimizing, strategic indexes |
-| API Design | FS-028 | REST principles, OpenAPI 3.1, RFC 7807 errors |
-| Supabase | FS-060 + Context7 | Auth, RLS, Edge Functions, TypeScript types |
-| Stripe | FS-061 | Checkout, Subscriptions, Webhooks |
+| TypeScript | SK-116 | Strict TS, proper generics, type safety |
+| React/Next.js | SK-118 + SK-119 + Context7 | Server components, hooks patterns |
+| SQL/PostgreSQL | SK-117 + SK-123 | EXPLAIN before optimizing, strategic indexes |
+| API Design | SK-120 | REST principles, OpenAPI 3.1, RFC 7807 errors |
+| Supabase | SK-124 + Context7 | Auth, RLS, Edge Functions, TypeScript types |
+| Stripe | SK-125 | Checkout, Subscriptions, Webhooks |
 
 ---
 

@@ -28,18 +28,18 @@ Also activate from REGISTRY.md: SK-005, SK-029, FS-002, FS-020, FS-021.
 
 Read `~/.claude/topics/KNOWLEDGE-DIRECTORY.md` and scan for tags matching: `#nextjs`, `#tailwind`, `#css`, `#framer-motion`, `#daisy-ui`, `#animation`, `#performance`, `#scroll`.
 
-For every matching G-ERR and G-FAIL topic, read the topic file and apply the lesson proactively. Key known issues:
+For every matching entry with `**Type**: error` or `**Type**: failure`, read the topic file and apply the lesson proactively. Key known issues:
 
-- **G-ERR-005**: `last:` pseudo-class trap with animation wrappers — don't use `last:mb-0` on individually-wrapped items
-- **G-ERR-008**: Stale `.next` cache — kill node + rm -rf .next before rebuilding if dev server was running
-- **G-ERR-009**: `backdrop-blur` on sticky/fixed elements causes scroll jank — use solid bg instead
-- **G-ERR-010**: Framer Motion `whileInView` + `animate` conflict — use separate conditional JSX paths
-- **G-FAIL-002**: `next/dynamic` with `ssr: false` cannot be used in Server Components — wrap in client component
-- **G-FAIL-003**: Mouse-tracking animations (MagicCard style) cause scroll lag with 3+ instances
-- **G-FAIL-006**: Preview MCP headless browser doesn't fire IntersectionObserver — use fallback timers
-- **G-PAT-009**: DaisyUI v4 uses oklch channels — use `oklch(var(--b2))` not `hsl(var(--b2))`
-- **G-SOL-005**: Remove `scroll-behavior: smooth` from html when using Framer Motion `whileInView`
-- **G-SOL-013**: Add scroll-to-top on refresh via `history.scrollRestoration='manual'` in head
+- **KNOWLEDGE-051**: `last:` pseudo-class trap with animation wrappers — don't use `last:mb-0` on individually-wrapped items
+- **KNOWLEDGE-053**: Stale `.next` cache — kill node + rm -rf .next before rebuilding if dev server was running
+- **KNOWLEDGE-054**: `backdrop-blur` on sticky/fixed elements causes scroll jank — use solid bg instead
+- **KNOWLEDGE-055**: Framer Motion `whileInView` + `animate` conflict — use separate conditional JSX paths
+- **KNOWLEDGE-069**: `next/dynamic` with `ssr: false` cannot be used in Server Components — wrap in client component
+- **KNOWLEDGE-070**: Mouse-tracking animations (MagicCard style) cause scroll lag with 3+ instances
+- **KNOWLEDGE-073**: Preview MCP headless browser doesn't fire IntersectionObserver — use fallback timers
+- **DaisyUI v4 oklch channels**: use `oklch(var(--b2))` not `hsl(var(--b2))` (no canonical knowledge entry — record one if you hit this again)
+- **KNOWLEDGE-032**: Remove `scroll-behavior: smooth` from html when using Framer Motion `whileInView`
+- **KNOWLEDGE-040**: Add scroll-to-top on refresh via `history.scrollRestoration='manual'` in head
 
 ## Step 4 — Generate project CLAUDE.md
 

@@ -232,12 +232,12 @@ Show a concise summary:
 Session Reflected
 
 Knowledge captured:
-- G-PAT-014: React useCallback dependency trap (#react #hooks)
-- G-ERR-008: Never await inside useEffect directly (#react #async)
+- KNOWLEDGE-012: React useCallback dependency trap (#react #hooks)
+- KNOWLEDGE-053: Never await inside useEffect directly (#react #async)
 
 Evolution:
-- Confirmed: G-PAT-003 (3x → proven)
-- Save: Avoided G-ERR-005
+- Confirmed: KNOWLEDGE-003 (3x → proven)
+- Save: Avoided KNOWLEDGE-051
 
 Usage: 2 commands, 1 skill, 3 MCP tools, medium complexity
 ```

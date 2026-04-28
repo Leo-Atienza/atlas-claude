@@ -1,80 +1,80 @@
-# Knowledge Store — Page 3: Errors (G-ERR)
+# Knowledge Store — Page 3: Errors (type: error)
 
 > Mistakes to avoid. Each entry includes what went wrong, why, and what to do instead.
 
 ---
 
-## G-ERR-001: Grep Path Parameter
-**Date**: 2026-02-27 | **Tags**: #tools #grep #api
+## KNOWLEDGE-047: Grep Path Parameter
+**Date**: 2026-02-27 | **Type**: error | **Tags**: #tools #grep #api
 
 Grep tool uses `path` param, NOT `file_path`. Mixing them causes silent failures — Grep ignores unknown params and searches the entire working directory. Read tool uses `file_path`, creating muscle memory that bleeds into Grep calls.
 
 ---
 
-## G-ERR-002: Glob for Filename Search
-**Date**: 2026-02-27 | **Tags**: #tools #glob #search
+## KNOWLEDGE-048: Glob for Filename Search
+**Date**: 2026-02-27 | **Type**: error | **Tags**: #tools #glob #search
 
 Use Glob with pattern for filenames (`**/utils.ts`), not Grep. Grep with common names returns every file containing that string as text, not files named that. Glob = find by name, Grep = find content inside files.
 
 ---
 
-## G-ERR-003: Windows Path Quoting
-**Date**: 2026-02-27 | **Tags**: #windows #bash #paths
+## KNOWLEDGE-049: Windows Path Quoting
+**Date**: 2026-02-27 | **Type**: error | **Tags**: #windows #bash #paths
 
 Windows paths with spaces need double quotes: `cd "C:/Users/My User/projects"`. Use `~` shorthand when possible to avoid space issues.
 
 ---
 
-## G-ERR-004: Unix Syntax on Windows
-**Date**: 2026-02-27 | **Tags**: #windows #bash #syntax
+## KNOWLEDGE-050: Unix Syntax on Windows
+**Date**: 2026-02-27 | **Type**: error | **Tags**: #windows #bash #syntax
 
 Claude Code runs bash (Git Bash/MSYS2) on Windows, not cmd.exe. Use forward slashes, `/dev/null`, `cat`, `ls`, `cp`, `rm`, `grep` — not Windows equivalents. Dedicated tools (Read, Grep, Glob) handle path translation automatically.
 
 ---
 
-## G-ERR-005: last: Pseudo-class Trap with Wrappers
-**Date**: 2026-03-09 | **Tags**: #tailwind #css #pseudo-class
+## KNOWLEDGE-051: last: Pseudo-class Trap with Wrappers
+**Date**: 2026-03-09 | **Type**: error | **Tags**: #tailwind #css #pseudo-class
 
 When items are individually wrapped in components (AnimateIn, Framer Motion), every item is `:last-child` of its own wrapper. `last:mb-0` zeros ALL margins, not just the final item. Fix: remove `last:mb-0` entirely when items are individually wrapped. Same applies to `first:`, `odd:`, `even:`.
 
-**Related**: G-FAIL-001
+**Related**: KNOWLEDGE-068
 
 ---
 
-## G-ERR-007: Sequelize toJSON Double Cast Intentional
-**Date**: 2026-03-09 | **Tags**: #sequelize #typescript #orm
+## KNOWLEDGE-052: Sequelize toJSON Double Cast Intentional
+**Date**: 2026-03-09 | **Type**: error | **Tags**: #sequelize #typescript #orm
 
 `as unknown as Record<string, unknown>` after `.toJSON()` is intentional, not a code smell. Model interfaces lack string index signatures. The double cast bridges Sequelize's type system to generic object handling. Don't remove it.
 
 ---
 
-## G-ERR-008: Stale .next Cache from Concurrent Build+Dev
-**Date**: 2026-03-11 | **Tags**: #nextjs #build #cache
+## KNOWLEDGE-053: Stale .next Cache from Concurrent Build+Dev
+**Date**: 2026-03-11 | **Type**: error | **Tags**: #nextjs #build #cache
 
 Running `npm run build` while dev server is active corrupts `.next/chunks` → `MODULE_NOT_FOUND`. Fix: `taskkill //F //IM "node.exe"` → `rm -rf .next` → `npm run dev`. Prevention: always stop dev server before building.
 
 ---
 
-## G-ERR-009: backdrop-blur on Sticky = Scroll Jank
-**Date**: 2026-03-13 | **Tags**: #css #performance #scroll #backdrop-filter
+## KNOWLEDGE-054: backdrop-blur on Sticky = Scroll Jank
+**Date**: 2026-03-13 | **Type**: error | **Tags**: #css #performance #scroll #backdrop-filter
 
 `backdrop-filter: blur()` on `sticky`/`fixed` elements re-composites blur on every scroll frame — most expensive scroll op. Fix: solid background instead. Only use backdrop-filter on static elements (overlays, modals) or elements that don't move on scroll.
 
-**Related**: G-PAT-017
+**Related**: KNOWLEDGE-015
 
 ---
 
-## G-ERR-010: Framer Motion whileInView + animate Conflict
-**Date**: 2026-03-15 | **Tags**: #framer-motion #animation #react
+## KNOWLEDGE-055: Framer Motion whileInView + animate Conflict
+**Date**: 2026-03-15 | **Type**: error | **Tags**: #framer-motion #animation #react
 
 `animate` prop is silently ignored when `whileInView` is also set. Fix: TWO separate render paths — one with `whileInView` (normal), one with plain `animate` (fallback). Never combine both on the same `motion.div`.
 
-**Related**: G-SOL-014, G-FAIL-006
+**Related**: KNOWLEDGE-041, KNOWLEDGE-073
 
 ---
 
-## G-ERR-011: firecrawl_scrape Parameter Types
-**Date**: 2026-04-12 | **Tags**: #mcp #firecrawl #api #parameters
+## KNOWLEDGE-056: firecrawl_scrape Parameter Types
+**Date**: 2026-04-12 | **Type**: error | **Tags**: #mcp #firecrawl #api #parameters
 
 `firecrawl_scrape` requires `formats` as an actual JSON array (`["markdown"]`), NOT a stringified array (`"[\"markdown\"]"`). Same for `onlyMainContent` — must be boolean `true`, not string `"true"`. Causes MCP error -32602 parameter validation failure. Repeated 3 times in same session before catching it.
 
@@ -82,15 +82,15 @@ Running `npm run build` while dev server is active corrupts `.next/chunks` → `
 
 ---
 
-## G-ERR-012: create-next-app Rejects Capital Letters in Project Name
-**Date**: 2026-04-12 | **Tags**: #nextjs #create-next-app #naming
+## KNOWLEDGE-057: create-next-app Rejects Capital Letters in Project Name
+**Date**: 2026-04-12 | **Type**: error | **Tags**: #nextjs #create-next-app #naming
 
 `create-next-app` refuses names with capital letters — npm naming restriction. "Anniversary" fails with: "name can no longer contain capital letters". Workaround: use lowercase temp name (`anniversary-site`), bootstrap there, then move/rename files. NOTE: `mv` to `/c/tmp/trash/` can fail with "Permission denied" if `/c/tmp/` doesn't exist — create it first with `mkdir -p`.
 
 ---
 
-## G-ERR-013: Next.js Edge Runtime Cannot Use Node.js Crypto
-**Date**: 2026-04-12 | **Tags**: #nextjs #edge-runtime #middleware #crypto #security
+## KNOWLEDGE-058: Next.js Edge Runtime Cannot Use Node.js Crypto
+**Date**: 2026-04-12 | **Type**: error | **Tags**: #nextjs #edge-runtime #middleware #crypto #security
 
 Next.js middleware runs in Edge Runtime, which does NOT have access to the Node.js `crypto` module. Attempting to use `crypto.createHmac()` etc. throws at runtime. Must use the Web Crypto API instead:
 ```ts
@@ -101,8 +101,8 @@ const sig = await crypto.subtle.sign('HMAC', key, encoder.encode(payload))
 
 ---
 
-## G-ERR-014: `node -e` with Unix `/c/` Paths Double-Drive-Prefix Bug
-**Date**: 2026-04-24 | **Last audited**: 2026-04-24 | **Tags**: #windows #node #bash #paths
+## KNOWLEDGE-059: `node -e` with Unix `/c/` Paths Double-Drive-Prefix Bug
+**Date**: 2026-04-24 | **Type**: error | **Last audited**: 2026-04-24 | **Tags**: #windows #node #bash #paths
 
 When running `node -e "..."` in Git Bash on Windows, Node.js does NOT recognize Unix-style absolute paths embedded **inside the script string** — e.g. `'/c/Users/leooa/...'` is treated as a relative path, producing `C:\c\Users\leooa\...` (ENOENT). Silent failure because the tool-health log suppresses chronic Bash streaks.
 

@@ -133,3 +133,11 @@
 | FS-033 | Testing Strategist | Testing strategies and patterns | Enterprise | 3 |
 | FS-035 | Debugging Expert | Systematic debugging | Enterprise | 3 |
 | FS-052 | PostgreSQL Expert | PostgreSQL optimization and admin | Data & ML | 4 |
+
+## Wave 1 bulk archive (2026-04-27)
+
+Per `plans/i-want-you-to-bright-acorn.md` — 45 skills moved to `skills/_archived/` to bring active count from 63 → 18 (target ≤25). Restore any with `mv skills/_archived/<name>/ skills/<name>/`.
+
+advanced-javascript, ai-native-ui, anime-js, app-l100, barba-js, brand-guidelines, cinematic-web-engine, codebase-knowledge-graph, context-router, crossplatform-monorepo, css-first-ui, design-audit, design-critique, dev-cycle, device-hardware-bridge, discovery-doc, docx, edge-intelligence, graph-aware-review, gsap-advanced, lenis-smooth-scroll, linkedin-poster, local-first-architecture, modern-build-pipeline, motion-animation, motion-native, nano-banana, playwright, pptx, project-init, remotion, sensory-native, spline-3d, streaming-cache, tanstack-ecosystem, taste-skill, tauri-desktop, threejs, transition-native, ui-design-stack, visual-native, web-l100, web-platform-apis, wiki-manage, xlsx
+
+Active (18): audit, canvas-design, deep-research, design-polish, dream, flow, graphify, gsap, hackathon, handoff, impeccable, pdf, self-evolve, smart-swarm, stop-slop, subagent-driven-dev, theme-factory, vitest-testing

@@ -76,12 +76,12 @@ License: MIT (via obra/superpowers)
 Skill: subagent-driven-dev (SK-077) — task dispatch + fresh subagent + two-stage review
 
 ### Knowledge entries (6 G-PAT from multiple sources)
-G-PAT-027 (Verification-Before-Completion): obra/superpowers
-G-PAT-028 (Bite-Sized Task Plans): obra/superpowers
-G-PAT-029 (Token Optimization): Everything Claude Code community patterns
-G-PAT-030 (Continuous Learning Loop): Everything Claude Code community patterns
-G-PAT-031 (Context Compression Strategy): mksglu/context-mode + Context Engineering
-G-PAT-032 (Skeleton Loading Generation): amorim/boneyard
+KNOWLEDGE-020 (Verification-Before-Completion): obra/superpowers
+KNOWLEDGE-021 (Bite-Sized Task Plans): obra/superpowers
+KNOWLEDGE-022 (Token Optimization): Everything Claude Code community patterns
+KNOWLEDGE-023 (Continuous Learning Loop): Everything Claude Code community patterns
+KNOWLEDGE-024 (Context Compression Strategy): mksglu/context-mode + Context Engineering
+KNOWLEDGE-025 (Skeleton Loading Generation): amorim/boneyard
 
 ### Context Mode MCP Server
 Source: https://github.com/mksglu/context-mode
@@ -159,3 +159,90 @@ Active hooks: PreToolUse, PostToolUse, PostToolUseFailure, Notification, Stop, P
 Removed 2026-04-05: UserPromptSubmit keyword-detector (0% apply rate), SubagentStop (never existed), subagent-limiter (no-op without tracker)
 Re-added: UserPromptSubmit with cctools allow_git_hook.py (session-scoped git staging/commit approval toggle)
 Legacy GSD hooks removed (2026-03-16)
+
+## Living Memory subsystem (Bentley plan, 2026-04-26 onwards)
+
+The memory system at `~/.claude/projects/C--Users-leooa--claude/memory/` is being upgraded from passive markdown + flat index into a self-maintaining cognitive substrate (full plan: `~/.claude/plans/i-want-you-to-purring-bentley.md`). Markdown remains the source of truth; everything below is derived/regenerable.
+
+### Required runtime
+| Component | Version | Install method | Purpose |
+|---|---|---|---|
+| Ollama | ≥0.1.45 | `winget install --id Ollama.Ollama` | Local embedding model serving |
+| `embeddinggemma:300m` model | latest | `ollama pull embeddinggemma:300m` (~200 MB) | 256-dim Matryoshka embeddings |
+| better-sqlite3 | ^11.7.0 | npm at `~/.claude/memory/` | SQLite driver |
+| sqlite-vec | ^0.1.6 | npm at `~/.claude/memory/` | Vector index extension |
+| Node.js | ≥20 | already installed | Runtime |
+
+### Phases shipped
+- **Phase 0** (2026-04-26): Reconcile audit — Statsig contradiction resolved, all 13 memories have provenance, decay.yml deprecated, KG snapshotted, MEMORY.md regenerated
+- **Phase 1** (2026-04-26): Substrate — Ollama + EmbeddingGemma + SQLite at `~/.claude/memory/index.db`, indexer at `hooks/memory-indexer.js`, `/memory:rebuild` slash command, drift-check wired into `session-start.sh §7l`
+- Phase 2-5: pending (write pipeline, retrieval, lifecycle, observability)
+
+### Files
+- `~/.claude/memory/index.db` — SQLite derived index (regenerable)
+- `~/.claude/memory/lib/schema.sql` — schema v1
+- `~/.claude/memory/package.json` + `node_modules/` — isolated deps
+- `~/.claude/hooks/lib-memory.js` — shared helpers (DB, embed, hash, parse)
+- `~/.claude/hooks/memory-indexer.js` — rebuild + drift-check
+- `~/.claude/commands/memory-rebuild.md` — `/memory:rebuild`
+
+## Wave 2 prune (2026-04-27) — project-scope MCPs cut
+
+Cut from `~/.claude/.mcp.json`. Add to each project's own `.mcp.json` when needed. Activation commands (run from PowerShell):
+
+| Server | Re-add command |
+|---|---|
+| supabase | `claude mcp add -s user -e SUPABASE_ACCESS_TOKEN=$env:SUPABASE_ACCESS_TOKEN supabase -- npx -y @supabase/mcp-server-supabase@latest` |
+| stripe | `claude mcp add -s user -e STRIPE_SECRET_KEY=$env:STRIPE_SECRET_KEY stripe -- npx -y @stripe/mcp@latest` |
+| resend | `claude mcp add -s user -e RESEND_API_KEY=$env:RESEND_API_KEY resend -- npx -y resend-mcp` |
+| sentry | `claude mcp add -s user -e SENTRY_ACCESS_TOKEN=$env:SENTRY_ACCESS_TOKEN sentry -- npx -y @sentry/mcp-server` |
+| upstash | `claude mcp add -s user -e UPSTASH_EMAIL=$env:UPSTASH_EMAIL -e UPSTASH_API_KEY=$env:UPSTASH_API_KEY upstash -- npx -y @upstash/mcp-server@latest` |
+| netlify | OAuth (recommended): `npm i -g netlify-cli && netlify login`, then `claude mcp add -s user netlify -- npx -y @netlify/mcp@latest`. Or env-var: `claude mcp add -s user -e NETLIFY_ACCESS_TOKEN=$env:NETLIFY_ACCESS_TOKEN netlify -- npx -y @netlify/mcp@latest` |
+| firecrawl | `claude mcp add -s user -e FIRECRAWL_API_KEY=$env:FIRECRAWL_API_KEY firecrawl -- npx -y firecrawl-mcp` |
+| 21st-dev | `claude mcp add -s user -e TWENTY_FIRST_API_KEY=$env:TWENTY_FIRST_API_KEY 21st-dev -- npx -y @21st-dev/magic@latest` |
+| maestro | `claude mcp add -s user maestro -- wsl -d Ubuntu -- bash -c 'export PATH="$PATH:$HOME/.maestro/bin" && maestro mcp'` |
+
+User-scope removals (also from this wave): `linear`, `posthog` (`claude mcp remove -s user <name>`). Re-add via search of `claude mcp add` examples or registry docs.
+
+## Wave 2.4 — Plugin-marketplace MCP servers (audit only, 2026-04-27)
+
+These load via Claude Code's plugin system (not `claude mcp` registry). Manage via plugin settings UI. Identified at session start by their UUID prefix. If unused in last 60 days, consider disabling via plugin marketplace.
+
+| UUID prefix | Likely service |
+|---|---|
+| 0aa31d67-... | Gamma (AI presentations) |
+| 33fa2d63-... | BigData (company/market tearsheets) |
+| 4b36355d-... | Cryptocurrencies / LunarCrush social |
+| 883407ff-... | Canva designs |
+| a135693c-... | Figma (design context, separate from plugin:figma:figma) |
+| b5e00eb0-... | Resume / job search |
+| cf0a53bf-... | Gmail |
+| e7480d9f-... | Prospect / B2B enrichment |
+| f8134a90-... | Vercel deploy / toolbar helpers |
+
+Action for user: open plugin marketplace, disable any not used in last 60 days. Records here so re-enabling is one click later.
+
+## App Dev (CLAUDE.md migration, 2026-04-28)
+
+Moved out of `CLAUDE.md` during Wave 3.3 of the ATLAS reduction.
+
+### App Dev MCP Servers
+
+| Server | Purpose | Surface |
+|--------|---------|---------|
+| `tauri-mcp` | Build, dev, test Tauri v2 projects (pairs with Tauri Desktop Engine skill) | Desktop |
+| `maestro` | Mobile E2E testing with auto-healing selectors (Android on Win, iOS needs macOS) | Mobile testing |
+| `statsig` | Feature flags, A/B experiments, metrics (free 50M events/mo) — OAuth | Lifecycle |
+| `lighthouse` | Performance/a11y/SEO audits on URLs, runs locally | Runtime quality |
+| `firecrawl` | Clean markdown extraction from webpages | Research |
+| `21st-dev`, `heroui`, `aceternity`, `shadcn`, `magicuidesign`, `iconify` | Component + icon registries | UI sourcing |
+| `supabase`, `resend`, `sentry`, `netlify`, `vercel`, `prisma` | Backend + deployment + error tracking | Platform |
+
+### App Dev Slash Commands
+- `/new-mobile-app` — Scaffold Expo + Supabase mobile project
+- `/new-desktop-app` — Scaffold Tauri desktop project
+- `/api-design` — Design and generate API from spec
+- `/db-schema` — Design and validate database schema
+
+### App Dev Skills (Expo Official, 2026-04-12)
+Installed from `expo/skills`: expo-api-routes, expo-cicd-workflows, expo-deployment, expo-dev-client, expo-module, expo-tailwind-setup, expo-ui-jetpack-compose, expo-ui-swiftui, native-data-fetching, upgrading-expo, use-dom

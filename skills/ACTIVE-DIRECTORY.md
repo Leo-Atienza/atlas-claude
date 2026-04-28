@@ -14,11 +14,11 @@
 
 | ID | Name | Purpose | Page |
 |----|------|---------|------|
-| FS-002 | TypeScript Expert | Strict TypeScript, generics, type safety | 1 |
-| FS-020 | Next.js Developer | Next.js App Router, RSC, SSR | 1 |
-| FS-021 | React Expert | React component patterns, hooks, state | 1 |
-| FS-060 | Supabase Expert | Auth, RLS, Storage, Edge Functions, Realtime, TypeScript | 2 |
-| FS-061 | Stripe Expert | Checkout, Subscriptions, Webhooks, Customer Portal | 2 |
+| SK-116 | TypeScript Expert | Strict TypeScript, generics, type safety | 1 |
+| SK-118 | Next.js Developer | Next.js App Router, RSC, SSR | 1 |
+| SK-119 | React Expert | React component patterns, hooks, state | 1 |
+| SK-124 | Supabase Expert | Auth, RLS, Storage, Edge Functions, Realtime, TypeScript | 2 |
+| SK-125 | Stripe Expert | Checkout, Subscriptions, Webhooks, Customer Portal | 2 |
 | SK-042 | GSAP Core Animation | Tweens, timelines, utilities, performance | 1 |
 | SK-047 | Motion (Framer Motion) | React animation: springs, layout, gestures, scroll, exit | 1 |
 | SK-048 | Lenis Smooth Scroll | Lightweight smooth scroll (3KB) with GSAP integration | 1 |
@@ -26,9 +26,9 @@
 | SK-055 | TanStack Ecosystem | TanStack Query + Form + Router for React | 1 |
 | SK-056 | Vitest Testing Framework | Fast unit testing + Testing Library + test pyramid | 1 |
 | SK-083 | Vanguard Web Architecture | Orchestrates web stack via Render Tiers, CSS-First, streaming pipeline | 1 |
-| CE-005 | Code Review | Unified code review (local + PR) | 1 |
-| SC-001 | Sharp Edges Scanner | API footguns, dangerous defaults, fail-open patterns | 1 |
-| SC-002 | Differential Risk Review | Risk classification on diffs, attack scenarios | 1 |
+| SK-115 | Code Review | Unified code review (local + PR) | 1 |
+| SK-112 | Sharp Edges Scanner | API footguns, dangerous defaults, fail-open patterns | 1 |
+| SK-113 | Differential Risk Review | Risk classification on diffs, attack scenarios | 1 |
 
 ## Available Skills
 
@@ -89,12 +89,12 @@
 | SK-109 | Graphify (Mixed-Corpus) | Turn any folder → queryable knowledge graph (docs + papers + images + code) via `/graphify` | 2 |
 | SK-110 | Handoff | End-of-session: build, test, commit, push, handoff doc via `/handoff` | 2 |
 | SK-111 | Audit | Wave-based codebase audit with verified fixes via `/audit` | 2 |
-| SC-003 | Insecure Defaults Detector | Hardcoded secrets, weak defaults, fail-open detection | 1 |
-| FS-012 | SQL Expert | SQL optimization, strategic indexes, query planning | 2 |
-| FS-028 | API Designer | REST API design, OpenAPI 3.1, RFC 7807 error responses | 2 |
-| FS-033 | Testing Strategist | Testing strategies, patterns, coverage optimization | 2 |
-| FS-035 | Debugging Expert | Systematic debugging methodology and root cause analysis | 2 |
-| FS-052 | PostgreSQL Expert | PostgreSQL optimization, administration, extensions | 2 |
+| SK-114 | Insecure Defaults Detector | Hardcoded secrets, weak defaults, fail-open detection | 1 |
+| SK-117 | SQL Expert | SQL optimization, strategic indexes, query planning | 2 |
+| SK-120 | API Designer | REST API design, OpenAPI 3.1, RFC 7807 error responses | 2 |
+| SK-121 | Testing Strategist | Testing strategies, patterns, coverage optimization | 2 |
+| SK-122 | Debugging Expert | Systematic debugging methodology and root cause analysis | 2 |
+| SK-123 | PostgreSQL Expert | PostgreSQL optimization, administration, extensions | 2 |
 | — | Rules: Git | On-demand git workflow rules | `skills/RULES-GIT.md` |
 | — | Rules: Security | On-demand security rules + triggers | `skills/RULES-SECURITY.md` |
 | — | Rules: Testing | On-demand testing rules | `skills/RULES-TESTING.md` |
