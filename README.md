@@ -25,11 +25,11 @@
 
 <p align="center">
   <img src="https://img.shields.io/badge/claude_code-opus_4.7-blueviolet?style=flat-square" alt="Claude Code">
-  <img src="https://img.shields.io/badge/version-6.9.1-informational?style=flat-square" alt="Version">
+  <img src="https://img.shields.io/badge/version-7.0.1-informational?style=flat-square" alt="Version">
   <img src="https://img.shields.io/badge/skills-66_active-blue?style=flat-square" alt="Skills">
   <img src="https://img.shields.io/badge/agents-74-green?style=flat-square" alt="Agents">
-  <img src="https://img.shields.io/badge/hooks-14-yellow?style=flat-square" alt="Hooks">
-  <img src="https://img.shields.io/badge/commands-48-teal?style=flat-square" alt="Commands">
+  <img src="https://img.shields.io/badge/hooks-20-yellow?style=flat-square" alt="Hooks">
+  <img src="https://img.shields.io/badge/commands-50-teal?style=flat-square" alt="Commands">
   <img src="https://img.shields.io/badge/license-MIT-orange?style=flat-square" alt="License">
 </p>
 
@@ -37,7 +37,7 @@
 
 ## What is ATLAS?
 
-Most Claude Code setups are a `CLAUDE.md` with some rules. ATLAS is a **full infrastructure layer** — 14 lifecycle hooks, 74 specialized agents, a persistent knowledge graph, an in-session action graph, and self-evolving skill/memory systems that let Claude Code grow its own capabilities.
+Most Claude Code setups are a `CLAUDE.md` with some rules. ATLAS is a **full infrastructure layer** — 20 lifecycle hooks, 74 specialized agents, a persistent knowledge graph, an in-session action graph, and self-evolving skill/memory systems that let Claude Code grow its own capabilities. Since v7.0, drift catches itself: telemetry feeds an `/observe` dashboard and a session-start drift-proposer that surfaces fixable problems before you ask.
 
 <table>
 <tr>
@@ -75,7 +75,7 @@ build a REST API for user management
        │        ▼              ▼          │
        │  ┌──────────────────────────┐    │
        │  │ 66 Skills · 74 Agents    │    │ ← Execution
-       │  │ 14 Hooks  · 3 Rule Files │    │
+       │  │ 20 Hooks  · 3 Rule Files │    │
        │  └──────────┬───────────────┘    │
        │             ▼                    │
        │  ┌──────────────────────────┐    │
@@ -111,7 +111,7 @@ See [`examples/`](examples/) for a starter `settings.json` template with sensibl
 
 ## The Entry Points
 
-Everything funnels through a small set of entry commands. You never need to think about the 66 active skills, 74 agents, or 48 commands underneath.
+Everything funnels through a small set of entry commands. You never need to think about the 66 active skills, 74 agents, or 50 commands underneath.
 
 | Command | Plain English | What Happens Under the Hood |
 |:-------:|:-------------|:---------------------------|
@@ -124,6 +124,8 @@ Everything funnels through a small set of entry commands. You never need to thin
 | `/handoff` | "end session" | Build + test → commit → push → chat handoff block |
 | `/audit` | "check this repo" | Wave-based systematic audit with verified fixes |
 | `/health` | "system status" | Validates hooks, counts, drift; updates SYSTEM_VERSION |
+| `/observe` | "how's the system?" | 6-section dashboard (tool health, safety hooks, skills, tasks, action graph, cleanup) |
+| `/apply-drift-fix` | "fix the drift" | Reads last drift proposal, routes to archive/disable/retrigger action |
 
 ---
 
@@ -155,7 +157,7 @@ Three persistence systems with strict boundaries:
 
 ```
 Memory  (projects/*/memory/)   user profile, feedback, project context, external refs
-Knowledge Store  (topics/)     G-PAT, G-SOL, G-ERR, G-PREF, G-FAIL — reusable patterns
+Knowledge Store  (topics/)     KNOWLEDGE-NNN with type: pattern|solution|error|preference|failure
 Atlas KG  (atlas-kg/)          facts NOT derivable from git/code — architectural truths
 ```
 
@@ -199,12 +201,14 @@ Trivial ─────→ Quick ─────→ Standard ─────→ 
 
 ## Hook Lifecycle
 
-14 hooks across 8 lifecycle events create a fully reactive system:
+20 hooks across 9 lifecycle events create a fully reactive system:
 
 ```
 ┌─ SessionStart ──────────────────────────────────────────────────┐
 │  session-start.sh      Handoff, version, rotation, KG, action-   │
 │                        graph carryover (48h guard)               │
+│  cleanup-runner.js     13 declarative cleanup rules (v7.0)       │
+│  drift-proposer.js     At most ONE DRIFT advisory per session    │
 ├─ UserPromptSubmit ──────────────────────────────────────────────┤
 │  allow_git_hook.py     Session-scoped git approval               │
 ├─ PreToolUse ────────────────────────────────────────────────────┤
@@ -216,6 +220,7 @@ Trivial ─────→ Quick ─────→ Standard ─────→ 
 │  read_env_protection   Protect env file reads                    │
 │  pre-commit-gate.js    Warn if build+test not run before commit  │
 │  graph-hint (bash)     Suggest CRG/graphify MCP over Glob/Grep   │
+│  skill-usage-log.js    Append {ts, skill, cwd} on Skill (v7.0)   │
 ├─ PostToolUse ───────────────────────────────────────────────────┤
 │  auto-formatter        prettier / dart format on save            │
 │  tsc-check.js          TS errors injected as additionalContext   │
@@ -231,6 +236,8 @@ Trivial ─────→ Quick ─────→ Standard ─────→ 
 │  session-stop.sh       Handoff, todos, KG capture, stats rollup  │
 ├─ Notification ──────────────────────────────────────────────────┤
 │  claudio               Desktop notifications                     │
+├─ StatusLine ────────────────────────────────────────────────────┤
+│  statusline.js         Context bar, task, call count             │
 └─────────────────────────────────────────────────────────────────┘
 ```
 
@@ -264,22 +271,27 @@ Archived skills live under `skills/ARCHIVE-DIRECTORY.md` (7 domain bundles). Thi
 ├── SYSTEM_CHANGELOG.md          # Infrastructure version history
 ├── settings.json                # Hook wiring, permissions, env vars
 │
-├── hooks/                       # 14 lifecycle hooks
+├── hooks/                       # 20 lifecycle hooks (30 files incl. helpers)
 │   ├── lib.js                   #   Shared utilities (all Node hooks import this)
 │   ├── context-guard.js         #   PreToolUse — duplicate-read + security gate
 │   ├── post-tool-monitor.js     #   PostToolUse — telemetry + action-graph logging
 │   ├── tool-failure-handler.js  #   PostToolUseFailure — circuit breaker
 │   ├── pre-commit-gate.js       #   PreToolUse — build+test reminder
 │   ├── tsc-check.js             #   PostToolUse — TypeScript diagnostics
+│   ├── skill-usage-log.js       #   PreToolUse Skill — usage telemetry (v7.0)
+│   ├── cleanup-runner.js        #   SessionStart — 13 declarative cleanup rules
+│   ├── cleanup-config.json      #     Cleanup engine rules (per-mode)
+│   ├── drift-proposer.js        #   SessionStart — DRIFT advisor (v7.0)
+│   ├── drift-thresholds.json    #     Per-channel cooldowns + silenced-kinds
 │   ├── atlas-kg.js              #   Temporal knowledge graph module
-│   ├── atlas-extractor.js       #   Regex classifier (text → G-PAT/G-SOL/...)
+│   ├── atlas-extractor.js       #   Regex classifier (text → KNOWLEDGE-NNN with type:)
 │   ├── atlas-action-graph.js    #   In-session retrieval log + priority queue
 │   ├── session-start.sh         #   SessionStart — handoff + KG + carryover
 │   ├── session-stop.sh          #   Stop — handoff + KG capture + stats rollup
 │   ├── statusline.js            #   StatusLine — context bar, task, call count
 │   └── cctools-safety-hooks/    #   Python safety blockers (bash, rm, env, file len)
 │
-├── skills/                      # 66 active skills (105 on disk)
+├── skills/                      # 66 active skill entries (62 active dirs, 44 in _archived/)
 │   ├── ACTIVE-DIRECTORY.md      #   Index of active skills
 │   ├── ACTIVE-PAGE-1-*.md       #   Web + frontend skills (34)
 │   ├── ACTIVE-PAGE-2-*.md       #   Backend + tools skills (22)
@@ -290,16 +302,16 @@ Archived skills live under `skills/ARCHIVE-DIRECTORY.md` (7 domain bundles). Thi
 │   ├── RULES-TESTING.md         #   On-demand testing rules
 │   └── [domain]/SKILL.md        #   Individual skill definitions
 │
-├── topics/                      # Knowledge store (72 entries)
-│   ├── KNOWLEDGE-DIRECTORY.md   #   Index
-│   ├── KNOWLEDGE-PAGE-1-patterns.md    #   G-PAT (29)
-│   ├── KNOWLEDGE-PAGE-2-solutions.md   #   G-SOL (17)
-│   ├── KNOWLEDGE-PAGE-3-errors.md      #   G-ERR (12)
-│   ├── KNOWLEDGE-PAGE-4-preferences.md #   G-PREF (8)
-│   └── KNOWLEDGE-PAGE-5-failures.md    #   G-FAIL (6)
+├── topics/                      # Knowledge store (74 entries, v7.0.1 unified namespace)
+│   ├── KNOWLEDGE-DIRECTORY.md   #   Index — IDs are KNOWLEDGE-NNN with type: field
+│   ├── KNOWLEDGE-PAGE-1-patterns.md    #   type: pattern (30)
+│   ├── KNOWLEDGE-PAGE-2-solutions.md   #   type: solution (17)
+│   ├── KNOWLEDGE-PAGE-3-errors.md      #   type: error (13)
+│   ├── KNOWLEDGE-PAGE-4-preferences.md #   type: preference (8)
+│   └── KNOWLEDGE-PAGE-5-failures.md    #   type: failure (6)
 │
-├── commands/                    # 48 slash commands (22 top-level + 21 flow + 5 plugin)
-│   ├── new.md, resume.md, ...   #   Top-level entry points
+├── commands/                    # 50 slash commands (29 top-level + 21 flow)
+│   ├── new.md, resume.md, ...   #   Top-level entry points (incl. v7.0 /observe + /apply-drift-fix)
 │   └── flow/*.md                #   21 Flow workflow commands
 │
 ├── agents/                      # 74 specialized agents
@@ -379,6 +391,9 @@ Some hooks reference external components. They degrade gracefully — silent no-
 | **Tier routing** | Haiku/Sonnet/Opus per subtask | Token cost reduction without quality loss |
 | **Circuit breaker** | Failure tracking + MCP-aware classification | Prevents runaway tool failures |
 | **CRG integration** | Tree-sitter code graph with MCP tool preference | Minimal-context navigation over Glob/Grep |
+| **Observability dashboard** (v7.0) | `/observe` renders telemetry from 6 streams | The system shows you what's drifting before you ask |
+| **Drift proposer** (v7.0) | SessionStart emits at most 1 advisory per session | Self-surfacing fixes — system proposes, you approve |
+| **Unified cleanup engine** (v7.0) | 13 declarative rules in `cleanup-config.json` | One JSONL log per rule, fail-open, 3-line config to add a target |
 
 ---
 
