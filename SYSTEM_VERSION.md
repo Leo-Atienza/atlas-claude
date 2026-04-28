@@ -2,8 +2,8 @@
 
 > Auto-updated by `/health`. Do not edit manually.
 
-**version: 7.0.0**
-**last_updated: 2026-04-24**
+**version: 7.0.1**
+**last_updated: 2026-04-28**
 
 ## Component Counts
 
@@ -15,19 +15,21 @@
 | Skills (in ACTIVE-DIRECTORY) | 76 | 2026-04-24 |
 | Agents | 74 | 2026-04-24 |
 | Rules | 3 (RULES-GIT, RULES-SECURITY, RULES-TESTING) | 2026-04-20 |
-| Knowledge entries | 73 | 2026-04-24 |
+| Knowledge entries | 74 | 2026-04-28 |
 | Scheduled tasks (enabled) | 4 | 2026-04-24 |
 | Cleanup rules | 13 | 2026-04-24 |
 
 ## Knowledge Breakdown
 
+> ID format unified to `KNOWLEDGE-NNN` with `**Type**:` field (v7.0.1).
+
 | Category | Count |
 |----------|-------|
-| Patterns (G-PAT) | 30 |
-| Solutions (G-SOL) | 17 |
-| Mistakes (G-ERR) | 12 |
-| Preferences (G-PREF) | 8 |
-| Failed Approaches (G-FAIL) | 6 |
+| Patterns (type: pattern) | 30 |
+| Solutions (type: solution) | 17 |
+| Errors (type: error) | 13 |
+| Preferences (type: preference) | 8 |
+| Failures (type: failure) | 6 |
 
 ## Installed Versions
 
@@ -54,7 +56,7 @@
 
 | Key | Value |
 |-----|-------|
-| version | 7.0.0 |
+| version | 7.0.1 |
 | last_health_check | 2026-04-24 |
 | hook_event_types | 8 (Notification, PostToolUse, PostToolUseFailure, PreToolUse, PreCompact, SessionStart, Stop, UserPromptSubmit) |
 | disk_total | 351MB |

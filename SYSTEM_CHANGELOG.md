@@ -1,5 +1,78 @@
 # System Changelog
 
+## [7.0.1] — 2026-04-28 (ATLAS Reduction — namespace unification + doc diet)
+
+### Theme — fewer surfaces, one ID per registry, docs that match what ships
+
+A two-session reduction sweep (2026-04-27 + 2026-04-28) trimmed bloated registries and unified parallel ID namespaces. v7.0 added the dashboards; v7.0.1 acts on what those dashboards revealed.
+
+**Wave 0-2 (2026-04-27)**
+- Reset stale tool-health streaks (WebFetch, firecrawl_scrape — both ≥7d old, no real failures).
+- Trashed 2 deprecated scheduled tasks (`weekly-memory-maintenance`, `weekly-cleanup-scan`) — shadow window ended 2026-04-13; absorbed into `weekly-dream` and `weekly-maintenance` per v7.0.
+- Archived 45 skill directories to `skills/_archived/`. Active skill dirs: 63 → 18 (target ≤25). Bulk archive log appended to `skills/ARCHIVE-DIRECTORY.md`. Restore via `mv skills/_archived/<name>/ skills/<name>/`.
+- Added anti-creep note to `CLAUDE.md` Skills & Knowledge section: check `skills/_archived/` before creating new skills.
+- Cut 9 project-scope MCP servers from `.mcp.json` (supabase, stripe, resend, sentry, upstash, netlify, firecrawl, 21st-dev, maestro). Each entry's install command preserved in `INSTALLED.md` for one-command re-add per-project.
+- Removed 2 user-scope MCPs (`linear`, `posthog`).
+- Total registered MCPs: 30+ → 19 (~37% reduction).
+
+**Wave 3 (2026-04-28) — `CLAUDE.md` diet**
+- 213 → 163 lines (target ≤170).
+- `## Automatic Workflows` section moved to `ARCHITECTURE.md` as `## Hook-driven workflows` (after the `Hooks` table). 5 sub-workflows preserved verbatim: Auto-Graph-Navigation, Auto-History-Check, Auto-System-Docs, Auto-Handoff, Auto-Action-Graph.
+- Resolved trivial-task contradiction (Pipeline §4 vs No-Guess Mandate). Trivial-task definition now reads: `**Trivial tasks** = no ambiguity AND <20 lines AND 1 file. If any is uncertain, it isn't trivial — research first (see No-Guess Mandate below).` — the precedence is explicit.
+- `## App Development MCP Servers` table + slash commands + Expo skills list moved to `INSTALLED.md` under new section `## App Dev (CLAUDE.md migration, 2026-04-28)`.
+
+**Wave 4 (2026-04-28) — Namespace collapse**
+
+*4.1 Skills: SK + FS + CE + SC → SK only.* The four parallel prefixes carried no semantic distinction — same registry, four naming conventions accreted from successive imports. Collapsed to a single `SK-NNN` namespace.
+- 14 IDs renamed across 4 active files (`skills/ACTIVE-DIRECTORY.md`, `skills/ACTIVE-PAGE-1-web-frontend.md`, `skills/ACTIVE-PAGE-2-backend-tools.md`, `REFERENCE.md`).
+- 43 string replacements total. New IDs occupy `SK-112..SK-125`.
+- Mapping in `C:/tmp/claude-scratchpad/skill-id-rename.json` for rollback.
+- Archive files (`skills/ARCHIVE-DIRECTORY.md`, backups, transcripts) intentionally NOT touched — old prefixes are historical record.
+
+*4.2 Knowledge: G-PAT/SOL/ERR/PREF/FAIL → KNOWLEDGE-NNN with `**Type**:` field.* Five-prefix layout encoded category in the ID; collapsed by promoting category to a frontmatter field, freeing IDs to be sequential and category-agnostic.
+- 74 entries (drift discovered: `G-PAT-037: Observability over Audit` was on PAGE-1 but missing from KNOWLEDGE-DIRECTORY.md; added as `KNOWLEDGE-074`).
+- 191 ID renames + 74 type-field injections across 12 active files.
+- Page headers renamed (`G-PAT` → `type: pattern`, etc.).
+- 4 stale cross-references cleaned (entries that pointed at non-existent IDs: `G-PREF-005`, `G-SOL-004`, `G-PAT-009`, `G-SOL-042`).
+- Mapping in `C:/tmp/claude-scratchpad/knowledge-id-rename.json` for rollback.
+
+**Wave 5 (2026-04-28) — Living Memory trim**
+- `ARCHITECTURE.md` §5 (Living Memory) trimmed from 11 lines to 4. Phase 0 (source-of-truth namespaces) + Phase 1 (substrate: schema.sql, package.json, sqlite-vec index) kept verbatim — that matches what ships. Phase 2-5 description (embedder, pipeline, retrieval ranker, decay/dream lifecycle, slash commands) replaced with a link to `plans/i-want-you-to-purring-bentley.md` where the design lives.
+
+### File-level summary
+
+- `CLAUDE.md`: -50 lines.
+- `ARCHITECTURE.md`: +32 lines net (-7 from §5 trim, +39 from Hook-driven workflows section).
+- `INSTALLED.md`: +25 lines (App Dev migration section).
+- `topics/KNOWLEDGE-*`: 6 files, ~190 ID renames + 74 `**Type**:` injections.
+- `skills/ACTIVE-*`: 3 files, 14 ID renames.
+- `REFERENCE.md`: 15 ID renames.
+- `commands/{reflect,new-web}.md`, `agents/flow-research-synthesizer.md`, `scheduled-tasks/weekly-maintenance/SKILL.md`, `plans/v7-scope.md`: incidental ID updates.
+- 44 skill directories moved from `skills/<name>/` to `skills/_archived/<name>/` in this commit (1 of 45 was already absent in public mirror).
+
+### Verification
+
+- `grep -rE '\b(FS|CE|SC)-[0-9]+' active-files` → 0 hits.
+- `grep -rE 'G-(PAT|SOL|ERR|PREF|FAIL)-[0-9]+' active-files` → 0 hits.
+- `wc -l CLAUDE.md` → 163 (under 170).
+- Sample skill load (`SK-116` TypeScript Expert) — frontmatter parses cleanly.
+- Sample knowledge entries (`KNOWLEDGE-001`, `KNOWLEDGE-074`) — `**Type**:` field present, cross-refs valid.
+- Schedule queued: `atlas-wave4-rename-1week-check` fires 2026-05-05 10:00 EDT to confirm no regressions.
+
+### Out of scope (intentional)
+
+- No new skills, MCPs, or features added.
+- No SYSTEM_VERSION bump beyond 7.0.1 — these are cleanup-class changes.
+- Living Memory Phase 2-5 implementation deferred indefinitely (Branch B selected — trim in place of build).
+
+### Rollback
+
+- Each rename script (`C:/tmp/claude-scratchpad/{skill,knowledge}-id-rename.js`) is reversible — flip the mapping JSON and re-run.
+- Skill archives restorable via `git mv skills/_archived/<name> skills/<name>` per directory.
+- Doc reorgs are plain reverts — `git revert df950a1 <next-sha>`.
+
+---
+
 ## [7.0.0] — 2026-04-24 (Consolidation & Observability)
 
 ### Theme — the system now proposes drift fixes to the user instead of waiting to be audited
