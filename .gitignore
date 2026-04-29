@@ -79,3 +79,6 @@ scheduled-tasks/
 # TRASH
 TRASH/
 TRASH-FILES.md
+
+# Personal Windows-only binary (compiled paths leak; keep local-only)
+bin/claudio

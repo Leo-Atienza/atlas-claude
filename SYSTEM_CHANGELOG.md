@@ -1,5 +1,52 @@
 # System Changelog
 
+## [7.0.3] — 2026-04-29 (Public-mirror posture finalization)
+
+Closes the v7.0.x sanitization line opened by v7.0.2.
+
+**Removed `bin/claudio` from the public mirror.** A 1.4MB Windows PE32+
+executable with personal paths baked in at compile time. Source not in
+the tree, so rebuilding with portable paths wasn't an option. Cross-
+platform users wouldn't use a Windows-only binary anyway. Working-tree
+move to trash + `git add -u` records the deletion; gitignore entry
+prevents accidental re-add. The local copy at `~/.claude/bin/claudio`
+is untouched (mirror-only operation).
+
+**Added `scripts/sync-from-local.sh`.** A `sed`-based scrub that runs at
+local→public sync time. Replaces known personal-path patterns
+(`C:/Users/<u>/.claude/`, `/c/Users/<u>/.agents/`, slug forms, etc.)
+with portable equivalents (`~/.claude/`, `~/.agents/`, `<your-cwd-slug>`).
+Forward-defense against the local source files that the v7.0.2 session
+couldn't sanitize (safety hook blocked self-modification of agent
+config). Runtime usage: `bash scripts/sync-from-local.sh <src> <dest>`.
+Smoke-tested on `commands/flow/ground.md`: 3 personal-path references
+scrubbed, output line count within tolerance.
+
+**Pre-existing git history intentionally not rewritten.** Force-push
+would break clones/forks and not actually un-leak info already cached
+on GitHub. Forward-clean only.
+
+**Files changed**
+- `bin/claudio` — removed (working-tree move to trash, then `git add -u`).
+- `.gitignore` — `bin/claudio` added.
+- `scripts/sync-from-local.sh` — new file (~85 lines, executable).
+- `SYSTEM_CHANGELOG.md` — this entry.
+
+**Verification**
+- `git ls-files bin/claudio` → empty post-commit.
+- `git ls-files | xargs grep -lE '<known-leaked-username>'` (excluding
+  pre-existing `ckm/canvas-fonts`, `skills-archive/ckm`, `property-based-testing`)
+  → empty.
+- Smoke test: `bash scripts/sync-from-local.sh ~/.claude/commands/flow/ground.md /tmp/sync-test.md`
+  reports `scrubbed: 3 personal-path reference(s)` and `0 leaks remaining`.
+
+**Rollback**
+`git revert HEAD` restores both files. The binary itself is preserved
+locally at `C:/tmp/trash/claudio.public-mirror.atlas-v7.0.3` — restore
+with `mv` + `git add` if a revert isn't enough.
+
+---
+
 ## [7.0.2] — 2026-04-28 (Namespace polish — extractor + ACTIVE-DIRECTORY drift)
 
 Two follow-up items that v7.0.1 left dangling:
