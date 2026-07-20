@@ -1,0 +1,10 @@
+{
+  "_comment": "ATLAS v7.0 drift-proposer thresholds. Edit values to tune sensitivity; delete a key to disable that channel.",
+  "skill_unused_days": 60,
+  "tool_failure_weeks": 5,
+  "scheduled_task_drift_hours": 6,
+  "cleanup_rule_error_streak": 3,
+  "max_proposals_per_session": 1,
+  "cooldown_hours_per_proposal_kind": 24,
+  "silenced_kinds": []
+}

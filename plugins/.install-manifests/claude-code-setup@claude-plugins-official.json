@@ -1,0 +1,15 @@
+{
+  "pluginId": "claude-code-setup@claude-plugins-official",
+  "createdAt": "2026-02-14T15:21:39.011Z",
+  "files": {
+    ".claude-plugin\\plugin.json": "acb399dcc8054f9caf3fc2cc707bf3d0cdac8144240bb7c1baf3f97351d3beac",
+    "automation-recommender-example.png": "fc81926b540b89be2d10eea6d9d5758fa3ae4d747ab4cd3e34c0238ecc190431",
+    "README.md": "e0b4ba718543116c76b2c116e64d88e80f18ad8ff45da7d147f91a31aaaba354",
+    "skills\\claude-automation-recommender\\references\\hooks-patterns.md": "6221f7f6d10b99ded96f0bfb06fdf4a52390c12c6686ceff186d2b77a03308ce",
+    "skills\\claude-automation-recommender\\references\\mcp-servers.md": "d62c6ad40166616c5f3d1562b982d3a509bdd3a40dfbd5c7577418c7e6917759",
+    "skills\\claude-automation-recommender\\references\\plugins-reference.md": "a5058f4f4550b9ca6bce02182f63164502454319d38442d4c624ba4f8d298448",
+    "skills\\claude-automation-recommender\\references\\skills-reference.md": "45c3d96339966e75d2617068e51a8a8df8dadc6e3dbef8e43c3fca23b7614291",
+    "skills\\claude-automation-recommender\\references\\subagent-templates.md": "6367e703c0649a173d9c0d769d3da9f8bfa8f68b81fa18c1538f2862a0fdffae",
+    "skills\\claude-automation-recommender\\SKILL.md": "dde31ba7ac71b88e6c37f03d796bb4d7bd7f05207d58e3e3dafbfc2d9f601a02"
+  }
+}

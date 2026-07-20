@@ -1,0 +1,238 @@
+{
+  "env": {
+    "CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS": "1",
+    "ENABLE_TOOL_SEARCH": "auto",
+    "ATLAS_HOOK_PROFILE": "standard",
+    "FIRECRAWL_API_KEY": "${FIRECRAWL_API_KEY}",
+    "TWENTY_FIRST_API_KEY": "${TWENTY_FIRST_API_KEY}",
+    "CLAUDE_CODE_EFFORT_LEVEL": "max",
+    "CLAUDE_CODE_DISABLE_ADAPTIVE_THINKING": "1"
+  },
+  "permissions": {
+    "allow": [
+      "Read",
+      "Glob",
+      "Grep",
+      "TodoWrite",
+      "ToolSearch",
+      "AskUserQuestion",
+      "EnterPlanMode",
+      "ExitPlanMode",
+      "Agent",
+      "Skill",
+      "NotebookRead",
+      "NotebookEdit",
+      "WebSearch",
+      "WebFetch",
+      "SendMessage",
+      "TaskOutput",
+      "RemoteTrigger",
+      "CronList",
+      "ListMcpResourcesTool",
+      "ReadMcpResourceTool"
+    ],
+    "deny": []
+  },
+  "hooks": {
+    "Notification": [
+      {
+        "matcher": ".*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "~/.claude/bin/claudio || true"
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Write|Edit|MultiEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "(test -f pubspec.yaml && dart format . 2>/dev/null) || (test -f package.json && (bun run format 2>/dev/null || npm run format 2>/dev/null)) || (test -f pyproject.toml && (uvx ruff format . 2>/dev/null || ruff format . 2>/dev/null)) || (test -f Cargo.toml && cargo fmt 2>/dev/null) || true"
+          }
+        ]
+      },
+      {
+        "matcher": "Write|Edit|MultiEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node ~/.claude/hooks/tsc-check.js",
+            "timeout": 15
+          }
+        ]
+      },
+      {
+        "matcher": "Read|Glob|Grep|Write|Edit|MultiEdit|Bash|Agent",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node ~/.claude/hooks/post-tool-monitor.js",
+            "timeout": 5
+          }
+        ]
+      },
+      {
+        "matcher": "Write|Edit|MultiEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "[ -f .code-review-graph/graph.db ] && (uvx code-review-graph update >/dev/null 2>&1 &) || true",
+            "timeout": 3
+          }
+        ]
+      }
+    ],
+    "PostToolUseFailure": [
+      {
+        "matcher": ".*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node ~/.claude/hooks/tool-failure-handler.js",
+            "timeout": 5
+          }
+        ]
+      }
+    ],
+    "PreToolUse": [
+      {
+        "matcher": "Skill",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node ~/.claude/hooks/skill-usage-log.js",
+            "timeout": 3
+          }
+        ]
+      },
+      {
+        "matcher": "Write|Edit|MultiEdit|Bash|Agent",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node ~/.claude/hooks/context-guard.js",
+            "timeout": 3
+          }
+        ]
+      },
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "CLAUDE_PLUGIN_ROOT=$HOME/.claude/hooks/cctools-safety-hooks python3 ~/.claude/hooks/cctools-safety-hooks/bash_hook.py",
+            "timeout": 5
+          }
+        ]
+      },
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node ~/.claude/hooks/pre-commit-gate.js",
+            "timeout": 5
+          }
+        ]
+      },
+      {
+        "matcher": "Write|Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "CLAUDE_PLUGIN_ROOT=$HOME/.claude/hooks/cctools-safety-hooks python3 ~/.claude/hooks/cctools-safety-hooks/file_length_limit_hook.py",
+            "timeout": 5
+          }
+        ]
+      },
+      {
+        "matcher": "Read",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "CLAUDE_PLUGIN_ROOT=$HOME/.claude/hooks/cctools-safety-hooks python3 ~/.claude/hooks/cctools-safety-hooks/read_env_protection_hook.py",
+            "timeout": 5
+          }
+        ]
+      },
+      {
+        "matcher": "Glob|Grep",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "if [ -f .code-review-graph/graph.db ]; then echo '{\"additionalContext\":\"code-review-graph: knowledge graph exists. Prefer MCP tools (get_minimal_context, query_graph, get_impact_radius, semantic_search_nodes) over Glob/Grep.\"}'; elif [ -f graphify-out/graph.json ]; then echo '{\"additionalContext\":\"graphify: knowledge graph exists. Read graphify-out/GRAPH_REPORT.md before broad searches.\"}'; fi",
+            "timeout": 2
+          }
+        ]
+      }
+    ],
+    "PreCompact": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash ~/.claude/scripts/progressive-learning/precompact-reflect.sh"
+          }
+        ]
+      }
+    ],
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash ~/.claude/hooks/session-start.sh"
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash ~/.claude/hooks/session-stop.sh"
+          }
+        ]
+      }
+    ],
+    "UserPromptSubmit": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "CLAUDE_PLUGIN_ROOT=$HOME/.claude/hooks/cctools-safety-hooks python3 ~/.claude/hooks/cctools-safety-hooks/allow_git_hook.py",
+            "timeout": 5
+          }
+        ]
+      }
+    ]
+  },
+  "statusLine": {
+    "type": "command",
+    "command": "node ~/.claude/hooks/statusline.js"
+  },
+  "enabledPlugins": {
+    "agent-sdk-dev@claude-plugins-official": true,
+    "asana@claude-plugins-official": true,
+    "claude-code-setup@claude-plugins-official": true,
+    "claude-md-management@claude-plugins-official": true,
+    "code-review@claude-plugins-official": true,
+    "code-simplifier@claude-plugins-official": true,
+    "coderabbit@claude-plugins-official": true,
+    "commit-commands@claude-plugins-official": true,
+    "feature-dev@claude-plugins-official": true,
+    "figma@claude-plugins-official": true,
+    "firebase@claude-plugins-official": true,
+    "github@claude-plugins-official": true,
+    "kotlin-lsp@claude-plugins-official": true,
+    "ralph-loop@claude-plugins-official": true,
+    "scheduled-tasks@claude-plugins-official": true
+  },
+  "defaultMode": "allowedTools",
+  "syntaxHighlightingDisabled": true
+}

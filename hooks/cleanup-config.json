@@ -1,0 +1,114 @@
+{
+  "_comment": "ATLAS v7.0 — declarative cleanup rules. Read by hooks/cleanup-runner.js each SessionStart. Paths are relative to CLAUDE_DIR. Ordering is preserved. Add a rule here instead of a new session-start.sh section.",
+  "rules": [
+    {
+      "name": "version-manifest-nag",
+      "mode": "weekly-nag",
+      "state": "cache/version-nag-last",
+      "check": "hooks/cleanup-rules/check-version-manifest.js",
+      "description": "VERSION-MANIFEST staleness nag (was \u00a77a)"
+    },
+    {
+      "name": "tool-health-prune",
+      "mode": "custom",
+      "script": "hooks/cleanup-rules/prune-tool-health.js",
+      "description": "Keep last 20 failure timestamps per tool (was \u00a77a2)"
+    },
+    {
+      "name": "trash-prune",
+      "mode": "age-prune",
+      "path": "TRASH",
+      "age_days": 3,
+      "match_all": true,
+      "max_depth": 1,
+      "description": "Expire items in TRASH after 3 days (was \u00a77a2)"
+    },
+    {
+      "name": "session-cache-prune",
+      "mode": "per-project-uuid-dirs",
+      "path": "projects",
+      "age_days": 14,
+      "keep_last": 30,
+      "description": "Per-project session UUID-dir rotation (was \u00a77a3)"
+    },
+    {
+      "name": "python-cache",
+      "mode": "delete-matching-dirs",
+      "path": "hooks",
+      "dir_name": "__pycache__",
+      "description": "Remove Python __pycache__ under hooks/ (was \u00a77b)"
+    },
+    {
+      "name": "debug-cleanup",
+      "mode": "age-prune",
+      "path": "debug",
+      "glob": "*.txt",
+      "age_days": 14,
+      "max_depth": 1,
+      "description": "Debug .txt files older than 14 days (was \u00a77c)"
+    },
+    {
+      "name": "shell-snapshots",
+      "mode": "age-and-count",
+      "path": "shell-snapshots",
+      "glob": "snapshot-*.sh",
+      "age_days": 14,
+      "keep_last": 50,
+      "max_depth": 1,
+      "description": "Shell snapshots: age-prune 14d and cap at 50 (was \u00a77d)"
+    },
+    {
+      "name": "stale-todos",
+      "mode": "age-prune",
+      "path": "todos",
+      "glob": "*.json",
+      "age_days": 3,
+      "max_depth": 1,
+      "description": "Stale todo .json files older than 3 days (was \u00a77e)"
+    },
+    {
+      "name": "plans-rotation",
+      "mode": "keep-last",
+      "path": "plans",
+      "glob": "*.md",
+      "keep_last": 15,
+      "max_depth": 1,
+      "description": "Keep last 15 plan files by mtime (was \u00a77f)"
+    },
+    {
+      "name": "session-env-rotation",
+      "mode": "age-prune-dirs",
+      "path": "session-env",
+      "age_days": 7,
+      "description": "Session-env subdirs older than 7 days (was \u00a77g)"
+    },
+    {
+      "name": "cache-efficiency",
+      "mode": "keep-last",
+      "path": "cache",
+      "glob": "efficiency-*.json",
+      "keep_last": 10,
+      "max_depth": 1,
+      "description": "Keep last 10 cache efficiency snapshots (was \u00a77h)"
+    },
+    {
+      "name": "transcripts-rotation",
+      "mode": "gzip-then-trash",
+      "path": "projects",
+      "glob": "*.jsonl",
+      "depth": 2,
+      "gzip_age_days": 7,
+      "gzip_min_size_mb": 1,
+      "trash_age_days": 30,
+      "trash_dir": "/c/tmp/trash/claude-transcripts",
+      "description": "Gzip >1MB+7d transcripts; trash .gz >30d (was \u00a77j)"
+    },
+    {
+      "name": "plugin-skill-pack-nag",
+      "mode": "weekly-nag",
+      "state": "cache/plugin-skill-nag-last",
+      "check": "hooks/cleanup-rules/check-skill-packs.js",
+      "description": "Plugin skill-pack freshness weekly nag (was \u00a77k)"
+    }
+  ]
+}

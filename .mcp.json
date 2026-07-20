@@ -1,0 +1,11 @@
+{
+  "_comment_purpose": "PROJECT-SCOPE MCP registry for sessions with CWD=~/.claude/. Servers here load only for system-maintenance work in this dir; per-project servers belong in each project's own .mcp.json. Parsing rule: `_comment_*` keys MUST be at the top level (siblings of `mcpServers`), NEVER inside `mcpServers`. For GLOBAL availability across all CWDs, register via `claude mcp add -s user`.",
+  "_comment_wave2_2026_04_27": "Wave 2 prune: cut 9 project-scope servers (supabase, stripe, resend, sentry, upstash, netlify, firecrawl, 21st-dev, maestro). Each is documented in INSTALLED.md with one-command re-add for per-project use. Statsig retained at user request pending future auth.",
+  "mcpServers": {
+    "statsig": {
+      "type": "http",
+      "url": "https://api.statsig.com/v1/mcp",
+      "_activate": "Get `console-` key from console.statsig.com/api_keys, then: claude mcp add -s user --transport http --header 'statsig-api-key: console-KEY' statsig https://api.statsig.com/v1/mcp"
+    }
+  }
+}

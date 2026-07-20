@@ -1,0 +1,84 @@
+# Credentials and secrets
+.credentials.json
+.claude/settings.local.json
+settings.local.json
+
+# Runtime state
+.last-session-handoff
+handoffs/
+session-state.md
+handoff-next-session.md
+
+# Project-specific memory (contains personal session data)
+projects/
+
+# Logs (runtime artifacts)
+logs/
+
+# Cache and temp
+cache/
+.cache/
+*.pyc
+__pycache__/
+stats-cache.json
+mcp-needs-auth-cache.json
+
+# Knowledge graphs (per-repo, locally rebuilt)
+.code-review-graph/
+graphify-out/
+
+# Runtime history and state
+history.jsonl
+shell-snapshots/
+debug/
+backups/
+todos/
+plans/
+
+# IDE integration (auto-generated)
+ide/
+
+# Node
+node_modules/
+package-lock.json
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Telemetry (runtime analytics)
+telemetry/
+
+# Session state (ephemeral handoffs)
+sessions/
+
+# Claude internal
+.claude-code-version
+statsig/
+
+# Plugin runtime state (install counts, caches)
+plugins/cache/
+plugins/blocklist.json
+plugins/install-counts-cache.json
+plugins/installed_plugins.json
+plugins/known_marketplaces.json
+plugins/marketplaces/
+
+# Other runtime directories
+session-env/
+downloads/
+flow-knowledge/
+usage-data/
+scheduled-tasks/
+
+# Temp/corrupt files
+*.tmp
+*.corrupt.*
+*.stackdump
+
+# TRASH
+TRASH/
+TRASH-FILES.md
+
+# Personal Windows-only binary (compiled paths leak; keep local-only)
+bin/claudio

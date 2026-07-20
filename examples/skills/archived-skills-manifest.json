@@ -1,0 +1,440 @@
+{
+  "_description": "Detection patterns for archived skills. Used by skill-watcher hook and usage-audit scheduled task.",
+  "_updated": "2026-03-27",
+  "skills": {
+    "DV-001": {
+      "name": "terraform-generator",
+      "category": "devops",
+      "detect_files": ["*.tf", "*.tfvars", ".terraform/**"],
+      "detect_packages": [],
+      "detect_keywords": ["terraform", "tfstate"]
+    },
+    "DV-003": {
+      "name": "terragrunt-generator",
+      "category": "devops",
+      "detect_files": ["terragrunt.hcl", "**/terragrunt.hcl"],
+      "detect_packages": [],
+      "detect_keywords": ["terragrunt"]
+    },
+    "DV-005": {
+      "name": "dockerfile-generator",
+      "category": "devops",
+      "detect_files": ["Dockerfile", "Dockerfile.*", "docker-compose.yml", "docker-compose.yaml", ".dockerignore"],
+      "detect_packages": [],
+      "detect_keywords": ["docker", "container"]
+    },
+    "DV-007": {
+      "name": "k8s-yaml-generator",
+      "category": "devops",
+      "detect_files": ["k8s/**", "kubernetes/**", "**/deployment.yaml", "**/service.yaml"],
+      "detect_packages": [],
+      "detect_keywords": ["kubernetes", "k8s", "kubectl"]
+    },
+    "DV-009": {
+      "name": "k8s-debug",
+      "category": "devops",
+      "detect_files": ["k8s/**", "kubernetes/**"],
+      "detect_packages": [],
+      "detect_keywords": ["kubectl", "pod", "k8s debug"]
+    },
+    "DV-010": {
+      "name": "helm-generator",
+      "category": "devops",
+      "detect_files": ["Chart.yaml", "charts/**", "helm/**"],
+      "detect_packages": [],
+      "detect_keywords": ["helm"]
+    },
+    "DV-012": {
+      "name": "github-actions-generator",
+      "category": "devops",
+      "detect_files": [".github/workflows/*.yml", ".github/workflows/*.yaml"],
+      "detect_packages": [],
+      "detect_keywords": ["github actions", "workflow", "ci/cd"]
+    },
+    "DV-014": {
+      "name": "gitlab-ci-generator",
+      "category": "devops",
+      "detect_files": [".gitlab-ci.yml"],
+      "detect_packages": [],
+      "detect_keywords": ["gitlab"]
+    },
+    "DV-016": {
+      "name": "azure-pipelines-generator",
+      "category": "devops",
+      "detect_files": ["azure-pipelines.yml"],
+      "detect_packages": [],
+      "detect_keywords": ["azure pipelines"]
+    },
+    "DV-018": {
+      "name": "jenkinsfile-generator",
+      "category": "devops",
+      "detect_files": ["Jenkinsfile"],
+      "detect_packages": [],
+      "detect_keywords": ["jenkins"]
+    },
+    "DV-020": {
+      "name": "ansible-generator",
+      "category": "devops",
+      "detect_files": ["playbook.yml", "ansible.cfg", "roles/**", "inventory/**"],
+      "detect_packages": [],
+      "detect_keywords": ["ansible"]
+    },
+    "DV-024": {
+      "name": "makefile-generator",
+      "category": "devops",
+      "detect_files": ["Makefile", "makefile", "GNUmakefile"],
+      "detect_packages": [],
+      "detect_keywords": ["makefile", "make"]
+    },
+    "DV-026": {
+      "name": "promql-generator",
+      "category": "devops",
+      "detect_files": ["prometheus.yml", "**/alerts/*.yml"],
+      "detect_packages": [],
+      "detect_keywords": ["promql", "prometheus"]
+    },
+    "DV-028": {
+      "name": "logql-generator",
+      "category": "devops",
+      "detect_files": [],
+      "detect_packages": [],
+      "detect_keywords": ["logql", "loki"]
+    },
+    "DV-029": {
+      "name": "fluentbit-generator",
+      "category": "devops",
+      "detect_files": ["fluent-bit.conf", "fluent-bit/**"],
+      "detect_packages": [],
+      "detect_keywords": ["fluent bit", "fluentbit"]
+    },
+    "DV-031": {
+      "name": "loki-config-generator",
+      "category": "devops",
+      "detect_files": ["loki-config.yaml", "loki.yaml"],
+      "detect_packages": [],
+      "detect_keywords": ["loki"]
+    },
+    "SC-006": {
+      "name": "property-based-testing",
+      "category": "security-deep",
+      "detect_files": [],
+      "detect_packages": ["fast-check", "hypothesis", "quickcheck"],
+      "detect_keywords": ["property-based", "fuzz"]
+    },
+    "SC-007": {
+      "name": "audit-context-building",
+      "category": "security-deep",
+      "detect_files": [],
+      "detect_packages": [],
+      "detect_keywords": ["security audit", "threat model"]
+    },
+    "SC-008": {
+      "name": "semgrep-rule-creator",
+      "category": "security-deep",
+      "detect_files": [".semgrep/**", "**/*.semgrep"],
+      "detect_packages": ["semgrep"],
+      "detect_keywords": ["semgrep"]
+    },
+    "SC-010": {
+      "name": "spec-to-code-compliance",
+      "category": "security-deep",
+      "detect_files": [],
+      "detect_packages": [],
+      "detect_keywords": ["compliance", "spec verification"]
+    },
+    "SC-011": {
+      "name": "constant-time-analysis",
+      "category": "security-deep",
+      "detect_files": [],
+      "detect_packages": [],
+      "detect_keywords": ["constant-time", "crypto", "timing attack"]
+    },
+    "SC-013": {
+      "name": "building-secure-contracts",
+      "category": "security-deep",
+      "detect_files": ["**/*.sol", "hardhat.config.*", "foundry.toml", "truffle-config.js"],
+      "detect_packages": ["hardhat", "@openzeppelin/contracts", "ethers", "web3"],
+      "detect_keywords": ["solidity", "smart contract", "web3"]
+    },
+    "SC-015": {
+      "name": "firebase-apk-scanner",
+      "category": "security-deep",
+      "detect_files": ["**/*.apk"],
+      "detect_packages": [],
+      "detect_keywords": ["apk scan", "firebase misconfig"]
+    },
+    "SC-016": {
+      "name": "yara-authoring",
+      "category": "security-deep",
+      "detect_files": ["**/*.yar", "**/*.yara"],
+      "detect_packages": [],
+      "detect_keywords": ["yara", "malware detection"]
+    },
+    "SC-017": {
+      "name": "dwarf-expert",
+      "category": "security-deep",
+      "detect_files": [],
+      "detect_packages": [],
+      "detect_keywords": ["dwarf", "debug info", "binary analysis"]
+    },
+    "SC-018": {
+      "name": "burpsuite-project-parser",
+      "category": "security-deep",
+      "detect_files": ["**/*.burp"],
+      "detect_packages": [],
+      "detect_keywords": ["burp suite", "burpsuite"]
+    },
+    "FS-004": {
+      "name": "golang-pro",
+      "category": "language",
+      "detect_files": ["go.mod", "go.sum", "**/*.go"],
+      "detect_packages": [],
+      "detect_keywords": ["golang", "go module"]
+    },
+    "FS-005": {
+      "name": "rust-engineer",
+      "category": "language",
+      "detect_files": ["Cargo.toml", "Cargo.lock", "**/*.rs"],
+      "detect_packages": [],
+      "detect_keywords": ["rust", "cargo"]
+    },
+    "FS-006": {
+      "name": "swift-expert",
+      "category": "language",
+      "detect_files": ["Package.swift", "**/*.swift", "*.xcodeproj/**"],
+      "detect_packages": [],
+      "detect_keywords": ["swift", "xcode"]
+    },
+    "FS-007": {
+      "name": "cpp-pro",
+      "category": "language",
+      "detect_files": ["CMakeLists.txt", "**/*.cpp", "**/*.hpp", "**/*.cc", "**/*.h"],
+      "detect_packages": [],
+      "detect_keywords": ["c++", "cmake"]
+    },
+    "FS-008": {
+      "name": "csharp-developer",
+      "category": "language",
+      "detect_files": ["**/*.csproj", "**/*.sln", "**/*.cs"],
+      "detect_packages": [],
+      "detect_keywords": ["c#", "dotnet", ".net"]
+    },
+    "FS-009": {
+      "name": "java-architect",
+      "category": "language",
+      "detect_files": ["pom.xml", "build.gradle", "**/*.java"],
+      "detect_packages": [],
+      "detect_keywords": ["java", "maven", "gradle"]
+    },
+    "FS-010": {
+      "name": "kotlin-specialist",
+      "category": "language",
+      "detect_files": ["**/*.kt", "**/*.kts", "build.gradle.kts"],
+      "detect_packages": [],
+      "detect_keywords": ["kotlin"]
+    },
+    "FS-011": {
+      "name": "php-pro",
+      "category": "language",
+      "detect_files": ["composer.json", "**/*.php"],
+      "detect_packages": [],
+      "detect_keywords": ["php", "composer"]
+    },
+    "FS-013": {
+      "name": "fastapi-expert",
+      "category": "framework",
+      "detect_files": [],
+      "detect_packages": ["fastapi", "uvicorn"],
+      "detect_keywords": ["fastapi"]
+    },
+    "FS-014": {
+      "name": "django-expert",
+      "category": "framework",
+      "detect_files": ["manage.py", "**/settings.py", "**/wsgi.py"],
+      "detect_packages": ["django"],
+      "detect_keywords": ["django"]
+    },
+    "FS-015": {
+      "name": "rails-expert",
+      "category": "framework",
+      "detect_files": ["Gemfile", "Rakefile", "config/routes.rb"],
+      "detect_packages": ["rails"],
+      "detect_keywords": ["rails", "ruby on rails"]
+    },
+    "FS-016": {
+      "name": "nestjs-expert",
+      "category": "framework",
+      "detect_files": [],
+      "detect_packages": ["@nestjs/core", "@nestjs/common"],
+      "detect_keywords": ["nestjs"]
+    },
+    "FS-017": {
+      "name": "spring-boot-engineer",
+      "category": "framework",
+      "detect_files": ["**/application.properties", "**/application.yml"],
+      "detect_packages": ["spring-boot"],
+      "detect_keywords": ["spring boot"]
+    },
+    "FS-018": {
+      "name": "laravel-specialist",
+      "category": "framework",
+      "detect_files": ["artisan", "app/Http/**"],
+      "detect_packages": ["laravel"],
+      "detect_keywords": ["laravel"]
+    },
+    "FS-019": {
+      "name": "dotnet-core-expert",
+      "category": "framework",
+      "detect_files": ["**/*.csproj", "appsettings.json", "Program.cs"],
+      "detect_packages": [],
+      "detect_keywords": [".net core", "asp.net"]
+    },
+    "FS-022": {
+      "name": "vue-expert",
+      "category": "framework",
+      "detect_files": ["**/*.vue"],
+      "detect_packages": ["vue", "nuxt"],
+      "detect_keywords": ["vue", "nuxt"]
+    },
+    "FS-023": {
+      "name": "angular-architect",
+      "category": "framework",
+      "detect_files": ["angular.json", "**/app.module.ts"],
+      "detect_packages": ["@angular/core"],
+      "detect_keywords": ["angular"]
+    },
+    "FS-025": {
+      "name": "flutter-expert",
+      "category": "framework",
+      "detect_files": ["pubspec.yaml", "**/*.dart", "lib/main.dart"],
+      "detect_packages": [],
+      "detect_keywords": ["flutter", "dart"]
+    },
+    "FS-029": {
+      "name": "cloud-architect",
+      "category": "infra",
+      "detect_files": ["*.tf", "serverless.yml", "cdk.json", "sam.yaml"],
+      "detect_packages": ["aws-cdk", "@aws-sdk/*", "boto3"],
+      "detect_keywords": ["aws", "gcp", "azure", "cloud architecture"]
+    },
+    "FS-030": {
+      "name": "kubernetes-specialist",
+      "category": "infra",
+      "detect_files": ["k8s/**", "kubernetes/**", "helm/**"],
+      "detect_packages": [],
+      "detect_keywords": ["kubernetes", "k8s"]
+    },
+    "FS-039": {
+      "name": "graphql-architect",
+      "category": "framework",
+      "detect_files": ["**/*.graphql", "**/*.gql"],
+      "detect_packages": ["graphql", "apollo-server", "@apollo/client"],
+      "detect_keywords": ["graphql"]
+    },
+    "FS-040": {
+      "name": "ml-pipeline",
+      "category": "data",
+      "detect_files": ["**/*.ipynb"],
+      "detect_packages": ["tensorflow", "torch", "pytorch", "scikit-learn", "transformers"],
+      "detect_keywords": ["machine learning", "ml pipeline", "model training"]
+    },
+    "FS-041": {
+      "name": "data-engineer",
+      "category": "data",
+      "detect_files": [],
+      "detect_packages": ["pyspark", "apache-beam", "airflow"],
+      "detect_keywords": ["data pipeline", "etl", "spark"]
+    },
+    "FS-042": {
+      "name": "game-developer",
+      "category": "framework",
+      "detect_files": ["ProjectSettings/**", "Assets/**"],
+      "detect_packages": ["phaser", "pixi.js", "babylonjs"],
+      "detect_keywords": ["game dev", "unity", "godot", "phaser"]
+    },
+    "FS-045": {
+      "name": "embedded-systems",
+      "category": "infra",
+      "detect_files": ["platformio.ini", "**/CMakeLists.txt"],
+      "detect_packages": [],
+      "detect_keywords": ["embedded", "iot", "arduino", "esp32", "stm32"]
+    },
+    "FS-047": {
+      "name": "chaos-engineer",
+      "category": "infra",
+      "detect_files": [],
+      "detect_packages": ["litmus", "chaos-mesh"],
+      "detect_keywords": ["chaos engineering", "resilience"]
+    },
+    "FS-048": {
+      "name": "microservices-architect",
+      "category": "infra",
+      "detect_files": ["docker-compose.yml"],
+      "detect_packages": [],
+      "detect_keywords": ["microservice", "service mesh", "istio"]
+    },
+    "FS-049": {
+      "name": "sre-engineer",
+      "category": "infra",
+      "detect_files": [],
+      "detect_packages": [],
+      "detect_keywords": ["sre", "slo", "incident response", "on-call"]
+    },
+    "FS-051": {
+      "name": "monitoring-expert",
+      "category": "infra",
+      "detect_files": ["prometheus.yml", "grafana/**"],
+      "detect_packages": [],
+      "detect_keywords": ["monitoring", "grafana", "prometheus", "alerting"]
+    },
+    "FS-053": {
+      "name": "terraform-engineer",
+      "category": "infra",
+      "detect_files": ["*.tf", "*.tfvars"],
+      "detect_packages": [],
+      "detect_keywords": ["terraform"]
+    },
+    "FS-056": {
+      "name": "fine-tuning-expert",
+      "category": "data",
+      "detect_files": [],
+      "detect_packages": ["transformers", "peft", "trl"],
+      "detect_keywords": ["fine-tuning", "fine tuning", "lora", "qlora"]
+    },
+    "FS-060": {
+      "name": "pandas-pro",
+      "category": "data",
+      "detect_files": [],
+      "detect_packages": ["pandas"],
+      "detect_keywords": ["pandas", "dataframe"]
+    },
+    "FS-061": {
+      "name": "shopify-expert",
+      "category": "framework",
+      "detect_files": ["**/*.liquid", "shopify.theme.toml"],
+      "detect_packages": ["@shopify/cli"],
+      "detect_keywords": ["shopify", "liquid"]
+    },
+    "FS-062": {
+      "name": "wordpress-pro",
+      "category": "framework",
+      "detect_files": ["wp-config.php", "wp-content/**"],
+      "detect_packages": [],
+      "detect_keywords": ["wordpress", "wp-cli"]
+    },
+    "FS-063": {
+      "name": "salesforce-developer",
+      "category": "framework",
+      "detect_files": ["sfdx-project.json", "**/*.cls", "**/*.trigger"],
+      "detect_packages": [],
+      "detect_keywords": ["salesforce", "apex", "sfdx"]
+    },
+    "FS-065": {
+      "name": "vue-expert-js",
+      "category": "framework",
+      "detect_files": ["**/*.vue"],
+      "detect_packages": ["vue"],
+      "detect_keywords": ["vue"]
+    }
+  }
+}
