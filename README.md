@@ -2,414 +2,380 @@
   <picture>
     <source media="(prefers-color-scheme: dark)" srcset="assets/atlas-banner-dark.svg">
     <source media="(prefers-color-scheme: light)" srcset="assets/atlas-banner-light.svg">
-    <img alt="ATLAS" src="assets/atlas-banner-dark.svg" width="600">
+    <img alt="ATLAS — Autonomous Task, Learning and Agent System" src="assets/atlas-banner-dark.svg" width="880">
   </picture>
 </p>
 
-<h3 align="center"><b>A</b>utonomous <b>T</b>ask, <b>L</b>earning, and <b>A</b>gent <b>S</b>ystem</h3>
-
 <p align="center">
-  A self-evolving AI operating system for Claude Code<br>
-  <sub>It doesn't just follow instructions — it learns, adapts, and grows itself.</sub>
+  <a href="#what-it-is">What it is</a> &nbsp;·&nbsp;
+  <a href="#install">Install</a> &nbsp;·&nbsp;
+  <a href="#whats-in-here">What's in here</a> &nbsp;·&nbsp;
+  <a href="#the-entry-points">Commands</a> &nbsp;·&nbsp;
+  <a href="#what-it-does-on-its-own">Behaviors</a> &nbsp;·&nbsp;
+  <a href="#under-the-hood">Under the hood</a> &nbsp;·&nbsp;
+  <a href="#making-it-yours">Make it yours</a>
 </p>
 
 <p align="center">
-  <a href="#-what-is-atlas">What</a> &bull;
-  <a href="#quick-start">Install</a> &bull;
-  <a href="#the-entry-points">Commands</a> &bull;
-  <a href="#autonomous-behaviors">Behaviors</a> &bull;
-  <a href="#workflow-depth-v10">Workflow</a> &bull;
-  <a href="#hook-lifecycle">Hooks</a> &bull;
-  <a href="#architecture">Architecture</a>
-</p>
-
-<p align="center">
-  <!-- Badge counts are illustrative; authoritative live counts are in SYSTEM_VERSION.md / cache/system-ground-truth.json -->
-  <img src="https://img.shields.io/badge/claude_code-opus_4.8-blueviolet?style=flat-square" alt="Claude Code">
-  <img src="https://img.shields.io/badge/version-10.3.1-informational?style=flat-square" alt="Version">
-  <img src="https://img.shields.io/badge/skills-53_active-blue?style=flat-square" alt="Skills">
-  <img src="https://img.shields.io/badge/agents-21_registered-green?style=flat-square" alt="Agents">
-  <img src="https://img.shields.io/badge/hooks-28-yellow?style=flat-square" alt="Hooks">
-  <img src="https://img.shields.io/badge/commands-36-teal?style=flat-square" alt="Commands">
-  <img src="https://img.shields.io/badge/license-MIT-orange?style=flat-square" alt="License">
+  <img src="https://img.shields.io/badge/version-10.3.1-B07D28?style=flat-square" alt="Version 10.3.1">
+  <img src="https://img.shields.io/badge/for-Claude_Code-4A4135?style=flat-square" alt="For Claude Code">
+  <img src="https://img.shields.io/badge/skills-45-6B5E4B?style=flat-square" alt="45 skills">
+  <img src="https://img.shields.io/badge/hooks-28-6B5E4B?style=flat-square" alt="28 hooks">
+  <img src="https://img.shields.io/badge/agents-21-6B5E4B?style=flat-square" alt="21 agents">
+  <img src="https://img.shields.io/badge/license-MIT-8F7F67?style=flat-square" alt="MIT license">
 </p>
 
 ---
 
-## What is ATLAS?
+## What it is
 
-Most Claude Code setups are a `CLAUDE.md` with some rules. ATLAS is a **full infrastructure layer** — lifecycle hooks, a registered agent roster (`agents/AGENTS.md`), a persistent knowledge graph, an in-session action graph, and self-evolving skill/memory systems that let Claude Code grow its own capabilities. Since v7.0, drift catches itself: telemetry feeds an `/observe` dashboard and a session-start drift-proposer; since v10, an evidence-fused usage ledger (`scripts/usage-report.js`) drives a weekly inventory loop so nothing unused accumulates.
+Most Claude Code setups are a `CLAUDE.md` with some rules in it. **ATLAS is the infrastructure layer underneath** — lifecycle hooks, a skill library, an agent roster, two persistence systems, and a telemetry loop that notices when the system itself is drifting.
+
+The short version: it keeps working when context runs out, picks its own execution depth, and gets a little better every session.
 
 <table>
 <tr>
-<td width="50%">
+<td width="52%" valign="top">
 
-**What you type:**
+**You type this**
+
 ```
 build a REST API for user management
 ```
 
-**What ATLAS does:**
-1. Recalls prior work first (`/recall` fused retrieval — don't re-derive)
-2. Loads the matching skills + Capability System for the stack
-3. Plans at the right depth (brief plan → plan file for multi-phase work)
-4. Executes wave-by-wave with verification between waves
-5. For known fan-out structure: the Workflow tool; for high-stakes calls: the council (two orchestration lanes)
-6. Security scans before marking done
-7. Learns from any mistakes for next time
+**It does this**
+
+1. **Recalls** prior work first — don't re-derive what you already solved
+2. **Loads** the matching skills and capability system for the stack
+3. **Plans** at the right depth — a sentence, or a plan file for multi-phase work
+4. **Executes** wave by wave, verifying between waves
+5. **Escalates** only when it pays: a deterministic Workflow for known fan-out, a council of agents for high-stakes calls
+6. **Scans** for security issues before saying "done"
+7. **Records** anything genuinely new so next time is cheaper
 
 </td>
-<td width="50%">
+<td width="48%" valign="top">
 
 ```
-       ┌──────────────────────────────────┐
-       │            A T L A S             │
-       ├──────────────────────────────────┤
-       │                                  │
-       │  /new  /resume  /task  /done     │ ← You
-       │         │                        │
-       │         ▼                        │
-       │  ┌───────────┐  ┌───────────┐    │
-       │  │ Workflow  │  │  Council  │    │ ← Two lanes
-       │  │  (fan-out)│  │ (judgment)│    │
-       │  └─────┬─────┘  └─────┬─────┘    │
-       │        ▼              ▼          │
-       │  ┌──────────────────────────┐    │
-       │  │ 53 Skills · 21 Agents    │    │ ← Execution
-       │  │ 28 Hooks  · 5 Rule Files │    │
-       │  └──────────┬───────────────┘    │
-       │             ▼                    │
-       │  ┌──────────────────────────┐    │
-       │  │ Learn · Evolve · Grow    │    │ ← Growth
-       │  └──────────────────────────┘    │
-       └──────────────────────────────────┘
+        ┌───────────────────────────┐
+        │  /new  /resume  /task     │  you
+        └─────────────┬─────────────┘
+                      │
+          ┌───────────┴───────────┐
+          ▼                       ▼
+   ┌─────────────┐         ┌─────────────┐
+   │  Workflow   │         │   Council    │
+   │  fan-out    │         │  judgment    │
+   └──────┬──────┘         └──────┬──────┘
+          └───────────┬───────────┘
+                      ▼
+        ┌───────────────────────────┐
+        │  45 skills · 21 agents    │  execution
+        │  28 hooks · 4 systems     │
+        └─────────────┬─────────────┘
+                      ▼
+        ┌───────────────────────────┐
+        │  observe → propose →      │  growth
+        │  you approve → apply      │
+        └───────────────────────────┘
 ```
 
 </td>
 </tr>
 </table>
 
-> **TL;DR** — It continues its own work when context runs out. It deploys agent teams based on task complexity. It creates new skills when it finds capability gaps. It learns from mistakes across sessions.
+> **The one-line pitch** — it continues its own work when context runs out, sizes its own execution depth, proposes its own fixes from telemetry, and learns from mistakes across sessions. You approve; it never rewrites itself behind your back.
 
 ---
 
-## Quick Start
+## Install
 
 ```bash
-# Clone
 git clone https://github.com/Leo-Atienza/atlas-claude.git
+```
 
-# Install (safe — never overwrites existing files)
+```bash
 cd atlas-claude && bash install.sh
+```
 
-# Verify system health
+`install.sh` is additive — it never overwrites a file you already have.
+
+Then verify:
+
+```bash
 bash ~/.claude/scripts/smoke-test.sh
 ```
 
-See [`examples/`](examples/) for a starter `settings.json` template with sensible defaults.
+**Before your first real session**, skim three things: `settings.json` (hook wiring and the `enabledPlugins` map), `hooks/cleanup-config.json` (retention rules that delete things on a schedule), and [`RUNTIME-STATE.md`](RUNTIME-STATE.md). See [Making it yours](#making-it-yours).
 
 ---
 
-## The Entry Points
+## What's in here
 
-Everything funnels through a small set of entry commands. You never need to think about the 53 active skills or 36 commands underneath — nor the registered agent roster (`agents/AGENTS.md`).
+| | Count | Where |
+|---|---:|---|
+| **Skills** — domain playbooks, loaded on demand | 45 | [`skills/`](skills/) |
+| **Hooks** — lifecycle automation across 11 events | 28 | [`hooks/`](hooks/) |
+| **Agents** — specialist subagents | 21 | [`agents/AGENTS.md`](agents/AGENTS.md) |
+| **Commands** — slash-command entry points | 29 | [`commands/`](commands/) |
+| **Scripts** — validators, telemetry, maintenance | 51 | [`scripts/`](scripts/) |
+| **Capability systems** — stack-aware presets | 4 | [`systems/`](systems/) |
+| **Rule files** — git, security, testing, delegation, scope | 5 | [`skills/RULES-*.md`](skills/) |
 
-| Command | Plain English | What Happens Under the Hood |
-|:-------:|:-------------|:---------------------------|
-| `/new` | "build X", "create X" | Classifies task → plans at the right depth → executes (Workflow lane for known fan-out) |
-| `/resume` | "continue", "pick up" | Reads handoff + state files in precedence order → restores full context → continues |
-| `/task` | "fix X", "add X" | One-off routing → complexity scoring → direct execution |
-| `/done` | "wrap up" | Reflects → captures knowledge → saves state → commits |
-| `/ship` | "push this" | Commits → pushes → opens PR → security scan |
-| `/handoff` | "end session" | Build + test → commit → push → chat handoff block |
-| `/review-proposals` | "what's Claude proposing?" | Reviews the A4 queue — the only self-modification path (conductor files here weekly) |
-| `/health` | "system status" | Validates hooks, counts, drift; updates SYSTEM_VERSION |
-| `/observe` | "how's the system?" | 6-section dashboard (tool health, safety hooks, skills, tasks, action graph, cleanup) |
-| `/apply-drift-fix` | "fix the drift" | Reads last drift proposal, routes to archive/disable/retrigger action |
+`skills/ACTIVE-DIRECTORY.md` indexes 51 entries — the extra six are ecosystem skills you install separately, listed in [`skills/SYMLINKS.md`](skills/SYMLINKS.md). Another 60 archived skill bundles sit in `skills/_archived/`, restorable with a single `mv`.
 
----
-
-## Autonomous Behaviors
-
-These happen **without user action**. ATLAS monitors, decides, and acts.
-
-### Auto-Continuation
-
-When context nears limits, ATLAS writes a structured handoff so a new session can pick up exactly where it left off. Handoffs live per-CWD at `~/.claude/handoffs/<cwd-slug>.md`.
-
-### Orchestration — two lanes (v10)
-
-Multi-agent work routes through exactly two mechanisms (the former smart-swarm scoring system is archived — `skills/_archived/smart-swarm/`):
-
-```
- Known structure (fan-out, judge panels, ──→  Workflow tool   (deterministic pipelines,
- migrations, adversarial verify)               user-opted-in: "use a workflow")
-
- High-stakes judgment (architecture, ─────→  Council          (2-4 subagents with diverse
- security, hard-to-reverse choices)            lenses, or agent-teams for real debate)
-```
-
-Routine tasks stay single-pass — orchestration cost isn't free.
-
-### Atlas Intelligence Layer
-
-Two persistence systems with strict boundaries (collapsed from 3 → 2 in v8.0.0 — Memory + Knowledge Store merged into the Obsidian vault):
-
-```
-Vault  (<your-vault-path>/wiki/)  personal/ (profile, feedback, project context) + engineering/ (KNOWLEDGE-NNN: pattern|solution|error|preference|failure). Local-only git.
-Atlas KG  (atlas-kg/)            facts NOT derivable from git/code — architectural truths
-```
-
-Plus an in-session **action graph** (`atlas-action-graph/`) that tracks reads/searches, feeds a duplicate-read advisory, and surfaces a hot-set digest across PreCompact and SessionStart.
-
-### Defense-in-Depth Security
-
-```
-Layer 1 (PreToolUse):  context-guard.js — secrets, context budget, duplicate-read advisory
-Layer 2 (PreToolUse):  cctools safety hooks — bash command patterns, file length, env reads, rm-block
-Layer 3 (PreToolUse):  pre-commit-gate.js — warns if build+test wasn't run before commit
-Layer 4 (PostToolUse): tsc-check.js + post-tool-monitor.js — type errors + failure/efficiency telemetry
-Layer 5 (PostToolUseFailure): tool-failure-handler.js — circuit breaker, MCP classification
-```
-
-### Code Graph Integration (CRG)
-
-When a project has `.code-review-graph/graph.db`, ATLAS prefers the CRG MCP tools (`get_minimal_context`, `query_graph`, `get_impact_radius`, `semantic_search_nodes`) over Glob/Grep. The graph auto-updates on every Write/Edit via a PostToolUse hook. Falls back to graphify (`graphify-out/graph.json`) for mixed-corpus projects.
+> **This is a sanitized publication, not a disk copy.** Personal session data, a private engineering journal, and identity-specific skills are excluded — so a few cross-references point at things you won't find here. [`PUBLIC-MIRROR.md`](PUBLIC-MIRROR.md) lists exactly what was held back and why.
 
 ---
 
-## Workflow depth (v10)
+## The entry points
 
-Task depth scales without a dedicated command family (the former Flow system — 19 commands + 15 agents, zero recorded uses — is archived as one bundle at `skills/_archived/flow/`; a repo containing `.flow/state.yaml` auto-offers its restore):
+You never think about 45 skills. Everything funnels through a handful of commands — and most of the time, plain English is enough.
 
-```
-Trivial ─────→ Small ──────→ Medium ────────→ Large / multi-phase
-(<20 lines)    (1-3 files)   (3-10 files)     (10+ files)
-    │             │              │                  │
-    ▼             ▼              ▼                  ▼
- Just do      Brief plan     Present plan,     Plan file in plans/ →
-   it         first          get approval      execute wave-by-wave,
-                                               validators between waves
-```
-
----
-
-## Hook Lifecycle
-
-Hooks across 9 lifecycle events create a fully reactive system (current count in the components box above — sync-counts-anchored):
-
-```
-┌─ SessionStart ──────────────────────────────────────────────────┐
-│  session-start.sh      Handoff, version, rotation, KG, action-   │
-│                        graph carryover (48h guard)               │
-│  cleanup-runner.js     25 declarative cleanup rules (v7.0)       │
-│  drift-proposer.js     At most ONE DRIFT advisory per session    │
-├─ UserPromptSubmit ──────────────────────────────────────────────┤
-│  allow_git_hook.py     Session-scoped git approval               │
-├─ PreToolUse ────────────────────────────────────────────────────┤
-│  context-guard.js      Duplicate-read advisory + security gate   │
-│                        + context budget                          │
-│  bash_hook.py          Dangerous shell command blocker           │
-│  rm_block_hook.py      Enforce "mv to TRASH" over rm             │
-│  file_length_limit     Prevent file bloat                        │
-│  read_env_protection   Protect env file reads                    │
-│  pre-commit-gate.js    Warn if build+test not run before commit  │
-│  graph-hint (bash)     Suggest CRG/graphify MCP over Glob/Grep   │
-│  skill-usage-log.js    Append {ts, skill, cwd} on Skill (v7.0)   │
-├─ PostToolUse ───────────────────────────────────────────────────┤
-│  auto-formatter        prettier / dart format on save            │
-│  tsc-check.js          TS errors injected as additionalContext   │
-│  CRG auto-update       Incremental graph update on Write/Edit    │
-│  post-tool-monitor.js  Context, efficiency, failure telemetry    │
-│                        + action-graph retrieval logging          │
-├─ PostToolUseFailure ────────────────────────────────────────────┤
-│  tool-failure-handler  Circuit breaker, tool health, MCP tag     │
-├─ PreCompact ────────────────────────────────────────────────────┤
-│  precompact-reflect.sh KG preservation + action-graph hot-set    │
-│                        digest injection (Tier 2)                 │
-├─ Stop ──────────────────────────────────────────────────────────┤
-│  session-stop.sh       Handoff, todos, KG capture, stats rollup  │
-├─ Notification ──────────────────────────────────────────────────┤
-│  claudio               Desktop notifications                     │
-├─ StatusLine ────────────────────────────────────────────────────┤
-│  statusline.js         Context bar, task, call count             │
-└─────────────────────────────────────────────────────────────────┘
-```
-
-Additional safety hooks ship on disk but are **opt-in** (not registered by default): `git_add_block_hook`, `git_checkout_safety_hook`, `git_commit_block_hook`, `env_file_protection_hook`. See [`hooks/README.md`](hooks/README.md#opt-in-safety-hooks-unregistered-by-default) for activation.
+| Command | Say it like | What happens |
+|:---|:---|:---|
+| `/new` | "build X" | Classifies the task, plans at the right depth, executes |
+| `/resume` | "continue" | Restores state in precedence order, picks up mid-thought |
+| `/task` | "fix X" | One-off routing, complexity scoring, straight to work |
+| `/done` | "wrap up" | Reflects, captures knowledge, saves state, commits |
+| `/ship` | "push this" | Commit, push, PR, security scan |
+| `/handoff` | "end session" | Build, test, commit, then a handoff block for next time |
+| `/health` | "system status" | Validates hooks and counts, updates `SYSTEM_VERSION.md` |
+| `/observe` | "how's it doing?" | Seven-panel telemetry dashboard |
+| `/review-proposals` | "what's it suggesting?" | The approval queue — the only path to self-modification |
 
 ---
 
-## Skill Domains
+## What it does on its own
 
-Active skills are indexed in `skills/ACTIVE-DIRECTORY.md` across three pages:
+No prompting required. It watches, decides, and acts.
 
-<table>
-<tr><th>Page</th><th>Count</th><th>Highlights</th></tr>
-<tr><td><b>Web &amp; Frontend</b> (Page 1)</td><td>34</td><td>React, Next.js, animation, design systems, web testing, security</td></tr>
-<tr><td><b>Backend &amp; Tools</b> (Page 2)</td><td>22</td><td>FastAPI, Express, deployment, workflow, MCP tooling</td></tr>
-<tr><td><b>Native &amp; Cross-Platform</b> (Page 3)</td><td>10</td><td>Expo, Tauri, SwiftUI, Jetpack Compose, Maestro</td></tr>
-</table>
+**Survives context limits.** As context fills, it writes a structured handoff keyed to the working directory. A fresh session reads it and resumes mid-thought instead of mid-guess.
 
-Archived skills live under `skills/ARCHIVE-DIRECTORY.md` (7 domain bundles). Third-party skill packs on disk include `trailofbits-security`, `fullstack-dev`, `context-engineering-kit`, `compound-engineering`, and `cctools`.
+**Sizes its own execution.** Trivial edits happen immediately. Multi-phase work gets a plan file and wave-by-wave execution with validators between waves. You aren't asked to pick a mode.
+
+**Escalates to multiple agents only when it pays.** Two lanes, deliberately:
+
+```
+known structure          →   Workflow tool     deterministic pipelines, fan-out,
+(migrations, audits,         (you opt in)      judge panels, adversarial verify
+ sweeps, fan-out)
+
+high-stakes judgment     →   Council           2–4 agents with deliberately
+(architecture, security,     (auto)            different lenses, then synthesis
+ one-way doors)
+```
+
+Routine work stays single-pass. Orchestration isn't free, and pretending otherwise is how you burn tokens for a worse answer.
+
+**Notices its own drift.** Every tool failure, skill invocation, and rejected suggestion is logged. A weekly pass compares that evidence against the active inventory and files proposals for what's decaying. At session start you get **at most one** advisory — never a wall of nagging.
+
+**Proposes, never applies.** Self-modification has exactly one path: a proposal lands in `proposals/`, and you approve or reject it. Nothing edits its own configuration unsupervised. That constraint is the feature.
+
+**Defends in depth.** Five hook layers: a secrets-and-context gate, shell-command blockers (including enforced `mv`-to-trash over `rm`), a pre-commit build/test check, type diagnostics fed back as context, and a circuit breaker that trips on repeated tool failures.
 
 ---
 
-## Architecture
+## Under the hood
+
+<details>
+<summary><b>Hook lifecycle</b> — what fires, and when</summary>
+
+<br>
+
+Hooks are registered across 11 lifecycle events:
+
+```
+SessionStart          session-start.sh     handoff, version, rotation, KG,
+                                           action-graph carryover (48h guard)
+                      cleanup-runner.js    25 declarative retention rules
+                      drift-proposer.js    at most ONE advisory per session
+
+UserPromptSubmit      allow_git_hook.py    session-scoped git approval
+
+PreToolUse            context-guard.js     duplicate-read advisory, secrets,
+                                           context budget
+                      bash_hook.py         dangerous shell command blocker
+                      rm_block_hook.py     enforce "mv to trash" over rm
+                      file_length_limit    prevent file bloat
+                      read_env_protection  guard env-file reads
+                      pre-commit-gate.js   warn if build+test wasn't run
+                      skill-usage-log.js   usage telemetry
+
+PostToolUse           auto-formatter       prettier / dart format on save
+                      tsc-check.js         TS errors as additionalContext
+                      post-tool-monitor.js telemetry + retrieval logging
+
+PostToolUseFailure    tool-failure-handler circuit breaker, MCP classification
+
+PreCompact            precompact-reflect   knowledge preservation + hot-set
+                                           digest injection
+
+Stop / SessionEnd     session-stop.sh      handoff, todos, capture, rollup
+
+Notification          desktop notify       optional
+StatusLine            statusline.js        context bar, task, call count
+```
+
+Four extra safety hooks ship on disk but stay **unregistered by default** — `git_add_block`, `git_checkout_safety`, `git_commit_block`, `env_file_protection`. See [`hooks/README.md`](hooks/README.md) to turn them on.
+
+</details>
+
+<details>
+<summary><b>Memory</b> — two stores, one in-session graph</summary>
+
+<br>
+
+Two persistent stores with a hard boundary between them:
+
+| Store | Holds | Notes |
+|---|---|---|
+| **Knowledge vault** | Durable engineering knowledge — patterns, solutions, errors, preferences, failures | Plain markdown in an Obsidian vault. Point it anywhere; docs call it `<your-vault-path>` |
+| **Operational graph** (`atlas-kg/`) | Facts *not* derivable from code or git — architectural truths, component relationships | Temporal triples: facts expire instead of being deleted. Format in [`atlas-kg/SCHEMA.md`](atlas-kg/SCHEMA.md) |
+
+Plus an in-session **action graph** (`atlas-action-graph/`) that logs what got read and searched, warns on duplicate reads, and carries a ranked hot-set across compaction and into the next session.
+
+On resume, state is read in strict precedence:
+
+```
+1. handoffs/<cwd-slug>.md              git state + todos from the Stop hook
+2. atlas-action-graph/<id>.state.json  previous hot-set (48h carryover guard)
+3. atlas-kg/{entities,triples}.json    long-term architectural facts
+```
+
+</details>
+
+<details>
+<summary><b>Layout</b> — what lives where</summary>
+
+<br>
 
 ```
 ~/.claude/
-├── CLAUDE.md                    # Slim core instructions (~8KB)
-├── ARCHITECTURE.md              # System architecture reference
-├── REFERENCE.md                 # Slash commands, MCP patterns, generators
-├── SYSTEM_VERSION.md            # Component inventory + health (auto-updated)
-├── SYSTEM_CHANGELOG.md          # Infrastructure version history
-├── settings.json                # Hook wiring, permissions, env vars
+├── CLAUDE.md              core instructions — the behavioral contract
+├── ARCHITECTURE.md        system architecture reference
+├── REFERENCE.md           commands, MCP patterns, generators
+├── SYSTEM_VERSION.md      component inventory + health (auto-updated)
+├── settings.json          hook wiring, permissions, env, enabled plugins
 │
-├── hooks/                       # 24 lifecycle hooks (30+ files incl. helpers)
-│   ├── lib.js                   #   Shared utilities (all Node hooks import this)
-│   ├── context-guard.js         #   PreToolUse — duplicate-read + security gate
-│   ├── post-tool-monitor.js     #   PostToolUse — telemetry + action-graph logging
-│   ├── tool-failure-handler.js  #   PostToolUseFailure — circuit breaker
-│   ├── pre-commit-gate.js       #   PreToolUse — build+test reminder
-│   ├── tsc-check.js             #   PostToolUse — TypeScript diagnostics
-│   ├── skill-usage-log.js       #   PreToolUse Skill — usage telemetry (v7.0)
-│   ├── cleanup-runner.js        #   SessionStart — 25 declarative cleanup rules
-│   ├── cleanup-config.json      #     Cleanup engine rules (per-mode)
-│   ├── drift-proposer.js        #   SessionStart — DRIFT advisor (v7.0)
-│   ├── drift-thresholds.json    #     Per-channel cooldowns + silenced-kinds
-│   ├── atlas-kg.js              #   Temporal knowledge graph module
-│   ├── atlas-extractor.js       #   Regex classifier (text → KNOWLEDGE-NNN with type:)
-│   ├── atlas-action-graph.js    #   In-session retrieval log + priority queue
-│   ├── session-start.sh         #   SessionStart — handoff + KG + carryover
-│   ├── session-stop.sh          #   Stop — handoff + KG capture + stats rollup
-│   ├── statusline.js            #   StatusLine — context bar, task, call count
-│   └── cctools-safety-hooks/    #   Python safety blockers (bash, rm, env, file len)
+├── hooks/                 lifecycle automation
+│   ├── lib.js               shared utilities (every Node hook imports this)
+│   ├── context-guard.js     PreToolUse — duplicate-read + security gate
+│   ├── post-tool-monitor.js PostToolUse — telemetry + retrieval logging
+│   ├── cleanup-runner.js    SessionStart — 25 declarative retention rules
+│   ├── drift-proposer.js    SessionStart — the one advisory per session
+│   ├── atlas-kg.js          temporal knowledge graph
+│   ├── atlas-action-graph.js in-session retrieval log + priority queue
+│   └── cctools-safety-hooks/ python blockers (bash, rm, env, file length)
 │
-├── skills/                      # 53 active skill entries (see SYSTEM_VERSION.md; 45 dirs in _archived/)
-│   ├── ACTIVE-DIRECTORY.md      #   Index of active skills
-│   ├── ACTIVE-PAGE-1-*.md       #   Web + frontend skills (22)
-│   ├── ACTIVE-PAGE-2-*.md       #   Backend + tools skills (13)
-│   ├── ACTIVE-PAGE-3-*.md       #   Native + cross-platform skills (9)
-│   ├── ARCHIVE-DIRECTORY.md     #   Archived skills by domain bundle
-│   ├── RULES-GIT.md             #   On-demand git workflow rules
-│   ├── RULES-SECURITY.md        #   On-demand security rules + triggers
-│   ├── RULES-TESTING.md         #   On-demand testing rules
-│   └── [domain]/SKILL.md        #   Individual skill definitions
+├── skills/                45 skill directories + the ACTIVE-* index
+│   ├── ACTIVE-DIRECTORY.md  the index you actually read
+│   ├── SYMLINKS.md          ecosystem skills, installed separately
+│   ├── RULES-*.md           git · security · testing · delegation · scope
+│   └── _archived/           60 bundles, restorable with one mv
 │
-│   # Knowledge store retired in v8.0.0 — migrated to the Obsidian vault at
-│   #   <your-vault-path>/wiki/engineering/ (146 entries across patterns/solutions/errors/preferences/failures)
-│
-├── commands/                    # slash commands (count in the components box — sync-counts-anchored)
-│   └── new.md, resume.md, ...   #   Top-level entry points (incl. v7.0 /observe + /apply-drift-fix)
-│
-├── agents/                      # 16 custom agents (74 incl. plugin packs)
-│   ├── flow-*.md                #   Flow agents (planner, executor, verifier, ...)
-│   ├── smart-swarm-coordinator  #   Multi-agent orchestrator
-│   └── [domain]/*.md            #   Domain specialists
-│
-├── atlas-kg/                    # Persistent knowledge graph (cross-session)
-│   ├── entities.json            #   Entities with validity windows
-│   └── triples.json             #   Subject-predicate-object triples
-│
-├── atlas-action-graph/          # In-session retrieval log + priority queue
-│   ├── ${session_id}.jsonl      #   Append-only event log
-│   ├── ${session_id}.state.json #   Priority queue (atomic writes)
-│   └── snapshots/               #   PreCompact state-file snapshots
-│
-├── scripts/                     # System utilities
-│   ├── smoke-test.sh            #   System validator
-│   ├── health-validator.js      #   Drift + health verification
-│   ├── system-doctor.js         #   Unified validator scoreboard (/system-doctor)
-│   ├── observability.js         #   Telemetry dashboard (/observe)
-│   └── progressive-learning/    #   PreCompact reflection scripts
-│
-└── projects/<cwd>/              # Per-CWD Claude Code session transcripts + logs (auto-memory subsystem retired v8.0.0)
+├── commands/              slash-command entry points
+├── agents/                specialist subagents + AGENTS.md roster
+├── systems/               capability systems (stack-aware presets)
+├── scripts/               validators, telemetry, maintenance
+├── templates/             project scaffolds
+├── design-system/         tokens, brand, components
+├── local-llm/             zero-cost delegation evals
+└── mcp-servers/local-agent/  local-model MCP server (source included)
 ```
 
-## State Management
+State directories (`atlas-kg/`, `atlas-action-graph/`, `proposals/`, `tasks/`, `logs/`, `cache/`) are created on demand — see [`RUNTIME-STATE.md`](RUNTIME-STATE.md).
 
-When resuming, ATLAS reads state in strict precedence order:
+</details>
 
-| Priority | Source | Purpose |
-|:--------:|:-------|:--------|
-| 1 | `.flow/state.yaml` | Active Flow workflow state (authoritative) |
-| 2 | `~/.claude/handoffs/<cwd-slug>.md` | Git state + todos from Stop hook (per-CWD — slug replaces `/`, `\`, `:` with `_`) |
-| 3 | `~/.claude/atlas-action-graph/${session_id}.state.json` | Previous session's hot-set (48h carryover guard) |
-| 4 | `~/.claude/atlas-kg/{entities,triples}.json` | Long-term architectural facts |
+<details>
+<summary><b>MCP servers</b> — two registries</summary>
 
----
+<br>
 
-## MCP Servers
+| Registry | Scope | Managed with |
+|---|---|---|
+| `~/.claude.json` → `mcpServers` | **User** — every working directory | `claude mcp add\|remove -s user` |
+| `~/.claude/.mcp.json` | **Project** — only when cwd is `~/.claude/` | edit the file directly |
 
-Two registries:
-
-- **`~/.claude.json`** (top-level `mcpServers`) — **USER scope**, global across all CWDs. Managed via `claude mcp add|remove -s user`.
-- **`~/.claude/.mcp.json`** — **PROJECT scope**, loaded only when CWD is `~/.claude/`.
-
-Currently ✓ Connected at user scope: `code-review-graph`, `magicuidesign-mcp`, `shadcn`, `prisma`, `tauri-mcp`, `lighthouse`, `heroui`, `context-mode`, `mobile`, `aceternity`, `iconify`, `plugin:firebase:firebase`, and more. Project-scope entries load from `.mcp.json` when CWD=`~/.claude/` and promote to user scope via the `_activate` commands documented in that file.
-
-OAuth-pending (sign-in on first use): `cloudflare`, `linear`, `expo`, `posthog`, `vercel`, `statsig`, `plugin:asana:asana`, `plugin:figma:figma`.
-
-See [`ARCHITECTURE.md`](ARCHITECTURE.md#mcp-servers) for the complete list.
-
----
-
-## Optional Components
-
-Some hooks reference external components. They degrade gracefully — silent no-op if missing:
-
-| Component | Purpose | How to Get |
-|-----------|---------|-----------|
-| `cctools-safety-hooks/` | Block dangerous bash commands, file limits, rm enforcement | Install [cctools](https://github.com/anthropics/claude-code-community-tools) |
-| `progressive-learning/` | Force reflection before compaction | Ships with ATLAS |
-| `claudio` | Audio notifications | Optional binary at `~/.claude/bin/claudio` |
-| `code-review-graph` | Tree-sitter code graph (23 languages) | `uvx code-review-graph build` per project |
-| `graphify` | Mixed-corpus graph (docs + code + images) | `python -m graphify .` per folder |
-
----
-
-## What's Novel
-
-| Feature | What It Does | Why It Matters |
-|---------|-------------|----------------|
-| **Auto-continuation** | Context-aware session chaining with structured handoff | Never lose work mid-task |
-| **Complexity scoring** | Automatic agent team deployment | Right-sized execution without asking |
-| **Self-evolution** | Creates skills + adds MCP servers on capability gaps | System grows with your needs |
-| **Two-layer persistence** | Vault (personal + engineering knowledge, v8.0.0 merge) + Atlas KG (facts) | Strict boundaries, no overlap |
-| **Action graph** | In-session retrieval log with priority queue + hot-set carryover | Duplicate-read advisory + PreCompact digest survival |
-| **Tier routing** | Haiku/Sonnet/Opus per subtask | Token cost reduction without quality loss |
-| **Circuit breaker** | Failure tracking + MCP-aware classification | Prevents runaway tool failures |
-| **CRG integration** | Tree-sitter code graph with MCP tool preference | Minimal-context navigation over Glob/Grep |
-| **Observability dashboard** (v7.0) | `/observe` renders telemetry from 6 streams | The system shows you what's drifting before you ask |
-| **Drift proposer** (v7.0) | SessionStart emits at most 1 advisory per session | Self-surfacing fixes — system proposes, you approve |
-| **Unified cleanup engine** (v7.0) | 19 declarative rules in `cleanup-config.json` | One JSONL log per rule, fail-open, 3-line config to add a target |
-
----
-
-## System Validation
+Per-server install commands are in [`INSTALLED.md`](INSTALLED.md). The one server original to this repo is `mcp-servers/local-agent/`, which routes cheap sub-tasks (summarizing, classifying, extracting) to a local Ollama model at zero API cost:
 
 ```bash
-# Full system smoke test
-bash ~/.claude/scripts/smoke-test.sh
-
-# Validator scoreboard
-node ~/.claude/scripts/system-doctor.js
-
-# Slash command (updates SYSTEM_VERSION.md)
-/health
+npm install --prefix mcp-servers/local-agent
 ```
+
+The delegation policy — what should and should not go to a small local model — is in `skills/RULES-LOCAL-LLM.md`.
+
+</details>
+
+<details>
+<summary><b>Optional components</b> — all degrade to a silent no-op</summary>
+
+<br>
+
+| Component | Purpose | How to get it |
+|---|---|---|
+| `cctools-safety-hooks/` | Shell blockers, file limits, `rm` enforcement | Ships with ATLAS |
+| `code-review-graph` | Tree-sitter code graph; preferred over grep when present | `uvx code-review-graph build` |
+| `graphify` | Mixed-corpus graph (docs + code + images) | `python -m graphify .` |
+| Ollama | Local-model delegation via `local-agent` | [ollama.com](https://ollama.com) |
+| Desktop notifications | Audio/visual session alerts | Optional binary |
+
+Nothing here is required. A missing component logs nothing and blocks nothing.
+
+</details>
+
+<details>
+<summary><b>Validation</b> — proving the system is intact</summary>
+
+<br>
+
+```bash
+bash ~/.claude/scripts/smoke-test.sh
+```
+
+```bash
+node ~/.claude/scripts/system-doctor.js
+```
+
+13 validators check hook wiring, registry parity, reference integrity (every script an automation points at actually exists), skill counts, and archive manifests. `scripts/test-validators.js` unit-tests the validators themselves, including must-reject cases — because a validator that silently passes is worse than none.
+
+</details>
+
+---
+
+## What's actually novel
+
+| | What it does | Why it matters |
+|---|---|---|
+| **Auto-continuation** | Structured handoff written as context fills | Work survives the context limit |
+| **Proposal queue** | Telemetry files suggestions; you approve them | Self-improvement without an agent editing its own config |
+| **Action graph** | In-session retrieval log with a ranked hot-set | Catches duplicate reads; survives compaction |
+| **Temporal knowledge** | Facts carry validity windows | The system can answer "what was true then?" |
+| **Evidence-fused usage ledger** | Skill usage measured across six independent signals | Retirement decisions come from data, not vibes |
+| **Two-lane orchestration** | Deterministic workflows vs. deliberative councils | Multi-agent cost is paid only where it returns |
+| **Circuit breaker** | Failure tracking with MCP-aware classification | One broken tool can't spiral a session |
+| **Local-model delegation** | Cheap sub-tasks routed to Ollama | Real token savings on summarize/classify/extract |
+
+---
+
+## Making it yours
+
+This is one person's working system, published so you can take it apart. A few things are worth changing before you lean on it:
+
+1. **`settings.json`** — ships with opinionated defaults: enabled plugins, a hook profile, permissions, and behavioral rules in `CLAUDE.md` (including a terse response register). All of it is meant to be edited.
+2. **`hooks/cleanup-config.json`** — 25 retention rules that *delete things on a schedule*. Read these before they run.
+3. **The knowledge vault path** — docs reference `<your-vault-path>`. Point it at your own vault, or drop the vault-dependent hooks entirely.
+4. **`CLAUDE.md`** — the behavioral contract. Everything else is machinery serving it. Start here if you only read one file.
+
+Lifting a single piece works too — the hooks, the proposal queue, and the action graph are independent. [`RUNTIME-STATE.md`](RUNTIME-STATE.md) explains the state layer; [`PUBLIC-MIRROR.md`](PUBLIC-MIRROR.md) explains what was left out.
 
 ---
 
 ## License
 
-MIT License. Use it, modify it, make it yours.
-
-## Author
-
-**the user**
+MIT. Use it, fork it, strip it for parts.
 
 <p align="center">
-  <sub>Built with Claude Code (Opus 4.8) and an unhealthy amount of ambition.</sub>
+  <sub>Built with Claude Code · <a href="https://github.com/Leo-Atienza">github.com/Leo-Atienza</a></sub>
 </p>
