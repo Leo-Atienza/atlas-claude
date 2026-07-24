@@ -1,0 +1,78 @@
+{
+  "_description": "Machine index of Capability Systems. DERIVED from systems/*/SYSTEM.md frontmatter by scripts/systems-registry.js (also regenerated inline by hooks/system-detect.js when stale). DO NOT HAND-EDIT.",
+  "_updated": "2026-07-24",
+  "systems": {
+    "SYS-APP": {
+      "name": "app-dev",
+      "domain": "native",
+      "status": "active",
+      "when_to_use": "React Native / Expo / Flutter / Swift / Android apps — mobile screens, native builds, APK/IPA pipelines.",
+      "priority": 40,
+      "detect_files": [
+        "app.json",
+        "eas.json",
+        "pubspec.yaml",
+        "android/build.gradle",
+        "ios/Podfile"
+      ],
+      "detect_packages": [
+        "expo",
+        "react-native",
+        "@react-native/*"
+      ],
+      "companions": [],
+      "manifest": "systems/app-dev/SYSTEM.md"
+    },
+    "SYS-META": {
+      "name": "atlas-meta",
+      "domain": "atlas",
+      "status": "active",
+      "when_to_use": "Working ON the ATLAS system itself — hooks, skills, validators, MCP wiring, knowledge plumbing, ~/.claude infrastructure.",
+      "priority": 60,
+      "detect_files": [
+        "SYSTEM_VERSION.md",
+        "ARCHITECTURE.md",
+        "hooks/session-start.sh"
+      ],
+      "detect_packages": [],
+      "companions": [],
+      "manifest": "systems/atlas-meta/SYSTEM.md"
+    },
+    "SYS-DSGN": {
+      "name": "design-ui",
+      "domain": "design",
+      "status": "active",
+      "when_to_use": "Visual/UX-heavy website work — landing pages, marketing sites, portfolios, brand-led UI where design quality IS the deliverable. Activate manually.",
+      "priority": 0,
+      "detect_files": [],
+      "detect_packages": [],
+      "companions": [],
+      "manifest": "systems/design-ui/SYSTEM.md"
+    },
+    "SYS-WEB": {
+      "name": "full-stack",
+      "domain": "web",
+      "status": "active",
+      "when_to_use": "Next.js / React / TS web apps, dashboards, landing pages, full-stack web features.",
+      "priority": 50,
+      "detect_files": [
+        "next.config.js",
+        "next.config.ts",
+        "next.config.mjs",
+        "app/**/page.tsx",
+        "vercel.json"
+      ],
+      "detect_packages": [
+        "next",
+        "@vercel/*",
+        "tailwindcss",
+        "drizzle-orm",
+        "better-auth"
+      ],
+      "companions": [
+        "design-ui"
+      ],
+      "manifest": "systems/full-stack/SYSTEM.md"
+    }
+  }
+}

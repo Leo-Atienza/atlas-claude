@@ -63,6 +63,31 @@ check('resolve strips quotes', resolveRef('"$CLAUDE_DIR/scripts/x.js"') === path
 check('resolve non-exec dir -> null', resolveRef('cache/foo.js') === null);
 check('resolve .json -> null', resolveRef('hooks/context-thresholds.json') === null);
 
+// validate-brain-coverage `mentions`: the routing-detector. A false POSITIVE here
+// is the dangerous direction — it marks an orphan "reachable" and the check silently
+// rots into a no-op. Bare-stem matches must never count.
+const { mentions } = require('./validate-brain-coverage.js');
+check('mentions filename with ext', mentions('see reference/craft.md for the flow', 'craft.md'));
+check('mentions wikilink form', mentions('routed via [[react-bits-catalog]] here', 'react-bits-catalog.md'));
+check('mentions wikilink with alias', mentions('see [[craft|the craft flow]]', 'craft.md'));
+check('mentions .mjs script', mentions('run scripts/web-preflight.mjs before presenting', 'web-preflight.mjs'));
+check('reject bare stem in prose', !mentions('apply careful craft to the build', 'craft.md'));
+check('reject unrelated text', !mentions('nothing routes here at all', 'asset-pipelines.md'));
+check('regex-escapes dotted stems', !mentions('a b c', 'a.b.c.md'));
+
+// web-intent-router `classify`: routes the user's two natural-language web doors. A false
+// POSITIVE fires a signpost on ordinary system talk (pure noise); a false NEGATIVE
+// loses the whole brain on a real build. Both directions are covered here.
+const { classify: webIntent } = require('../hooks/web-intent-router.js');
+check('web: new site', webIntent('create a website for my portfolio') === 'new');
+check('web: new via indefinite article', webIntent('make me a website') === 'new');
+check('web: existing via improve-verb', webIntent('upgrade this website') === 'existing');
+check('web: existing via demonstrative', webIntent('make this website better') === 'existing');
+check('web: veto system talk', webIntent('make sure the web-dev system is automatic') === null);
+check('web: veto meta nouns', webIntent('improve the validator so it catches orphans') === null);
+check('web: veto reading a site', webIntent('scan through this website and take what you can') === null);
+check('web: silent on unrelated', webIntent('fix the build script') === null);
+
 const unitFails = fails.length;
 
 // ── 2. smoke-test every validator ────────────────────────────────────

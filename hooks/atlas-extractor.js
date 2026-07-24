@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+require('./lib'); // F5: auto-instrument per-hook health on exit (lib.js IIFE)
 /**
  * atlas-extractor.js — Heuristic Memory Auto-Extractor for ATLAS
  * ================================================================
@@ -304,7 +305,7 @@ function cli() {
       if (memories.length === 0) return console.log("No extractable memories found.");
       console.log(`Extracted ${memories.length} memories:\n`);
       for (const m of memories) {
-        console.log(`  [${m.atlas_tag}] (${m.confidence}) ${m.preview}`);
+        console.log(`  [${m.type}] (${m.confidence}) ${m.preview}`);
       }
       break;
     }

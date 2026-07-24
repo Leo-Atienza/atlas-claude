@@ -1,0 +1,8 @@
+{
+  "task": "describe-snippet",
+  "cases": [
+    { "prompt": "function chunk(arr, n) {\n  const out = [];\n  for (let i = 0; i < arr.length; i += n) out.push(arr.slice(i, i + n));\n  return out;\n}", "expect": { "containsAny": ["chunk", "split", "sub-array", "subarray", "group", "length"] } },
+    { "prompt": "const debounce = (fn, ms) => { let t; return (...a) => { clearTimeout(t); t = setTimeout(() => fn(...a), ms); }; };", "expect": { "containsAny": ["debounce", "delay", "wait", "timeout", "last call"] } },
+    { "prompt": "async function retry(fn, n) { for (let i = 0; i < n; i++) { try { return await fn(); } catch (e) { if (i === n - 1) throw e; } } }", "expect": { "containsAny": ["retr", "attempt", "n times", "fail", "throw"] } }
+  ]
+}

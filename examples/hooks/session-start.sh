@@ -20,7 +20,14 @@ done
 # ─── 1. Progressive Learning checks ───────────────────────────────────
 FLAG_FILE="$CLAUDE_DIR/.pending-reflection"
 CONFLICTS_FILE="${MEMORY_DIR:+$MEMORY_DIR/conflicts.md}"
-HANDOFF_FILE="$CLAUDE_DIR/.last-session-handoff"
+
+# Per-CWD handoff file so two projects can't clobber each other.
+# Slug matches the one in session-stop.sh.
+cwd_slug() {
+  printf '%s' "$1" | sed -e 's|[/\\:]|_|g' -e 's|__*|_|g' -e 's|^_||' -e 's|_$||'
+}
+HANDOFFS_DIR="$CLAUDE_DIR/handoffs"
+HANDOFF_FILE="$HANDOFFS_DIR/$(cwd_slug "$(pwd)").md"
 
 if [ -f "$FLAG_FILE" ]; then
   echo "PROGRESSIVE LEARNING: Previous session reflection was missed."
@@ -41,10 +48,22 @@ fi
 
 if [ -f "$HANDOFF_FILE" ]; then
   echo ""
-  echo "SESSION HANDOFF from previous session:"
+  echo "SESSION HANDOFF from previous session in this folder:"
   cat "$HANDOFF_FILE"
   echo ""
   echo "Use /resume to continue where you left off."
+fi
+
+# Prune stale per-CWD handoffs older than 14 days
+if [ -d "$HANDOFFS_DIR" ]; then
+  find "$HANDOFFS_DIR" -maxdepth 1 -name '*.md' -mtime +14 -delete 2>/dev/null || true
+fi
+
+# One-time migration: retire the old global file
+STALE_GLOBAL="$CLAUDE_DIR/.last-session-handoff"
+if [ -f "$STALE_GLOBAL" ]; then
+  mkdir -p "$CLAUDE_DIR/TRASH" 2>/dev/null || true
+  mv "$STALE_GLOBAL" "$CLAUDE_DIR/TRASH/.last-session-handoff.$(date +%s)" 2>/dev/null || true
 fi
 
 # ─── 1.5. Mermaid architecture diagram detection ──────────────────────

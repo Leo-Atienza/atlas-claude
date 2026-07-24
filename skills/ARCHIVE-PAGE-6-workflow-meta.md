@@ -1,6 +1,7 @@
 # Archive — Bundle 6: Workflow & Meta
 
 > Methodology skills and meta-tools. Practices from Compound Engineering and CEK are now baked into the Flow pipeline — these archive pages are reference material.
+> **Path note (2026-06-09):** rows pointing into `compound-engineering/` or `context-engineering-kit/` are historical — both bundles reorganized under `<bundle>/plugins/.../skills/...`. Locate current paths with `find ~/.claude/skills/<bundle> -name SKILL.md | grep <slug>` before loading. Rows pointing at `skills/_archived/<slug>/` resolve as written.
 
 ## Context Engineering Kit (CEK)
 
@@ -29,6 +30,6 @@ All located under `skills/compound-engineering/`. Each has its own SKILL.md.
 | ID | Name | Path | Description |
 |----|------|------|-------------|
 | SK-012 | Skill Creator | `skills/skill-creator/SKILL.md` | Create new skills from detected capability gaps |
-| SK-014 | Brand Guidelines | `skills/brand-guidelines/SKILL.md` | Brand consistency and guidelines management |
-| SK-015 | Discovery Doc | `skills/discovery-doc/SKILL.md` | Technical discovery document creation |
-| SK-051 | Dev Cycle | `skills/dev-cycle/SKILL.md` | Development lifecycle management |
+| SK-014 | Brand Guidelines | `skills/_archived/brand-guidelines/SKILL.md` | Brand consistency and guidelines management |
+| SK-015 | Discovery Doc | `skills/_archived/discovery-doc/SKILL.md` | Technical discovery document creation |
+| SK-051 | Dev Cycle | `skills/_archived/dev-cycle/SKILL.md` | Development lifecycle management |

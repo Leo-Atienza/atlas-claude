@@ -40,8 +40,12 @@ def _check_single_git_checkout_command(command):
     if not command.strip().startswith("git checkout"):
         return False, None
 
-    # Safe patterns that we should allow without checking
-    if "-b" in command or "--help" in command or "-h" in command:
+    # Safe patterns that we should allow without checking.
+    # v8.14 audit fix: these must match as standalone flags — the old substring
+    # check ('-b' in command) treated ANY branch name containing "-b"/"-h"
+    # (feature-branch, fix-bug, my-hotfix) as safe, bypassing every dangerous-
+    # pattern check below (e.g. `git checkout -f feature-branch` was allowed).
+    if re.search(r'(^|\s)(-b|-B|--help|-h)(\s|$)', command):
         return False, None
 
     # ALWAYS block these dangerous patterns

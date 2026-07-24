@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+require('./lib'); // F5: auto-instrument per-hook health on exit (lib.js IIFE)
 /**
  * atlas-action-graph.js — In-session retrieval tracking & duplicate detection
  * ===========================================================================
@@ -562,6 +563,25 @@ function hotSet(sessionId, budget = 2000) {
 }
 
 /**
+ * Render a single item's target in a human-readable form. Read targets stay
+ * as the bare path; Grep/Glob targets get formatted as `verb "pattern" in scope`
+ * because the raw stored target is a packed `pattern@path#type*glob` string.
+ */
+function formatTarget(item) {
+  const raw = item.target || "";
+  const tool = item.tool || "";
+  if (tool === "Grep" || tool === "Glob") {
+    const verb = tool.toLowerCase();
+    const atIdx = raw.indexOf("@");
+    let pattern = atIdx > 0 ? raw.slice(0, atIdx) : raw;
+    const scope = atIdx > 0 ? raw.slice(atIdx + 1) : "";
+    if (pattern.length > 50) pattern = pattern.slice(0, 47) + "...";
+    return scope ? `${verb} "${pattern}" in ${scope}` : `${verb} "${pattern}"`;
+  }
+  return raw;
+}
+
+/**
  * Format the hot set as a markdown block ready for PreCompact injection.
  * Returns "" if empty (caller should skip injection in that case).
  */
@@ -578,7 +598,7 @@ function compactDigest(sessionId, budget = 2000) {
     const star = item.pinned ? "★" : "·";
     const uses = item.used_count ? ` used ${item.used_count}x` : "";
     lines.push(
-      `  ${star} ${item.target} — read ${item.retrieved_count}x, priority ${item.priority.toFixed(2)}${uses}`
+      `  ${star} ${formatTarget(item)} — read ${item.retrieved_count}x, priority ${item.priority.toFixed(2)}${uses}`
     );
   }
   if (dropped.length > 0) {
@@ -608,7 +628,7 @@ function carryoverDigest(sessionId, n = 5) {
     const star = item.pinned ? "★" : "·";
     const uses = item.used_count ? ` used ${item.used_count}x` : "";
     lines.push(
-      `  ${star} ${item.target} — read ${item.retrieved_count}x, priority ${item.priority.toFixed(2)}${uses}`
+      `  ${star} ${formatTarget(item)} — read ${item.retrieved_count}x, priority ${item.priority.toFixed(2)}${uses}`
     );
   }
   lines.push(

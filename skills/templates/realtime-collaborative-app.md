@@ -4,14 +4,14 @@
 Multi-user real-time apps: whiteboard, document editor, multiplayer game, shared dashboard, collaborative design tool, kanban board.
 
 ## Stack
-- Expo SDK 54 (mobile) or Next.js 16 (web) or both via monorepo (SK-092)
-- Legend State v3 (signals + built-in CRDT sync) or TinyBase v5 (MergeableStore CRDT)
+- Expo SDK 57 (mobile) or Next.js 16 (web) or both via monorepo (SK-092 — archived)
+- Legend State (v3 is BETA — npm stable is 2.x; signals + built-in CRDT sync) or TinyBase v9 (MergeableStore CRDT)
 - Supabase Realtime (presence, broadcast channels)
 - Reanimated 4 (collaborative cursors, live indicators)
 - Zustand v5 (local UI state)
 
 ## Skills to Load
-SK-058 (Universal Conductor), SK-090 (Local-First), SK-092 (Monorepo if multi-platform), SK-047 (Motion for web) or SK-058 for mobile animation
+SK-047 (Motion, web) + **impeccable** (SK-102) for the web surface. Note: SK-090 (Local-First) and SK-092 (Monorepo) are archived — restore from `skills/_archived/` if needed; SK-058 (Universal Conductor) is retired (no archive copy); mobile routes via tactile (SK-134).
 
 ## Architecture
 ```
@@ -70,7 +70,7 @@ stores/
 ```
 
 ## Setup Checklist
-- [ ] CRDT engine selected (Legend State v3 or TinyBase v5)
+- [ ] CRDT engine selected (Legend State v3 or TinyBase v9)
 - [ ] Supabase Realtime configured for presence + broadcast
 - [ ] Optimistic UI updates with instant local feedback
 - [ ] Conflict resolution strategy defined (CRDT auto-merge)

@@ -18,11 +18,12 @@ npm install
 
 If no project name provided, ask one question: "What should I name the app?"
 
-## Step 2 -- Load desktop skills
+## Step 2 -- Load desktop context
 
-Read these SKILL.md files (do NOT skip):
-1. `~/.claude/skills/tauri-desktop/SKILL.md` -- SK-088 Tauri Desktop Engine
-2. If monorepo: `~/.claude/skills/crossplatform-monorepo/SKILL.md` -- SK-092
+There is no dedicated Tauri *skill* in the active registry (the SK-088 engine is archived). Use these instead:
+1. **`tauri-mcp` MCP** -- drive and verify the running app: webview DOM snapshot, execute JS, IPC command/event capture, screenshot, driver session.
+2. **Context7** -- `resolve-library-id` -> `get-library-docs` for current Tauri 2 docs before writing `tauri.conf.json`, capabilities, or IPC.
+3. `<your-vault-path>/wiki/app-dev/stack.md` + `capability-map.md` -- the verified Tauri 2 facts (2.11.x line, GA since 2024-10-02, iOS/Android first-class, capabilities/permissions ACL security model) and the desktop routing.
 
 ## Step 3 -- Install frontend dependencies
 
@@ -88,7 +89,7 @@ Create `src/stores/` with:
 ## Step 7 -- Generate project CLAUDE.md
 
 Create a project-specific CLAUDE.md with:
-- Stack: Tauri 2.0 + React + TypeScript + Tailwind
+- Stack: Tauri 2.x + React + TypeScript + Tailwind
 - IPC patterns: Commands for request/response, Events for broadcasts, Channels for streams
 - Security: capability-based permissions, CSP configuration
 - Build: `cargo tauri dev` for development, `cargo tauri build` for production

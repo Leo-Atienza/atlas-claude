@@ -1,6 +1,7 @@
 # Archive — Bundle 4: Data, ML & Analytics
 
 > Load these for machine learning, data engineering, LLM fine-tuning, or RAG systems.
+> **Path note (2026-06-09):** rows pointing into `fullstack-dev/` are historical — some slugs differ from current bundle dir names. Locate current paths with `find ~/.claude/skills/fullstack-dev -name SKILL.md | grep <slug>` before loading.
 
 | ID | Name | Path | Description |
 |----|------|------|-------------|

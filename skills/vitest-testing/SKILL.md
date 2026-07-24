@@ -1,10 +1,10 @@
-<!--
+---
 id: SK-056
 name: vitest-testing
 description: Vitest — fast unit testing with Testing Library integration and test pyramid strategy
 keywords: vitest, testing, unit-test, component-test, testing-library, mock, coverage, tdd, test-pyramid, react-testing
 version: 1.0.0
--->
+---
 
 # Vitest Testing
 
@@ -12,7 +12,7 @@ version: 1.0.0
 
 Apply when writing tests for any Vite-based or modern JS/TS project. Vitest is the 2026 default (6x faster than Jest, native ESM, shared Vite config). **Test pyramid: Vitest for unit + component, Playwright for E2E.** Auto-activate on keywords: vitest, test, describe, it, expect, mock, coverage.
 
-**Related skills:** Playwright (SK-009) for E2E browser testing.
+**Related skills:** Playwright for E2E browser testing — via the `anthropic-skills:playwright-cli` skill or the Claude Browser / MCP_DOCKER browser tools (the old SK-009 Playwright skill is retired).
 
 ## Installation
 

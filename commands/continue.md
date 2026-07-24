@@ -10,15 +10,15 @@ Resume work from the most recent handoff file (or the specified one).
 
 1. **Find the handoff file**:
    - If `$ARGUMENTS` is provided, use that path
-   - Otherwise, find the most recent file matching `~/.claude/sessions/handoff-*.md`
-   - Fallback: `~/.claude/handoffs/<cwd-slug>.md` — where `<cwd-slug>` is the current working directory with `/`, `\`, and `:` replaced by `_` (e.g. `/c/Users/<user>/.claude` → `c_Users_<user>_.claude`). This is the per-project handoff written by `session-stop.sh`; the old global `.last-session-handoff` was retired to avoid cross-project pollution.
+   - Otherwise, use `~/.claude/handoffs/<cwd-slug>.md` — the per-project handoff written by `session-stop.sh`, where `<cwd-slug>` is the current working directory with `/`, `\`, and `:` replaced by `_` (e.g. `/c/Users/<user>/.claude` → `c_Users_<user>_.claude`). This is the **live, current** handoff and is the primary source.
+   - Fallback (legacy only): the most recent file matching `~/.claude/sessions/handoff-*.md`. These are pre-v8 dated handoffs and are usually stale — only use them if no per-project handoff exists. (The old global `.last-session-handoff` was retired to avoid cross-project pollution.)
 
 2. **Read and parse** the handoff file completely
 
 3. **Restore context**:
    - Switch to the correct working directory (`cwd` field)
    - Check git branch matches (`branch` field)
-   - Read any referenced plan files (`.flow/` state if `plan_state` is set)
+   - Read any referenced plan files (`plan_state` field, `.planning/`, or `plans/`)
    - Restore todo list from `todo_state` field using TodoWrite
 
 4. **Verify state**:
@@ -32,5 +32,5 @@ Resume work from the most recent handoff file (or the specified one).
 
 ## Important
 - Do NOT ask the user what to do unless the handoff file is ambiguous
-- If the handoff references a `.flow/` plan, read the ROADMAP.md or PLAN.md
+- If the handoff references a plan file (ROADMAP.md / PLAN.md / plans/*.md), read it
 - If `chain_depth_exceeded: true` is in the handoff, warn the user that 5 continuations were reached

@@ -26,9 +26,9 @@ Format:
 
 If no todos exist, skip this step silently.
 
-## Step 2 — Save flow state
+## Step 2 — Save project state
 
-Check for `.flow/state.yaml` in the current working directory.
+Check for `.planning/STATE.md` in the current working directory.
 - If found: read it and note the current phase, status, and any velocity data
 - If not found: skip silently
 

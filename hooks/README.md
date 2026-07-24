@@ -2,9 +2,18 @@
 
 All hooks receive JSON on stdin and respond via stdout + exit code.
 
-## Shared Utilities — `lib.js`
+## Shared Utilities — `lib.js` + `lib/` (v8.5)
 
-All Node hooks import from `lib.js` instead of defining their own helpers:
+Domain libs live in `lib/` (since v8.5, 2026-06-09):
+
+| Module | Exports | Used by |
+|--------|---------|---------|
+| `lib/slug.js` | `entitySlug` (FROZEN — keys atlas-kg entities.json), `canonKey` (cross-system matching), `cwdSlug` (FROZEN — keys handoffs/session-hot; bash twin in session-stop.sh, parity-asserted by smoke-test) | atlas-kg.js, session-handoff.js, atlas-kg-vault-sync.js, recall.js, recall-embed-index.js |
+| `lib/session.js` | `readHandoff`, `readTodos`, `getDigest` | wiki-session-log.js (the designated home for session-state readers — next consumer lands here, not as another private copy) |
+| `lib/git.js` | `getGitState(cwd)` | session-handoff.js |
+| `lib/ollama.js` | `ollamaGenerate`, `ollamaEmbed`, `isBreakerOpen`, `MODELS` (fast/deep/embed tiers) — ONE system-wide circuit breaker at `cache/ollama-breaker.json` (session-transcript-log.py reads the same file) | pre-read-local-llm.js, session-handoff.js, recall.js, recall-embed-index.js, transcript-distill-weekly.js |
+
+All Node hooks import generic helpers from `lib.js` instead of defining their own:
 
 ```js
 const { paths, loadThresholds, readJsonSafe, writeJsonSafe,
@@ -22,8 +31,8 @@ const { paths, loadThresholds, readJsonSafe, writeJsonSafe,
 | `ensureDir(dir)` | mkdir -p equivalent |
 | `rotateIfLarge(path, maxBytes?)` | Rotate file if > maxBytes (default 2MB) |
 | `readStdin(callback)` | Collect stdin, parse JSON, call callback |
-| `blockTool(reason)` | PreToolUse: emit block decision |
-| `injectContext(message)` | PostToolUse/Failure: emit additionalContext |
+| `blockTool(reason)` | PreToolUse: emit `permissionDecision: "deny"` (v8.14 — the old nested `decision` key was unrecognized and silently ignored) |
+| `injectContext(message, hookEventName?)` | Any context-capable event: emit `hookSpecificOutput.additionalContext` with the event name captured from stdin (v8.14 — the old bare top-level `{additionalContext}` was unrecognized and silently dropped) |
 
 ## Input (stdin)
 
@@ -39,44 +48,31 @@ Additional fields vary by event (`hook_event_name`, `tool_response`, etc.).
 
 ## Output by Hook Type
 
-### PreToolUse — Block a tool call
+> **v8.14 correction — the shapes previously documented here were WRONG and caused a system-wide silent failure.** The harness parses hook stdout as JSON and silently drops unrecognized keys. The old `decision`/`reason` nested form and the bare top-level `{additionalContext}` were both unrecognized — every message emitted in those shapes was a no-op (KNOWLEDGE-162). The shapes below match the current hooks reference.
+
+### PreToolUse — Deny a tool call
 ```json
 {
   "hookSpecificOutput": {
     "hookEventName": "PreToolUse",
-    "decision": "block",
-    "reason": "Why it was blocked"
+    "permissionDecision": "deny",
+    "permissionDecisionReason": "Why it was blocked"
   }
 }
 ```
+(`permissionDecision` accepts `"allow" | "deny" | "ask"` — use `"ask"` for user-confirmation flows.)
 
-### PreToolUse — Ask user for confirmation
+### Inject context — ALL context-capable events (PreToolUse, PostToolUse, PostToolUseFailure, UserPromptSubmit, SessionStart, Stop)
 ```json
 {
   "hookSpecificOutput": {
-    "hookEventName": "PreToolUse",
-    "decision": "ask",
-    "reason": "Why approval is needed"
+    "hookEventName": "<the event this hook is wired to>",
+    "additionalContext": "Message visible to the agent"
   }
 }
 ```
 
-### PreToolUse — Inject context (allow + inform)
-```json
-{ "additionalContext": "Message visible to the agent" }
-```
-
-### PostToolUse — Inject context
-```json
-{ "additionalContext": "Message visible to the agent" }
-```
-
-### PostToolUseFailure — Inject context
-```json
-{ "additionalContext": "Message visible to the agent" }
-```
-
-**Note**: PostToolUse and PostToolUseFailure both use top-level `additionalContext`, NOT nested under `hookSpecificOutput`.
+**Note**: there is NO valid top-level `additionalContext` — it must be inside `hookSpecificOutput` with the correct `hookEventName`. `lib.js` `injectContext()` handles this automatically (event name captured from the stdin payload). PermissionDenied ignores hook stdout entirely.
 
 ### Allow silently (any hook type)
 ```
@@ -111,8 +107,9 @@ process.exit(0)   // JS — no stdout
 | CRG auto-update (inline bash) | PostToolUse | Write\|Edit\|MultiEdit | (stdout only — if `.code-review-graph/graph.db` exists, runs `uvx code-review-graph update` backgrounded with 3s timeout, fail-open) |
 | `pre-commit-gate.js` | PreToolUse | Bash | (stdout only — warns if build+test not run before commit) |
 | `tsc-check.js` | PostToolUse | Write\|Edit\|MultiEdit | (stdout only — TS errors as additionalContext) |
-| `post-tool-monitor.js` | PostToolUse | Read\|Glob\|Grep\|Write\|Edit\|MultiEdit\|Bash\|Agent | `logs/failures.jsonl`, `logs/error-patterns.json`, `logs/hook-health.jsonl`, `logs/tool-call-counts.json`, `cache/efficiency-*.json` (efficiency counts/failure logging stay bounded to expensive tools via `MATCH_EXPENSIVE` guard; Read/Glob/Grep only feed action-graph logging) |
+| `post-tool-monitor.js` | PostToolUse | Read\|Glob\|Grep\|Write\|Edit\|MultiEdit\|Bash\|Agent | `logs/tool-failures.jsonl`, `logs/error-patterns.json`, `logs/hook-health.jsonl`, `logs/tool-call-counts.json`, `cache/efficiency-*.json` (efficiency counts/failure logging stay bounded to expensive tools via `MATCH_EXPENSIVE` guard; Read/Glob/Grep only feed action-graph logging) |
 | `tool-failure-handler.js` | PostToolUseFailure | * | `logs/tool-failures.jsonl`, `logs/tool-health.json` (MCP failures tagged with `is_mcp: true`) |
+| `system-detect.js` | SessionStart | * | `cache/system-detect-<cwd_slug>.json` (v8.6 — Capability System proposer: scores CWD vs `systems/registry.json` detect signals, bounded depth-3 walk + ~200-fs-op budget, prints at most one `SYSTEM:` advisory, never auto-activates; 24h per-CWD throttle file doubles as recoverable last-proposal; inline registry regen via mtime guard; profile-gated `system-detect`, fail-open) |
 | `session-start.sh` | SessionStart | * | (stdout only — v7.0 delegates §7a–§7k bespoke cleanup to `cleanup-runner.js`, and fires `drift-proposer.js` §8a after §8 stale-temp cleanup) |
 | `cleanup-runner.js` | SessionStart (§7a via session-start.sh) | * | `logs/cleanup.jsonl` (v7.0 — declarative engine, 13 rules in `cleanup-config.json`, 9 modes; `--dry-run` supported; fail-open per rule) |
 | `drift-proposer.js` | SessionStart (§8a via session-start.sh) | * | `cache/last-drift-proposal.json` (v7.0 — at most 1 DRIFT advisory per session when thresholds in `drift-thresholds.json` cross; 24h per-kind cooldown; `/apply-drift-fix` consumes) |
@@ -120,6 +117,17 @@ process.exit(0)   // JS — no stdout
 | `scripts/progressive-learning/precompact-reflect.sh` | PreCompact | * | (stdout only — Tier 2: action-graph digest injection + state.json snapshot) |
 | `claudio` | Notification | * | (external) |
 | `statusline.js` | StatusLine | * | `/tmp/claude-ctx-*.json` (bridge file) |
+| `session-reminders.js` | PreToolUse \| PostToolUse | varies by `--reminder` flag | Unified session-throttled reminder dispatcher (merged 2026-05-15 — absorbed `build-ship-verify-reminder.js` + `ui-edit-design-check-reminder.js`). State: single JSON per session at `cache/session-reminders-<session_id>.json`. Variants: **`--reminder=build-ship-verify`** (PostToolUse Bash) — injects /ship-verify (SK-128) reminder when bash matches flutter/gradle/npm/pnpm/bun/yarn build, next/vite/turbo build, vercel/netlify deploy, gh-pages, npm publish, eas build, xcodebuild. **`--reminder=ui-edit-design-check`** (PreToolUse Write\|Edit\|MultiEdit) — injects /design-check (SK-127) reminder when path matches UI extensions (.tsx/.jsx/.vue/.svelte/.astro/.dart/.swift/.kt/.java/layouts/*.xml) or sits under UI dirs (screens/components/pages/widgets/views/app/(groups)/ui). Both throttled once/session, fail-open, non-blocking. |
+| `open-ended-scope-guard.js` | UserPromptSubmit | * | (stdout only — fires when prompt contains "finish/continue/wrap up the app/project/work/implementation" WITHOUT a bounded signal like "step N", "phase N", "wave N", "R6/R7", "plan in X.md", "but only", "just the", "specifically", "only N"; injects scope-plan reminder; fail-open). Added 2026-05-15 per Insights friction fix. |
+| `web-intent-router.js` | UserPromptSubmit | * | (stdout only — fires the user's two natural-language web doors at INTENT time, which `web-project-context.js` cannot: that one needs a `package.json`, so a NEW site in an empty folder never triggers it, and SessionStart cannot catch an ask made mid-session. Requires an action verb + a site noun in one clause; `META_VETO` suppresses system/brain/config talk. NEW → `commands/new-web.md`; EXISTING → `.impeccable.md` + cook-log. A ≤3-line SIGNPOST, never orders, per `webdev-brain-routes-not-mandates`. Matcher unit-tested in `scripts/test-validators.js`; fail-open). Added 2026-07-23. |
+| `verify-before-answer.js` | UserPromptSubmit | * | (stdout only — injects the standing "verify external/time-sensitive facts before asserting" reminder on every prompt. Self-scoping: the wording tells Claude to search only when the answer depends on an external fact and to skip purely local code/logic work, so it never forces a wasteful search on "fix this typo".) |
+| `path-validator.js` | PreToolUse | Read | (blocks + stdout — two merged jobs since 2026-05-15, absorbing `wave-2-contamination-guard.js` to save a Node bootstrap per Read: (1) blind-test contamination guard, blocking `plans/_blind-tests/**` unless `BLIND_TEST_OPERATOR=1`, soft-warning when CWD is `~/.claude/`; (2) path validation.) |
+| `preview-health-gate.js` | PreToolUse | `mcp__Claude_Browser__.*` \| `mcp__Claude_Preview__preview_.*` | (stdout only — reads the tool-health tally in `logs/tool-health.json` (kept by `post-tool-monitor.js`) and, when preview has been failing recently (screenshot timeouts, navigate/snapshot errors), injects a NON-BLOCKING advisory steering toward the Playwright fallback. Never blocks — preview can still be the right call.) |
+| `deletion-guard.js` | PostToolUse | Edit\|MultiEdit | (stdout only — F-13, v10. Fires when an edit's `old_string` contains a symbol definition (method, function, `toString`, CSS class) the `new_string` lacks, injecting a once-per-file-per-session advisory pointing at the CLAUDE.md deletion protocol. Born from the 2× JavaFX `toString()` regression, where both times there were zero grep-visible call sites. Not on Write — no old-content diff there.) |
+| `user-rejection-log.js` | PostToolUseFailure \| PermissionRequest \| PermissionDenied | * | `logs/user-rejections.jsonl` (captures user denials of tool calls — high-signal moments where the user disagreed with a proposed action, flagged by the 2026-05-13 Insights report as otherwise-lost signal.) |
+| `archived-skill-offer.js` | SessionStart | * | (stdout only — v10 U3-8: the consumer for `archived-skills-manifest.json`, which had 60+ detection patterns and no consumer, making aggressive archiving safe. Checks cwd against each archived skill's `detect_files` (literal paths + simple prefixes, bounded fs ops) and `detect_packages` (one package.json read); on first match injects ONE advisory naming the archived skill and how to restore it.) |
+| `system-doctor-advisory.js` | SessionStart | * | (stdout only — reads the latest result from `cache/system-ground-truth.json` and surfaces a one-line DRIFT advisory if any validator is red OR the snapshot is stale (mtime > 7 days). Replaced the narrower `detect-orphan-hooks.js` with a surface covering every validator in the manifest.) |
+| `ensure-frontend-mcp.js` | SessionStart | * | (`scripts/`, not `hooks/` — auto-provisions the 5 UI-component MCP servers (shadcn, heroui, aceternity, magicuidesign-mcp, iconify) into a frontend project's own `.mcp.json` at project scope. They were demoted from global user scope on 2026-05-28 (jazzy-wren audit) to cut tool-surface bloat; this restores them only in projects that actually need them, detected via package.json frontend deps.) |
 
 ### Shared modules used by hooks (not hooks themselves)
 

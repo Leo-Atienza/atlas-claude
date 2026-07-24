@@ -3,8 +3,15 @@
   "skill_unused_days": 60,
   "tool_failure_weeks": 5,
   "scheduled_task_drift_hours": 6,
+  "scheduled_cache_max_age_hours": 36,
   "cleanup_rule_error_streak": 3,
+  "mcp_unused_days": 30,
+  "permission_friction_days": 7,
+  "permission_friction_min_asks": 5,
   "max_proposals_per_session": 1,
   "cooldown_hours_per_proposal_kind": 24,
-  "silenced_kinds": []
+  "silenced_kinds": ["permission_friction"],
+  "_permission_friction_silenced_note": "permission_friction silenced 2026-07-04 (v8.14 audit close-out): the user explicitly declined its flagship proposal (blanket Bash allowlist — too broad a hammer; the prompt friction is acceptable). 16+ proposals accumulated with zero acted on — the channel was producing nags, not action (KNOWLEDGE-144: a detector needs a decline-memory or it re-proposes rejected actions forever). Remove \"permission_friction\" from the array to re-enable; per-rule allowlisting can be added to detectPermissionFriction if a narrower version is ever wanted.",
+  "_silenced_kinds_note": "skill_unused RE-ENABLED 2026-07-20 (v10 U1-3): capture is now comprehensive — skill-usage.jsonl carries Skill-tool AND slash rows (skill-usage-log.js dual registration), detectSkillUnused additionally counts SKILL.md reads from the action graph as soft usage, and per-target decline-memory (cache/proposal-stats.json declined_targets, written on /review-proposals reject) stops re-proposing anything the user declined (KNOWLEDGE-144). Was silenced 2026-05-28 for single-source under-reporting.",
+  "_v85_channels_note": "mcp_server_unused + permission_friction added 2026-06-09 (v8.5). mcp_server_unused stays silent until tool-call-counts.json _meta.since is >= mcp_unused_days old (the counter only gained a clock + mcp__.* coverage today). permission_friction reads user-rejections.jsonl kind:'ask' rows (PermissionRequest events) and excludes any group that also has denials."
 }

@@ -4,15 +4,15 @@
 Apps used in low-connectivity environments: field inspection, warehouse management, delivery tracking, agriculture, healthcare data collection, utility maintenance.
 
 ## Stack
-- Expo SDK 54 + Expo Router v4
-- PowerSync (Postgres sync) or TinyBase v5 (lightweight CRDT)
+- Expo SDK 57 + Expo Router (SDK-aligned versioning, 57.x)
+- PowerSync (Postgres sync) or TinyBase v9 (lightweight CRDT)
 - Vision Camera v5 (photo capture, barcode scanning)
 - expo-location + expo-sensors
 - Zustand v5 + MMKV (local state)
 - Supabase (backend when online)
 
 ## Skills to Load
-SK-058 (Universal Conductor), SK-089 (Hardware Bridge), SK-090 (Local-First), SK-027 (E2E Testing)
+**tactile** (SK-134 — the mobile craft entry point) + SK-027 (E2E Testing). Note: SK-089 (Hardware Bridge) and SK-090 (Local-First) are archived — restore from `skills/_archived/` if this archetype needs them; SK-058 (Universal Conductor) is retired (no archive copy).
 
 ## Architecture
 ```
@@ -65,4 +65,4 @@ stores/
 - [ ] Sync status indicator in UI
 - [ ] Background sync task registered
 - [ ] EAS Build + OTA updates configured
-- [ ] Haptics on every interaction (SK-058 patterns)
+- [ ] Haptics on every interaction (tactile SK-134 patterns)

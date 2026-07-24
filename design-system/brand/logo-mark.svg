@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="none" aria-label="Logo mark">
+  <!--
+    Placeholder mark. Warm-neutral square with a hairline arc cutting through.
+    Replace with the real mark when it exists; keep viewBox and stroke tokens
+    so size/weight remain consistent.
+  -->
+  <rect x="4" y="4" width="56" height="56" rx="10" fill="#1A1612" />
+  <path
+    d="M18 42 C 28 20, 36 20, 46 42"
+    stroke="#B07D28"
+    stroke-width="2.5"
+    stroke-linecap="round"
+    fill="none"
+  />
+  <circle cx="32" cy="30" r="2.25" fill="#FBF8F3" />
+</svg>

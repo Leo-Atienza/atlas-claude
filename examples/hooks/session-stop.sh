@@ -13,7 +13,14 @@ for d in "$HOME/.claude/projects"/*/memory; do
 done
 SESSIONS_DIR="${MEMORY_DIR:+$MEMORY_DIR/sessions}"
 FLAG_FILE="$HOME/.claude/.pending-reflection"
-HANDOFF_FILE="$HOME/.claude/.last-session-handoff"
+
+# Per-CWD handoff file so two projects can't clobber each other's handoffs.
+cwd_slug() {
+  printf '%s' "$1" | sed -e 's|[/\\:]|_|g' -e 's|__*|_|g' -e 's|^_||' -e 's|_$||'
+}
+HANDOFFS_DIR="$HOME/.claude/handoffs"
+mkdir -p "$HANDOFFS_DIR" 2>/dev/null || true
+HANDOFF_FILE="$HANDOFFS_DIR/$(cwd_slug "$(pwd)").md"
 TODAY=$(date +%Y-%m-%d)
 NOW=$(date +%H:%M:%S)
 

@@ -26,7 +26,7 @@ def _bump_counter(check_name, decision):
             counts = {}
         bucket = counts.setdefault(check_name, {"block": 0, "ask": 0, "last": None})
         bucket[decision] = bucket.get(decision, 0) + 1
-        bucket["last"] = datetime.datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%SZ')
+        bucket["last"] = datetime.datetime.now(datetime.timezone.utc).strftime('%Y-%m-%dT%H:%M:%SZ')
         counts["_meta"] = {"last_updated": bucket["last"]}
         tmp = _COUNTS_PATH + ".tmp"
         with open(tmp, 'w', encoding='utf-8') as f:
@@ -71,6 +71,138 @@ SECRET_PATTERNS = [
     (r'(mongodb|postgres|mysql|redis)://[^:]+:[^@]+@', 'database connection string with credentials'),
     (r'(token|api_key|apikey|secret_key)\s*[:=]\s*["\'][a-zA-Z0-9+/=]{40,}', 'generic token/API key'),
 ]
+
+
+# ── Git routine-command allowlist (added 2026-05-15; compound chains 2026-06-15) ──
+# Allowlist for routine git operations that don't need user approval prompts.
+# Telemetry showed ~245 commit + ~156 add modal prompts/period for routine git
+# ops. Disabled by setting ATLAS_DISABLE_GIT_ALLOWLIST=1. Single-command pure-git
+# invocations qualify, AND (2026-06-15) plain `&&`/`;` chains where EVERY part is
+# an independently-safe git command (e.g. `git add <file> && git commit -m "..."`,
+# which dominated the prompts). Anything with a pipe (`|`/`||`), command
+# substitution (`$(...)`), backticks, or a background `&` still falls through to
+# the per-command checks. Dangerous patterns (--force, push, reset --hard, rebase,
+# --amend, clean -f, remote add, etc.) are excluded even if a leading verb matches
+# a safe pattern. When allowlisted, the rm / env-file / secret checks STILL run.
+
+GIT_READ_ONLY_PATTERNS = [
+    re.compile(r'^\s*git\s+status\b'),
+    re.compile(r'^\s*git\s+diff\b'),
+    re.compile(r'^\s*git\s+log\b'),
+    re.compile(r'^\s*git\s+show\b'),
+    re.compile(r'^\s*git\s+blame\b'),
+    re.compile(r'^\s*git\s+grep\b'),
+    re.compile(r'^\s*git\s+rev-(?:parse|list)\b'),
+    re.compile(r'^\s*git\s+ls-(?:files|remote|tree)\b'),
+    re.compile(r'^\s*git\s+config\s+(?:--get|--list|-l)\b'),
+    re.compile(r'^\s*git\s+remote\s+(?:-v|show|get-url)\b'),
+    re.compile(r'^\s*git\s+remote\s*$'),
+    re.compile(r'^\s*git\s+(?:describe|reflog|fsck|cat-file|symbolic-ref)\b'),
+    re.compile(r'^\s*git\s+stash\s+(?:list|show)\b'),
+    re.compile(r'^\s*git\s+branch\s*$'),
+    re.compile(r'^\s*git\s+branch\s+-(?:l|a|r|v|vv)\b'),
+    re.compile(r'^\s*git\s+tag\s*$'),
+    re.compile(r'^\s*git\s+tag\s+-l\b'),
+    re.compile(r'^\s*git\s+fetch\b'),
+    re.compile(r'^\s*git\s+(?:worktree\s+list|submodule\s+(?:status|summary))\b'),
+]
+
+GIT_SAFE_WRITE_PATTERNS = [
+    # `git add <explicit files>` — rejects -A, --all, -a, bare `.`, bare `*`.
+    # `git add ./subdir/file` is allowed; `git add .` and `git add *` are not.
+    re.compile(r'^\s*git\s+add\s+(?!-A\b|--all\b|-a\b|\.(?:\s|$)|\*(?:\s|$))[^\s]'),
+    # `git commit -m "..."` with explicit message (optionally `-S -m` for signed).
+    # `--amend` is caught by GIT_DANGEROUS_PATTERNS below.
+    re.compile(r'^\s*git\s+commit\s+(?:-S\s+)?-m\s+["\']'),
+]
+
+GIT_DANGEROUS_PATTERNS = [
+    re.compile(r'\b--force\b'),
+    re.compile(r'\b--no-verify\b'),
+    re.compile(r'\bgit\s+push\b'),
+    re.compile(r'\bgit\s+reset\s+(?:--hard|--mixed)\b'),
+    re.compile(r'\bgit\s+rebase\b'),
+    re.compile(r'\bgit\s+clean\s+-[fF]'),
+    re.compile(r'\bgit\s+checkout\s+--\b'),
+    re.compile(r'\bgit\s+restore\b'),
+    re.compile(r'\bgit\s+commit\b[^;|&]*--amend\b'),
+    re.compile(r'\bgit\s+branch\s+(?:-D|--delete\s+--force)\b'),
+    re.compile(r'\bgit\s+(?:update-ref|filter-branch|filter-repo)\b'),
+    re.compile(r'\bgit\s+remote\s+(?:add|remove|rename|set-url|rm)\b'),
+]
+
+SHELL_CHAIN_OPERATORS = re.compile(r'[;|&]|\$\(|\`')
+
+
+def _is_single_routine_git(cmd):
+    """True if a SINGLE (unchained) command is a safe git op.
+
+    A part is routine only if it (a) contains no shell chaining/substitution
+    of its own, (b) matches no dangerous git pattern, and (c) is a git command
+    matching a read-only or safe-write pattern.
+    """
+    cmd = cmd.strip()
+    if not cmd:
+        return False
+    if SHELL_CHAIN_OPERATORS.search(cmd):
+        return False
+    if any(p.search(cmd) for p in GIT_DANGEROUS_PATTERNS):
+        return False
+    if not re.match(r'^\s*git\b', cmd):
+        return False
+    return (any(p.search(cmd) for p in GIT_READ_ONLY_PATTERNS) or
+            any(p.search(cmd) for p in GIT_SAFE_WRITE_PATTERNS))
+
+
+def _split_simple_chain(cmd):
+    """Split a command on `&&` and `;` ONLY, into stripped non-empty parts.
+
+    Returns None (caller treats as not-routine) if the command contains any
+    construct we refuse to reason about: a pipe `|`/`||`, command substitution
+    `$(...)`, a backtick, or a background `&`. This keeps the compound path
+    restricted to plain sequential chains of simple git commands — e.g.
+    `git add file && git commit -m "..."` — and never auto-approves anything
+    whose output is piped or whose arguments are command-substituted.
+    """
+    if '$(' in cmd or '`' in cmd:
+        return None
+    if '|' in cmd:            # rejects both `|` (pipe) and `||` (logical or)
+        return None
+    # Reject a background `&` (a single `&` that is not part of `&&`).
+    if '&' in cmd.replace('&&', ''):
+        return None
+    segments = []
+    for amp_seg in cmd.split('&&'):
+        segments.extend(amp_seg.split(';'))
+    return [s.strip() for s in segments if s.strip()]
+
+
+def is_routine_git_command(command):
+    """Return True if command is a routine git op safe to auto-approve.
+
+    Single commands take the fast path. Compound commands joined only by `&&`
+    or `;` are routine iff EVERY subcommand is independently a safe git op and
+    NONE is dangerous — so `git add <file> && git commit -m "..."` stops
+    prompting, while `git add x && git push`, `... && rm -rf /`, or anything
+    piped/substituted still falls through to the full safety checks (and the
+    rm/env/secret checks run regardless of this allowlist).
+    """
+    if not command:
+        return False
+    if os.environ.get('ATLAS_DISABLE_GIT_ALLOWLIST') == '1':
+        return False
+
+    cmd = command.strip()
+
+    # Fast path: a single command with no chaining of any kind.
+    if not SHELL_CHAIN_OPERATORS.search(cmd):
+        return _is_single_routine_git(cmd)
+
+    # Compound path: only plain `&&`/`;` chains of safe git commands qualify.
+    parts = _split_simple_chain(cmd)
+    if not parts:
+        return False
+    return all(_is_single_routine_git(p) for p in parts)
 
 
 def check_secret_patterns(command):
@@ -151,15 +283,23 @@ def main():
     # This handles cases like 'gco -f' -> 'git checkout -f'
     command = expand_command_aliases(command)
 
-    # Run all checks
+    # Routine git ops bypass the git-specific ask prompts. rm/env/secrets
+    # checks still run. See is_routine_git_command for pattern details.
+    routine_git = is_routine_git_command(command)
+    if routine_git:
+        _bump_counter('git_routine_allowlist', 'allow')
+
     checks = [
         check_rm_command,
-        check_git_add_command,
-        check_git_checkout_command,
-        check_git_commit_command,
         check_env_file_access,
         check_secret_patterns,
     ]
+    if not routine_git:
+        checks.extend([
+            check_git_add_command,
+            check_git_checkout_command,
+            check_git_commit_command,
+        ])
 
     block_reasons = []
     ask_reasons = []

@@ -24,10 +24,16 @@
  *   - knowledge (total, per-type, drift)
  *   - hooks (total, wired, indirect, orphans)
  *   - commands (total, ghosts, undocumented, plugin-namespaced)
- *   - mcp (visible config files, server names, statsig stub state)
+ *   - skill_collisions (frontmatter conformance + routing collisions)
+ *   - mcp (visible config files, server names)
  *   - scheduled_tasks (count, names)
- *   - memory (active count, embeddings, contradictions, WAL ratio)
- *   - validator_results (each validator's ok flag + summary)
+ *   - plugins (enabled count + names)
+ *   - overall (each validator's ok flag + pass/total)
+ *
+ * The validator list is shared with system-doctor.js via
+ * `scripts/lib/validators.js` — the single source of truth. Add new
+ * validators THERE only; this script iterates whatever it exports, so the
+ * two can never drift apart.
  *
  * Exit 0 always. The snapshot is informational; failures inside
  * validators are surfaced via per-validator ok flags.
@@ -38,6 +44,7 @@
 const fs = require('fs');
 const path = require('path');
 const { spawnSync } = require('child_process');
+const VALIDATORS = require('./lib/validators');
 
 const HOME = require('os').homedir();
 const ROOT = path.join(HOME, '.claude');
@@ -48,31 +55,14 @@ function safe(fn, fallback) {
   try { return fn(); } catch { return fallback; }
 }
 
-function listJsonl(p) {
-  return safe(() => fs.readFileSync(p, 'utf8').split('\n').filter(Boolean), []);
-}
-
-function runValidator(name) {
-  const p = path.join(ROOT, 'scripts', name);
-  if (!fs.existsSync(p)) return { ok: false, error: 'missing' };
-  const r = spawnSync('node', [p, '--json'], { encoding: 'utf8', timeout: 30000 });
-  if (r.status === 2) return { ok: false, error: 'config error', stderr: (r.stderr || '').slice(0, 200) };
+function runValidator(v) {
+  const p = path.join(ROOT, 'scripts', v.file);
+  if (!fs.existsSync(p)) return { id: v.id, ok: false, error: 'missing' };
+  const r = spawnSync('node', [p, ...(v.args || [])], { encoding: 'utf8', timeout: 30000 });
+  if (r.status === 2) return { id: v.id, ok: false, error: 'config error', stderr: (r.stderr || '').slice(0, 200) };
   let parsed = null;
   try { parsed = JSON.parse(r.stdout); } catch { /* fall through */ }
-  return { ok: r.status === 0, summary: parsed };
-}
-
-function snapshotMemory() {
-  const dbPath = path.join(ROOT, 'memory', 'index.db');
-  const walPath = dbPath + '-wal';
-  const dbSize = safe(() => fs.statSync(dbPath).size, 0);
-  const walSize = safe(() => fs.statSync(walPath).size, 0);
-  return {
-    db_path: dbPath,
-    db_size_bytes: dbSize,
-    wal_size_bytes: walSize,
-    wal_ratio: dbSize > 0 ? walSize / dbSize : 0,
-  };
+  return { id: v.id, ok: r.status === 0, summary: parsed };
 }
 
 function snapshotHooks() {
@@ -106,41 +96,34 @@ function snapshotPlugins() {
 }
 
 function main() {
-  // Run every validator in --json mode
-  const validators = {
-    skill_counts:           runValidator('validate-skill-counts.js'),
-    cross_listed_skills:    runValidator('validate-cross-listed-skills.js'),
-    archive_counts:         runValidator('validate-archive-counts.js'),
-    symlinks:               runValidator('validate-symlinks.js'),
-    archive_manifest:       runValidator('validate-archive-manifest.js'),
-    commands:               runValidator('validate-commands.js'),
-    hooks:                  runValidator('validate-hooks.js'),
-    knowledge:              runValidator('validate-knowledge.js'),
-    references:             runValidator('validate-references.js'),
-  };
+  // Run every validator from the shared manifest (single source of truth).
+  const results = VALIDATORS.map(runValidator);
+  const byId = Object.fromEntries(results.map(r => [r.id, r]));
+  const sum = id => byId[id]?.summary || null;
 
   const snapshot = {
     generated_at: new Date().toISOString(),
-    schema_version: 1,
+    schema_version: 2,
     skills: {
-      from_validator: validators.skill_counts.summary || null,
-      cross_listed:    validators.cross_listed_skills.summary || null,
-      archive_counts:  validators.archive_counts.summary || null,
-      symlinks:        validators.symlinks.summary || null,
-      archive_manifest: validators.archive_manifest.summary || null,
+      from_validator:   sum('skill-counts'),
+      cross_listed:     sum('cross-listed-skills'),
+      archive_counts:   sum('archive-counts'),
+      symlinks:         sum('symlinks'),
+      archive_manifest: sum('archive-manifest'),
     },
-    knowledge: validators.knowledge.summary || null,
+    knowledge: sum('knowledge'),
     hooks_dir: snapshotHooks(),
-    hooks_validation: validators.hooks.summary || null,
-    commands: validators.commands.summary || null,
+    hooks_validation: sum('hooks'),
+    commands: sum('commands'),
+    skill_collisions: sum('skill-collisions'),
+    systems: sum('systems'),
     mcp: snapshotMcp(),
     scheduled_tasks: snapshotScheduledTasks(),
     plugins: snapshotPlugins(),
-    memory: snapshotMemory(),
     overall: {
-      validators_passing: Object.values(validators).filter(v => v.ok).length,
-      validators_total: Object.keys(validators).length,
-      validators_status: Object.fromEntries(Object.entries(validators).map(([k, v]) => [k, v.ok])),
+      validators_passing: results.filter(r => r.ok).length,
+      validators_total: results.length,
+      validators_status: Object.fromEntries(results.map(r => [r.id, r.ok])),
     },
   };
 
@@ -157,8 +140,7 @@ function main() {
     `  commands:   ${snapshot.commands?.counts?.fs_commands ?? '?'} files\n` +
     `  scheduled:  ${snapshot.scheduled_tasks.count} tasks\n` +
     `  plugins:    ${snapshot.plugins.enabled_count} enabled\n` +
-    `  memory wal: ${(snapshot.memory.wal_size_bytes / 1024).toFixed(1)} KB ` +
-      `(ratio ${snapshot.memory.wal_ratio.toFixed(2)})\n`
+    `  systems:    ${snapshot.systems?.skipped ? 'none (skipped)' : `${snapshot.systems?.counts?.active ?? '?'} active`}\n`
   );
   process.exit(0);
 }

@@ -1,6 +1,7 @@
 # Archive — Bundle 3: Enterprise & Backend Languages
 
 > Load these for non-primary languages (Go, Rust, Java, etc.), alternative web frameworks (Vue, Angular), or enterprise platforms.
+> **Path note (2026-06-09):** rows pointing into `fullstack-dev/` are historical — some slugs differ from the bundle's current dir names (e.g. `angular-expert` vs `angular-architect`). Locate current paths with `find ~/.claude/skills/fullstack-dev -name SKILL.md | grep <slug>` before loading.
 
 ## Languages
 

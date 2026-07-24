@@ -7,22 +7,21 @@ Pick up exactly where you left off. Execute autonomously.
 ## Step 1 — Find the project
 
 Check in this order:
-1. `.flow/state.yaml` in the current working directory
-2. `.flow/state.yaml` in any parent directory
-3. `.planning/STATE.md` in the current working directory (legacy GSD)
-4. `.planning/STATE.md` in any parent directory (legacy GSD)
-5. If found → continue to Step 2
-6. If not found → ask: "What project or directory should I resume from?"
+1. `.planning/STATE.md` in the current working directory (legacy GSD)
+2. `.planning/STATE.md` in any parent directory (legacy GSD)
+3. The latest handoff for this cwd (`~/.claude/handoffs/`, or `wiki/session-log/handoffs/`)
+4. If found → continue to Step 2
+5. If not found → ask: "What project or directory should I resume from?"
+
+(If the project contains a legacy `.flow/state.yaml`, the flow system is archived — the manifest will offer restoring `skills/_archived/flow/`; otherwise read the state file directly as plain YAML for context.)
 
 ## Step 2 — Restore context
 
-Run `/flow:status` — this shows:
+From the state/handoff found above, determine:
 - What phases are complete
 - What's currently in progress
 - What the next recommended action is
 - Any blockers or pending todos
-
-Check for `.flow/.continue-here.md` — if exists, read for session handoff context.
 
 ## Step 3 — Present status clearly
 
@@ -35,11 +34,10 @@ Show the user:
 
 Without waiting, begin the next recommended action.
 
-- If plans exist but not executed → `/flow:go {phase}`
-- If a phase needs planning → `/flow:plan {phase}` then `/flow:go`
-- If executed but not verified → `/flow:verify {phase}`
-- If verified with gaps → `/flow:go {phase} --gaps-only`
-- If all phases complete → `/flow:complete`
+- If plans exist but not executed → execute the next planned phase
+- If a phase needs planning → plan it (EnterPlanMode for large scopes), then execute
+- If executed but not verified → run the relevant verification (tests, /ship-verify)
+- If all phases complete → close out (offer /done)
 - If there are pending todos → offer to work on one
 
 Apply all quality gates automatically (TDD, security scan, test run). Do not ask permission.

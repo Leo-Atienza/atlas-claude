@@ -1,109 +1,151 @@
 ---
 name: codebase-knowledge-graph
-description: "Build queryable knowledge graphs from codebases using AST parsing + semantic extraction. 71.5x token reduction vs raw file reading. Use when: onboarding to a new codebase, mapping architecture, tracing dependencies, or user says 'graph this', 'map the codebase', 'show dependencies'. Integrates with Flow map/discover phases."
+description: "Router skill for graph-based codebase/corpus queries. Picks the right tool: code-review-graph (CRG, MCP-native, Tree-sitter, 23 langs, auto-update) for code structure; graphify for mixed corpora (docs + papers + images + tweets). Use when: onboarding, mapping architecture, tracing dependencies, blast-radius analysis, user says 'graph this', 'map the codebase', 'show dependencies'."
 ---
 
-# Codebase Knowledge Graph
+# Codebase Knowledge Graph (Router)
 
-Build persistent, queryable knowledge graphs from code repositories. Two-pass processing (deterministic AST + semantic extraction) produces graph structures that replace expensive file-by-file reading.
+Two graph tools live in this system. They are **complementary, not redundant** — this skill routes tasks to the right one.
 
-## Prerequisites
+## Decision tree
 
-```bash
-pip install graphifyy && graphify install
+```
+Is the corpus code-only (Python, TS, Go, Rust, Java, etc.)?
+├── YES → code-review-graph (CRG) — MCP-native, Tree-sitter, 23 langs
+└── NO (docs + papers + images + tweets, or research corpus)?
+    └── graphify — LLM-assisted semantic extraction
+
+Already have .code-review-graph/graph.db?       → CRG (query via MCP)
+Already have graphify-out/graph.json?            → graphify (query via CLI)
 ```
 
-## When to Use
+---
 
-- Onboarding to a large/unfamiliar codebase
+## Tool A — `code-review-graph` (primary for code)
+
+MCP-native. Tree-sitter. 22 tools. Auto-updates on Write/Edit. Registered at user scope via `claude mcp add -s user code-review-graph uvx code-review-graph serve` (stored in `~/.claude.json`).
+
+### When to use
+- Onboarding to a codebase (Python, TS, TSX, Go, Rust, Java, Scala, C#, Ruby, Kotlin, Swift, PHP, Solidity, C/C++, Dart, R, Perl, Lua, Zig, PowerShell, Julia, Vue, Svelte, Jupyter `.ipynb`)
 - Mapping architecture before a refactor
-- Tracing dependency chains across modules
-- Understanding code communities and clusters
+- Blast-radius analysis: "what breaks if I change `login()`?"
+- Risk-scored PR/commit review
+- Finding hub nodes, bridges, surprise couplings
 - Pre-loading context for Flow `/flow:map` or `/flow:discover`
 
-## Two-Pass Processing
+### Core usage via MCP tools
+| Task | Tool |
+|---|---|
+| "Give me just enough context to start" | `get_minimal_context(task="...")` — ~100 tokens |
+| "What calls this function?" | `query_graph(pattern="callers_of", node="...")` |
+| "What does this call?" | `query_graph(pattern="callees_of", node="...")` |
+| "What's affected if I change X?" | `get_impact_radius(node="...")` |
+| "Find classes/functions by name" | `semantic_search_nodes_tool(query="...")` |
+| "Full review context for a PR" | `get_review_context(diff="...")` |
+| "Architecture overview" | prompt: `architecture_map` |
+| "Pre-merge check" | prompt: `pre_merge_check` |
 
-### Pass 1: Deterministic AST (Local, Zero LLM Cost)
-Tree-sitter extracts structural facts from code files:
-- Classes, functions, imports, call graphs, docstrings
-- Inheritance and implementation relationships
-- Module boundaries and export surfaces
+Follow the `next_tool_suggestions` field in every response — it's the optimal next step.
 
-**Supported:** .py, .ts, .js, .go, .rs, .java, .c, .cpp, .rb, .cs, .kt, .scala, .php
+### CLI (when MCP isn't available)
+```bash
+uvx code-review-graph build           # parse codebase (~10s for 500 files)
+uvx code-review-graph update          # incremental (~2s, auto via hook)
+uvx code-review-graph status          # graph stats
+uvx code-review-graph detect-changes  # risk-scored diff impact
+uvx code-review-graph visualize       # D3.js HTML graph
+uvx code-review-graph wiki            # export Obsidian vault
+uvx code-review-graph register <path> # multi-repo registry
+```
 
-### Pass 2: Semantic Extraction (LLM-Assisted)
-For non-code files (docs, papers, images):
-- Concept and relationship identification
-- Design rationale extraction (NOTE:, HACK:, WHY: comments)
-- Citation mining from papers
+### Auto-update
+PostToolUse hook fires `code-review-graph update` on Write/Edit/MultiEdit if `.code-review-graph/graph.db` exists. No manual updates needed.
 
-**Supported:** .md, .txt, .rst, .pdf, .png, .jpg, .webp, .gif
+### Output
+- `.code-review-graph/graph.db` — SQLite WAL store
+- Via `visualize`: interactive D3.js HTML
+- Via `wiki`: Obsidian vault with wikilinks
+- Via exports: GraphML (Gephi/yEd), Neo4j Cypher, SVG
 
-## Confidence-Scored Relationships
+---
 
-Every edge in the graph gets one of three tags:
+## Tool B — `graphify` (for mixed corpora)
+
+LLM-assisted semantic extraction. Handles docs, papers, images, tweets, code together.
+
+### When to use
+- Research corpus (PDFs + tweets + screenshots + notes)
+- Karpathy-style `/raw` folder workflow
+- Cross-document concept mining
+- Any corpus where LLM vision/semantic matters (e.g. chart images, handwritten notes)
+- Code corpora where you want `INFERRED`/`AMBIGUOUS` edge tagging and Q&A memory loop
+
+### Core usage (slash command)
+```
+/graphify                     # current dir → Obsidian vault
+/graphify <path>              # specific path
+/graphify <path> --update     # incremental
+/graphify query "<question>"  # BFS traversal
+/graphify path "A" "B"        # shortest path
+/graphify explain "Node"      # node explanation
+/graphify --mcp               # MCP stdio server
+```
+
+### Output
+- `graphify-out/graph.json` — persistent graph
+- `graphify-out/GRAPH_REPORT.md` — god nodes, surprises, suggested questions
+- `graphify-out/graph.html` — interactive viz
+- Optional: Obsidian vault, SVG, GraphML, Neo4j push
+
+---
+
+## Confidence-Scored Relationships (graphify only)
 
 | Tag | Meaning | Confidence |
 |-----|---------|------------|
-| `EXTRACTED` | Found directly in source code (import, call, inheritance) | 1.0 |
-| `INFERRED` | Reasonable deduction from patterns | 0.0–1.0 |
-| `AMBIGUOUS` | Flagged for human review | N/A |
+| `EXTRACTED` | Found directly in source (import, call, inheritance, citation) | 1.0 |
+| `INFERRED` | Reasonable deduction from patterns | 0.4–0.9 |
+| `AMBIGUOUS` | Flagged for human review | 0.1–0.3 |
 
-## Core Commands
+CRG uses a simpler three-tier edge confidence (EXTRACTED / INFERRED / AMBIGUOUS) plus float scores.
 
-```bash
-graphify build [path]              # Build graph from directory
-graphify build --update            # Incremental (changed files only)
-graphify query "question"          # Traverse graph for answer
-graphify path "NodeA" "NodeB"      # Trace connection between nodes
-graphify explain "Node"            # Detailed node explanation
-graphify export --format graphml   # Export for Gephi/yEd
-graphify export --format obsidian  # Generate Obsidian vault
-```
-
-## Output Artifacts
-
-| File | Purpose |
-|------|---------|
-| `graph.json` | Persistent queryable graph (reload across sessions) |
-| `graph.html` | Interactive visualization (click-through nodes, community filter) |
-| `GRAPH_REPORT.md` | Summary: god nodes, surprising connections, suggested questions |
-| `cache/` | SHA256-indexed cache for incremental updates |
+---
 
 ## Integration with Flow
 
 ### With `/flow:map`
-Before mapping, build the graph. The GRAPH_REPORT.md provides a structural overview that guides where to focus mapping agents.
+For code-heavy repos, build CRG first → use `get_minimal_context` to guide mapping agents.
+For mixed corpora, build graphify first → `GRAPH_REPORT.md` guides mapping.
 
 ### With `/flow:discover`
-Use `graphify query` to answer discovery questions with graph traversal instead of expensive file reads. 71.5x token reduction on large codebases.
+Prefer CRG MCP tools for code queries (no LLM extraction cost, auto-updates).
+Use graphify for discovery questions that span docs + code + research notes.
 
-### Always-On Mode (Optional)
-Install a PreToolUse hook that surfaces GRAPH_REPORT.md before file search operations:
-```bash
-graphify claude install  # Adds hook to settings.json
-```
+---
 
-## Performance Characteristics
-
-| Corpus Size | Token Reduction | Build Time |
-|-------------|-----------------|------------|
-| 50+ files (mixed code + docs) | ~71.5x | Minutes |
-| 6 files (single library) | ~1x | Seconds |
-| Incremental update | N/A | <2s |
-
-Token savings compound on subsequent queries — the graph avoids re-reading raw content.
-
-## Graph Topology Clustering
-
-Uses Leiden community detection (no embeddings needed) to cluster related code:
-- Identifies natural module boundaries
-- Surfaces unexpected cross-module dependencies
-- Generates architecture diagrams from structure, not annotations
-
-## When NOT to Use
+## When NOT to use graph tools
 
 - Single-file tasks (overhead exceeds benefit)
 - Already familiar with the codebase
-- Quick lookups (use Grep/Glob instead)
-- Context Mode MCP already indexed the project (use that for text search)
+- Quick lookups where Grep/Glob is faster
+
+---
+
+## Performance
+
+| Tool | Corpus | Reduction | Build time |
+|------|--------|-----------|------------|
+| CRG | Code-only, 500 files | 8.2× avg, up to 49× monorepo | ~10s |
+| CRG | Incremental (auto) | N/A | <2s |
+| graphify | Mixed, 50+ files | ~71.5× | Minutes (LLM) |
+| graphify | Incremental | N/A | <2s code, minutes docs |
+
+---
+
+## Retired: `graphify install` prerequisite
+
+Previous versions of this skill required `pip install graphifyy && graphify install` as prereq. Now:
+- `graphifyy` is already installed (pip).
+- `code-review-graph` is installed via `uv tool install code-review-graph`.
+- CRG is registered at user scope via `claude mcp add -s user code-review-graph uvx code-review-graph serve` (writes to `~/.claude.json` — the authoritative MCP registry). Graphify is invoked as a CLI (`python -m graphify`) rather than a persistent MCP server.
+- No `graphify install` or `code-review-graph install` needed — ATLAS wires them manually to preserve settings harmony. Do NOT use `code-review-graph install` (it injects its own skills/hooks/CLAUDE.md text and clobbers the ATLAS layout).

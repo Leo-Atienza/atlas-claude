@@ -1,0 +1,120 @@
+/* impeccable starter tokens — a non-generic baseline so every build starts designed, not default.
+ *
+ * USAGE: paste into app/globals.css *after* `@import "tailwindcss";` (see tailwind-setup, SK-040).
+ * Then change exactly three things: --brand-h (one number retints the whole palette), the three
+ * --font-* faces (wire real faces via next/font), and nothing else is required.
+ *
+ * Why this exists: impeccable's reference/*.md specify these tiers in prose; this is the emittable
+ * form, with the gaps those specs DON'T cover filled in (typography, radius, z-index, shadow).
+ * OKLCH throughout (perceptually uniform); neutrals are tinted toward the brand hue; dark mode uses
+ * light-dark() so there is no second block to maintain. Contrast of the default semantic pairings is
+ * WCAG-AA verified (see note at the bottom). Lazy-senior: one file, no JS, no build step.
+ *
+ * @theme registers each token as a :root custom property AND generates utilities for the standard
+ * namespaces (color → bg-/text-/border-, font → font-, radius → rounded-, shadow → shadow-, ease).
+ * Consume anything directly with var(--token) or arbitrary values, e.g. gap-[var(--space-lg)].
+ */
+
+@theme {
+  /* ── Brand hue — change THIS one number (0–360) ───────────────────────── */
+  --brand-h: 165; /* placeholder teal. Set to your brand's hue. Neutrals retint automatically. */
+
+  /* ── Spacing — 4pt scale, semantic names (spatial-design.md) ──────────── */
+  --space-2xs: 4px;
+  --space-xs: 8px;
+  --space-sm: 12px;
+  --space-md: 16px;
+  --space-lg: 24px;
+  --space-xl: 32px;
+  --space-2xl: 48px;
+  --space-3xl: 64px;
+  --space-4xl: 96px;
+
+  /* ── Color primitives — OKLCH; chroma drops toward the extremes ───────── */
+  --color-brand: oklch(0.5 0.16 var(--brand-h)); /* L tuned so white foreground passes AA at this hue */
+  --color-brand-strong: oklch(0.44 0.16 var(--brand-h)); /* hover / active / pressed */
+  --color-brand-foreground: oklch(0.99 0.01 var(--brand-h));
+
+  /* Neutrals tinted toward the brand hue (chroma ≤0.009 — felt, not seen) */
+  --color-neutral-50: oklch(0.985 0.004 var(--brand-h));
+  --color-neutral-100: oklch(0.965 0.005 var(--brand-h));
+  --color-neutral-200: oklch(0.920 0.006 var(--brand-h));
+  --color-neutral-300: oklch(0.870 0.007 var(--brand-h));
+  --color-neutral-400: oklch(0.710 0.008 var(--brand-h));
+  --color-neutral-500: oklch(0.560 0.009 var(--brand-h));
+  --color-neutral-600: oklch(0.448 0.008 var(--brand-h));
+  --color-neutral-700: oklch(0.370 0.007 var(--brand-h));
+  --color-neutral-800: oklch(0.270 0.006 var(--brand-h));
+  --color-neutral-900: oklch(0.205 0.005 var(--brand-h));
+  --color-neutral-950: oklch(0.150 0.004 var(--brand-h));
+
+  /* Status — distinct hues; scheme-flipped because their PRIMARY use is ink (text-error etc.):
+   * light values carry white foregrounds on filled chips; the mid-L light values measure only
+   * ~3.5–3.9:1 AS TEXT on the dark surface, so dark flips to L 0.70 inks (≥6.7:1). Filled status
+   * chips in dark take neutral-950 text, not white. */
+  --color-success: light-dark(oklch(0.52 0.13 150), oklch(0.70 0.13 150));
+  --color-warning: light-dark(oklch(0.52 0.13 70), oklch(0.70 0.13 70));
+  --color-error: light-dark(oklch(0.55 0.18 25), oklch(0.70 0.18 25));
+  --color-info: light-dark(oklch(0.54 0.12 240), oklch(0.70 0.12 240));
+
+  /* ── Semantic roles — flip for dark via light-dark() (status above flips too) ─ */
+  --color-surface: light-dark(var(--color-neutral-50), var(--color-neutral-950));
+  --color-surface-raised: light-dark(oklch(1 0 0), var(--color-neutral-900));
+  --color-text: light-dark(var(--color-neutral-900), var(--color-neutral-100));
+  --color-text-muted: light-dark(var(--color-neutral-600), var(--color-neutral-400));
+  --color-border: light-dark(var(--color-neutral-200), var(--color-neutral-800));
+  --color-border-strong: light-dark(var(--color-neutral-300), var(--color-neutral-700));
+  --color-primary: var(--color-brand);
+  --color-primary-foreground: var(--color-brand-foreground);
+
+  /* ── Typography — wire real faces (next/font sets --font-*-face) ──────── */
+  --font-display: var(--font-display-face, Georgia, "Times New Roman", serif);
+  --font-body: var(--font-body-face, system-ui, sans-serif);
+  --font-mono: var(--font-mono-face, ui-monospace, "SFMono-Regular", Menlo, monospace);
+
+  /* ── Radius ───────────────────────────────────────────────────────────── */
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --radius-xl: 20px;
+  --radius-pill: 9999px;
+
+  /* ── Elevation — shadows tinted to the brand hue, never flat gray ─────── */
+  --shadow-sm: 0 1px 2px oklch(0.2 0.03 var(--brand-h) / 0.08);
+  --shadow-md: 0 4px 12px oklch(0.2 0.03 var(--brand-h) / 0.1);
+  --shadow-lg: 0 12px 32px oklch(0.2 0.03 var(--brand-h) / 0.14);
+
+  /* ── Motion — easing curves + duration scale (motion-design.md) ───────── */
+  --ease-out-quart: cubic-bezier(0.25, 1, 0.5, 1);
+  --ease-out-quint: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+  --duration-fast: 120ms;
+  --duration-base: 220ms;
+  --duration-slow: 420ms;
+
+  /* ── Z-index — semantic scale, no magic numbers ──────────────────────── */
+  --z-dropdown: 10;
+  --z-sticky: 20;
+  --z-overlay: 30;
+  --z-modal: 40;
+  --z-toast: 50;
+  --z-tooltip: 60;
+}
+
+/* light-dark() needs the page to advertise both schemes. */
+html {
+  color-scheme: light dark;
+}
+
+/*
+ * WCAG-AA verified at the default --brand-h: 165 (computed OKLCH→sRGB→WCAG; all ratios p75-safe;
+ * re-verified BOTH schemes 2026-07-22 via impeccable scripts/check-contrast.mjs — which caught the
+ * original status-as-ink-on-dark gap the first verification missed):
+ *   LIGHT  text/surface 17.2:1 · text-muted/surface 7.2:1 · white/primary 5.1:1 · status ink ≥4.7:1 · white on status ≥4.9:1
+ *   DARK   text/surface 17.7:1 · text-muted/surface 7.6:1 · white/primary 5.1:1 · status ink ≥6.7:1 · neutral-950 on status ≥6.7:1
+ * Neutrals are near-zero chroma, so their contrast is hue-stable — change --brand-h freely.
+ * BUT white-on-brand IS hue-sensitive: at light/warm hues (yellow–green, ~90–140) brand L=0.5 gets
+ * more luminous and white text can dip below 4.5:1 — there, lower the brand L (~0.45) or use a dark
+ * --color-brand-foreground. For brand-COLORED text on a dark surface, step the brand lighter
+ * (e.g. oklch(0.72 0.15 h)); mid-tone brand as body text on dark dips below 4.5:1.
+ */

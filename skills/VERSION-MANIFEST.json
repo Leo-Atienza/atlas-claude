@@ -1,68 +1,192 @@
 {
   "schema_version": 1,
   "skill_packs": {
+    "css-keyframe-animations": {
+      "source": "github:MADEiN83/react-animista + github:Bigetion/animista-css-generator",
+      "installed": "2026-07-20",
+      "last_checked": "2026-07-20",
+      "pinned": true,
+      "note": "repo-integration round 3 (SK-146). Data mirrors @ 4946134 (react-animista, correctness) + 6243845 (animista-css-generator, completeness). Keyframe DATA © animista.net BSD-2-Clause/FreeBSD (free, no attribution) — repos' ISC-no-file packaging moot. Distilled to reference/catalog.md (49 keyframes); neither package installed — see skills/css-keyframe-animations/NOTICE.md"
+    },
+    "svg-backgrounds": {
+      "source": "authored + github:AThevon/genjutsu (canvas-generative)",
+      "installed": "2026-07-20",
+      "last_checked": "2026-07-20",
+      "pinned": true,
+      "note": "repo-integration round 3 (SK-147). SVG recipes authored (Haikei-equivalent — Haikei has no API); generative-canvas distilled from genjutsu canvas-generative @ a2b8b09 (MIT). genjutsu rejected wholesale otherwise — see skills/svg-backgrounds/NOTICE.md"
+    },
+    "motion-principles": {
+      "source": "github:lottiefiles/motion-design-skill",
+      "installed": "2026-07-20",
+      "last_checked": "2026-07-20",
+      "pinned": true,
+      "note": "repo-integration round 3 (SK-148) @ f9a8a04 (MIT). Verbatim SKILL.md (renamed motion-design->motion-principles) + director/patterns/reference + LICENSE. Motion PRINCIPLES not Lottie tooling (name is a misnomer) — see skills/motion-principles/NOTICE.md"
+    },
+    "gsap-plugins": {
+      "source": "github:greensock/gsap-skills",
+      "installed": "2026-07-20",
+      "last_checked": "2026-07-20",
+      "pinned": true,
+      "note": "repo-integration round 3 (SK-149) @ aed9cfd (official GreenSock, MIT). Vendored gsap-plugins/SKILL.md + reference/{scrolltrigger-advanced,gsap-utils,gsap-performance}.md + LICENSE. gsap-core/timeline/react/frameworks excluded (covered by SK-042/044 or off-stack) — see skills/gsap-plugins/NOTICE.md"
+    },
+    "design-dna": {
+      "source": "github:zanwei/design-dna",
+      "installed": "2026-07-20",
+      "last_checked": "2026-07-20",
+      "pinned": true,
+      "note": "repo-integration round 3 (SK-150) @ 9d9d795 (MIT). Verbatim SKILL.md + references/{schema,generation-guide}.md + LICENSE. Translated READMEs + demo PNG excluded — see skills/design-dna/NOTICE.md"
+    },
+    "threejs-imperative": {
+      "source": "github:cloudai-x/threejs-skills",
+      "installed": "2026-07-20",
+      "last_checked": "2026-07-20",
+      "pinned": true,
+      "note": "repo-integration round 3 (SK-151) @ b1c6230. WARNING: LICENSE UNCONFIRMED — no LICENSE file upstream, dead provenance (pinkforest/threejs-playground 404). Adopted at the user's direction for LOCAL REFERENCE ONLY, do NOT redistribute. 10 topic refs + authored router — see skills/threejs-imperative/NOTICE.md"
+    },
+    "ui-ux-catalog": {
+      "source": "github:nextlevelbuilder/ui-ux-pro-max-skill",
+      "installed": "2026-06-11",
+      "last_checked": "2026-06-11",
+      "pinned": true,
+      "note": "v2.5.0 @ 07f4ef3ac2568c25a3b0c8ef5165a86abc3e56e4; vendored data CSVs + search.py/core.py only (write paths + updaters stripped — see skills/ui-ux-catalog/NOTICE.md); refresh = re-vet per SYSTEM_CHANGELOG 8.7.0 procedure"
+    },
     "trailofbits-security": {
       "source": "github:trailofbits/skills",
-      "installed": "2026-02-25",
-      "last_checked": "2026-03-16",
-      "pinned": false
+      "installed": "2026-06-15",
+      "last_checked": "2026-06-15",
+      "pinned": false,
+      "note": "updated to c070b9b (2026-06-10) via gh repo clone --depth 1; 74 SKILL.md (content refresh, no count change); kept plugins/+.claude-plugin/+docs, stripped .git"
     },
     "fullstack-dev": {
       "source": "github:Jeffallan/claude-skills",
       "installed": "2026-02-25",
-      "last_checked": "2026-03-16",
-      "pinned": false
+      "last_checked": "2026-06-08",
+      "pinned": false,
+      "note": "extracted archive, not git repo — manual refresh required"
     },
     "context-engineering-kit": {
       "source": "github:NeoLabHQ/context-engineering-kit",
-      "installed": "2026-02-25",
-      "last_checked": "2026-03-16",
-      "pinned": false
+      "installed": "2026-06-15",
+      "last_checked": "2026-06-15",
+      "pinned": false,
+      "note": "updated to e455f9d (2026-06-14) via gh repo clone --depth 1; 63→65 SKILL.md (+2); kept plugins/+.claude-plugin/+docs, stripped docs/+justfile+.git"
     },
     "compound-engineering": {
       "source": "github:EveryInc/compound-engineering-plugin",
-      "installed": "2026-02-25",
-      "last_checked": "2026-03-16",
-      "pinned": false
+      "installed": "2026-06-15",
+      "last_checked": "2026-06-15",
+      "pinned": false,
+      "note": "updated to 2648200 (2026-06-15) via gh repo clone --depth 1; 39 real plugin SKILL.md (5 tests/ fixtures stripped); kept plugins/+.claude-plugin/+docs, stripped src/+tests/+docs/+scripts/+bun.lock+.git"
     },
     "cctools": {
       "source": "github:pchalasani/claude-code-tools",
-      "installed": "2026-02-25",
-      "last_checked": "2026-03-16",
-      "pinned": false
+      "installed": "2026-06-15",
+      "last_checked": "2026-06-15",
+      "pinned": false,
+      "note": "updated to 14705d9 (2026-06-14) via gh repo clone --depth 1; upstream migrated to plugins/ structure (was tool-dirs); 11 SKILL.md; stripped ~88M dev cruft (rust-search-ui/+node_ui/+demos/+docs-site/+claude_code_tools/+lmsh/+locks)+.git. NOTE: hooks/cctools-safety-hooks/ is a SEPARATE vendored copy, NOT updated here"
     },
     "infra-showcase": {
       "source": "github:diet103/claude-code-infrastructure-showcase",
       "installed": "2026-02-25",
-      "last_checked": "2026-03-16",
-      "pinned": false
+      "last_checked": "2026-06-08",
+      "pinned": false,
+      "note": "extracted archive, not git repo — manual refresh required"
+    },
+    "app-store-review": {
+      "source": "github:safaiyeh/app-store-review-skill",
+      "installed": "2026-06-18",
+      "last_checked": "2026-06-18",
+      "pinned": true,
+      "note": "v8.12.0 skills.sh app-dev sweep @ c2532321a3f3f60f6f54bd584fb86290a5ba9940; SKILL.md (+ATLAS routing note) + rules/1-5.md verbatim + LICENSE; README/metadata.json/plugin-machinery stripped (no telemetry path) — see skills/app-store-review/NOTICE.md"
+    },
+    "fastlane": {
+      "source": "github:greenstevester/fastlane-skill",
+      "installed": "2026-06-18",
+      "last_checked": "2026-06-18",
+      "pinned": true,
+      "note": "v8.12.0 skills.sh app-dev sweep @ df44877684fd885cad6cd153ca58466b74eb9485; distilled 5 command-skills + docs/xcode-cloud.md into one authored SKILL.md (dropped !auto-exec pre-flight blocks; iOS lanes macOS-only) + LICENSE verbatim — see skills/fastlane/NOTICE.md"
+    },
+    "upgrading-react-native": {
+      "source": "github:callstackincubator/agent-skills",
+      "installed": "2026-06-19",
+      "last_checked": "2026-06-19",
+      "pinned": true,
+      "note": "v8.13.0 app-dev sweep completion (held clean in v8.12.0) @ 0ba043ab797d0e623384a6495b3bb0dadbd3181a; upstream path skills/upgrading-react-native/; SKILL.md (+ATLAS routing note + vendored_from) + 7 references/*.md verbatim + LICENSE; agents/openai.yaml plugin machinery stripped — see skills/upgrading-react-native/NOTICE.md"
+    },
+    "react-native-brownfield-migration": {
+      "source": "github:callstackincubator/agent-skills",
+      "installed": "2026-06-19",
+      "last_checked": "2026-06-19",
+      "pinned": true,
+      "note": "v8.13.0 app-dev sweep completion (held clean in v8.12.0) @ 0ba043ab797d0e623384a6495b3bb0dadbd3181a; upstream path skills/react-native-brownfield-migration/; SKILL.md (+ATLAS routing note + vendored_from) + 10 references/*.md verbatim + LICENSE; agents/openai.yaml stripped — see skills/react-native-brownfield-migration/NOTICE.md"
+    },
+    "github-actions": {
+      "source": "github:callstackincubator/agent-skills",
+      "installed": "2026-06-19",
+      "last_checked": "2026-06-19",
+      "pinned": true,
+      "note": "v8.13.0 app-dev sweep completion (held clean in v8.12.0) @ 0ba043ab797d0e623384a6495b3bb0dadbd3181a; upstream path skills/github-actions/; SKILL.md (+ATLAS routing note + vendored_from) + 3 references/*.md verbatim + LICENSE; agents/openai.yaml stripped — see skills/github-actions/NOTICE.md"
+    },
+    "hyperframes": {
+      "source": "github:heygen-com/hyperframes",
+      "installed": "2026-07-10",
+      "last_checked": "2026-07-10",
+      "pinned": false,
+      "note": "v8.20.0 SK-143; Apache-2.0 (LICENSE file verified); vetted @ dda09c8d6434158de397c6ec393b83c15464a304. NOT SHA-pinned by design: skills/hyperframes* + media-use + lazily-installed workflow dirs are LIVE-MANAGED by the upstream CLI (npx hyperframes init / skills update) which overwrites local edits (empirically confirmed 2026-07-10) — never edit those SKILL.md files; ATLAS vet record + routing notes live in INSTALLED.md §v8.20.0. Telemetry opted out machine-wide (HYPERFRAMES_NO_TELEMETRY=1). media-use HeyGen catalog path = OAuth-gated, opt-in only"
+    },
+    "claude-real-video": {
+      "source": "github:HUANGCHIHHUNGLeo/claude-real-video",
+      "installed": "2026-07-20",
+      "last_checked": "2026-07-20",
+      "pinned": true,
+      "note": "v9.1.0 SK-144 @ 3fc1872dba1ba85ee534a3faa812231cef501e97; MIT (LICENSE verified, © LeoAido). Vendored SKILL.md (from skills/claude-real-video-for-agents/, frontmatter-only adaptation) + LICENSE + NOTICE; crv runtime installed via pip (see cli_tools). install-skill.sh inspected-not-run; no telemetry/network in free path — see skills/claude-real-video/NOTICE.md"
+    },
+    "clone-website": {
+      "source": "github:JCodesMore/ai-website-cloner-template",
+      "installed": "2026-07-20",
+      "last_checked": "2026-07-20",
+      "pinned": true,
+      "note": "v9.1.0 SK-145 @ 58e00d5369181dc0b84b45a2a55e6f64a017f59b; MIT (LICENSE verified, © JCodesMore). Vendored .claude/skills/clone-website/SKILL.md (+ATLAS routing note) + references/INSPECTION_GUIDE.md + LICENSE + NOTICE; Next.js scaffold + scripts/sync-skills.mjs (safe pure-fs) + per-agent copies stripped; needs browser MCP at runtime — see skills/clone-website/NOTICE.md"
     }
   },
   "cli_tools": {
+    "crawl4ai": {
+      "installed": "0.9.1",
+      "source": "pip:crawl4ai",
+      "last_checked": "2026-07-10",
+      "note": "v8.20.0 free web-extraction layer; Apache-2.0; CLIs at %APPDATA%/Python/Python313/Scripts (not on PATH); verified with real crawl; Docker MCP upgrade path parked in INSTALLED.md"
+    },
+    "claude-real-video": {
+      "installed": "0.7.15",
+      "source": "pip:claude-real-video[fast]",
+      "last_checked": "2026-07-20",
+      "note": "v9.1.0 SK-144 crv runtime; MIT; console scripts (crv/crv-web) at %APPDATA%/Python/Python313/Scripts — ADDED to Windows user PATH 2026-07-20; PATH-free fallback `python -m claude_real_video`. faster-whisper (CTranslate2, no torch) backend for the 4GB-VRAM/CPU machine; ffmpeg 8.1.2 on PATH; verified end-to-end"
+    },
     "better-ccflare": {
-      "installed": "3.2.0",
+      "installed": "3.5.23",
       "source": "npm:better-ccflare",
-      "last_checked": "2026-03-16"
+      "last_checked": "2026-06-15"
     },
     "tdd-guard": {
-      "installed": "1.1.0",
+      "installed": "1.6.8",
       "source": "npm:tdd-guard",
-      "last_checked": "2026-03-16"
+      "last_checked": "2026-06-08"
     },
     "claude-rules-doctor": {
       "installed": "0.2.2",
       "source": "npm:claude-rules-doctor",
-      "last_checked": "2026-03-16"
+      "last_checked": "2026-06-08"
     },
     "claudio": {
-      "installed": "1.11.1",
+      "installed": "1.13.1",
       "source": "go:claudio.click/cmd/claudio",
-      "last_checked": "2026-03-16"
+      "last_checked": "2026-06-08"
     },
     "claude-squad": {
-      "installed": "1.0.14",
+      "installed": "1.0.17",
       "source": "github:smtg-ai/claude-squad",
-      "last_checked": "2026-03-16"
+      "last_checked": "2026-06-08",
+      "note": "binary install from windows_amd64.zip; previous 1.0.14 backed up to C:/tmp/trash/claude-squad-1.0.14-backup-2026-05-01/"
     }
   },
   "git_skills": {

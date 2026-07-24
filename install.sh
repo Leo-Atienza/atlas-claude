@@ -1,6 +1,6 @@
 #!/bin/bash
 # ATLAS — Autonomous Task, Learning, and Agent System
-# Quick Install by Leo Atienza
+# Quick Install by the user
 # Usage: bash install.sh
 #
 # Installs core infrastructure (hooks, rules, scripts, key skills).
@@ -16,7 +16,7 @@ echo ""
 echo "    ╔═══════════════════════════════════════════╗"
 echo "    ║              A T L A S                    ║"
 echo "    ║  Autonomous Task, Learning & Agent System ║"
-echo "    ║           by Leo Atienza                  ║"
+echo "    ║           by the user                  ║"
 echo "    ╚═══════════════════════════════════════════╝"
 echo ""
 echo "=== Installing ATLAS ==="

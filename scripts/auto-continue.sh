@@ -13,7 +13,11 @@ if [ -z "$SESSION_ID" ]; then
   exit 1
 fi
 
-TRIGGER_FILE="/tmp/claude-handoff-${SESSION_ID}.trigger"
+# Resolve Node's os.tmpdir() — on Windows it's %LOCALAPPDATA%\Temp, not /tmp.
+# Hooks write trigger/bridge/log files here; Bash must read from the same place.
+NODE_TMPDIR=$(node -e "process.stdout.write(require('os').tmpdir())" 2>/dev/null || echo "/tmp")
+
+TRIGGER_FILE="$NODE_TMPDIR/claude-handoff-${SESSION_ID}.trigger"
 
 # Only continue if trigger exists
 if [ ! -f "$TRIGGER_FILE" ]; then
@@ -80,37 +84,22 @@ echo "[$(date -Iseconds)] Auto-continuation: session=$SESSION_ID chain=$NEXT_DEP
   >> "$HOME/.claude/logs/auto-continue.log" 2>/dev/null || true
 
 # Spawn new session — platform-aware
-# Strategy: try --resume first (preserves session history), fall back to -p
+# Always start fresh (no --resume). We hit 70% precisely because loading the
+# full transcript is what filled the budget; --resume would re-load it and
+# blow context instantly. The handoff prompt above already tells the fresh
+# session to read the handoff file and pick up from immediate_next_action.
 cd "$CWD"
-
-# Extract session ID from the bridge file for --resume
-RESUME_SESSION=""
-BRIDGE_FILE="/tmp/claude-ctx-${SESSION_ID}.json"
-if [ -f "$BRIDGE_FILE" ]; then
-  RESUME_SESSION=$(node -e "
-    try { const d=JSON.parse(require('fs').readFileSync('$BRIDGE_FILE','utf8')); process.stdout.write(d.session_id||''); } catch(e) {}
-  " 2>/dev/null || echo "")
-fi
 
 if [[ "${OSTYPE:-}" == "msys" || "${OSTYPE:-}" == "cygwin" || "${OS:-}" == "Windows_NT" ]]; then
   # Windows (Git Bash / MSYS2 / Cygwin): write prompt to temp file to avoid
   # cmd.exe special character issues (%, ^, !, &, |, <, > in commit messages/paths)
-  PROMPT_FILE="/tmp/claude-continue-prompt-${SESSION_ID}.txt"
+  PROMPT_FILE="$NODE_TMPDIR/claude-continue-prompt-${SESSION_ID}.txt"
   printf '%s' "$PROMPT" > "$PROMPT_FILE"
-  if [ -n "$RESUME_SESSION" ]; then
-    nohup bash -c "claude --resume '$RESUME_SESSION' -p \"\$(cat '$PROMPT_FILE')\" ; rm -f '$PROMPT_FILE'" \
-      > "/tmp/claude-continue-${SESSION_ID}.log" 2>&1 &
-  else
-    nohup bash -c "claude -p \"\$(cat '$PROMPT_FILE')\" ; rm -f '$PROMPT_FILE'" \
-      > "/tmp/claude-continue-${SESSION_ID}.log" 2>&1 &
-  fi
+  nohup bash -c "claude -p \"\$(cat '$PROMPT_FILE')\" ; rm -f '$PROMPT_FILE'" \
+    > "$NODE_TMPDIR/claude-continue-${SESSION_ID}.log" 2>&1 &
 else
   # Unix: use nohup for proper detachment
-  if [ -n "$RESUME_SESSION" ]; then
-    nohup claude --resume "$RESUME_SESSION" -p "$PROMPT" > "/tmp/claude-continue-${SESSION_ID}.log" 2>&1 &
-  else
-    nohup claude -p "$PROMPT" > "/tmp/claude-continue-${SESSION_ID}.log" 2>&1 &
-  fi
+  nohup claude -p "$PROMPT" > "$NODE_TMPDIR/claude-continue-${SESSION_ID}.log" 2>&1 &
 fi
 
-echo "Auto-continuation spawned (PID: $!, chain: ${NEXT_DEPTH}, resume: ${RESUME_SESSION:-none})"
+echo "Auto-continuation spawned (PID: $!, chain: ${NEXT_DEPTH}, fresh session)"

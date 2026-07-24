@@ -2,7 +2,7 @@
 /**
  * ATLAS v7.0 — Observability Dashboard
  *
- * Reads existing telemetry streams and emits a 6-section markdown dashboard to stdout.
+ * Reads existing telemetry streams and emits a 7-section markdown dashboard to stdout.
  * Invoked by `/observe`, by weekly-maintenance step 2, or directly on the CLI.
  *
  * Sections:
@@ -214,7 +214,8 @@ function sectionSkillUsage() {
 
   if (active.length > 0) {
     lines.push('');
-    lines.push(`**Unused (≥30d):** ${unused.length}/${active.length} active skills have no recorded invocation.`);
+    lines.push(`**No Skill-tool invocation (≥30d):** ${unused.length}/${active.length} active skills.`);
+    lines.push('_Caveat: only explicit `Skill`-tool calls are logged — auto-triggered skills never appear here, and many idle skills are situational/on-call (e.g. `next-upgrade`, `better-auth`). This is a REVIEW list, not a removal list._');
     if (unused.length > 0) {
       const preview = unused.slice(0, 12).map(s => `\`${s}\``).join(', ');
       const tail = unused.length > 12 ? `, … +${unused.length - 12} more` : '';
@@ -257,7 +258,8 @@ function sectionScheduledTasks() {
     const windowH = parseCron(t.cronExpression || t.cron || '');
     const ageH = last ? (NOW - last) / 3_600_000 : null;
     let status = 'ok';
-    if (!last) status = 'never-ran';
+    if (t.enabled === false) status = 'disabled';
+    else if (!last) status = 'never-ran';
     else if (windowH && ageH > windowH + 6) status = 'drift';
     else if (windowH && ageH > windowH) status = 'late';
     rows.push({
@@ -278,7 +280,7 @@ function sectionScheduledTasks() {
     '| Task | Enabled | Cron | Last run | Status |',
     '|---|:-:|---|---|---|',
   ];
-  const statusGlyph = { ok: '✓', late: '⏱ late', drift: '⚠ drift', 'never-ran': '· never' };
+  const statusGlyph = { ok: '✓', late: '⏱ late', drift: '⚠ drift', 'never-ran': '· never', disabled: '· disabled' };
   for (const r of rows) {
     lines.push(`| \`${r.id}\` | ${r.enabled ? 'Y' : 'N'} | \`${r.cron}\` | ${fmtAgo(r.lastRunAt)} | ${statusGlyph[r.status]} |`);
   }
@@ -381,6 +383,42 @@ function sectionCleanup() {
   return { md: lines.join('\n'), rows: { last, error_rules: [...errorRules], rules_run_7d: rulesRun, errors_7d: errorCount } };
 }
 
+// ─── section 7: delegation (local-LLM offload) ────────────────────────────
+// B8 (v9): make local-agent usage measurable — the chosen mechanism for the
+// under-use problem (visibility, not a new mandate). Reads logs/delegations.jsonl.
+
+function sectionDelegation() {
+  const rows = readJsonl(path.join(LOGS_DIR, 'delegations.jsonl'), { limit: 5000 });
+  if (!rows.length) return { md: emptyNotice('no delegations.jsonl yet — the local_llm_agent v2 engine logs here (v9 Wave 1)'), rows: [] };
+  const win = (ms) => rows.filter(r => { const t = parseTs(r.ts); return t != null && NOW - t <= ms; });
+  const d30 = win(THIRTY_DAYS_MS), d7 = win(7 * DAY_MS);
+  const ok = d30.filter(r => r.status === 'ok');
+  const escalated = d30.filter(r => r.escalated).length;
+  const schemaCalls = d30.filter(r => r.schema_ok === true || r.schema_ok === false);
+  const schemaOk = schemaCalls.filter(r => r.schema_ok === true).length;
+  const tokensSaved = ok.reduce((s, r) => s + (r.tokens_in || 0) + (r.tokens_out || 0), 0);
+  const byTask = {}; for (const r of ok) { const k = r.task || '(ad-hoc)'; byTask[k] = (byTask[k] || 0) + 1; }
+  const byModel = {}; for (const r of ok) { const k = r.model || '?'; byModel[k] = (byModel[k] || 0) + 1; }
+  const pct = (n, dn) => dn ? Math.round(n / dn * 100) : 0;
+  const lines = [
+    `Volume: **${d7.length}** (7d) · ${d30.length} (30d) · ${rows.length} all-time`,
+    `Acceptance (ok & not escalated): **${pct(ok.length - escalated, d30.length)}%** (n=${d30.length}) · escalation ${pct(escalated, d30.length)}% · schema-valid ${pct(schemaOk, schemaCalls.length)}% (n=${schemaCalls.length})`,
+    `Est. local work done (tokens Claude didn't process): ~${tokensSaved.toLocaleString('en-US')}`,
+    '',
+    '| Task | n | | Model | n |',
+    '|---|--:|---|---|--:|',
+  ];
+  const tasks = Object.entries(byTask).sort((a, b) => b[1] - a[1]).slice(0, 6);
+  const models = Object.entries(byModel).sort((a, b) => b[1] - a[1]).slice(0, 6);
+  for (let i = 0; i < Math.max(tasks.length, models.length); i++) {
+    const t = tasks[i] ? `\`${tasks[i][0]}\` | ${tasks[i][1]}` : ' | ';
+    const m = models[i] ? `\`${models[i][0]}\` | ${models[i][1]}` : ' | ';
+    lines.push(`| ${t} | | ${m} |`);
+  }
+  if (d30.length && pct(escalated, d30.length) > 40) lines.push('\n⚠ escalation >40% — delegations are frequently bouncing back to Claude; check task templates / model fit.');
+  return { md: lines.join('\n'), rows: d30 };
+}
+
 // ─── orchestration ────────────────────────────────────────────────────────
 
 const SECTIONS = [
@@ -390,6 +428,7 @@ const SECTIONS = [
   { key: 'scheduled_tasks', title: '4. Scheduled Tasks', fn: sectionScheduledTasks },
   { key: 'action_graph',    title: '5. Action Graph',    fn: sectionActionGraph },
   { key: 'cleanup',         title: '6. Cleanup',         fn: sectionCleanup },
+  { key: 'delegation',      title: '7. Delegation (local-LLM offload)', fn: sectionDelegation },
 ];
 
 function runSection(s) {

@@ -82,3 +82,70 @@ TRASH-FILES.md
 
 # Personal Windows-only binary (compiled paths leak; keep local-only)
 bin/claudio
+
+# ---- Added 2026-07-24 (v10.3.1 full-mirror sync) ----
+# Operational/session state. The DIRECTORIES are part of the system and are
+# documented in RUNTIME-STATE.md; only the per-session CONTENTS are private.
+# Schema/format templates are re-included so adopters can populate their own.
+atlas-kg/*
+!atlas-kg/SCHEMA.md
+proposals/*
+!proposals/TEMPLATE.md
+atlas-action-graph/
+tasks/
+teams/
+context-mode/
+# MCP servers: ship the source, never the vendored dependency trees.
+mcp-servers/**/node_modules/
+# Archived brain-consolidation tarballs (personal knowledge snapshots).
+_archived/
+# Plugin runtime state — machine-specific paths and install counts.
+plugins/.install-manifests
+plugins/.last_inuse_sweep
+plugins/data/
+# Personal-identity skills: real name, school, course codes, personal voice.
+skills/*-style/
+skills/*-style-*/
+# Hook written for a personal project.
+hooks/_archived/*-ship-guard.js
+# Third-party ecosystem skills symlinked from ~/.agents/skills/.
+# Documented in skills/SYMLINKS.md; never vendored (a cp -r would deref them).
+skills/android-development/
+skills/building-native-ui/
+skills/data-fetching/
+skills/deploy-to-vercel/
+skills/expo-api-routes/
+skills/expo-cicd-workflows/
+skills/expo-deployment/
+skills/expo-dev-client/
+skills/expo-module/
+skills/expo-tailwind-setup/
+skills/expo-ui-jetpack-compose/
+skills/expo-ui-swiftui/
+skills/frontend-design/
+skills/grill-me/
+skills/native-data-fetching/
+skills/next-best-practices/
+skills/next-cache-components/
+skills/prd-to-plan/
+skills/react-native/
+skills/skill-creator/
+skills/swift-concurrency-pro/
+skills/swift-testing-pro/
+skills/swiftui-pro/
+skills/upgrading-expo/
+skills/use-dom/
+skills/vercel-composition-patterns/
+skills/vercel-react-best-practices/
+skills/web-design-guidelines/
+skills/write-a-prd/
+# Third-party repo clone (has its own .git); not ours to redistribute.
+skills/_external/
+# Real identifiers used by scripts/sanitize-for-public.js. NEVER commit.
+scripts/sanitize-identity.json
+# Personal engineering journal: client names, private project post-mortems.
+# Adopters keep their own; examples/SYSTEM_CHANGELOG.md shows the format.
+/SYSTEM_CHANGELOG.md
+/SYSTEM_CHANGELOG-ARCHIVE.md
+# Capability system for one person's university coursework.
+systems/coursework/

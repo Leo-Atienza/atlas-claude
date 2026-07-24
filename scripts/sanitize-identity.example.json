@@ -1,0 +1,33 @@
+{
+  "_comment": "Copy to sanitize-identity.json (gitignored) and fill in your own values. Used by scripts/sanitize-for-public.js to scrub personal data before publishing the mirror.",
+
+  "_usernames": "OS username(s) that appear in absolute paths, e.g. C:/Users/<name>/",
+  "usernames": ["yourusername"],
+
+  "_names": "Real name and its parts. Matched on word boundaries; longest first.",
+  "names": ["Your Full Name", "Lastname", "Firstname"],
+
+  "_emails": "Personal email addresses.",
+  "emails": ["you@example.com"],
+
+  "_school": "School or employer names you would rather not publish.",
+  "school": ["Your College"],
+
+  "_courses": "Course codes or internal project codes tied to your identity.",
+  "courses": ["ABC123"],
+
+  "_projects": "Private or client project directory names.",
+  "projects": ["Client-Project", "private-repo-name"],
+
+  "_protected": "Strings that must SURVIVE scrubbing even though they contain a name above — typically this repo's own public URL.",
+  "protected": [
+    "github.com/Leo-Atienza/atlas-claude",
+    "Leo-Atienza/atlas-claude"
+  ],
+
+  "_allowExamples": "Repo-relative paths to docs whose credential-SHAPED strings are teaching examples (secret-pattern tables, truncated PEM stubs). Suppresses secret:* findings for those files ONLY; identity findings still fail the check.",
+  "allowExamples": [
+    "skills/fullstack-dev/kubernetes-specialist/references/configuration.md",
+    "skills/fullstack-dev/security-reviewer/references/secret-scanning.md"
+  ]
+}

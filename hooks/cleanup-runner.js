@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+require('./lib'); // F5: auto-instrument per-hook health on exit (lib.js IIFE)
 /**
  * ATLAS v7.0 — Unified cleanup engine.
  *
@@ -26,6 +27,7 @@ const { spawnSync } = require('child_process');
 const CLAUDE_DIR = path.resolve(__dirname, '..');
 const CONFIG_PATH = path.join(__dirname, 'cleanup-config.json');
 const LOG_PATH = path.join(CLAUDE_DIR, 'logs', 'cleanup.jsonl');
+const STAMP_DIR = path.join(CLAUDE_DIR, 'cache', 'cleanup-stamps');
 
 const argv = process.argv.slice(2);
 const DRY_RUN = argv.includes('--dry-run');
@@ -90,9 +92,19 @@ function handleAgePrune(rule) {
   const dir = resolvePath(rule.path);
   if (!safeStat(dir)) return { deleted: [], skipped: ['no-dir'] };
   const files = listEntries(dir, { glob: rule.glob, maxDepth: rule.max_depth || 1, type: 'f' });
-  const victims = files.filter(f => olderThan(f, rule.age_days));
-  if (DRY_RUN) return { would_delete: victims.slice(0, 50), total: victims.length };
-  const deleted = []; for (const v of victims) if (safeUnlink(v)) deleted.push(v);
+  // `match_all` also expires directory-shaped entries at the top level (e.g. a
+  // dated TRASH/<folder>/), which the files-only pass would otherwise leave stuck
+  // forever. Opt-in per rule; only TRASH sets it, and it removes via safeRmrf
+  // (the path is already an expiry/trash target).
+  const dirs = rule.match_all
+    ? listEntries(dir, { glob: rule.glob, maxDepth: 1, type: 'd' })
+    : [];
+  const fileVictims = files.filter(f => olderThan(f, rule.age_days));
+  const dirVictims = dirs.filter(d => olderThan(d, rule.age_days));
+  if (DRY_RUN) return { would_delete: [...fileVictims, ...dirVictims].slice(0, 50), total: fileVictims.length + dirVictims.length };
+  const deleted = [];
+  for (const v of fileVictims) if (safeUnlink(v)) deleted.push(v);
+  for (const v of dirVictims) if (safeRmrf(v)) deleted.push(v);
   return { deleted_count: deleted.length };
 }
 
@@ -257,11 +269,29 @@ function main() {
   const rules = (config.rules || []).filter(r => !ONLY || r.name === ONLY);
   const sessionId = process.env.CLAUDE_SESSION_ID || `local-${Date.now()}`;
   for (const rule of rules) {
+    // Per-rule interval throttle (added 2026-06-20): a rule with interval_hours
+    // runs at most once per that window, tracked by a stamp file — this lets the
+    // two subprocess-spawning `custom` rules skip most SessionStarts (their node
+    // startup was ~40% of cleanup time). Bypassed by --dry-run (full plan) and
+    // --only=<name> (forced run). Rules without interval_hours run every session,
+    // unchanged. Safe: the chatty logs these throttle are still capped to 500
+    // lines every session by session-start.sh §3, so nothing grows unbounded.
+    if (rule.interval_hours && !DRY_RUN && !ONLY) {
+      const stamp = path.join(STAMP_DIR, `${rule.name}.stamp`);
+      const st = safeStat(stamp);
+      if (st && (NOW - st.mtimeMs) < rule.interval_hours * 3600_000) {
+        appendJsonl({ ts: new Date().toISOString(), session_id: sessionId, rule: rule.name, mode: rule.mode, duration_ms: 0, skipped: 'interval-not-due' });
+        continue;
+      }
+    }
     const handler = HANDLERS[rule.mode];
     const start = Date.now();
     let result;
     if (!handler) { result = { error: `unknown mode: ${rule.mode}` }; }
     else { try { result = handler(rule); } catch (e) { result = { error: e.message }; } }
+    if (rule.interval_hours && !DRY_RUN && !ONLY && !(result && result.error)) {
+      try { fs.mkdirSync(STAMP_DIR, { recursive: true }); fs.writeFileSync(path.join(STAMP_DIR, `${rule.name}.stamp`), String(NOW)); } catch {}
+    }
     const record = { ts: new Date().toISOString(), session_id: sessionId, rule: rule.name, mode: rule.mode, duration_ms: Date.now() - start, dry_run: DRY_RUN, ...result };
     if (JSON_MODE || DRY_RUN) process.stdout.write(JSON.stringify(record) + '\n');
     else appendJsonl(record);

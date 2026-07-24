@@ -80,7 +80,7 @@ fi
 # Reflection prompt
 REFLECT_MSG="Context compaction approaching. Before compacting: (1) If this session produced novel patterns, solutions, or mistakes, run /reflect or save to Knowledge Store. (2) If you learned new facts about entities/projects, save to atlas-kg via: node ~/.claude/hooks/atlas-kg.js add <subject> <predicate> <object>"
 
-# Order: digest first (most session-specific) → KG summary → reflection prompt
+# Order: digest first → KG summary → reflection prompt
 FULL_MSG="${ACTION_GRAPH_DIGEST}${EXTRA}${REFLECT_MSG}"
 # Output as properly escaped JSON via node
 node -e "process.stdout.write(JSON.stringify({additionalContext: process.argv[1]}))" "$FULL_MSG"

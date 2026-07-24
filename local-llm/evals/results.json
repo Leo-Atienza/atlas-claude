@@ -1,0 +1,22 @@
+{
+  "date": "2026-07-12",
+  "note": "v9 Wave 1 B4 eval. Phase A completed; Phase B (no-template baseline) was cut short by an unbounded-generation hang, since fixed with num_predict:400 in run-evals.mjs. Re-run for a full Phase B.",
+  "golden_cases": 20,
+  "phase_a_with_template": {
+    "qwen2.5:7b": { "score": "18/20", "rate": 0.90, "seconds": 75, "per_task": { "answer-doc": "4/4", "classify": "6/6", "describe-snippet": "3/3", "extract-fields": "2/4", "summarize-file": "3/3" } },
+    "qwen3.5:4b": { "score": "19/20", "rate": 0.95, "seconds": 135, "per_task": { "answer-doc": "4/4", "classify": "6/6", "describe-snippet": "3/3", "extract-fields": "3/4", "summarize-file": "3/3" } }
+  },
+  "warm_speed_ms_avg": { "qwen2.5:7b": 2230, "qwen3.5:4b": 3957, "note": "3 warm runs each, num_predict:60" },
+  "decision": {
+    "default_worker": "qwen2.5:7b",
+    "rationale": "The 19/20 vs 18/20 gap is a single case (noise on 20 cases), and qwen3.5:4b is ~1.8x slower warm — no clear win, so the proven default is kept (eval-gated, not vibes-gated). The plan's 'GPU-resident => faster' premise for qwen3.5:4b was falsified by measurement.",
+    "roles": {
+      "qwen3.5:4b": "GPU-resident / 256K-ctx option; revisit as default with a larger golden set",
+      "qwen3.5:2b": "fast high-volume classifier (A1 mining)",
+      "qwen2.5-coder:7b": "code tasks",
+      "gemma4 / gemma4:12b-it-qat": "long docs / highest quality",
+      "qwen3-vl:4b": "vision (images param, B6)",
+      "qwen3-embedding:0.6b": "recall embedder candidate (E1)"
+    }
+  }
+}

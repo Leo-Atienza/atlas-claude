@@ -1,0 +1,280 @@
+#!/usr/bin/env bash
+#
+# say - Text-to-speech using pocket-tts
+#
+# Usage: say [--voice <voice>] <text>
+# Example: say hello world
+# Example: say --voice azure "Hello, how are you?"
+#
+
+set -e
+
+VOICE=""
+TEXT=""
+SESSION_ID=""
+TTS_HOST="${TTS_HOST:-localhost}"
+TTS_PORT="${TTS_PORT:-8000}"
+TTS_URL="http://${TTS_HOST}:${TTS_PORT}"
+
+# Parse arguments
+while [[ $# -gt 0 ]]; do
+    case $1 in
+        --voice)
+            VOICE="$2"
+            shift 2
+            ;;
+        --session)
+            SESSION_ID="$2"
+            shift 2
+            ;;
+        --help|-h)
+            echo "Usage: say [--voice <voice>] [--session <id>] <text>"
+            echo ""
+            echo "Options:"
+            echo "  --voice <voice>    Voice to use (e.g., alba, azure)"
+            echo "  --session <id>     Session ID for stop hook integration"
+            echo "  --help, -h         Show this help message"
+            echo ""
+            echo "Environment variables:"
+            echo "  CC_VOICE           Voice to use (overrides config file; --voice still wins)"
+            echo "  TTS_HOST           TTS server host (default: localhost)"
+            echo "  TTS_PORT           TTS server port (default: 8000)"
+            exit 0
+            ;;
+        *)
+            TEXT="$TEXT $1"
+            shift
+            ;;
+    esac
+done
+
+# Trim leading space from text
+TEXT="${TEXT## }"
+
+if [[ -z "$TEXT" ]]; then
+    echo "Error: No text provided" >&2
+    exit 1
+fi
+
+# Apply CC_VOICE env var if --voice was not specified
+if [[ -z "$VOICE" && -n "$CC_VOICE" ]]; then
+    VOICE="$CC_VOICE"
+fi
+
+# Check config file for voice and enabled status
+CONFIG_FILE="$HOME/.claude/voice.local.md"
+if [[ -f "$CONFIG_FILE" ]]; then
+    # Extract enabled status from YAML frontmatter
+    ENABLED=$(sed -n '/^---$/,/^---$/p' "$CONFIG_FILE" | grep "^enabled:" | sed 's/enabled:[[:space:]]*//')
+    # If explicitly disabled, exit silently
+    if [[ "$ENABLED" == "false" ]]; then
+        exit 0
+    fi
+    # Extract voice if not specified via --voice or CC_VOICE
+    if [[ -z "$VOICE" ]]; then
+        VOICE=$(sed -n '/^---$/,/^---$/p' "$CONFIG_FILE" | grep "^voice:" | sed 's/voice:[[:space:]]*//')
+    fi
+fi
+
+# Function to check if server is running
+check_server() {
+    curl -s -f "${TTS_URL}/health" > /dev/null 2>&1
+}
+
+# Function to start server
+start_server() {
+    echo "Starting pocket-tts server..." >&2
+    # Start server in background, redirect output to avoid cluttering terminal
+    nohup uvx pocket-tts serve --host "$TTS_HOST" --port "$TTS_PORT" \
+        > /tmp/pocket-tts-server.log 2>&1 &
+
+    # Wait for server to be ready (max 60 seconds)
+    local max_wait=60
+    local waited=0
+    while ! check_server; do
+        if [[ $waited -ge $max_wait ]]; then
+            echo "Error: Server failed to start within ${max_wait} seconds" >&2
+            echo "Check /tmp/pocket-tts-server.log for details" >&2
+            exit 1
+        fi
+        sleep 1
+        waited=$((waited + 1))
+        if [[ $((waited % 5)) -eq 0 ]]; then
+            echo "Waiting for server to start... (${waited}s)" >&2
+        fi
+    done
+    echo "Server started!" >&2
+}
+
+# Check if ffplay is available for streaming mode
+HAS_FFPLAY=false
+if command -v ffplay > /dev/null 2>&1; then
+    HAS_FFPLAY=true
+fi
+
+# Function to play audio from file (cross-platform fallback)
+play_audio_file() {
+    local file="$1"
+    if [[ "$(uname)" == "Darwin" ]]; then
+        afplay "$file"
+    elif [[ "$(uname -o 2>/dev/null)" == "Msys" ]] || [[ -n "$MSYSTEM" ]]; then
+        # Windows (Git Bash / MSYS2) - use WPF MediaPlayer with dynamic duration detection
+        # SoundPlayer often routes audio to the wrong device on multi-output Windows systems
+        # Calculate duration from file size (WAV headers from pocket-tts can be malformed)
+        # WAV format: (filesize - 44 header) / (sample_rate * bytes_per_sample * channels)
+        # pocket-tts outputs 24kHz, 16-bit, mono
+        local winpath filesize duration_ms
+        winpath=$(cygpath -w "$file")
+        filesize=$(stat -c%s "$file" 2>/dev/null || wc -c < "$file")
+        duration_ms=$(( (filesize - 44) * 1000 / (24000 * 2 * 1) + 1000 ))
+        powershell.exe -NoProfile -Command "Add-Type -AssemblyName PresentationCore; \$mp = New-Object System.Windows.Media.MediaPlayer; \$mp.Open([uri]::new('file:///$winpath')); Start-Sleep -Milliseconds 500; \$mp.Play(); Start-Sleep -Milliseconds $duration_ms; \$mp.Close()"
+    elif command -v aplay > /dev/null 2>&1; then
+        aplay -q "$file"
+    elif command -v paplay > /dev/null 2>&1; then
+        paplay "$file"
+    else
+        echo "Error: No audio player found (tried afplay, powershell, aplay, paplay)" >&2
+        exit 1
+    fi
+}
+
+# Function to play audio via streaming (lower latency)
+play_audio_stream() {
+    ffplay -nodisp -autoexit -loglevel quiet \
+        -probesize 32 -analyzeduration 0 -i pipe:0
+}
+
+# Session state files (for stop hook integration)
+if [[ -n "$SESSION_ID" ]]; then
+    SESSION_RUNNING="/tmp/voice-${SESSION_ID}-running"
+    SESSION_DONE="/tmp/voice-${SESSION_ID}-done"
+    SESSION_FAILED="/tmp/voice-${SESSION_ID}-failed"
+    # Mark as running (with PID for stale detection)
+    echo $$ > "$SESSION_RUNNING"
+fi
+
+# Ensure server is running
+if ! check_server; then
+    start_server
+fi
+
+# Build base curl args
+CURL_ARGS=(-s -X POST "${TTS_URL}/tts" -F "text=${TEXT}")
+if [[ -n "$VOICE" ]]; then
+    CURL_ARGS+=(-F "voice_url=${VOICE}")
+fi
+
+# Queue audio playback using mkdir lock (prevents overlapping voices from multiple sessions)
+LOCK_DIR="/tmp/voice-playback.lockdir"
+LOCK_PID_FILE="$LOCK_DIR/pid"
+
+# Function to check if lock is stale (owner process is dead)
+is_lock_stale() {
+    if [[ ! -d "$LOCK_DIR" ]]; then
+        return 1  # No lock exists
+    fi
+    if [[ ! -f "$LOCK_PID_FILE" ]]; then
+        return 0  # Lock exists but no PID file = stale
+    fi
+    local lock_pid
+    lock_pid=$(cat "$LOCK_PID_FILE" 2>/dev/null)
+    if [[ -z "$lock_pid" ]]; then
+        return 0  # Empty PID file = stale
+    fi
+    # Check if process is still running
+    if ! kill -0 "$lock_pid" 2>/dev/null; then
+        return 0  # Process is dead = stale
+    fi
+    return 1  # Process is alive = not stale
+}
+
+# Function to clean up stale lock
+cleanup_stale_lock() {
+    rm -f "$LOCK_PID_FILE" 2>/dev/null
+    rmdir "$LOCK_DIR" 2>/dev/null
+}
+
+# Function to release our lock
+release_lock() {
+    rm -f "$LOCK_PID_FILE" 2>/dev/null
+    rmdir "$LOCK_DIR" 2>/dev/null
+}
+
+# Function to clean up session state on interrupt (not success, not failure)
+cleanup_on_interrupt() {
+    release_lock
+    # Remove running flag but don't create done/failed (indicates interrupt)
+    [[ -n "$SESSION_RUNNING" ]] && rm -f "$SESSION_RUNNING"
+}
+
+# Function to mark session as failed
+mark_failed() {
+    if [[ -n "$SESSION_ID" ]]; then
+        touch "$SESSION_FAILED"
+        rm -f "$SESSION_RUNNING"
+    fi
+}
+
+# Acquire lock with stale detection
+MAX_WAIT=30
+WAITED=0
+while ! mkdir "$LOCK_DIR" 2>/dev/null; do
+    if is_lock_stale; then
+        echo "Removing stale lock (owner process dead)" >&2
+        cleanup_stale_lock
+        continue
+    fi
+    sleep 0.2
+    WAITED=$((WAITED + 1))
+    if [[ $WAITED -ge $((MAX_WAIT * 5)) ]]; then  # 5 iterations per second
+        echo "Error: Timeout waiting for audio lock after ${MAX_WAIT}s" >&2
+        exit 1
+    fi
+done
+
+# Write our PID to the lock
+echo $$ > "$LOCK_PID_FILE"
+
+# Set trap to clean up on interrupt (INT/TERM signals)
+# Note: EXIT trap is set separately after successful completion
+trap cleanup_on_interrupt INT TERM
+
+if [[ "$HAS_FFPLAY" == "true" ]]; then
+    # Streaming mode: pipe directly to ffplay (lower latency)
+    if ! curl "${CURL_ARGS[@]}" | play_audio_stream; then
+        echo "Error: Failed to generate or play audio" >&2
+        mark_failed
+        release_lock
+        exit 1
+    fi
+else
+    # Fallback mode: write to temp file then play
+    OUTPUT_FILE="/tmp/tts_output_$$.wav"
+    CURL_ARGS+=(-o "$OUTPUT_FILE")
+
+    if ! curl "${CURL_ARGS[@]}"; then
+        echo "Error: Failed to generate audio" >&2
+        mark_failed
+        release_lock
+        exit 1
+    fi
+
+    if [[ ! -s "$OUTPUT_FILE" ]]; then
+        echo "Error: Generated audio file is empty" >&2
+        mark_failed
+        release_lock
+        exit 1
+    fi
+
+    play_audio_file "$OUTPUT_FILE"
+    rm -f "$OUTPUT_FILE"
+fi
+
+# Release lock after successful playback
+release_lock
+
+# Mark session as done (for stop hook integration)
+if [[ -n "$SESSION_ID" ]]; then
+    touch "$SESSION_DONE"
+    rm -f "$SESSION_RUNNING"
+fi

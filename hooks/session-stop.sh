@@ -6,6 +6,9 @@
 # Slug: replace /, \, : with _; collapse repeats; strip leading/trailing _.
 #   /c/Users/<user>/.claude            -> c_Users_<user>_.claude
 #   /c/Users/<user>/Documents/Foo      -> c_Users_<user>_Documents_Foo
+# Canonical JS implementation: hooks/lib/slug.js cwdSlug() — this bash copy is
+# DELIBERATE (no node spawn on the hot Stop path). scripts/smoke-test.sh
+# asserts bash/JS parity; change BOTH or the smoke test fails.
 cwd_slug() {
   printf '%s' "$1" | sed -e 's|[/\\:]|_|g' -e 's|__*|_|g' -e 's|^_||' -e 's|_$||'
 }
@@ -45,6 +48,31 @@ fi
 # Appends one line to logs/action-graph-stats.jsonl per session. Fail-open.
 if [ -n "$SESSION_ID" ]; then
   node "$HOME/.claude/hooks/atlas-action-graph.js" rollup "$SESSION_ID" >/dev/null 2>&1 || true
+
+  # ── 0b. Land top working files in the KG (v8.5: retrieved_in) ──────
+  # Top-3 read-targets from this session's hot set become deduped
+  # `<file> retrieved_in <project>` triples (atlas-kg add-unique semantics),
+  # so /recall and `atlas-kg query` answer "what files does project X live in".
+  # One node spawn, both modules in-process. Fail-open.
+  node -e '
+    try {
+      const os = require("os"), path = require("path");
+      const ag = require(path.join(os.homedir(), ".claude", "hooks", "atlas-action-graph.js"));
+      const kg = require(path.join(os.homedir(), ".claude", "hooks", "atlas-kg.js"));
+      const sid = process.argv[1];
+      if (!sid) process.exit(0);
+      const hot = ag.hotSet(sid, 2000);
+      const files = ((hot && hot.items) || [])
+        .filter((i) => String(i.key || "").startsWith("read:"))
+        .slice(0, 3);
+      const proj = path.basename(process.cwd());
+      const today = new Date().toISOString().slice(0, 10);
+      for (const it of files) {
+        const base = path.basename(String(it.target || it.key).replace(/^read:/, ""));
+        if (base) kg.addTripleUnique(base, "retrieved_in", proj, { valid_from: today, source: "action-graph hot set" });
+      }
+    } catch (_) { /* fail-open */ }
+  ' "$SESSION_ID" >/dev/null 2>&1 || true
 fi
 
 # ─── 1. Session handoff (write file + echo to terminal) ─────────────
@@ -199,6 +227,10 @@ if [ -f "$SESSION_HOT_FILE" ]; then
   fi
 fi
 
+# ─── 1d. Living Memory MEMORY.md regen — REMOVED v8.0.0 ─────────────
+# Living Memory was decommissioned; the vault (<your-vault-path>/wiki/personal/)
+# is the source of truth, with _index.md auto-generated per folder. No regen needed.
+
 # Echo handoff to terminal so user sees it
 echo ""
 echo "── SESSION HANDOFF ──────────────────────────────"
@@ -210,7 +242,7 @@ echo "────────────────────────�
 GRAPH_FILE="$(pwd)/graphify-out/graph.json"
 if [ -f "$GRAPH_FILE" ]; then
   PYTHONUTF8=1 timeout 10 python3 -c "
-import sys
+import os, sys
 from pathlib import Path
 
 try:
@@ -221,13 +253,24 @@ try:
         '.py','.ts','.js','.tsx','.jsx','.go','.rs','.java','.cpp','.c',
         '.rb','.swift','.kt','.cs','.scala','.php','.h','.hpp','.cc','.cxx',
     }
+    # os.walk with in-place dir pruning — the old rglob('*') still DESCENDED
+    # into node_modules/.git and stat'ed every file before the filter ran,
+    # so worst case (fresh graph) paid a full-tree walk at every session stop.
+    SKIP = {'node_modules', '.venv', 'venv', '__pycache__', 'dist', 'build', '.next', 'target', 'TRASH', 'graphify-out'}
 
     stale = False
-    for f in Path('.').rglob('*'):
-        if f.suffix.lower() in CODE_EXTS and 'node_modules' not in f.parts and '.git' not in f.parts:
-            if f.stat().st_mtime > graph_mtime:
-                stale = True
-                break
+    for root, dirs, files in os.walk('.'):
+        dirs[:] = [d for d in dirs if d not in SKIP and not d.startswith('.')]
+        for name in files:
+            if os.path.splitext(name)[1].lower() in CODE_EXTS:
+                try:
+                    if os.path.getmtime(os.path.join(root, name)) > graph_mtime:
+                        stale = True
+                        break
+                except OSError:
+                    pass
+        if stale:
+            break
 
     if not stale:
         sys.exit(0)

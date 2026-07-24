@@ -1,72 +1,39 @@
 ---
 name: tailwind-setup
-description: Set up Tailwind CSS v4 in Expo with react-native-css and NativeWind v5 for universal styling
-version: 1.0.0
+description: Set up Tailwind CSS v4.3 in a Next.js 16 project (App Router) — PostCSS plugin, CSS-first @theme tokens, dark mode, plus the v4.2 webpack plugin path for non-Vite/Turbopack stacks and v4.3 utilities (scrollbars, @container-size, new palettes).
+version: 2.0.0
 license: MIT
 ---
 
-# Tailwind CSS Setup for Expo with react-native-css
+# Tailwind CSS v4.3 Setup for Next.js 16 (Web)
 
-This guide covers setting up Tailwind CSS v4 in Expo using react-native-css and NativeWind v5 for universal styling across iOS, Android, and Web.
+The default and recommended setup for the user's primary stack: **Next.js 16 App Router + Tailwind CSS v4.3**. For React Native / Expo, use the `expo-tailwind-setup` skill instead.
 
-## Overview
+## Quickest path (new project)
 
-This setup uses:
-
-- **Tailwind CSS v4** - Modern CSS-first configuration
-- **react-native-css** - CSS runtime for React Native
-- **NativeWind v5** - Metro transformer for Tailwind in React Native
-- **@tailwindcss/postcss** - PostCSS plugin for Tailwind v4
-
-## Installation
+`create-next-app` already wires Tailwind v4 with the `--tailwind` flag — accept the defaults:
 
 ```bash
-# Install dependencies
-npx expo install tailwindcss@^4 nativewind@5.0.0-preview.2 react-native-css@0.0.0-nightly.5ce6396 @tailwindcss/postcss tailwind-merge clsx
+npx create-next-app@latest my-app --typescript --tailwind --eslint --app --src-dir --import-alias "@/*"
 ```
 
-Add resolutions for lightningcss compatibility:
+That gives you `@tailwindcss/postcss`, a working `app/globals.css`, and a `postcss.config.mjs`. Skip to "Add design tokens" below.
 
-```json
-// package.json
-{
-  "resolutions": {
-    "lightningcss": "1.30.1"
-  }
-}
+---
+
+## Manual install (existing project)
+
+Use this when adding Tailwind v4 to an existing Next.js 16 codebase or migrating from v3.
+
+```bash
+npm install tailwindcss@^4.3 @tailwindcss/postcss@^4.3
+# optional companions
+npm install tailwind-merge clsx
 ```
 
-- autoprefixer is not needed in Expo because of lightningcss
-- postcss is included in expo by default
-
-## Configuration Files
-
-### Metro Config
-
-Create or update `metro.config.js`:
+### `postcss.config.mjs`
 
 ```js
-// metro.config.js
-const { getDefaultConfig } = require("expo/metro-config");
-const { withNativewind } = require("nativewind/metro");
-
-/** @type {import('expo/metro-config').MetroConfig} */
-const config = getDefaultConfig(__dirname);
-
-module.exports = withNativewind(config, {
-  // inline variables break PlatformColor in CSS variables
-  inlineVariables: false,
-  // We add className support manually
-  globalClassNamePolyfill: false,
-});
-```
-
-### PostCSS Config
-
-Create `postcss.config.mjs`:
-
-```js
-// postcss.config.mjs
 export default {
   plugins: {
     "@tailwindcss/postcss": {},
@@ -74,407 +41,176 @@ export default {
 };
 ```
 
-### Global CSS
+No `autoprefixer` line — `@tailwindcss/postcss` handles vendor prefixing internally via Lightning CSS.
 
-Create `src/global.css`:
+### `app/globals.css`
 
 ```css
-@import "tailwindcss/theme.css" layer(theme);
-@import "tailwindcss/preflight.css" layer(base);
-@import "tailwindcss/utilities.css";
+@import "tailwindcss";
 
-/* Platform-specific font families */
-@media android {
-  :root {
-    --font-mono: monospace;
-    --font-rounded: normal;
-    --font-serif: serif;
-    --font-sans: normal;
-  }
-}
+@theme {
+  --font-sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-mono: ui-monospace, "SF Mono", Menlo, monospace;
 
-@media ios {
-  :root {
-    --font-mono: ui-monospace;
-    --font-serif: ui-serif;
-    --font-sans: system-ui;
-    --font-rounded: ui-rounded;
-  }
+  /* Brand tokens — register custom utilities like text-brand, bg-brand */
+  --color-brand: oklch(0.65 0.2 250);
+  --color-brand-foreground: oklch(0.98 0 0);
+
+  /* Custom radius scale */
+  --radius-pill: 9999px;
 }
 ```
 
-## IMPORTANT: No Babel Config Needed
+### `app/layout.tsx`
 
-With Tailwind v4 and NativeWind v5, you do NOT need a babel.config.js for Tailwind. Remove any NativeWind babel presets if present:
+```tsx
+import "./globals.css";
+
+export default function RootLayout({ children }: { children: React.ReactNode }) {
+  return (
+    <html lang="en">
+      <body>{children}</body>
+    </html>
+  );
+}
+```
+
+That's it — no `tailwind.config.js`, no `@tailwind` directives. Tailwind v4 reads tokens from CSS via `@theme` and discovers utilities via the `@import "tailwindcss"` line.
+
+Token-hierarchy architecture (brand → semantic → component tiers): see `skills/impeccable/reference/color-and-contrast.md` § @theme token hierarchy.
+
+---
+
+## Dark mode (v4 idiom)
+
+Two patterns. Pick one — don't mix.
+
+### Pattern A — `prefers-color-scheme` (zero JS)
+
+```css
+@import "tailwindcss";
+
+@theme {
+  --color-bg: light-dark(white, oklch(0.18 0 0));
+  --color-fg: light-dark(oklch(0.18 0 0), white);
+}
+
+html { color-scheme: light dark; }
+```
+
+Use `bg-bg text-fg` and the system handles the toggle. No `dark:` variants needed.
+
+### Pattern B — class-based toggle (next-themes / manual)
+
+```css
+@import "tailwindcss";
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+@theme {
+  --color-bg: white;
+  --color-fg: oklch(0.18 0 0);
+}
+```
+
+Then write `bg-bg dark:bg-zinc-950 text-fg dark:text-zinc-100`. Pair with `next-themes` to drive the `.dark` class on `<html>`.
+
+---
+
+## v4.3 utilities worth knowing
+
+### Scrollbar utilities (v4.3)
+
+```html
+<div class="overflow-y-auto scrollbar-thin scrollbar-thumb-zinc-400 scrollbar-track-zinc-100 dark:scrollbar-thumb-zinc-700 dark:scrollbar-track-zinc-900">
+```
+
+Variants: `scrollbar-thin`, `scrollbar-none`, `scrollbar-thumb-*`, `scrollbar-track-*`. Replaces the `tailwind-scrollbar` plugin for most use cases.
+
+### `@container-size` (v4.3)
+
+Container queries that reference the container's own size as a token:
+
+```html
+<article class="@container">
+  <div class="@container-size:h-40 @container-size:flex"> … </div>
+</article>
+```
+
+Use this when a component should adapt to its parent's measured size, not the viewport.
+
+### New neutral palettes (v4.3)
+
+`mauve`, `olive`, `mist`, `taupe` — slightly warmer / cooler than `zinc/gray/slate/neutral/stone`. Available as `bg-mauve-50` … `bg-mauve-950`, etc. Useful when the existing five neutrals all look wrong against your brand color.
+
+### Faster builds (v4.2)
+
+v4.2 ships ~3.8× faster incremental recompilation in Next.js dev. No code change required — just run `npm install tailwindcss@^4.3` to pick up the perf delta.
+
+---
+
+## When to use the webpack plugin (v4.2+)
+
+Skip this section if you're on Turbopack (default in `create-next-app@latest`) — PostCSS works.
+
+For a custom Next.js setup that uses webpack and bypasses PostCSS:
+
+```bash
+npm install @tailwindcss/webpack@^4.3
+```
 
 ```js
-// DELETE babel.config.js if it only contains NativeWind config
-// The following is NO LONGER needed:
-// module.exports = function (api) {
-//   api.cache(true);
-//   return {
-//     presets: [
-//       ["babel-preset-expo", { jsxImportSource: "nativewind" }],
-//       "nativewind/babel",
-//     ],
-//   };
-// };
-```
-
-## CSS Component Wrappers
-
-Since react-native-css requires explicit CSS element wrapping, create reusable components:
-
-### Main Components (`src/tw/index.tsx`)
-
-```tsx
-import {
-  useCssElement,
-  useNativeVariable as useFunctionalVariable,
-} from "react-native-css";
-
-import { Link as RouterLink } from "expo-router";
-import Animated from "react-native-reanimated";
-import React from "react";
-import {
-  View as RNView,
-  Text as RNText,
-  Pressable as RNPressable,
-  ScrollView as RNScrollView,
-  TouchableHighlight as RNTouchableHighlight,
-  TextInput as RNTextInput,
-  StyleSheet,
-} from "react-native";
-
-// CSS-enabled Link
-export const Link = (
-  props: React.ComponentProps<typeof RouterLink> & { className?: string }
-) => {
-  return useCssElement(RouterLink, props, { className: "style" });
-};
-
-Link.Trigger = RouterLink.Trigger;
-Link.Menu = RouterLink.Menu;
-Link.MenuAction = RouterLink.MenuAction;
-Link.Preview = RouterLink.Preview;
-
-// CSS Variable hook
-export const useCSSVariable =
-  process.env.EXPO_OS !== "web"
-    ? useFunctionalVariable
-    : (variable: string) => `var(${variable})`;
-
-// View
-export type ViewProps = React.ComponentProps<typeof RNView> & {
-  className?: string;
-};
-
-export const View = (props: ViewProps) => {
-  return useCssElement(RNView, props, { className: "style" });
-};
-View.displayName = "CSS(View)";
-
-// Text
-export const Text = (
-  props: React.ComponentProps<typeof RNText> & { className?: string }
-) => {
-  return useCssElement(RNText, props, { className: "style" });
-};
-Text.displayName = "CSS(Text)";
-
-// ScrollView
-export const ScrollView = (
-  props: React.ComponentProps<typeof RNScrollView> & {
-    className?: string;
-    contentContainerClassName?: string;
-  }
-) => {
-  return useCssElement(RNScrollView, props, {
-    className: "style",
-    contentContainerClassName: "contentContainerStyle",
-  });
-};
-ScrollView.displayName = "CSS(ScrollView)";
-
-// Pressable
-export const Pressable = (
-  props: React.ComponentProps<typeof RNPressable> & { className?: string }
-) => {
-  return useCssElement(RNPressable, props, { className: "style" });
-};
-Pressable.displayName = "CSS(Pressable)";
-
-// TextInput
-export const TextInput = (
-  props: React.ComponentProps<typeof RNTextInput> & { className?: string }
-) => {
-  return useCssElement(RNTextInput, props, { className: "style" });
-};
-TextInput.displayName = "CSS(TextInput)";
-
-// AnimatedScrollView
-export const AnimatedScrollView = (
-  props: React.ComponentProps<typeof Animated.ScrollView> & {
-    className?: string;
-    contentClassName?: string;
-    contentContainerClassName?: string;
-  }
-) => {
-  return useCssElement(Animated.ScrollView, props, {
-    className: "style",
-    contentClassName: "contentContainerStyle",
-    contentContainerClassName: "contentContainerStyle",
-  });
-};
-
-// TouchableHighlight with underlayColor extraction
-function XXTouchableHighlight(
-  props: React.ComponentProps<typeof RNTouchableHighlight>
-) {
-  const { underlayColor, ...style } = StyleSheet.flatten(props.style) || {};
-  return (
-    <RNTouchableHighlight
-      underlayColor={underlayColor}
-      {...props}
-      style={style}
-    />
-  );
-}
-
-export const TouchableHighlight = (
-  props: React.ComponentProps<typeof RNTouchableHighlight>
-) => {
-  return useCssElement(XXTouchableHighlight, props, { className: "style" });
-};
-TouchableHighlight.displayName = "CSS(TouchableHighlight)";
-```
-
-### Image Component (`src/tw/image.tsx`)
-
-```tsx
-import { useCssElement } from "react-native-css";
-import React from "react";
-import { StyleSheet } from "react-native";
-import Animated from "react-native-reanimated";
-import { Image as RNImage } from "expo-image";
-
-const AnimatedExpoImage = Animated.createAnimatedComponent(RNImage);
-
-export type ImageProps = React.ComponentProps<typeof Image>;
-
-function CSSImage(props: React.ComponentProps<typeof AnimatedExpoImage>) {
-  // @ts-expect-error: Remap objectFit style to contentFit property
-  const { objectFit, objectPosition, ...style } =
-    StyleSheet.flatten(props.style) || {};
-
-  return (
-    <AnimatedExpoImage
-      contentFit={objectFit}
-      contentPosition={objectPosition}
-      {...props}
-      source={
-        typeof props.source === "string" ? { uri: props.source } : props.source
-      }
-      // @ts-expect-error: Style is remapped above
-      style={style}
-    />
-  );
-}
-
-export const Image = (
-  props: React.ComponentProps<typeof CSSImage> & { className?: string }
-) => {
-  return useCssElement(CSSImage, props, { className: "style" });
-};
-
-Image.displayName = "CSS(Image)";
-```
-
-### Animated Components (`src/tw/animated.tsx`)
-
-```tsx
-import * as TW from "./index";
-import RNAnimated from "react-native-reanimated";
-
-export const Animated = {
-  ...RNAnimated,
-  View: RNAnimated.createAnimatedComponent(TW.View),
+// next.config.js — only if you have a custom webpack(config) function and need direct integration
+module.exports = {
+  webpack: (config) => {
+    config.module.rules.push({
+      test: /\.css$/,
+      use: ["@tailwindcss/webpack"],
+    });
+    return config;
+  },
 };
 ```
 
-## Usage
+This is rare in Next.js (PostCSS path covers ~99% of projects). Real use case: monorepos where one app has webpack-only constraints and you can't stand up PostCSS.
 
-Import CSS-wrapped components from your tw directory:
+---
 
-```tsx
-import { View, Text, ScrollView, Image } from "@/tw";
+## Migration from v3 → v4
 
-export default function MyScreen() {
-  return (
-    <ScrollView className="flex-1 bg-white">
-      <View className="p-4 gap-4">
-        <Text className="text-xl font-bold text-gray-900">Hello Tailwind!</Text>
-        <Image
-          className="w-full h-48 rounded-lg object-cover"
-          source={{ uri: "https://example.com/image.jpg" }}
-        />
-      </View>
-    </ScrollView>
-  );
-}
+| v3 | v4 |
+|---|---|
+| `tailwind.config.js` (theme.extend.colors etc.) | `@theme { --color-*: ... }` in CSS |
+| `@tailwind base; @tailwind components; @tailwind utilities;` | `@import "tailwindcss";` |
+| `darkMode: 'class'` config | `@custom-variant dark (&:where(.dark, .dark *));` |
+| `content: [...]` glob config | Auto-detected from file imports — usually delete |
+| `plugins: [require('@tailwindcss/forms')]` | `@plugin "@tailwindcss/forms";` in CSS |
+| PostCSS `tailwindcss` plugin | PostCSS `@tailwindcss/postcss` plugin |
+| `autoprefixer` plugin | Built into Lightning CSS — remove |
+
+Migration codemod:
+
+```bash
+npx @tailwindcss/upgrade@latest
 ```
 
-## Custom Theme Variables
+Run on a clean git tree, review the diff. The codemod handles ~90% of the transform; manual fixes usually involve custom plugins or `@apply` chains in component CSS.
 
-Add custom theme variables in your global.css using `@theme`:
+---
 
-```css
-@layer theme {
-  @theme {
-    /* Custom fonts */
-    --font-rounded: "SF Pro Rounded", sans-serif;
+## Common pitfalls
 
-    /* Custom line heights */
-    --text-xs--line-height: calc(1em / 0.75);
-    --text-sm--line-height: calc(1.25em / 0.875);
-    --text-base--line-height: calc(1.5em / 1);
+- **Empty utility output**: usually a missing `@import "tailwindcss";` or the wrong PostCSS plugin name (`tailwindcss` instead of `@tailwindcss/postcss`).
+- **`@theme` tokens not generating utilities**: tokens must be inside the `@theme` block at the top level — not nested inside `@layer`.
+- **Custom colors don't work with `dark:` variant**: use `light-dark()` in the `@theme` value, or define separate `--color-foo` and `--color-foo-dark` and switch with `@custom-variant`.
+- **`@apply` in CSS Modules fails**: v4 dropped support inside scoped modules; either move utilities to global CSS or use the `tw` className directly.
+- **Stale Tailwind output after upgrade**: kill `next dev`, `mv .next /c/tmp/trash/.next-$(date +%s)`, restart. Cache between v3 and v4 is incompatible.
 
-    /* Custom leading scales */
-    --leading-tight: 1.25em;
-    --leading-snug: 1.375em;
-    --leading-normal: 1.5em;
-  }
-}
-```
+---
 
-## Platform-Specific Styles
+## Sources
 
-Use platform media queries for platform-specific styling:
-
-```css
-@media ios {
-  :root {
-    --font-sans: system-ui;
-    --font-rounded: ui-rounded;
-  }
-}
-
-@media android {
-  :root {
-    --font-sans: normal;
-    --font-rounded: normal;
-  }
-}
-```
-
-## Apple System Colors with CSS Variables
-
-Create a CSS file for Apple semantic colors:
-
-```css
-/* src/css/sf.css */
-@layer base {
-  html {
-    color-scheme: light;
-  }
-}
-
-:root {
-  /* Accent colors with light/dark mode */
-  --sf-blue: light-dark(rgb(0 122 255), rgb(10 132 255));
-  --sf-green: light-dark(rgb(52 199 89), rgb(48 209 89));
-  --sf-red: light-dark(rgb(255 59 48), rgb(255 69 58));
-
-  /* Gray scales */
-  --sf-gray: light-dark(rgb(142 142 147), rgb(142 142 147));
-  --sf-gray-2: light-dark(rgb(174 174 178), rgb(99 99 102));
-
-  /* Text colors */
-  --sf-text: light-dark(rgb(0 0 0), rgb(255 255 255));
-  --sf-text-2: light-dark(rgb(60 60 67 / 0.6), rgb(235 235 245 / 0.6));
-
-  /* Background colors */
-  --sf-bg: light-dark(rgb(255 255 255), rgb(0 0 0));
-  --sf-bg-2: light-dark(rgb(242 242 247), rgb(28 28 30));
-}
-
-/* iOS native colors via platformColor */
-@media ios {
-  :root {
-    --sf-blue: platformColor(systemBlue);
-    --sf-green: platformColor(systemGreen);
-    --sf-red: platformColor(systemRed);
-    --sf-gray: platformColor(systemGray);
-    --sf-text: platformColor(label);
-    --sf-text-2: platformColor(secondaryLabel);
-    --sf-bg: platformColor(systemBackground);
-    --sf-bg-2: platformColor(secondarySystemBackground);
-  }
-}
-
-/* Register as Tailwind theme colors */
-@layer theme {
-  @theme {
-    --color-sf-blue: var(--sf-blue);
-    --color-sf-green: var(--sf-green);
-    --color-sf-red: var(--sf-red);
-    --color-sf-gray: var(--sf-gray);
-    --color-sf-text: var(--sf-text);
-    --color-sf-text-2: var(--sf-text-2);
-    --color-sf-bg: var(--sf-bg);
-    --color-sf-bg-2: var(--sf-bg-2);
-  }
-}
-```
-
-Then use in components:
-
-```tsx
-<Text className="text-sf-text">Primary text</Text>
-<Text className="text-sf-text-2">Secondary text</Text>
-<View className="bg-sf-bg">...</View>
-```
-
-## Using CSS Variables in JavaScript
-
-Use the `useCSSVariable` hook:
-
-```tsx
-import { useCSSVariable } from "@/tw";
-
-function MyComponent() {
-  const blue = useCSSVariable("--sf-blue");
-
-  return <View style={{ borderColor: blue }} />;
-}
-```
-
-## Key Differences from NativeWind v4 / Tailwind v3
-
-1. **No babel.config.js** - Configuration is now CSS-first
-2. **PostCSS plugin** - Uses `@tailwindcss/postcss` instead of `tailwindcss`
-3. **CSS imports** - Use `@import "tailwindcss/..."` instead of `@tailwind` directives
-4. **Theme config** - Use `@theme` in CSS instead of `tailwind.config.js`
-5. **Component wrappers** - Must wrap components with `useCssElement` for className support
-6. **Metro config** - Use `withNativewind` with different options (`inlineVariables: false`)
-
-## Troubleshooting
-
-### Styles not applying
-
-1. Ensure you have the CSS file imported in your app entry
-2. Check that components are wrapped with `useCssElement`
-3. Verify Metro config has `withNativewind` applied
-
-### Platform colors not working
-
-1. Use `platformColor()` in `@media ios` blocks
-2. Fall back to `light-dark()` for web/Android
-
-### TypeScript errors
-
-Add className to component props:
-
-```tsx
-type Props = React.ComponentProps<typeof RNView> & { className?: string };
-```
+- [Tailwind v4.0 announcement](https://tailwindcss.com/blog/tailwindcss-v4)
+- [Tailwind v4.3 release (scrollbars, container-size, new palettes)](https://tailwindcss.com/blog/tailwindcss-v4-3)
+- [Next.js + Tailwind setup](https://nextjs.org/docs/app/guides/tailwind-css)
+- [Upgrade tool: @tailwindcss/upgrade](https://tailwindcss.com/docs/upgrade-guide)

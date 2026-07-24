@@ -2,6 +2,7 @@
 
 > Load these for deep security auditing, binary analysis, smart contract review, or specialized security testing.
 > Note: Basic security skills (SC-001, SC-002, SC-003) are in Active Page 1 and always available.
+> **Path note (2026-06-09):** rows pointing into `trailofbits-security/` are historical — the bundle reorganized under `trailofbits-security/plugins/<name>/skills/<name>/`. Locate current paths with `find ~/.claude/skills/trailofbits-security -name SKILL.md | grep <slug>` before loading.
 
 | ID | Name | Path | Description |
 |----|------|------|-------------|

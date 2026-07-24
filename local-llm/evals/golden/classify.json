@@ -1,0 +1,11 @@
+{
+  "task": "classify",
+  "cases": [
+    { "prompt": "Categories: [bug, feature, question]. Text: 'The app crashes every time I click login.'", "expect": { "category": "bug" } },
+    { "prompt": "Categories: [bug, feature, question]. Text: 'Could we add a dark mode toggle in settings?'", "expect": { "category": "feature" } },
+    { "prompt": "Categories: [bug, feature, question]. Text: 'How do I reset my password?'", "expect": { "category": "question" } },
+    { "prompt": "Categories: [semantic, procedural, reference]. Text: 'Step 1: run npm install. Step 2: run npm run build.'", "expect": { "category": "procedural" } },
+    { "prompt": "Categories: [positive, negative, neutral]. Text: 'This is the worst purchase I have ever made.'", "expect": { "category": "negative" } },
+    { "prompt": "Categories: [positive, negative, neutral]. Text: 'The package arrived on Tuesday.'", "expect": { "category": "neutral" } }
+  ]
+}

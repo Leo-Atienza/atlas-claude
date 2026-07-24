@@ -1,0 +1,33 @@
+{
+  "name": "compound-engineering-plugin",
+  "owner": {
+    "name": "Kieran Klaassen",
+    "url": "https://github.com/kieranklaassen"
+  },
+  "metadata": {
+    "description": "Plugin marketplace for Claude Code and Codex extensions",
+    "version": "1.0.2"
+  },
+  "plugins": [
+    {
+      "name": "compound-engineering",
+      "description": "AI-powered development tools that get smarter with every use. Make each unit of engineering work easier than the last.",
+      "author": {
+        "name": "Kieran Klaassen",
+        "url": "https://github.com/kieranklaassen",
+        "email": "kieran@every.to"
+      },
+      "homepage": "https://github.com/EveryInc/compound-engineering-plugin",
+      "tags": [
+        "ai-powered",
+        "compound-engineering",
+        "workflow-automation",
+        "code-review",
+        "quality",
+        "knowledge-management",
+        "image-generation"
+      ],
+      "source": "./plugins/compound-engineering"
+    }
+  ]
+}

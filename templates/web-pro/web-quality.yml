@@ -1,0 +1,76 @@
+# web-quality.yml — ATLAS v9 C1 (Wave 5). Drop into .github/workflows/.
+# The CI enforcement layer the web-dev craft layer lacked: lint → typecheck →
+# unit → E2E(+axe) → Lighthouse assertions → bundle budget. Every gate is the
+# CI mirror of a gate the brain already routes to (web-preflight / verify-browsers).
+#
+# FREE-TIER: GitHub Actions is unlimited on PUBLIC repos; PRIVATE repos get 2,000
+# Linux-min/mo free (macOS 10x, Windows 2x — this workflow is Linux-only, 1x).
+# Verified 2026-07-12. Pins: ESLint 10 (flat-config only), Playwright 1.61.x,
+# Vitest 4.x, @lhci/cli, size-limit. Next security floor >= 16.2.6.
+name: web-quality
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+concurrency:
+  group: web-quality-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  quality:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22, cache: npm }
+      - run: npm ci
+
+      # 1. Lint (ESLint 10 flat config — eslint.config.js, NOT .eslintrc)
+      - name: Lint
+        run: npx eslint .
+
+      # 2. Typecheck (next build no longer lints/typechecks by default)
+      - name: Typecheck
+        run: npx tsc --noEmit
+
+      # 2b. Contrast gate — every shipped ink/ground pair computed from the real
+      # tokens (both schemes), never asserted from a spec. Engine is vendored at
+      # scripts/check-contrast.mjs by /new-web; skips cleanly if a project has
+      # no token manifest. NOTE: `A && B || C` would mask a B failure — keep the if.
+      - name: Contrast gate
+        run: |
+          if [ -f contrast-pairs.json ]; then
+            node scripts/check-contrast.mjs
+          else
+            echo "no contrast-pairs.json — contrast gate skipped"
+          fi
+
+      # 3. Unit / component tests
+      - name: Unit tests
+        run: npm run test -- --run
+
+      # 4. Build (Turbopack default in Next 16)
+      - name: Build
+        run: npm run build
+
+      # 5. E2E + axe + visual regression (baselines committed from CI/Linux only)
+      - name: Install Playwright browsers
+        run: npx playwright install --with-deps chromium
+      - name: E2E + a11y + visual
+        run: npx playwright test
+
+      # 6. Bundle budget (fails if First Load JS > budget in .size-limit.json)
+      - name: Bundle budget
+        run: npx size-limit
+
+      # 7. Lighthouse assertions (perf >=0.9 mobile, others >=0.95; CWV budgets).
+      # Soft gate BY DESIGN (CI perf is noisy) but VISIBLY soft: continue-on-error
+      # shows the step red without failing the job. Never `|| echo` — that masked
+      # assertion failures entirely (the step could not go red at all).
+      - name: Lighthouse CI
+        continue-on-error: true
+        run: npx lhci autorun
+        env:
+          LHCI_GITHUB_APP_TOKEN: "${{ secrets.LHCI_GITHUB_APP_TOKEN }}"

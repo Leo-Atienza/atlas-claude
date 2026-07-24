@@ -1,0 +1,9 @@
+{
+  "task": "summarize-file",
+  "cases": [
+    { "prompt": "{ \"port\": 8080, \"retries\": 3, \"endpoints\": { \"health\": \"/healthz\" } }", "expect": { "containsAny": ["8080", "port"], "containsAny2": ["/healthz", "health"] } },
+    { "prompt": "#!/bin/bash\nfind /var/log/app -name '*.log' -mtime +7 -exec gzip {} \\;", "expect": { "containsAny": ["log", "gzip", "7 day", "compress"] } },
+    { "prompt": "export function add(a,b){return a+b}\nexport function sub(a,b){return a-b}", "expect": { "containsAny": ["add", "sub", "arithmetic", "sum"] } }
+  ],
+  "_note": "prose task; assertions are keyword must-contain (case-insensitive). A second golden file below covers describe-snippet."
+}

@@ -9,7 +9,7 @@ allowed-tools:
 ---
 
 <objective>
-Review accumulated failure data and G-ERR topics to surface patterns, recommend consolidation, and propose prevention mechanisms. Run weekly alongside /reflect.
+Review accumulated failure data and vault error entries to surface patterns, recommend consolidation, and propose prevention mechanisms. Run weekly alongside /reflect.
 </objective>
 
 <process>
@@ -18,7 +18,7 @@ Review accumulated failure data and G-ERR topics to surface patterns, recommend 
 
 ```bash
 # Recent failures (last 7 days)
-cat ~/.claude/logs/failures.jsonl 2>/dev/null | python3 -c "
+cat ~/.claude/logs/tool-failures.jsonl 2>/dev/null | python3 -c "
 import json, sys
 from datetime import datetime, timezone, timedelta
 cutoff = (datetime.now(timezone.utc) - timedelta(days=7)).isoformat()
@@ -55,25 +55,27 @@ else:
 " 2>/dev/null || echo "No error patterns file found"
 ```
 
-## Step 3: Review G-ERR Topics
+## Step 3: Review Error Entries (vault)
+
+> Id/entry conventions are defined once in `~/.claude/scripts/progressive-learning/KNOWLEDGE-WRITE.md`. This command is read-only — it audits patterns, it never allocates ids or writes entries.
 
 ```bash
-# Count and list existing error topics
-ls ~/.claude/topics/KNOWLEDGE-PAGE-3-errors.md 2>/dev/null | wc -l
+# Count and list existing KNOWLEDGE-NNN entries in the vault
+ls <your-vault-path>/wiki/engineering/errors.md 2>/dev/null | wc -l
 echo "---"
-grep "^| G-ERR" ~/.claude/topics/KNOWLEDGE-DIRECTORY.md 2>/dev/null
+grep "^## KNOWLEDGE-" <your-vault-path>/wiki/engineering/errors.md 2>/dev/null
 ```
 
-Read each G-ERR topic file. Look for:
-- **Duplicates**: Topics covering the same root cause with different symptoms
-- **Clusters**: Multiple topics sharing the same tags (indicates a systemic issue)
-- **Staleness**: Topics older than 90 days — are they still relevant?
+Read each `KNOWLEDGE-NNN` error entry in `wiki/engineering/errors.md`. Look for: (v8.14: "G-ERR topic files" were the retired pre-v8.0.0 storage)
+- **Duplicates**: Entries covering the same root cause with different symptoms
+- **Clusters**: Multiple entries sharing the same tags (indicates a systemic issue)
+- **Staleness**: Entries older than 90 days — are they still relevant?
 
 ## Step 4: Cross-Reference
 
-Check: Were any existing G-ERR rules violated this week?
-- For each G-ERR topic, check if `failures.jsonl` contains errors that match the topic's pattern
-- If a G-ERR rule exists but the same mistake keeps happening → needs mechanical enforcement (hook or rule file)
+Check: Were any existing error-entry rules violated this week?
+- For each error entry, check if `tool-failures.jsonl` contains errors that match the topic's pattern
+- If an error entry exists but the same mistake keeps happening → needs mechanical enforcement (hook or rule file)
 
 ## Step 5: Generate Report
 
@@ -83,34 +85,34 @@ Check: Were any existing G-ERR rules violated this week?
 ### Summary
 - Total failures (7d): {N}
 - Recurring patterns: {N}
-- G-ERR topics: {N}
+- Error entries: {N}
 
-### Top 3 Recurring Patterns (need G-ERR topics)
+### Top 3 Recurring Patterns (need error entries)
 1. [{count}x] {pattern} — Proposed rule: {text}
 2. ...
 
-### G-ERR Rules Being Violated (already have rules, still happening)
-- G-ERR-{NNN}: {name} — violated {N} times this week
+### Error Entries Being Violated (already have rules, still happening)
+- KNOWLEDGE-{NNN}: {name} — violated {N} times this week
   → Recommendation: Convert to hook / add to rules/ file
 
 ### Clusters (systemic issues)
-- {tag}: {N} related G-ERR topics — consider a unified prevention strategy
+- {tag}: {N} related error entries — consider a unified prevention strategy
 
 ### Duplicate Candidates
-- G-ERR-{A} and G-ERR-{B}: similar root cause — merge?
+- KNOWLEDGE-{A} and KNOWLEDGE-{B}: similar root cause — merge?
 
 ### Stale Topics (>90 days, may no longer apply)
-- G-ERR-{NNN}: {name} — last updated {date}
+- KNOWLEDGE-{NNN}: {name} — last updated {date}
 ```
 
 ## Step 6: Offer Actions
 
 After presenting the report, ask:
 
-1. "Run /learn for the top recurring pattern?"
-2. "Merge duplicate G-ERR topics?"
+1. "Run /remember for the top recurring pattern?"
+2. "Merge duplicate error entries?"
 3. "Archive stale topics?"
-4. "Create a rules/ entry for violated G-ERR rules?"
+4. "Create a RULES-*.md entry for repeatedly-violated error entries?"
 
 Execute only what the user approves.
 </process>

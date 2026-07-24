@@ -1,0 +1,91 @@
+@import "tailwindcss";
+
+/*
+ * Design system globals. CSS variables drive semantic tokens so that
+ * `[data-theme="dark"]` on the root flips the whole system without
+ * touching component markup.
+ *
+ * RGB triplets (not hex) so Tailwind's `<alpha-value>` works.
+ */
+
+:root,
+[data-theme="light"] {
+  --color-background: 251 248 243;  /* paper-50  */
+  --color-surface:    245 240 232;  /* paper-100 */
+  --color-border:     236 228 215;  /* paper-200 */
+
+  --color-ink:        26  22  18;   /* ink       */
+  --color-ink-muted:  74  65  53;   /* paper-700 */
+  --color-ink-subtle: 107 94  75;   /* paper-600 */
+
+  --color-accent:       176 125 40;  /* accent-500 */
+  --color-accent-hover: 141 99  32;  /* accent-600 */
+  --color-on-accent:    251 248 243; /* paper-50   */
+}
+
+[data-theme="dark"] {
+  --color-background: 15  13  10;   /* paper-950 */
+  --color-surface:    26  22  18;   /* paper-900 */
+  --color-border:     46  40  32;   /* paper-800 */
+
+  --color-ink:        251 248 243;  /* paper-50  */
+  --color-ink-muted:  217 205 185;  /* paper-300 */
+  --color-ink-subtle: 183 167 141;  /* paper-400 */
+
+  --color-accent:       201 152 60;  /* accent-400 — brighter in dark */
+  --color-accent-hover: 221 181 98;  /* accent-300 */
+  --color-on-accent:    15  13  10;
+}
+
+/* --------------------------------------------------------------- */
+/* Base resets + typography defaults                               */
+/* --------------------------------------------------------------- */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  font-feature-settings: "ss01", "ss02", "cv01", "cv11";
+}
+
+body {
+  margin: 0;
+  background: rgb(var(--color-background));
+  color: rgb(var(--color-ink));
+  font-family: "Geist", "Inter", -apple-system, BlinkMacSystemFont, sans-serif;
+  font-size: 1rem;
+  line-height: 1.6;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: "Fraunces", "Instrument Serif", Georgia, serif;
+  font-weight: 400;
+  letter-spacing: -0.02em;
+  color: rgb(var(--color-ink));
+}
+
+::selection {
+  background: rgb(var(--color-accent) / 0.25);
+  color: rgb(var(--color-ink));
+}
+
+/* --------------------------------------------------------------- */
+/* Motion — respect user preference                                */
+/* --------------------------------------------------------------- */
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

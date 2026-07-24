@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+require('./lib'); // F5: auto-instrument per-hook health on exit (lib.js IIFE)
 /**
  * atlas-kg.js — Temporal Knowledge Graph for ATLAS
  * =================================================
@@ -9,8 +10,11 @@
  * Answers: "What do we know about X?", "What was true in January?",
  *          "When did we decide Y?", "What changed recently?"
  *
- * Storage: ~/.claude/atlas-kg/entities.json + triples.json
+ * Storage: ~/.claude/atlas-kg/entities.json + triples.json (sole source of truth)
  * Integration: session-start (query), session-stop (capture), precompact (extract)
+ *
+ * Note: the legacy SQL mirror to memory/index.db (Living Memory) was retired in
+ * v8.0.0 and its dead code removed in v8.3.0. JSON is the only substrate.
  */
 
 const fs = require("fs");
@@ -58,15 +62,11 @@ function saveJSON(filepath, data) {
 }
 
 function entityId(name) {
-  // Hash-based ID preserves uniqueness for names like "C++", "C#", "C"
-  const normalized = name.toLowerCase().trim();
-  const slug = normalized.replace(/['\s]+/g, "_").replace(/[^a-z0-9_+#.-]/g, "");
-  // If slug would be ambiguous (too short or stripped to nothing), use hash suffix
-  if (slug.length < 2) {
-    const hash = crypto.createHash("md5").update(normalized).digest("hex").slice(0, 6);
-    return slug + "_" + hash;
-  }
-  return slug;
+  // Canonical implementation lives in lib/slug.entitySlug (2026-06-09) — a
+  // byte-identical port, regression-checked against all stored entities.
+  // FROZEN format: these slugs key entities.json. Cross-system MATCHING uses
+  // lib/slug.canonKey instead; never repurpose this for comparison logic.
+  return require("./lib/slug").entitySlug(name);
 }
 
 function tripleId(sub, pred, obj) {
@@ -90,6 +90,8 @@ const PREDICATE_TYPE_MAP = {
   integrated:  { subject: "system",    object: "component" },
   source_of:   { subject: "project",   object: "component" },
   pruned_skills_to: { subject: "system", object: "metric" },
+  retrieved_in: { subject: "file",     object: "directory" }, // v8.5: session-stop lands top working files here
+  bridges_to:   { object: "concept" },                        // v8.5: promoted atlas-kg↔graphify bridges
 };
 
 function inferType(predicate, role) {
@@ -194,7 +196,23 @@ function addTriple(subject, predicate, object, opts = {}) {
   // Save both atomically — entities first (referenced by triples), then triples
   if (entitiesChanged) saveJSON(ENTITIES_FILE, entities);
   saveJSON(TRIPLES_FILE, triples);
+
   return id;
+}
+
+// addTriple already no-ops on an identical ACTIVE triple (returns its id) —
+// this wrapper makes that outcome visible to callers/CLI so hook-driven writes
+// (session-stop retrieved_in, vault-sync bridges_to) can log added vs skipped.
+function addTripleUnique(subject, predicate, object, opts = {}) {
+  const subId = entityId(subject);
+  const objId = entityId(object);
+  const pred = predicate.toLowerCase().replace(/\s+/g, "_");
+  const triples = loadJSON(TRIPLES_FILE);
+  const existing = Object.values(triples).find(
+    (t) => t.subject === subId && t.predicate === pred && t.object === objId && !t.valid_to
+  );
+  if (existing) return { id: existing.id, existed: true };
+  return { id: addTriple(subject, predicate, object, opts), existed: false };
 }
 
 function invalidate(subject, predicate, object, ended = null) {
@@ -216,7 +234,9 @@ function invalidate(subject, predicate, object, ended = null) {
       invalidated++;
     }
   }
-  if (invalidated > 0) saveJSON(TRIPLES_FILE, triples);
+  if (invalidated > 0) {
+    saveJSON(TRIPLES_FILE, triples);
+  }
   return invalidated;
 }
 
@@ -233,7 +253,9 @@ function invalidateByPredicate(subject, predicate, ended = null) {
       invalidated++;
     }
   }
-  if (invalidated > 0) saveJSON(TRIPLES_FILE, triples);
+  if (invalidated > 0) {
+    saveJSON(TRIPLES_FILE, triples);
+  }
   return invalidated;
 }
 
@@ -484,6 +506,17 @@ function cli() {
       console.log(`Triple added: ${id}`);
       break;
     }
+    case "add-unique": {
+      const [subject, predicate, object] = positional;
+      if (!subject || !predicate || !object)
+        return console.error("Usage: atlas-kg add-unique <subject> <predicate> <object> [--from=DATE]");
+      const r = addTripleUnique(subject, predicate, object, {
+        valid_from: flags.from || new Date().toISOString().slice(0, 10),
+        source: flags.source || null,
+      });
+      console.log(r.existed ? `Triple exists, skipped: ${r.id}` : `Triple added: ${r.id}`);
+      break;
+    }
     case "invalidate": {
       const [s, p, o] = positional;
       if (!s || !p || !o)
@@ -583,6 +616,7 @@ function cli() {
 module.exports = {
   addEntity,
   addTriple,
+  addTripleUnique,
   invalidate,
   invalidateByPredicate,
   prune,

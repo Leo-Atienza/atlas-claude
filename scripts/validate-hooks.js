@@ -17,6 +17,15 @@
  *
  * lib*.js / *.test.js / *.bak files are excluded (helpers, tests, cruft).
  *
+ * Self-reference blind spot (fixed 2026-06-09): the corpus used to include
+ * every checked hook's own source, so a hook that named itself in a header
+ * comment counted as "wired" — a project-specific ship-guard hook, whose
+ * header literally said UNWIRED, passed. Checked hooks are now EXCLUDED from
+ * the shared corpus; hook→hook references (case 3) are honored by testing
+ * each hook's name against every OTHER hook's source explicitly. (That hook
+ * is deliberately NOT named in matchable form here — this file is part of
+ * the corpus, and naming it would re-wire it.)
+ *
  * Exit 0 = clean. Exit 1 = orphans found. Stdout prints JSON.
  */
 
@@ -40,26 +49,28 @@ function readIfExists(p) {
   try { return fs.readFileSync(p, 'utf8'); } catch { return ''; }
 }
 
-function gatherCorpus() {
+function gatherCorpus(excludeSet) {
   const settings = readIfExists(path.join(ROOT, 'settings.json'));
-  const sessionStart = readIfExists(path.join(HOOKS_DIR, 'session-start.sh'));
-  const sessionStop = readIfExists(path.join(HOOKS_DIR, 'session-stop.sh'));
-  const corpus = [settings, sessionStart, sessionStop];
+  const corpus = [settings];
 
-  // Walk hooks/, scripts/, commands/, scheduled-tasks/ for cross-references
+  // Walk hooks/ (minus the checked hooks themselves — see header), scripts/,
+  // commands/, scheduled-tasks/ for cross-references. session-start.sh /
+  // session-stop.sh are .sh files in hooks/, so the walk picks them up.
   const SCAN_DIRS = [HOOKS_DIR, path.join(ROOT, 'scripts'), path.join(ROOT, 'commands'), path.join(ROOT, 'scheduled-tasks')];
   for (const d of SCAN_DIRS) {
-    walkAndAppend(d, corpus);
+    walkAndAppend(d, corpus, excludeSet);
   }
   return corpus.join('\n');
 }
 
-function walkAndAppend(dir, corpus) {
+function walkAndAppend(dir, corpus, excludeSet) {
   if (!fs.existsSync(dir)) return;
   for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
+    if (entry.name.startsWith('_archived') || entry.name.startsWith('_retired')) continue; // archived content can't vouch for live hooks
     const full = path.join(dir, entry.name);
-    if (entry.isDirectory()) walkAndAppend(full, corpus);
+    if (entry.isDirectory()) walkAndAppend(full, corpus, excludeSet);
     else if (entry.isFile() && /\.(js|sh|md|json)$/.test(entry.name)) {
+      if (excludeSet && excludeSet.has(full)) continue;
       corpus.push(readIfExists(full));
     }
   }
@@ -67,12 +78,27 @@ function walkAndAppend(dir, corpus) {
 
 function main() {
   const hooks = listJsFiles(HOOKS_DIR);
-  const corpus = gatherCorpus();
+  const corpus = gatherCorpus(new Set(hooks));
+  const hookTexts = new Map(hooks.map((h) => [h, readIfExists(h)]));
   const orphans = [];
   for (const hookPath of hooks) {
     const base = path.basename(hookPath);
-    // A hook is "live" if its basename appears in any other config/script/command
-    if (!corpus.includes(base)) orphans.push(hookPath);
+    // A hook is "live" if its basename appears in any other config/script/command.
+    // Word-boundary match (not a bare substring) so a hook whose name is a
+    // SUBSTRING of another referenced name (e.g. "kg.js" inside "atlas-kg.js")
+    // is not falsely counted as wired. Mirrors the validate-references.js hardening.
+    const esc = base.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    const re = new RegExp('(?<![\\w-])' + esc + '(?![\\w])');
+    let wired = re.test(corpus);
+    if (!wired) {
+      // Case 3: another hook references this one (each hook's own source is
+      // excluded from the shared corpus, so test the others explicitly).
+      for (const [other, text] of hookTexts) {
+        if (other === hookPath) continue;
+        if (re.test(text)) { wired = true; break; }
+      }
+    }
+    if (!wired) orphans.push(hookPath);
   }
 
   const result = {

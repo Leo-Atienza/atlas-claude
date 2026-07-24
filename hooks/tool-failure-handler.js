@@ -43,11 +43,13 @@ readStdin((data) => {
 
   // ── 2. Track failure streak ─────────────────────────────────────
   const streakPath = path.join(paths.tmp, `claude-fail-streak-${sessionId}.json`);
-  const streak = readJsonSafe(streakPath, { count: 0, tools: [] });
+  const streak = readJsonSafe(streakPath, { count: 0, tools: [], perTool: {} });
+  streak.perTool = streak.perTool || {}; // guard for pre-existing files
 
   streak.count += 1;
   streak.tools.push(toolName);
   if (streak.tools.length > 10) streak.tools = streak.tools.slice(-10);
+  streak.perTool[toolName] = (streak.perTool[toolName] || 0) + 1;
   writeJsonSafe(streakPath, streak);
 
   // ── 3. Build guidance ───────────────────────────────────────────
@@ -60,17 +62,47 @@ readStdin((data) => {
       guidance;
   }
 
-  // FIX: Use top-level additionalContext (not nested under hookSpecificOutput)
+  // injectContext (lib.js) emits hookSpecificOutput.additionalContext with the
+  // event name captured from stdin — the previously-noted top-level form was
+  // an unrecognized shape the harness dropped (fixed v8.14 audit).
   injectContext(`TOOL FAILURE: ${guidance}`);
 
   // ── 4. Persistent per-tool health tracking ──────────────────────
-  updateToolHealth(toolName, streak.count);
+  // Per-tool streak, not the session-global count — the global streak powers
+  // the circuit breaker above, but writing it into tool-health cross-contaminated
+  // unrelated tools (weekly-mcp-health false positives, fixed v10).
+  updateToolHealth(toolName, streak.perTool[toolName]);
 
   rotateIfLarge(logPath);
 });
 
 function classifyFailure(toolName, errorStr) {
   const isMcp = /^mcp__/.test(toolName);
+  const lower = String(errorStr || '').toLowerCase();
+
+  // High-frequency shell reliability failures
+  if (toolName === 'Bash' && /unexpected eof while looking for matching [`'"]|unterminated quoted string/i.test(errorStr)) {
+    return `BASH QUOTE MISMATCH: The shell command has unbalanced quotes. Rebuild the command as a single line, balance quotes, and quote any path with spaces.`;
+  }
+  if (toolName === 'Bash' && /cd: .*No such file or directory|cannot access .*No such file or directory|enoent/i.test(errorStr)) {
+    return `BASH PATH FAILURE: Target path/file does not exist from current cwd. Run a directory preflight (ls) first, then use the verified absolute/quoted path.`;
+  }
+
+  // Read tool reliability failures
+  if (toolName === 'Read' && /File does not exist/i.test(errorStr)) {
+    return `READ PATH FAILURE: File not found from current working directory. Verify cwd context and use absolute paths for cross-project files.`;
+  }
+  if (toolName === 'Read' && /exceeds maximum allowed|exceeds maximum allowed tokens/i.test(errorStr)) {
+    return `READ SIZE LIMIT: File is too large for full read. Retry with bounded reads using offset/limit chunks, then summarize incrementally.`;
+  }
+
+  // Preview resilience failures
+  if (/^mcp__Claude_(Browser|Preview)__/.test(toolName) && /timed out|stuck|hang|unresponsive renderer/i.test(lower)) {
+    return `PREVIEW HANG: Run one recovery cycle only (check preview logs/state, refresh or restart preview), then report blocker with evidence instead of repeated retries.`;
+  }
+  if (/^mcp__Claude_(Browser|Preview)__/.test(toolName) && /inspected target navigated or closed/i.test(lower)) {
+    return `PREVIEW TARGET RESET: The page navigated/closed during eval. Reacquire fresh page state (snapshot/screenshot) before the next interaction.`;
+  }
 
   if (isMcp && /ECONNREFUSED|ECONNRESET|EPIPE|connection refused|server disconnected|transport closed|spawn.*ENOENT/i.test(errorStr)) {
     const serverName = toolName.split('__')[1] || 'unknown';

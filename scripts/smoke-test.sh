@@ -47,12 +47,13 @@ for i in 1 2 3 4 5 6 7; do
   ls "$CLAUDE_DIR/skills/ARCHIVE-PAGE-$i"-*.md >/dev/null 2>&1 && pass "ARCHIVE-PAGE-$i" || fail "ARCHIVE-PAGE-$i MISSING"
 done
 
-# ─── 3. Knowledge Store ─────────────────────────────────────────────
-echo "[3] Knowledge Store"
-[ -f "$CLAUDE_DIR/topics/KNOWLEDGE-DIRECTORY.md" ]       && pass "KNOWLEDGE-DIRECTORY.md" || fail "KNOWLEDGE-DIRECTORY.md MISSING"
-[ -f "$CLAUDE_DIR/topics/KNOWLEDGE-PAGE-1-patterns.md" ] && pass "KNOWLEDGE-PAGE-1" || fail "KNOWLEDGE-PAGE-1 MISSING"
-[ -f "$CLAUDE_DIR/topics/KNOWLEDGE-PAGE-2-solutions.md" ] && pass "KNOWLEDGE-PAGE-2" || fail "KNOWLEDGE-PAGE-2 MISSING"
-[ -f "$CLAUDE_DIR/topics/KNOWLEDGE-PAGE-3-errors.md" ]   && pass "KNOWLEDGE-PAGE-3" || fail "KNOWLEDGE-PAGE-3 MISSING"
+# ─── 3. Engineering Knowledge (vault, post-consolidation 2026-05-14) ─────
+echo "[3] Engineering Knowledge"
+VAULT_ENG="$HOME/Documents/Wiki/wiki/engineering"
+[ -f "$VAULT_ENG/_index.md" ]    && pass "engineering/_index.md" || fail "engineering/_index.md MISSING"
+[ -f "$VAULT_ENG/patterns.md" ]  && pass "engineering/patterns.md" || fail "engineering/patterns.md MISSING"
+[ -f "$VAULT_ENG/solutions.md" ] && pass "engineering/solutions.md" || fail "engineering/solutions.md MISSING"
+[ -f "$VAULT_ENG/errors.md" ]    && pass "engineering/errors.md" || fail "engineering/errors.md MISSING"
 
 # ─── 4. Project Templates ───────────────────────────────────────────
 echo "[4] Templates"
@@ -86,7 +87,9 @@ echo "[6] Stale References"
 # ─── 7. Security ────────────────────────────────────────────────────
 echo "[7] Security"
 CURRENT_MODE=$(node -e "const s=JSON.parse(require('fs').readFileSync(String.raw\`$SETTINGS_WIN\`,'utf8'));console.log(s.defaultMode)" 2>/dev/null)
-[ "$CURRENT_MODE" = "allowedTools" ] && pass "defaultMode=allowedTools" || warn "defaultMode=$CURRENT_MODE"
+# v8.15 double-check: "allowedTools" was an INVALID enum fixed to "default" in v8.2.0
+# (see SYSTEM_CHANGELOG) — this check used to celebrate the bug it should prevent.
+[ "$CURRENT_MODE" = "default" ] && pass "defaultMode=default" || warn "defaultMode=$CURRENT_MODE (expected: default)"
 ! grep -q "BYPASS_SAFETY_HOOKS" "$CLAUDE_DIR/settings.json" 2>/dev/null \
   && pass "No BYPASS_SAFETY_HOOKS" || fail "BYPASS_SAFETY_HOOKS found"
 
@@ -194,6 +197,23 @@ timeout 3 node "$CLAUDE_DIR/hooks/statusline.js" >/dev/null 2>&1; EXIT=$?
 [ "$EXIT" -eq 0 ] || [ "$EXIT" -eq 143 ] \
   && pass "statusline.js runs without crash" || warn "statusline.js exit code $EXIT"
 
+# ─── 11b. Hook Emission Contracts (v8.15 — KNOWLEDGE-162 guard) ─────
+# The §11 greps above match loose words that pass on broken AND fixed shapes —
+# exactly why the pre-v8.14 silent-drop bug survived every weekly run. This
+# asserts the exact hookSpecificOutput envelopes + statically lints hooks/*.js
+# and inline settings.json commands for the dropped shapes.
+echo "[11b] Hook Emission Contracts"
+if [ -f "$CLAUDE_DIR/scripts/hook-fixtures.js" ]; then
+  FIXTURE_OUT=$(node "$CLAUDE_DIR/scripts/hook-fixtures.js" --summary 2>/dev/null)
+  if [ $? -eq 0 ]; then
+    pass "hook-fixtures: $FIXTURE_OUT"
+  else
+    fail "hook-fixtures: ${FIXTURE_OUT:-failed to run} (run: node scripts/hook-fixtures.js)"
+  fi
+else
+  fail "scripts/hook-fixtures.js MISSING"
+fi
+
 # ─── 12. Atlas KG Integrity ──────────────────────────────────────────
 echo "[12] Atlas KG Integrity"
 KG_DIR="$CLAUDE_DIR/atlas-kg"
@@ -232,24 +252,26 @@ if [ -f "$KG_DIR/entities.json" ] && [ -f "$KG_DIR/triples.json" ]; then
   " 2>/dev/null && pass "All entities have types" || warn "Unknown-type entities found"
 fi
 
-# ─── 13. Memory System ──────────────────────────────────────────────
-echo "[13] Memory System"
-CWD_SLUG=$(printf '%s' "$CLAUDE_DIR" | sed -e 's|[/\\:]|-|g' -e 's|--*|-|g' -e 's|^-||' -e 's|-$||')
-MEMORY_DIR="$CLAUDE_DIR/projects/$CWD_SLUG/memory"
-if [ -f "$MEMORY_DIR/MEMORY.md" ]; then
-  pass "MEMORY.md exists"
-  BROKEN_REFS=""
-  while IFS= read -r ref; do
-    [ -f "$MEMORY_DIR/$ref" ] || BROKEN_REFS="${BROKEN_REFS} $ref"
-  done < <(grep -oP '\[.*?\]\(\K[^)]+' "$MEMORY_DIR/MEMORY.md" 2>/dev/null || true)
-  [ -z "$BROKEN_REFS" ] && pass "All MEMORY.md refs resolve" || warn "Broken memory refs:$BROKEN_REFS"
+# ─── 13. Vault (consolidated brain, v8.0.0) ─────────────────────────
+echo "[13] Vault"
+VAULT_DIR="$HOME/Documents/Wiki/wiki"
+if [ -f "$VAULT_DIR/personal/system-overview.md" ] && [ -f "$VAULT_DIR/personal/profile.md" ]; then
+  pass "Vault anchor docs present (system-overview.md + profile.md)"
+  # Sanity: 5 engineering files exist
+  ENG_COUNT=$(ls "$VAULT_DIR/engineering/"{patterns,solutions,errors,preferences,failures}.md 2>/dev/null | wc -l)
+  [ "$ENG_COUNT" = "5" ] && pass "All 5 engineering files present" || warn "engineering/ incomplete ($ENG_COUNT/5)"
+  # Vault git must be local-only
+  if [ -d "$HOME/Documents/Wiki/.git" ]; then
+    REMOTE=$(cd "$HOME/Documents/Wiki" && git remote -v 2>/dev/null)
+    [ -z "$REMOTE" ] && pass "Vault git is local-only (no remote)" || warn "Vault has a remote — must be local-only"
+  fi
 else
-  warn "MEMORY.md not found"
+  warn "Vault anchor docs missing"
 fi
 
 # ─── 14. G-ERR-014 Regression Guard ─────────────────────────────────
 # Detects the `node -e` path-literal antipattern that causes `C:\c\Users\...`
-# ENOENT failures on Windows Git Bash. See topics/KNOWLEDGE-PAGE-3-errors.md.
+# ENOENT failures on Windows Git Bash. See wiki/engineering/errors.md.
 # Scans for same-line `node -e` + quoted `/c/` or `C:/` literal,
 # excluding known-safe idioms (cygpath, String.raw, process.argv).
 # Excludes this file itself (contains the detection regex in source).
@@ -262,7 +284,7 @@ NODE_E_BAD=$(grep -rEn --exclude="smoke-test.sh" \
 if [ -n "$NODE_E_BAD" ]; then
   fail "G-ERR-014 regression: literal /c/ or C:/ inside node -e string"
   printf '%s\n' "$NODE_E_BAD" | sed 's|^|    |'
-  echo "    Fix: argv-pass, cygpath+String.raw, or os.homedir(). See topics/KNOWLEDGE-PAGE-3-errors.md#g-err-014"
+  echo "    Fix: argv-pass, cygpath+String.raw, or os.homedir(). See wiki/engineering/errors.md#g-err-014"
 else
   pass "No G-ERR-014 bad patterns (hooks/ + scripts/)"
 fi
@@ -349,6 +371,24 @@ if [ -f "$CLAUDE_DIR/commands/apply-drift-fix.md" ]; then
   pass "/apply-drift-fix command present"
 else
   fail "/apply-drift-fix command MISSING"
+fi
+
+# ─── Shared-lib parity (v8.5) ───────────────────────────────────────
+# session-stop.sh keeps a deliberate BASH copy of cwdSlug (hot Stop path, no
+# node spawn). The JS canonical lives in hooks/lib/slug.js — assert they agree
+# on a representative path so neither drifts silently.
+if [ -f "$CLAUDE_DIR/hooks/lib/slug.js" ]; then
+  SLUG_WIN=$(cygpath -w "$CLAUDE_DIR/hooks/lib/slug.js" 2>/dev/null || echo "$CLAUDE_DIR/hooks/lib/slug.js")
+  SLUG_SAMPLE='/c/Users/test user/.claude:weird\\path'
+  BASH_SLUG=$(printf '%s' "$SLUG_SAMPLE" | sed -e 's|[/\\:]|_|g' -e 's|__*|_|g' -e 's|^_||' -e 's|_$||')
+  JS_SLUG=$(node -e "console.log(require(String.raw\`$SLUG_WIN\`).cwdSlug(process.argv[1]))" "$SLUG_SAMPLE" 2>/dev/null)
+  if [ -n "$JS_SLUG" ] && [ "$BASH_SLUG" = "$JS_SLUG" ]; then
+    pass "cwdSlug bash/JS parity ($JS_SLUG)"
+  else
+    fail "cwdSlug bash/JS MISMATCH (bash='$BASH_SLUG' js='$JS_SLUG')"
+  fi
+else
+  fail "hooks/lib/slug.js MISSING"
 fi
 
 # ─── Summary ────────────────────────────────────────────────────────

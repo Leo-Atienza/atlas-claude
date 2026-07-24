@@ -4,7 +4,7 @@
 Apps centered on camera: document scanner, inventory tracker, AR experience, photo editor with ML, receipt scanner, ID verification, quality inspection.
 
 ## Stack
-- Expo SDK 54 + Expo Router v4
+- Expo SDK 57 + Expo Router (SDK-aligned versioning, 57.x)
 - Vision Camera v5 (multi-camera, depth, frame processors)
 - MediaPipe (pose/face/object detection via frame processors)
 - expo-image (gallery, editing)
@@ -13,7 +13,7 @@ Apps centered on camera: document scanner, inventory tracker, AR experience, pho
 - Zustand v5 + MMKV
 
 ## Skills to Load
-SK-058 (Universal Conductor), SK-089 (Hardware Bridge), SK-091 (Edge Intelligence), SK-027 (E2E Testing)
+**tactile** (SK-134 — the mobile craft entry point) + SK-027 (E2E Testing). Note: SK-089 (Hardware Bridge) and SK-091 (Edge Intelligence) are archived — restore from `skills/_archived/` if this archetype needs them; SK-058 (Universal Conductor) is retired (no archive copy).
 
 ## Architecture
 ```

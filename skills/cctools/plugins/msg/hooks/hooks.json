@@ -1,0 +1,29 @@
+{
+  "description": "Hooks for msg inter-agent communication. Checks inbox on Stop and UserPromptSubmit.",
+  "hooks": {
+    "Stop": [
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "msg-hook stop",
+            "timeout": 5
+          }
+        ]
+      }
+    ],
+    "UserPromptSubmit": [
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "msg-hook prompt-submit",
+            "timeout": 5
+          }
+        ]
+      }
+    ]
+  }
+}

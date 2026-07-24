@@ -1,0 +1,49 @@
+{
+  "name": "cctools-plugins",
+  "version": "1.0.0",
+  "owner": {
+    "name": "Prasad Chalasani"
+  },
+  "plugins": [
+    {
+      "name": "safety-hooks",
+      "source": "./plugins/safety-hooks",
+      "description": "Provides safety guards to block or require confirmation for risky CLI operations (e.g., rm, destructive git actions, .env access, large file operations)"
+    },
+    {
+      "name": "aichat",
+      "source": "./plugins/aichat",
+      "description": "Adds `aichat`-related capabilities (agent support, reusable skills, hooks, and a slash command) for continuing work in CLI agent sessions without compaction, and for searching sessions"
+    },
+    {
+      "name": "tmux-cli",
+      "source": "./plugins/tmux-cli",
+      "description": "Introduces tmux-cli skill for interacting with CLI scripts and other code agents inside tmux panes using the `tmux-cli` command"
+    },
+    {
+      "name": "workflow",
+      "source": "./plugins/workflow",
+      "description": "Workflow utilities and agents including code walkthrough tools, work logging, issue specification helpers, and a UI testing agent for browser-based validation"
+    },
+    {
+      "name": "langroid",
+      "source": "./plugins/langroid",
+      "description": "Design patterns for the Langroid multi-agent LLM framework, with a skill to add new patterns as you learn them"
+    },
+    {
+      "name": "voice",
+      "source": "./plugins/voice",
+      "description": "Audio feedback when Claude Code agent completes tasks using pocket-tts"
+    },
+    {
+      "name": "msg",
+      "source": "./plugins/msg",
+      "description": "Inter-agent communication for Claude Code and Codex CLI sessions via threads and messages"
+    },
+    {
+      "name": "agent-tunnel",
+      "source": "./plugins/agent-tunnel",
+      "description": "Publish the current Claude session via >share so teammates can ask it questions through the agent-tunnel Discord bot (read-only forks)"
+    }
+  ]
+}

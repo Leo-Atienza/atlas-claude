@@ -1,5 +1,5 @@
 ---
-name: graphify-windows
+name: graphify
 description: any input (code, docs, papers, images) → knowledge graph → clustered communities → HTML + JSON + audit report
 trigger: /graphify
 ---
@@ -638,7 +638,7 @@ print(f'This run: {input_tok:,} input tokens, {output_tok:,} output tokens')
 print(f'All time: {cost[\"total_input_tokens\"]:,} input, {cost[\"total_output_tokens\"]:,} output ({len(cost[\"runs\"])} runs)')
 "
 Remove-Item -ErrorAction SilentlyContinue .graphify_detect.json, .graphify_extract.json, .graphify_ast.json, .graphify_semantic.json, .graphify_analysis.json, .graphify_labels.json
-Remove-Item -ErrorAction SilentlyContinue graphify-out/.needs_update
+Remove-Item -ErrorAction SilentlyContinue graphify-out/needs_update  # v8.14: undotted — matches what --watch actually writes (line was .needs_update, never matched)
 ```
 
 Tell the user (omit the obsidian line unless --obsidian was given):

@@ -91,6 +91,8 @@ body {
 
 Tools like [Fontaine](https://github.com/unjs/fontaine) calculate these overrides automatically.
 
+**Off the Next.js stack** (plain HTML/Vite/static — where `next/font` isn't doing this for you), the full self-host + subset + metric-matched-fallback pipeline is written up with measured numbers in `wiki/web-dev/techniques/asset-pipelines.md`, including the quantified Lighthouse cost of leaving a `fonts.googleapis.com` link in the head. Read it before hand-rolling font delivery on a non-Next build.
+
 ## Modern Web Typography
 
 ### Fluid Type

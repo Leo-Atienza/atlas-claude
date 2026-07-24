@@ -44,7 +44,10 @@ readStdin((data) => {
     if (stdout) {
       const lines = stdout.split('\n').slice(0, 20);
       process.stdout.write(JSON.stringify({
-        additionalContext: 'TSC TYPE ERRORS:\n' + lines.join('\n'),
+        hookSpecificOutput: {
+          hookEventName: 'PostToolUse',
+          additionalContext: 'TSC TYPE ERRORS:\n' + lines.join('\n'),
+        },
       }));
     }
   }

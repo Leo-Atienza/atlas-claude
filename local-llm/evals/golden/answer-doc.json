@@ -1,0 +1,9 @@
+{
+  "task": "answer-doc",
+  "cases": [
+    { "prompt": "Document: 'The build runs on Node 22. Deploys target Vercel Pro with a 300s timeout.'\nQuestion: What is the deploy timeout?", "expect": { "found": true, "answerContains": "300" } },
+    { "prompt": "Document: 'ATLAS is at version 9.0.0. It uses a local-only Obsidian vault.'\nQuestion: What version is ATLAS?", "expect": { "found": true, "answerContains": "9.0.0" } },
+    { "prompt": "Document: 'The build runs on Node 22.'\nQuestion: What database does it use?", "expect": { "found": false } },
+    { "prompt": "Document: 'Deploys target Vercel Pro.'\nQuestion: How many users are on the free tier?", "expect": { "found": false } }
+  ]
+}

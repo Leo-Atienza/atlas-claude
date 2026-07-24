@@ -11,6 +11,7 @@
     {
       "name": "tool-health-prune",
       "mode": "custom",
+      "interval_hours": 24,
       "script": "hooks/cleanup-rules/prune-tool-health.js",
       "description": "Keep last 20 failure timestamps per tool (was \u00a77a2)"
     },
@@ -45,7 +46,8 @@
       "glob": "*.txt",
       "age_days": 14,
       "max_depth": 1,
-      "description": "Debug .txt files older than 14 days (was \u00a77c)"
+      "description": "Debug .txt files older than 14 days (was \u00a77c)",
+      "_note": "Verified-dead target as of 2026-06-15 (deep audit): no native or ATLAS writer of ~/.claude/debug/ exists (project-local .flow/debug is the only debug dir created). Harmless ~0ms no-op each session; retained defensively, symmetric with other guard rules. Do NOT confuse with stale-todos \u2014 ~/.claude/todos/ IS a live lazily-created dir (native TodoWrite); that rule must stay."
     },
     {
       "name": "shell-snapshots",
@@ -69,11 +71,11 @@
     {
       "name": "plans-rotation",
       "mode": "keep-last",
-      "path": "plans",
+      "path": "plans/archive",
       "glob": "*.md",
-      "keep_last": 15,
+      "keep_last": 40,
       "max_depth": 1,
-      "description": "Keep last 15 plan files by mtime (was \u00a77f)"
+      "description": "v8.14: repointed at plans/archive/ (cap 40). Live plans/ is owned by session-stop.sh \u00a75, which ARCHIVES all but the 5 newest (+ <!-- keep --> exemptions) \u2014 the old delete-based keep-15 on plans/ was dead in practice and would have DELETED plans if the stop hook ever missed"
     },
     {
       "name": "session-env-rotation",
@@ -92,6 +94,24 @@
       "description": "Keep last 10 cache efficiency snapshots (was \u00a77h)"
     },
     {
+      "name": "session-reminders-prune",
+      "mode": "keep-last",
+      "path": "cache",
+      "glob": "session-reminders-*.json",
+      "keep_last": 10,
+      "max_depth": 1,
+      "description": "Keep last 10 per-session reminder flag files (added 2026-05-28 / jazzy-wren audit — accumulated unmanaged, one per session)"
+    },
+    {
+      "name": "context-mode-stats-prune",
+      "mode": "age-prune",
+      "path": "context-mode/sessions",
+      "glob": "stats-pid-*.json",
+      "age_days": 14,
+      "max_depth": 1,
+      "description": "Expire per-PID context-mode stats files after 14 days; content/*.db (live DB) is untouched (added 2026-06-24 / system audit — 381 files had accumulated unmanaged)"
+    },
+    {
       "name": "transcripts-rotation",
       "mode": "gzip-then-trash",
       "path": "projects",
@@ -100,7 +120,7 @@
       "gzip_age_days": 7,
       "gzip_min_size_mb": 1,
       "trash_age_days": 30,
-      "trash_dir": "/c/tmp/trash/claude-transcripts",
+      "trash_dir": "C:/tmp/claude-transcripts-trash",
       "description": "Gzip >1MB+7d transcripts; trash .gz >30d (was \u00a77j)"
     },
     {
@@ -109,6 +129,92 @@
       "state": "cache/plugin-skill-nag-last",
       "check": "hooks/cleanup-rules/check-skill-packs.js",
       "description": "Plugin skill-pack freshness weekly nag (was \u00a77k)"
+    },
+    {
+      "name": "log-rotation-chatty",
+      "mode": "custom",
+      "interval_hours": 24,
+      "script": "hooks/cleanup-rules/rotate-chatty-logs.js",
+      "description": "Rotate chatty logs at 500KB (local-llm-reads, tool-failures, action-graph-stats, hook-health) \u2014 prevent unbounded growth (added 2026-05-15 / audit)"
+    },
+    {
+      "name": "log-bak-prune",
+      "mode": "age-prune",
+      "path": "logs",
+      "glob": "*.bak",
+      "age_days": 30,
+      "max_depth": 1,
+      "description": "Expire rotated .bak log files after 30 days (added 2026-05-15 / audit)"
+    },
+    {
+      "name": "active-system-prune",
+      "mode": "age-prune",
+      "path": "cache",
+      "glob": "active-system-*",
+      "age_days": 14,
+      "max_depth": 1,
+      "description": "Capability-system activation markers + digests idle >14d (sliding TTL — session-start §7m touches them on every session in that CWD; added v8.6.0)"
+    },
+    {
+      "name": "system-detect-prune",
+      "mode": "age-prune",
+      "path": "cache",
+      "glob": "system-detect-*",
+      "age_days": 2,
+      "max_depth": 1,
+      "description": "system-detect.js per-CWD proposal throttle files >48h (added v8.6.0)"
+    },
+    {
+      "name": "knowledge-view-prune",
+      "mode": "age-prune",
+      "path": "cache",
+      "glob": "knowledge-view-*",
+      "age_days": 14,
+      "max_depth": 1,
+      "description": "Generated per-domain knowledge views (regenerated on /system activate; added v8.6.0)"
+    },
+    {
+      "name": "dated-handoffs-prune",
+      "mode": "age-prune",
+      "path": "handoffs",
+      "glob": "*.md",
+      "age_days": 30,
+      "max_depth": 2,
+      "description": "Dated per-session handoffs (handoffs/<slug>/<ts>.md, written by session-handoff.js at SessionEnd) expire after 30d — they had NO pruner and grew unbounded; depth 2 also covers the depth-1 per-CWD snapshots (harmless overlap with session-start §1's 14d prune). Added v8.14.0 audit"
+    },
+    {
+      "name": "ide-lock-prune",
+      "mode": "age-prune",
+      "path": "ide",
+      "glob": "*.lock",
+      "age_days": 14,
+      "max_depth": 1,
+      "description": "Stale IDE-bridge lock files (pid+authToken per VS Code window); live extensions rewrite their lock on reconnect, so >14d mtime = dead process (added v8.14.0 audit — 8 had accumulated since May)"
+    },
+    {
+      "name": "stale-task-lists",
+      "mode": "age-prune-dirs",
+      "path": "tasks",
+      "age_days": 30,
+      "description": "Native per-session task-list dirs (tasks/<session-uuid>/N.json); dir mtime = last task write. 30d > the 14d session rotation, so no resumable session loses its list (added v8.14.0 audit — 9 had accumulated unmanaged)"
+    },
+    {
+      "name": "global-trash-prune",
+      "mode": "age-prune",
+      "path": "C:/tmp/trash",
+      "age_days": 14,
+      "match_all": true,
+      "max_depth": 1,
+      "description": "Expire items in the global bash_hook.py trash (C:/tmp/trash/<name>-<epoch>) after 14 days — closes the 'cleanup engine clears trash on schedule' promise, which previously only covered ~/.claude/TRASH (added v8.14.0 audit). match_all expires dir-shaped items via rmRf like the TRASH rule; trashed transcripts live in the sibling C:/tmp/claude-transcripts-trash precisely so this rule cannot rmRf them early"
+    },
+    {
+      "name": "trashed-transcripts-prune",
+      "mode": "age-prune",
+      "path": "C:/tmp/claude-transcripts-trash",
+      "glob": "*.gz",
+      "age_days": 30,
+      "max_depth": 1,
+      "description": "Expire trashed session-transcript .jsonl.gz 30d after they land (they already survived 30d live + gzip stage). Added v8.14.0 audit alongside the trash_dir POSIX→Windows path fix that had been silently diverting these to C:\\c\\tmp since the v7.0 bash→Node port (107MB migrated). Sibling of C:/tmp/trash so global-trash-prune's match_all dir-expiry can't collide"
     }
   ]
 }

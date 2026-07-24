@@ -1,11 +1,13 @@
 #!/usr/bin/env node
 /**
- * Consolidated PostToolUse monitor — five responsibilities:
+ * Consolidated PostToolUse monitor — six responsibilities:
  *   1. context-monitor    → context usage warnings + auto-continuation
  *   2. mistake-capture    → failure logging + pattern detection
  *   3. hook-health-logger → hook execution time logging
  *   4. tool-efficiency    → tool call counting + efficiency warnings
  *   5. action-graph       → retrieval tracking + reference scanner for usage scoring
+ *   6. secret-exposure    → warn (once/session/class) when tool output contains
+ *                           credential-shaped values (v10.2.1, from the 07-22 leak)
  *
  * Matcher: Read|Glob|Grep|Write|Edit|MultiEdit|Bash|Agent
  *   - Action-graph logging fires for all matched tools (Read/Glob/Grep → retrievals)
@@ -47,6 +49,50 @@ const ERROR_INDICATORS = [
   'command not found', 'No such file', 'Permission denied', 'exit code',
   'ENOENT', 'EPERM', 'EACCES', 'SyntaxError', 'TypeError', 'ReferenceError',
 ];
+
+// ── Secret-exposure scan (v10.2.1) ──────────────────────────────────
+// The 2026-07-22 session printed a live OAuth token + two client secrets into
+// the transcript while inspecting .credentials.json. Transcripts are plaintext
+// logs, so credential VALUES in tool output are an exposure. Patterns are
+// written so their own source text can't match itself (an audit Reading this
+// file must not trip the scanner). Scan is bounded (first 40KB) and warns at
+// most once per session per class via the shared session-reminders state file
+// (which already has a cleanup rule).
+const SECRET_PATTERNS = [
+  ['anthropic-key', /\bsk-ant-[A-Za-z0-9_-]{16,}/],
+  ['generic-sk-key', /\bsk-[A-Za-z0-9]{32,}\b/],
+  ['github-token', /\b(?:ghp|gho|ghu|ghs|ghr)_[A-Za-z0-9]{20,}\b|\bgithub_pat_[A-Za-z0-9_]{30,}\b/],
+  ['slack-token', /\bxox[baprs]-[A-Za-z0-9-]{10,}\b/],
+  ['aws-key-id', /\bAKIA[0-9A-Z]{16}\b/],
+  ['jwt', /\beyJ[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]{5,}\b/],
+  ['private-key-block', /-----BEGIN [A-Z ]*PRIVATE KEY-----/],
+  ['secret-assignment', /(?:api[_-]?key|client[_-]?secret|access[_-]?token|refresh[_-]?token)["']?\s*[:=]\s*["'][A-Za-z0-9_./+-]{16,}["']/i],
+];
+const SECRET_SCAN_CAP = 40_000;
+
+function scanForSecrets(toolName, toolResponse, sessionId, messages) {
+  if (!sessionId) return;
+  try {
+    const raw = (typeof toolResponse === 'string' ? toolResponse : JSON.stringify(toolResponse || {}))
+      .slice(0, SECRET_SCAN_CAP);
+    if (raw.length < 20) return;
+    const hits = SECRET_PATTERNS.filter(([, re]) => re.test(raw)).map(([cls]) => cls);
+    if (!hits.length) return;
+
+    const statePath = path.join(paths.cache, `session-reminders-${sessionId}.json`);
+    const state = readJsonSafe(statePath, {});
+    const fresh = hits.filter(cls => !state[`secret-warn-${cls}`]);
+    if (!fresh.length) return;
+    for (const cls of fresh) state[`secret-warn-${cls}`] = new Date().toISOString();
+    writeJsonSafe(statePath, state);
+
+    messages.push(
+      `SECRET EXPOSURE WARNING: the last ${toolName} output contains what looks like a live credential (${fresh.join(', ')}). ` +
+      `This transcript is stored as plaintext. Do not print secret values — inspect key names/lengths only and redact when quoting. ` +
+      `If the value is real, tell the user now and recommend rotating it. (Warned once per session per credential class.)`
+    );
+  } catch (_) { /* fail-open — never block the monitor */ }
+}
 
 // ── Action-graph reference scanner helpers ──────────────────────────
 // Flatten an object/array into its string-valued leaves so the reference
@@ -124,6 +170,9 @@ readStdin((data) => {
   } else {
     trackSuccess(toolName, sessionId);
   }
+
+  // ── 2b. Secret-exposure scan ────────────────────────────────────
+  scanForSecrets(toolName, toolResponse, sessionId, messages);
 
   // ── 3. Context Monitor ──────────────────────────────────────────
   if (sessionId) {
@@ -225,7 +274,12 @@ function logFailure(sessionId, toolName, toolInput, toolResponse, messages) {
     session: sessionId.substring(0, 16),
   };
 
-  const failuresPath = path.join(paths.logs, 'failures.jsonl');
+  // Unified 2026-06-09: content-level failures (this hook, PostToolUse) and
+  // framework-level failures (tool-failure-handler.js, PostToolUseFailure)
+  // share ONE log. The old separate 'failures.jsonl' never populated — Bash
+  // exit 1/2 is filtered as benign and hard failures route to the other hook —
+  // so /health and /analyze-mistakes were always reading an empty file.
+  const failuresPath = path.join(paths.logs, 'tool-failures.jsonl');
   appendLine(failuresPath, JSON.stringify(entry));
 
   // Pattern detection
@@ -245,28 +299,73 @@ function logFailure(sessionId, toolName, toolInput, toolResponse, messages) {
   writeJsonSafe(patternsPath, patterns);
 
   if (patterns[fingerprint].count >= 3) {
+    const recoveryHint = deriveRecoveryHint(toolName, errorText);
     messages.push(
       `RECURRING FAILURE (${patterns[fingerprint].count}x): ${toolName} — ${errorText.substring(0, 80)}... ` +
-      `Consider saving this as a G-ERR entry in the Knowledge Store.`
+      `${recoveryHint ? `Recovery hint: ${recoveryHint} ` : ''}` +
+      `Consider capturing this via /remember (routes a type:error entry to wiki/engineering/errors.md).`
     );
   }
 
   rotateIfLarge(failuresPath);
 }
 
+function deriveRecoveryHint(toolName, errorText) {
+  const lower = String(errorText || '').toLowerCase();
+
+  if (toolName === 'Bash' && /unexpected eof while looking for matching [`'"]|unterminated quoted string/i.test(errorText)) {
+    return 'rebalance shell quotes and keep the command single-line.';
+  }
+  if (toolName === 'Bash' && /no such file or directory|enoent/i.test(lower)) {
+    return 'verify cwd and path existence with ls before rerunning.';
+  }
+  if (toolName === 'Read' && /file does not exist/i.test(lower)) {
+    return 'switch to an absolute path or correct the active working directory.';
+  }
+  if (toolName === 'Read' && /exceeds maximum allowed|maximum allowed tokens/i.test(lower)) {
+    return 'use bounded reads (offset/limit) and process in chunks.';
+  }
+  if (/^mcp__Claude_(Browser|Preview)__/.test(toolName) && /timed out|stuck|unresponsive/i.test(lower)) {
+    return 'perform one preview restart/log check cycle, then stop retry loops.';
+  }
+  return '';
+}
+
 // ── Success tracking ────────────────────────────────────────────────
 function trackSuccess(toolName, sessionId) {
-  // Reset failure streak on success
+  // Reset failure streak on success. The global count/tools reset is the
+  // circuit-breaker semantic (any success breaks the session streak); the
+  // per-tool counters must survive — only the succeeding tool's own streak
+  // resets, so tool A's success can't mask tool B's ongoing failures.
   if (sessionId) {
     const streakPath = path.join(paths.tmp, `claude-fail-streak-${sessionId}.json`);
     if (fs.existsSync(streakPath)) {
-      writeJsonSafe(streakPath, { count: 0, tools: [] });
+      const streak = readJsonSafe(streakPath, { count: 0, tools: [], perTool: {} });
+      streak.count = 0;
+      streak.tools = [];
+      if (streak.perTool) streak.perTool[toolName] = 0;
+      writeJsonSafe(streakPath, streak);
     }
   }
 
-  // Track cumulative tool call counts (write every call — file is small, ~1KB)
+  // A success also breaks this tool's persistent streak in tool-health.json —
+  // otherwise a tool that failed 3× long ago and recovered keeps
+  // consecutive_streak ≥ 3 forever, which weekly-mcp-health reads as
+  // "currently broken". Write only when there is a nonzero streak to clear.
+  const healthPath = path.join(paths.logs, 'tool-health.json');
+  const health = readJsonSafe(healthPath, null);
+  if (health && health.tools && health.tools[toolName] && health.tools[toolName].consecutive_streak) {
+    health.tools[toolName].consecutive_streak = 0;
+    writeJsonSafe(healthPath, health);
+  }
+
+  // Track cumulative tool call counts (write every call — file is small, ~1KB).
+  // _meta.since gives the cumulative counter a clock (v8.5) — the
+  // mcp_server_unused drift channel needs to know how old the data is before
+  // it can claim a server is unused.
   const countsPath = path.join(paths.logs, 'tool-call-counts.json');
   const counts = readJsonSafe(countsPath, {});
+  if (!counts._meta || !counts._meta.since) counts._meta = { since: new Date().toISOString() };
   counts[toolName] = (counts[toolName] || 0) + 1;
   writeJsonSafe(countsPath, counts);
 }

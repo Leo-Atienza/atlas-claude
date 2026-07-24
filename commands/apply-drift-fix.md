@@ -51,6 +51,18 @@ Ask what they want to do. Default actions per kind:
   grep -F '"<target>"' ~/.claude/logs/tool-failures.jsonl | tail -5
   ```
 
+### `kind: mcp_server_unused` (v8.5)
+- The target server logged 0 tool calls since `extra.since` (data is `_meta.since`-gated, so this is ≥30 days of real measurement, not a cold counter).
+- Confirm it isn't an interactive-auth server you use rarely-but-deliberately (claude.ai connectors don't appear in local counts).
+- Option A: disable — find the server in `~/.claude/.mcp.json` or `~/.claude.json` `mcpServers` and remove its entry (back the file up first: copy to `TRASH/` with a timestamp). If it's a plugin server, flip the plugin off in settings.json `enabledPlugins` instead (settings.json edits need explicit user authorization).
+- Option B: keep — note `extra.unused_count` for the rest of the list, resolve as "deferred".
+- Option C: silence — add `"mcp_server_unused"` to `silenced_kinds`.
+
+### `kind: permission_friction` (v8.5)
+- The target pattern (e.g. `Bash(npx:*)`) hit ≥N permission dialogs in 7d with **zero denials** — the user always says yes.
+- Option A: add the suggested rule (or a tighter variant) to `permissions.allow` in `~/.claude/settings.json` — REQUIRES explicit user authorization (settings.json is classifier-protected; present the exact diff).
+- Option B: decline — the user may want to keep approving that pattern; resolve as "deferred" and the 24h cooldown prevents re-nagging.
+
 ### `kind: skill_unused`
 - Confirm archive is desired (the skill has had 0 invocations since the hook started logging).
 - Move to archive:
@@ -58,7 +70,16 @@ Ask what they want to do. Default actions per kind:
   mkdir -p ~/.claude/skills/_archived
   mv ~/.claude/skills/<target> ~/.claude/skills/_archived/<target>
   ```
-- Remove the skill from `skills/ACTIVE-DIRECTORY.md` and update any component-count references (run `/health` afterward to re-sync).
+- **Update all six surfaces** (the validator only catches 4 of these — drift in the other 2 is silent):
+  1. `skills/ACTIVE-DIRECTORY.md` — header `Total active skills: **N**` and the matching index row for the skill
+  2. `skills/ACTIVE-PAGE-{1|2|...}-*.md` — remove the `| SK-NNN | ... |` row from whichever page contained it
+  3. `ARCHITECTURE.md` — `(N active skill entries...)` count AND the `ACTIVE-PAGE-{n}-*.md — ... (M skills)` per-page count for the affected page
+  4. `REFERENCE.md` — `Active skill index (N skills: X Core + Y Available)` row
+  5. `SYSTEM_VERSION.md` — `| Skills (in ACTIVE-DIRECTORY) | N | <date> |` row
+  6. `skills/ARCHIVE-DIRECTORY.md` — `Active (N): ...` census line at the bottom (legacy v6→v7 reduction tracker; **not** checked by the validator, drifts silently)
+- After editing: re-split `9 Core + 27 Available` style counts so they still sum to the new total. Bump the date stamps where present.
+- Run `node ~/.claude/scripts/validate-skill-counts.js` to confirm the 4 validated surfaces agree. The validator does **not** check surface 6 (ARCHIVE-DIRECTORY census) — verify it manually.
+- Note: `/health` auto-updates `last_health_check` and component-count rows, but does **not** auto-bump the `version:` field. Bump that manually when archive corresponds to a versioned release.
 
 ## 3. Mark the proposal resolved
 
@@ -71,8 +92,10 @@ node -e '
   if (j.current) {
     j.current.resolved_at = new Date().toISOString();
     j.current.outcome = process.argv[1] || "applied";
+    j.history = j.history || [];
+    j.history.push(j.current);   // v8.14 fix: actually append to history…
+    j.current = null;            // …and clear current so it is not re-presented
   }
-  j.history = j.history || [];
   fs.writeFileSync(p, JSON.stringify(j, null, 2));
 ' "<applied|deferred|silenced>"
 ```

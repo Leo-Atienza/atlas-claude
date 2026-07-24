@@ -1,0 +1,10 @@
+{
+  "task": "extract-fields",
+  "format": { "type": "object", "additionalProperties": false, "properties": { "name": { "type": ["string", "null"] }, "version": { "type": ["string", "null"] } }, "required": ["name", "version"] },
+  "cases": [
+    { "prompt": "Extract name and version. package.json: { \"name\": \"atlas\", \"version\": \"9.0.0\", \"private\": true }", "expect": { "json": { "name": "atlas", "version": "9.0.0" } } },
+    { "prompt": "Extract name and version. Text: 'Package foo-bar at v2.3.1 ships today.'", "expect": { "json": { "name": "foo-bar", "version": "2.3.1" } } },
+    { "prompt": "Extract name and version. Text: 'The library is called quux.'", "expect": { "json": { "name": "quux", "version": null } } },
+    { "prompt": "Extract name and version. Text: 'Released version 4.5.0 last night.'", "expect": { "json": { "name": null, "version": "4.5.0" } } }
+  ]
+}

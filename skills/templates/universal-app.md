@@ -5,15 +5,15 @@ Apps that run on all platforms from one codebase: productivity tools, messaging,
 
 ## Stack
 - Turborepo monorepo
-- apps/mobile: Expo SDK 54 + Expo Router v4
-- apps/desktop: Tauri 2.0 + React
+- apps/mobile: Expo SDK 57 + Expo Router (SDK-aligned, 57.x)
+- apps/desktop: Tauri 2.x + React
 - apps/web: Next.js 16 + App Router
 - packages/shared: types, utils, stores, API client, validators
 - packages/ui: platform-specific component implementations
 - Supabase (backend) + PowerSync (sync)
 
 ## Skills to Load
-SK-058 (Universal Conductor), SK-092 (Monorepo), SK-088 (Tauri), SK-090 (Local-First), SK-083 (Vanguard for web app)
+**impeccable** (SK-102) for the web app; **tactile** (SK-134) + the Expo skills for mobile. Note: SK-092 (Monorepo), SK-088 (Tauri), SK-090 (Local-First) and SK-083 (Vanguard) are archived — restore from `skills/_archived/` if building this archetype; SK-058 (Universal Conductor) is retired (no archive copy)
 
 ## Architecture
 ```
@@ -90,8 +90,8 @@ package.json
 - [ ] Turborepo workspace with `apps/` and `packages/`
 - [ ] `packages/shared` with types + utils + stores + API client + validators
 - [ ] `packages/ui` with platform-specific variants
-- [ ] `apps/mobile` Expo SDK 54 project with Metro resolving packages
-- [ ] `apps/desktop` Tauri 2.0 project with Vite resolving packages
+- [ ] `apps/mobile` Expo SDK 57 project with Metro resolving packages
+- [ ] `apps/desktop` Tauri 2.x project with Vite resolving packages
 - [ ] `apps/web` Next.js 16 project
 - [ ] Shared Zustand stores with platform-specific persisters
 - [ ] PowerSync or ElectricSQL for cross-platform sync

@@ -4,11 +4,11 @@
  *
  * Usage:
  *   node health-validator.js                        # Run all checks
- *   node health-validator.js --check registry       # Single check
+ *   node health-validator.js --check versions       # Single check
  *   node health-validator.js --skip-network          # Skip version checks (fast)
  *   node health-validator.js --check versions --skip-network  # Dry-run versions
  *
- * Checks: knowledge, versions, hooks, behavior
+ * Checks: knowledge, versions, behavior (hook-wiring integrity is owned by system-doctor.js)
  * Output: JSON to stdout. Exit code always 0 (reporter, not gate).
  */
 
@@ -19,22 +19,10 @@ const { execSync } = require('child_process');
 
 const CLAUDE_DIR = path.join(os.homedir(), '.claude');
 const SKILLS_DIR = path.join(CLAUDE_DIR, 'skills');
-// Find the project-scoped memory directory by scanning projects/*/memory/MEMORY.md
-// Claude Code encodes paths with -- separators (e.g. C--Users-<user>--claude)
-// which is hard to reverse-engineer cross-platform, so we glob for it instead.
-const MEMORY_DIR = (function() {
-  const projectsDir = path.join(CLAUDE_DIR, 'projects');
-  try {
-    for (const entry of fs.readdirSync(projectsDir)) {
-      const candidate = path.join(projectsDir, entry, 'memory');
-      if (fs.existsSync(path.join(candidate, 'MEMORY.md'))) return candidate;
-    }
-  } catch (_) {}
-  return path.join(projectsDir, 'unknown', 'memory');
-})();
 const MANIFEST_PATH = path.join(SKILLS_DIR, 'VERSION-MANIFEST.json');
-const KNOWLEDGE_DIR_PATH = path.join(CLAUDE_DIR, 'topics', 'KNOWLEDGE-DIRECTORY.md');
-const SETTINGS_PATH = path.join(CLAUDE_DIR, 'settings.json');
+// Knowledge migrated to the Obsidian vault in v8.0.0 (was topics/KNOWLEDGE-DIRECTORY.md).
+const ENGINEERING_DIR = path.join(os.homedir(), 'Documents', 'Wiki', 'wiki', 'engineering');
+const KNOWLEDGE_FILES = ['patterns', 'solutions', 'errors', 'preferences', 'failures'];
 
 // ─── Helpers ─────────────────────────────────────────────────────────
 
@@ -65,27 +53,31 @@ function daysSince(dateStr) {
 function knowledgeStaleness() {
   const result = { total: 0, stale: 0, stale_threshold_days: 90, details: [] };
 
-  const content = safeReadFile(KNOWLEDGE_DIR_PATH);
-  if (!content) {
-    result.details.push('KNOWLEDGE-DIRECTORY.md not found');
-    return result;
+  result.files_found = 0;
+  for (const name of KNOWLEDGE_FILES) {
+    const content = safeReadFile(path.join(ENGINEERING_DIR, name + '.md'));
+    if (content == null) continue;
+    result.files_found++;
+
+    // Each entry is an H2 header: "## KNOWLEDGE-NNN ...".
+    const entries = content.match(/^## KNOWLEDGE-\d+/gm);
+    result.total += entries ? entries.length : 0;
+
+    // File-level freshness from frontmatter `updated:` — per-entry dates aren't
+    // reliably present after the v8.0.0 vault migration, so file freshness is
+    // the honest staleness signal (no false positives).
+    const um = content.match(/^updated:\s*['"]?(\d{4}-\d{2}-\d{2})/m);
+    if (um) {
+      const days = daysSince(um[1]);
+      if (days > result.stale_threshold_days) {
+        result.stale++;
+        result.details.push(`${name}.md — last updated ${um[1]} (${days} days ago)`);
+      }
+    }
   }
 
-  // Match 4-column table rows: | G-PAT-001 | Name | Tags | 2026-02-27 |
-  const rowRegex = /^\|\s*(G-\w+-\d+)\s*\|\s*([^|]+)\|\s*[^|]+\|\s*(\d{4}-\d{2}-\d{2})\s*\|/gm;
-  let match;
-
-  while ((match = rowRegex.exec(content)) !== null) {
-    const id = match[1].trim();
-    const name = match[2].trim();
-    const date = match[3].trim();
-    result.total++;
-
-    const days = daysSince(date);
-    if (days > result.stale_threshold_days) {
-      result.stale++;
-      result.details.push(`${id} "${name}" — last verified ${date} (${days} days ago)`);
-    }
+  if (result.files_found === 0) {
+    result.details.push(`engineering vault not found at ${ENGINEERING_DIR}`);
   }
 
   return result;
@@ -152,7 +144,7 @@ function versionManifest(skipNetwork = false) {
     // github releases
     if (info.source && info.source.startsWith('github:')) {
       const repo = info.source.replace('github:', '');
-      const latest = safeExec(`gh api repos/${repo}/releases/latest --jq ".tag_name" 2>/dev/null`);
+      const latest = safeExec(`gh api repos/${repo}/releases/latest --jq ".tag_name"`);
       if (latest && latest !== info.installed && latest !== `v${info.installed}`) {
         result.tool_updates.push({ name, current: info.installed, latest, source: 'github-release' });
       }
@@ -195,95 +187,27 @@ function versionManifest(skipNetwork = false) {
   return result;
 }
 
-// ─── Check 4: Hook Integrity ─────────────────────────────────────────
-
-function hookIntegrity() {
-  const result = { total: 0, missing: 0, details: [] };
-
-  const content = safeReadFile(SETTINGS_PATH);
-  if (!content) {
-    result.details.push('settings.json not found');
-    return result;
-  }
-
-  let settings;
-  try {
-    settings = JSON.parse(content);
-  } catch {
-    result.details.push('settings.json parse error');
-    return result;
-  }
-
-  // settings.json structure: hooks.EventName[].hooks[].command (nested)
-  const hookEvents = settings.hooks || {};
-  for (const [event, matchers] of Object.entries(hookEvents)) {
-    if (!Array.isArray(matchers)) continue;
-    for (const matcher of matchers) {
-      const innerHooks = matcher.hooks || [];
-      if (!Array.isArray(innerHooks)) continue;
-      for (const hook of innerHooks) {
-        if (hook.type !== 'command' || !hook.command) continue;
-        result.total++;
-
-        // Extract script path from command string
-        // Patterns: "bash ~/.claude/hooks/foo.sh", "node ~/.claude/hooks/bar.js",
-        //           "~/.claude/bin/claudio || true", "C:/Users/.claude/hooks/foo.js"
-        const cmd = hook.command.replace(/\|\|.*$/, '').trim(); // strip || true fallbacks
-        const parts = cmd.split(/\s+/).filter(p =>
-          p.startsWith('~') || p.startsWith('/') || p.startsWith('$HOME') || /^[A-Z]:[/\\]/i.test(p)
-        );
-
-        for (const part of parts) {
-          const resolved = part
-            .replace(/^\$HOME/, os.homedir())
-            .replace(/^~/, os.homedir())
-            .replace(/"/g, '');
-          if (!fs.existsSync(resolved)) {
-            result.missing++;
-            result.details.push(`${event}: ${part} — not found`);
-          }
-        }
-      }
-    }
-  }
-
-  return result;
-}
-
-// ─── Check 5: Behavioral Audit ───────────────────────────────────────
+// ─── Check: Behavioral Audit ─────────────────────────────────────────
+// (Hook-wiring integrity moved to system-doctor.js `hooks` validator — /health
+//  reads that scoreboard row in §1 instead of re-checking here.)
 
 function behavioralAudit() {
   const result = {
     pending_flags: false,
     knowledge_health: { total: 0, pages_found: 0, pages_expected: 5 },
-    memory_health: { exists: false, entries: 0 },
   };
 
   // Check pending reflection flag
   const flagPath = path.join(CLAUDE_DIR, '.pending-reflection');
   result.pending_flags = fs.existsSync(flagPath);
 
-  // Check knowledge store health (all 5 pages present)
-  const knowledgeContent = safeReadFile(KNOWLEDGE_DIR_PATH);
-  if (knowledgeContent) {
-    const rowRegex = /^\|\s*G-\w+-\d+\s*\|/gm;
-    const matches = knowledgeContent.match(rowRegex);
-    result.knowledge_health.total = matches ? matches.length : 0;
-  }
-  for (let i = 1; i <= 5; i++) {
-    const pagePath = path.join(CLAUDE_DIR, 'topics', `KNOWLEDGE-PAGE-${i}-${['patterns','solutions','errors','preferences','failures'][i-1]}.md`);
-    if (fs.existsSync(pagePath)) result.knowledge_health.pages_found++;
-  }
-
-  // Check memory system health
-  const memoryIndex = path.join(MEMORY_DIR, 'MEMORY.md');
-  if (fs.existsSync(memoryIndex)) {
-    result.memory_health.exists = true;
-    const memContent = safeReadFile(memoryIndex);
-    if (memContent) {
-      const links = memContent.match(/\[.*?\]\([^)]+\)/g);
-      result.memory_health.entries = links ? links.length : 0;
-    }
+  // Check knowledge store health (all 5 engineering vault files present)
+  for (const name of KNOWLEDGE_FILES) {
+    const content = safeReadFile(path.join(ENGINEERING_DIR, name + '.md'));
+    if (content == null) continue;
+    result.knowledge_health.pages_found++;
+    const entries = content.match(/^## KNOWLEDGE-\d+/gm);
+    result.knowledge_health.total += entries ? entries.length : 0;
   }
 
   return result;
@@ -304,9 +228,6 @@ function main() {
   }
   if (!specificCheck || specificCheck === 'versions') {
     results.versions = versionManifest(skipNetwork);
-  }
-  if (!specificCheck || specificCheck === 'hooks') {
-    results.hooks = hookIntegrity();
   }
   if (!specificCheck || specificCheck === 'behavior') {
     results.behavior = behavioralAudit();

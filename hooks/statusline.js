@@ -46,6 +46,10 @@ function computeRemainingFromTranscript(transcriptPath) {
           const total = (u.input_tokens || 0)
                       + (u.cache_read_input_tokens || 0)
                       + (u.cache_creation_input_tokens || 0);
+          // ponytail: hardcoded 200k window — only a FALLBACK when the statusline
+          // payload lacks context_window (the primary, model-accurate path). On a
+          // 1M-context model this fallback over-reports usage; upgrade path: read
+          // the limit from data.model if the harness ever exposes it here.
           const CONTEXT_LIMIT = 200_000;
           const usedFrac = Math.min(1, total / CONTEXT_LIMIT);
           return Math.max(0, Math.round((1 - usedFrac) * 100));
@@ -69,13 +73,25 @@ readStdin((data) => {
   const task = findCurrentTask(session);
   const calls = getCallCount(session);
   const dirname = path.basename(dir);
+  const sys = getActiveSystem(dir);
+  const sysSeg = sys ? ` \u2502 \x1b[2m\u25c6 ${sys}\x1b[0m` : '';
 
   if (task) {
-    process.stdout.write(`\x1b[2m${model}\x1b[0m \u2502 \x1b[1m${task}\x1b[0m \u2502 \x1b[2m${dirname}\x1b[0m${ctx}${calls}`);
+    process.stdout.write(`\x1b[2m${model}\x1b[0m \u2502 \x1b[1m${task}\x1b[0m \u2502 \x1b[2m${dirname}\x1b[0m${sysSeg}${ctx}${calls}`);
   } else {
-    process.stdout.write(`\x1b[2m${model}\x1b[0m \u2502 \x1b[2m${dirname}\x1b[0m${ctx}${calls}`);
+    process.stdout.write(`\x1b[2m${model}\x1b[0m \u2502 \x1b[2m${dirname}\x1b[0m${sysSeg}${ctx}${calls}`);
   }
 });
+
+// Active Capability System for this CWD (cache/active-system-<slug>.json,
+// written by /system:activate). Persistent visual cue \u2014 fail-open.
+function getActiveSystem(dir) {
+  try {
+    const { cwdSlug } = require('./lib/slug');
+    const marker = readJsonSafe(path.join(paths.cache, `active-system-${cwdSlug(dir)}.json`), null);
+    return marker?.primary?.name || null;
+  } catch (_) { return null; }
+}
 
 function buildContextBar(remaining, session) {
   if (remaining == null) return '';

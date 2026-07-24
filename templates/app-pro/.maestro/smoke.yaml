@@ -1,0 +1,18 @@
+# .maestro/smoke.yaml — ATLAS v9 D3 (Wave 6). The repeatable regression layer that
+# complements the interactive `mobile` MCP. Maestro CLI is Apache-2.0, free,
+# UNLIMITED locally (cloud is $250/device/mo — never). Needs Java 17+.
+#
+# NATIVE WINDOWS is now first-class (verified 2026-07-12: macOS/Windows/Linux;
+# WSL discouraged) — so this runs LOCALLY against the Android emulator on the user's
+# machine, not just in CI. Install: download maestro.zip from GitHub Releases,
+# extract to C:\maestro, add bin to PATH.  Run:  maestro test .maestro/smoke.yaml
+appId: com.yourorg.yourapp
+---
+- launchApp
+- assertVisible: ".*"           # app rendered something (replace with a real anchor)
+- takeScreenshot: smoke-home
+# Extend with your critical flow, e.g.:
+# - tapOn: "Sign in"
+# - inputText: "test@example.com"
+# - tapOn: "Continue"
+# - assertVisible: "Welcome"

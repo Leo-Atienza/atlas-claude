@@ -2,7 +2,7 @@
 /**
  * validate-knowledge.js
  *
- * Verifies the topics/ knowledge store against itself.
+ * Verifies the engineering knowledge vault against itself.
  *
  * THIS VALIDATOR EXISTS BECAUSE: during the synthetic-leaf audit
  * (2026-05-02), a discovery agent claimed the topics/ pages had
@@ -13,9 +13,9 @@
  * pattern would have prevented the wrong finding from surfacing.
  *
  * Checks:
- *   1. KNOWLEDGE-DIRECTORY.md "Total entries: N" matches actual count
- *      summed across all KNOWLEDGE-PAGE-*.md files
- *   2. Per-page count matches what the directory advertises (per type)
+ *   1. _index.md "Total entries: N" (if present) matches actual count
+ *      summed across all engineering pages — inert while _index has no total
+ *   2. Per-type breakdown matches what the directory advertises (if present)
  *   3. Every KNOWLEDGE-NNN ID is unique across all pages
  *   4. Every entry's `**Type**:` field is one of the allowed values
  *   5. Each ID is sequentially valid (no obvious gaps reported)
@@ -29,14 +29,18 @@ const fs = require('fs');
 const path = require('path');
 
 const HOME = require('os').homedir();
-const TOPICS_DIR = path.join(HOME, '.claude', 'topics');
-const DIRECTORY = path.join(TOPICS_DIR, 'KNOWLEDGE-DIRECTORY.md');
+// v8.0.0 (brain-consolidation): knowledge moved from ~/.claude/topics/ to the
+// Obsidian vault. The store is now the 5 engineering pages; _index.md is the
+// folder index (no "Total entries:" line → the total/breakdown checks stay
+// inert, leaving the uniqueness, valid-type, and per-page checks live).
+const TOPICS_DIR = path.join(HOME, 'Documents', 'Wiki', 'wiki', 'engineering');
+const DIRECTORY = path.join(TOPICS_DIR, '_index.md');
 const VALID_TYPES = new Set(['pattern', 'solution', 'error', 'preference', 'failure']);
 
 function listPages() {
   if (!fs.existsSync(TOPICS_DIR)) return [];
   return fs.readdirSync(TOPICS_DIR)
-    .filter(n => /^KNOWLEDGE-PAGE-\d+/.test(n))
+    .filter(n => n.endsWith('.md') && n !== '_index.md')
     .map(n => path.join(TOPICS_DIR, n))
     .sort();
 }

@@ -32,7 +32,7 @@ Read session-state.md for fast resume. Check `.flow/` for active workflow. Check
 **State File Precedence** (when resuming, read in this order):
 1. `.flow/state.yaml` — Flow workflow state (authoritative for active Flow work)
 2. `session-state.md` (project root) — Ephemeral session snapshot
-3. `~/.claude/.last-session-handoff` — Git state + todos from Stop hook
+3. `~/.claude/handoffs/<cwd-slug>.md` — Git state + todos from Stop hook (per-CWD; slug replaces `/`, `\`, `:` with `_`)
 4. `~/.claude/sessions/handoff-*.md` — Auto-continuation handoff (context limit hit)
 
 **Write session-state.md** before ending: `{ workflow, active_skills, branch, next_action }`.

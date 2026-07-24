@@ -25,9 +25,11 @@ If no build/test system exists, skip this step and note it in the summary.
    - Push to the current branch
 3. If no changes, skip to Step 3
 
-## Step 3 — Create handoff document
+## Step 3 — Print handoff (copy-paste block)
 
-Write a structured handoff document to `~/.claude/sessions/handoff-YYYY-MM-DD.md`:
+Print the handoff directly in chat as a single fenced markdown code block so the user can copy it and paste it into the next session. **Do not write to disk.** The block must be self-contained — the next session will see only what's inside the fence.
+
+Print exactly this format (fill in the sections from this session's work):
 
 ```markdown
 # Session Handoff — [Date]
@@ -54,6 +56,8 @@ Write a structured handoff document to `~/.claude/sessions/handoff-YYYY-MM-DD.md
 > "Continue [project] work. [1-sentence context]. Start with [first task]."
 ```
 
+Sizing: keep the block tight — aim for under ~80 lines. Prune sections that are empty (e.g. no commits this session → drop the Commits section entirely rather than leaving "- none"). The Resume Prompt is mandatory and should be the last section.
+
 ## Step 4 — Wiki update (conditional)
 
 If the project has a `wiki/` directory, append a session entry to `wiki/session-log.md` with date, summary of changes, and pending items.
@@ -64,14 +68,14 @@ If anything genuinely novel was learned this session (new pattern, mistake to av
 
 ## Step 6 — Summary
 
-Print:
+After printing the handoff block, print a short status line (outside the fence) so the user can verify at a glance:
+
 ```
-Handoff complete.
+Handoff ready — copy the block above.
 Build: [pass/fail]
 Tests: [count] passing, [count] failing
 Committed: [hash] — [message]
 Pushed to: [branch]
-Handoff doc: ~/.claude/sessions/handoff-YYYY-MM-DD.md
 Pending: [count] items for next session
 ```
 

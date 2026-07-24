@@ -18,18 +18,19 @@
   <a href="#quick-start">Install</a> &bull;
   <a href="#the-entry-points">Commands</a> &bull;
   <a href="#autonomous-behaviors">Behaviors</a> &bull;
-  <a href="#the-flow-system">Flow</a> &bull;
+  <a href="#workflow-depth-v10">Workflow</a> &bull;
   <a href="#hook-lifecycle">Hooks</a> &bull;
   <a href="#architecture">Architecture</a>
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/claude_code-opus_4.7-blueviolet?style=flat-square" alt="Claude Code">
-  <img src="https://img.shields.io/badge/version-7.0.1-informational?style=flat-square" alt="Version">
-  <img src="https://img.shields.io/badge/skills-45_active-blue?style=flat-square" alt="Skills">
-  <img src="https://img.shields.io/badge/agents-74-green?style=flat-square" alt="Agents">
-  <img src="https://img.shields.io/badge/hooks-20-yellow?style=flat-square" alt="Hooks">
-  <img src="https://img.shields.io/badge/commands-67-teal?style=flat-square" alt="Commands">
+  <!-- Badge counts are illustrative; authoritative live counts are in SYSTEM_VERSION.md / cache/system-ground-truth.json -->
+  <img src="https://img.shields.io/badge/claude_code-opus_4.8-blueviolet?style=flat-square" alt="Claude Code">
+  <img src="https://img.shields.io/badge/version-10.3.1-informational?style=flat-square" alt="Version">
+  <img src="https://img.shields.io/badge/skills-53_active-blue?style=flat-square" alt="Skills">
+  <img src="https://img.shields.io/badge/agents-21_registered-green?style=flat-square" alt="Agents">
+  <img src="https://img.shields.io/badge/hooks-28-yellow?style=flat-square" alt="Hooks">
+  <img src="https://img.shields.io/badge/commands-36-teal?style=flat-square" alt="Commands">
   <img src="https://img.shields.io/badge/license-MIT-orange?style=flat-square" alt="License">
 </p>
 
@@ -37,7 +38,7 @@
 
 ## What is ATLAS?
 
-Most Claude Code setups are a `CLAUDE.md` with some rules. ATLAS is a **full infrastructure layer** — 20 lifecycle hooks, 74 specialized agents, a persistent knowledge graph, an in-session action graph, and self-evolving skill/memory systems that let Claude Code grow its own capabilities. Since v7.0, drift catches itself: telemetry feeds an `/observe` dashboard and a session-start drift-proposer that surfaces fixable problems before you ask.
+Most Claude Code setups are a `CLAUDE.md` with some rules. ATLAS is a **full infrastructure layer** — lifecycle hooks, a registered agent roster (`agents/AGENTS.md`), a persistent knowledge graph, an in-session action graph, and self-evolving skill/memory systems that let Claude Code grow its own capabilities. Since v7.0, drift catches itself: telemetry feeds an `/observe` dashboard and a session-start drift-proposer; since v10, an evidence-fused usage ledger (`scripts/usage-report.js`) drives a weekly inventory loop so nothing unused accumulates.
 
 <table>
 <tr>
@@ -49,11 +50,11 @@ build a REST API for user management
 ```
 
 **What ATLAS does:**
-1. Scores complexity → **TEAM** (score: 9)
-2. Spawns 3 agents: architect, implementer, tester
-3. Routes to Tier 3 (Sonnet) for cost efficiency
-4. Loads relevant skills (FastAPI, security, testing)
-5. Executes with parallel agents in isolated worktrees
+1. Recalls prior work first (`/recall` fused retrieval — don't re-derive)
+2. Loads the matching skills + Capability System for the stack
+3. Plans at the right depth (brief plan → plan file for multi-phase work)
+4. Executes wave-by-wave with verification between waves
+5. For known fan-out structure: the Workflow tool; for high-stakes calls: the council (two orchestration lanes)
 6. Security scans before marking done
 7. Learns from any mistakes for next time
 
@@ -69,13 +70,13 @@ build a REST API for user management
        │         │                        │
        │         ▼                        │
        │  ┌───────────┐  ┌───────────┐    │
-       │  │   Flow    │  │   Smart   │    │ ← Routing
-       │  │  System   │  │   Swarm   │    │
+       │  │ Workflow  │  │  Council  │    │ ← Two lanes
+       │  │  (fan-out)│  │ (judgment)│    │
        │  └─────┬─────┘  └─────┬─────┘    │
        │        ▼              ▼          │
        │  ┌──────────────────────────┐    │
-       │  │ 45 Skills · 74 Agents    │    │ ← Execution
-       │  │ 20 Hooks  · 3 Rule Files │    │
+       │  │ 53 Skills · 21 Agents    │    │ ← Execution
+       │  │ 28 Hooks  · 5 Rule Files │    │
        │  └──────────┬───────────────┘    │
        │             ▼                    │
        │  ┌──────────────────────────┐    │
@@ -111,20 +112,18 @@ See [`examples/`](examples/) for a starter `settings.json` template with sensibl
 
 ## The Entry Points
 
-Everything funnels through a small set of entry commands. You never need to think about the 45 active skills, 74 agents, or 67 commands underneath.
+Everything funnels through a small set of entry commands. You never need to think about the 53 active skills or 36 commands underneath — nor the registered agent roster (`agents/AGENTS.md`).
 
 | Command | Plain English | What Happens Under the Hood |
 |:-------:|:-------------|:---------------------------|
-| `/new` | "build X", "create X" | Classifies task → auto-detects depth → initializes Flow → routes to agents |
+| `/new` | "build X", "create X" | Classifies task → plans at the right depth → executes (Workflow lane for known fan-out) |
 | `/resume` | "continue", "pick up" | Reads handoff + state files in precedence order → restores full context → continues |
 | `/task` | "fix X", "add X" | One-off routing → complexity scoring → direct execution |
 | `/done` | "wrap up" | Reflects → captures knowledge → saves state → commits |
 | `/ship` | "push this" | Commits → pushes → opens PR → security scan |
-| `/dream` | "consolidate" | Deep memory merge → prune stale → resolve conflicts → reindex |
 | `/handoff` | "end session" | Build + test → commit → push → chat handoff block |
-| `/audit` | "check this repo" | Wave-based systematic audit with verified fixes |
+| `/review-proposals` | "what's Claude proposing?" | Reviews the A4 queue — the only self-modification path (conductor files here weekly) |
 | `/health` | "system status" | Validates hooks, counts, drift; updates SYSTEM_VERSION |
-| `/system-doctor` | "validator scoreboard" | Runs all 9 `scripts/validate-*.js` validators (incl. `references` integrity check), emits unified ✓/✗ scoreboard; `test-validators.js` regression-tests the validators themselves |
 | `/observe` | "how's the system?" | 6-section dashboard (tool health, safety hooks, skills, tasks, action graph, cleanup) |
 | `/apply-drift-fix` | "fix the drift" | Reads last drift proposal, routes to archive/disable/retrigger action |
 
@@ -138,28 +137,27 @@ These happen **without user action**. ATLAS monitors, decides, and acts.
 
 When context nears limits, ATLAS writes a structured handoff so a new session can pick up exactly where it left off. Handoffs live per-CWD at `~/.claude/handoffs/<cwd-slug>.md`.
 
-### Smart Swarm
+### Orchestration — two lanes (v10)
 
-Every task is scored across multiple dimensions on a 0-15 scale:
+Multi-agent work routes through exactly two mechanisms (the former smart-swarm scoring system is archived — `skills/_archived/smart-swarm/`):
 
 ```
- File Scope ──┐
- Concerns ────┤
- Risk ────────┼── Score ──→ SOLO (0-4)  │ DUO (5-7)  │ TEAM (8-11) │ SWARM (12-15)
- Isolation ───┤            execute      2 agents      3-4 agents    wave execution
- Urgency ─────┘            directly     in parallel   + coordinator  + worktrees
+ Known structure (fan-out, judge panels, ──→  Workflow tool   (deterministic pipelines,
+ migrations, adversarial verify)               user-opted-in: "use a workflow")
+
+ High-stakes judgment (architecture, ─────→  Council          (2-4 subagents with diverse
+ security, hard-to-reverse choices)            lenses, or agent-teams for real debate)
 ```
 
-Combined with **three-tier model routing** — Haiku for simple subtasks, Sonnet for implementation, Opus for architecture — to cut token costs without sacrificing quality.
+Routine tasks stay single-pass — orchestration cost isn't free.
 
 ### Atlas Intelligence Layer
 
-Three persistence systems with strict boundaries:
+Two persistence systems with strict boundaries (collapsed from 3 → 2 in v8.0.0 — Memory + Knowledge Store merged into the Obsidian vault):
 
 ```
-Memory  (projects/*/memory/)   user profile, feedback, project context, external refs
-Knowledge Store  (topics/)     KNOWLEDGE-NNN with type: pattern|solution|error|preference|failure
-Atlas KG  (atlas-kg/)          facts NOT derivable from git/code — architectural truths
+Vault  (<your-vault-path>/wiki/)  personal/ (profile, feedback, project context) + engineering/ (KNOWLEDGE-NNN: pattern|solution|error|preference|failure). Local-only git.
+Atlas KG  (atlas-kg/)            facts NOT derivable from git/code — architectural truths
 ```
 
 Plus an in-session **action graph** (`atlas-action-graph/`) that tracks reads/searches, feeds a duplicate-read advisory, and surfaces a hot-set digest across PreCompact and SessionStart.
@@ -180,35 +178,31 @@ When a project has `.code-review-graph/graph.db`, ATLAS prefers the CRG MCP tool
 
 ---
 
-## The Flow System
+## Workflow depth (v10)
 
-One unified workflow system with 21 Flow commands:
+Task depth scales without a dedicated command family (the former Flow system — 19 commands + 15 agents, zero recorded uses — is archived as one bundle at `skills/_archived/flow/`; a repo containing `.flow/state.yaml` auto-offers its restore):
 
 ```
-Trivial ─────→ Quick ─────→ Standard ─────→ Deep ─────→ Epic
-(<20 lines)    (small)      (3-10 files)    (10-30)     (system-wide)
-    │             │              │              │             │
-    ▼             ▼              ▼              ▼             ▼
- Just do      Minimal       Plan →         Full plan     Wave-based
-   it         ceremony      Execute       + parallel      + swarm
-                                           agents         mode
+Trivial ─────→ Small ──────→ Medium ────────→ Large / multi-phase
+(<20 lines)    (1-3 files)   (3-10 files)     (10+ files)
+    │             │              │                  │
+    ▼             ▼              ▼                  ▼
+ Just do      Brief plan     Present plan,     Plan file in plans/ →
+   it         first          get approval      execute wave-by-wave,
+                                               validators between waves
 ```
-
-**Flow commands**: `/flow:start`, `/flow:plan`, `/flow:go`, `/flow:quick`, `/flow:map`, `/flow:review`, `/flow:verify`, `/flow:ship`, `/flow:debug`, `/flow:discover`, `/flow:brainstorm`, `/flow:ground`, `/flow:compound`, `/flow:complete`, `/flow:retro`, `/flow:status`, `/flow:test`, `/flow:smart-swarm`, `/flow:swarm`, `/flow:team`, `/flow:auto`.
-
-**Flow agents**: planner, executor, verifier, mapper, debugger, UAT, external-researcher, repo-analyst, learnings-researcher, research-synthesizer, git-analyst, compound-writer, risk-assessor, plan-checker, security-auditor, and the smart-swarm-coordinator.
 
 ---
 
 ## Hook Lifecycle
 
-20 hooks across 9 lifecycle events create a fully reactive system:
+Hooks across 9 lifecycle events create a fully reactive system (current count in the components box above — sync-counts-anchored):
 
 ```
 ┌─ SessionStart ──────────────────────────────────────────────────┐
 │  session-start.sh      Handoff, version, rotation, KG, action-   │
 │                        graph carryover (48h guard)               │
-│  cleanup-runner.js     13 declarative cleanup rules (v7.0)       │
+│  cleanup-runner.js     25 declarative cleanup rules (v7.0)       │
 │  drift-proposer.js     At most ONE DRIFT advisory per session    │
 ├─ UserPromptSubmit ──────────────────────────────────────────────┤
 │  allow_git_hook.py     Session-scoped git approval               │
@@ -272,7 +266,7 @@ Archived skills live under `skills/ARCHIVE-DIRECTORY.md` (7 domain bundles). Thi
 ├── SYSTEM_CHANGELOG.md          # Infrastructure version history
 ├── settings.json                # Hook wiring, permissions, env vars
 │
-├── hooks/                       # 20 lifecycle hooks (30 files incl. helpers)
+├── hooks/                       # 24 lifecycle hooks (30+ files incl. helpers)
 │   ├── lib.js                   #   Shared utilities (all Node hooks import this)
 │   ├── context-guard.js         #   PreToolUse — duplicate-read + security gate
 │   ├── post-tool-monitor.js     #   PostToolUse — telemetry + action-graph logging
@@ -280,7 +274,7 @@ Archived skills live under `skills/ARCHIVE-DIRECTORY.md` (7 domain bundles). Thi
 │   ├── pre-commit-gate.js       #   PreToolUse — build+test reminder
 │   ├── tsc-check.js             #   PostToolUse — TypeScript diagnostics
 │   ├── skill-usage-log.js       #   PreToolUse Skill — usage telemetry (v7.0)
-│   ├── cleanup-runner.js        #   SessionStart — 13 declarative cleanup rules
+│   ├── cleanup-runner.js        #   SessionStart — 25 declarative cleanup rules
 │   ├── cleanup-config.json      #     Cleanup engine rules (per-mode)
 │   ├── drift-proposer.js        #   SessionStart — DRIFT advisor (v7.0)
 │   ├── drift-thresholds.json    #     Per-channel cooldowns + silenced-kinds
@@ -292,30 +286,24 @@ Archived skills live under `skills/ARCHIVE-DIRECTORY.md` (7 domain bundles). Thi
 │   ├── statusline.js            #   StatusLine — context bar, task, call count
 │   └── cctools-safety-hooks/    #   Python safety blockers (bash, rm, env, file len)
 │
-├── skills/                      # 45 active skill entries (in skills/ACTIVE-DIRECTORY.md, 47 in _archived/)
+├── skills/                      # 53 active skill entries (see SYSTEM_VERSION.md; 45 dirs in _archived/)
 │   ├── ACTIVE-DIRECTORY.md      #   Index of active skills
-│   ├── ACTIVE-PAGE-1-*.md       #   Web + frontend skills (34)
-│   ├── ACTIVE-PAGE-2-*.md       #   Backend + tools skills (22)
-│   ├── ACTIVE-PAGE-3-*.md       #   Native + cross-platform skills (10)
+│   ├── ACTIVE-PAGE-1-*.md       #   Web + frontend skills (22)
+│   ├── ACTIVE-PAGE-2-*.md       #   Backend + tools skills (13)
+│   ├── ACTIVE-PAGE-3-*.md       #   Native + cross-platform skills (9)
 │   ├── ARCHIVE-DIRECTORY.md     #   Archived skills by domain bundle
 │   ├── RULES-GIT.md             #   On-demand git workflow rules
 │   ├── RULES-SECURITY.md        #   On-demand security rules + triggers
 │   ├── RULES-TESTING.md         #   On-demand testing rules
 │   └── [domain]/SKILL.md        #   Individual skill definitions
 │
-├── topics/                      # Knowledge store (74 entries, v7.0.1 unified namespace)
-│   ├── KNOWLEDGE-DIRECTORY.md   #   Index — IDs are KNOWLEDGE-NNN with type: field
-│   ├── KNOWLEDGE-PAGE-1-patterns.md    #   type: pattern (30)
-│   ├── KNOWLEDGE-PAGE-2-solutions.md   #   type: solution (17)
-│   ├── KNOWLEDGE-PAGE-3-errors.md      #   type: error (13)
-│   ├── KNOWLEDGE-PAGE-4-preferences.md #   type: preference (8)
-│   └── KNOWLEDGE-PAGE-5-failures.md    #   type: failure (6)
+│   # Knowledge store retired in v8.0.0 — migrated to the Obsidian vault at
+│   #   <your-vault-path>/wiki/engineering/ (146 entries across patterns/solutions/errors/preferences/failures)
 │
-├── commands/                    # 67 slash commands (top-level + namespaced plugin/flow/hackathon)
-│   ├── new.md, resume.md, ...   #   Top-level entry points (incl. v7.0 /observe + /apply-drift-fix)
-│   └── flow/*.md                #   21 Flow workflow commands
+├── commands/                    # slash commands (count in the components box — sync-counts-anchored)
+│   └── new.md, resume.md, ...   #   Top-level entry points (incl. v7.0 /observe + /apply-drift-fix)
 │
-├── agents/                      # 74 specialized agents
+├── agents/                      # 16 custom agents (74 incl. plugin packs)
 │   ├── flow-*.md                #   Flow agents (planner, executor, verifier, ...)
 │   ├── smart-swarm-coordinator  #   Multi-agent orchestrator
 │   └── [domain]/*.md            #   Domain specialists
@@ -330,17 +318,13 @@ Archived skills live under `skills/ARCHIVE-DIRECTORY.md` (7 domain bundles). Thi
 │   └── snapshots/               #   PreCompact state-file snapshots
 │
 ├── scripts/                     # System utilities
-│   ├── system-snapshot.js       #   Writes cache/system-ground-truth.json (drift detector input)
-│   ├── system-doctor.js         #   8-validator scoreboard (skill counts, hooks, commands, …)
-│   ├── validate-commands.js     #   Cross-checks commands/ ↔ REFERENCE.md (incl. plugin namespaces)
-│   ├── validate-{skills,hooks,…}.js  #   Individual validators consumed by system-doctor
-│   ├── smoke-test.sh            #   Quick health probe
+│   ├── smoke-test.sh            #   System validator
 │   ├── health-validator.js      #   Drift + health verification
-│   ├── health-dashboard.js      #   Metrics surface
-│   ├── sync-from-local.sh       #   Local→mirror personal-path scrubber
+│   ├── system-doctor.js         #   Unified validator scoreboard (/system-doctor)
+│   ├── observability.js         #   Telemetry dashboard (/observe)
 │   └── progressive-learning/    #   PreCompact reflection scripts
 │
-└── projects/*/memory/           # Per-CWD auto-memory (user/feedback/project/reference)
+└── projects/<cwd>/              # Per-CWD Claude Code session transcripts + logs (auto-memory subsystem retired v8.0.0)
 ```
 
 ## State Management
@@ -392,14 +376,14 @@ Some hooks reference external components. They degrade gracefully — silent no-
 | **Auto-continuation** | Context-aware session chaining with structured handoff | Never lose work mid-task |
 | **Complexity scoring** | Automatic agent team deployment | Right-sized execution without asking |
 | **Self-evolution** | Creates skills + adds MCP servers on capability gaps | System grows with your needs |
-| **Three-layer persistence** | Memory (user) + Knowledge Store (patterns) + Atlas KG (facts) | Strict boundaries, no overlap |
+| **Two-layer persistence** | Vault (personal + engineering knowledge, v8.0.0 merge) + Atlas KG (facts) | Strict boundaries, no overlap |
 | **Action graph** | In-session retrieval log with priority queue + hot-set carryover | Duplicate-read advisory + PreCompact digest survival |
 | **Tier routing** | Haiku/Sonnet/Opus per subtask | Token cost reduction without quality loss |
 | **Circuit breaker** | Failure tracking + MCP-aware classification | Prevents runaway tool failures |
 | **CRG integration** | Tree-sitter code graph with MCP tool preference | Minimal-context navigation over Glob/Grep |
 | **Observability dashboard** (v7.0) | `/observe` renders telemetry from 6 streams | The system shows you what's drifting before you ask |
 | **Drift proposer** (v7.0) | SessionStart emits at most 1 advisory per session | Self-surfacing fixes — system proposes, you approve |
-| **Unified cleanup engine** (v7.0) | 13 declarative rules in `cleanup-config.json` | One JSONL log per rule, fail-open, 3-line config to add a target |
+| **Unified cleanup engine** (v7.0) | 19 declarative rules in `cleanup-config.json` | One JSONL log per rule, fail-open, 3-line config to add a target |
 
 ---
 
@@ -409,8 +393,8 @@ Some hooks reference external components. They degrade gracefully — silent no-
 # Full system smoke test
 bash ~/.claude/scripts/smoke-test.sh
 
-# Health dashboard
-node ~/.claude/scripts/health-dashboard.js
+# Validator scoreboard
+node ~/.claude/scripts/system-doctor.js
 
 # Slash command (updates SYSTEM_VERSION.md)
 /health
@@ -424,8 +408,8 @@ MIT License. Use it, modify it, make it yours.
 
 ## Author
 
-**Leo Atienza**
+**the user**
 
 <p align="center">
-  <sub>Built with Claude Code (Opus 4.7) and an unhealthy amount of ambition.</sub>
+  <sub>Built with Claude Code (Opus 4.8) and an unhealthy amount of ambition.</sub>
 </p>

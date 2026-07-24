@@ -1,6 +1,6 @@
 ---
 name: observe
-description: "Render the 6-section ATLAS observability dashboard (tool health, safety hooks, skill usage, scheduled tasks, action graph, cleanup)."
+description: "Render the 7-section ATLAS observability dashboard (tool health, safety hooks, skill usage, scheduled tasks, action graph, cleanup, delegation)."
 allowed-tools:
   - Read
   - Bash
@@ -8,7 +8,7 @@ allowed-tools:
 ---
 
 <objective>
-Refresh the scheduled-tasks cache, then render the full 6-section dashboard from existing telemetry. This is the time-series complement to `/health`'s point-in-time diagnostic — run it whenever you want to see how the system is actually behaving.
+Refresh the scheduled-tasks cache, then render the full 7-section dashboard from existing telemetry. This is the time-series complement to `/health`'s point-in-time diagnostic — run it whenever you want to see how the system is actually behaving.
 </objective>
 
 <process>
@@ -49,7 +49,7 @@ Flags you can pass through on request:
 After the table renders, add a short `## Signals` block below the dashboard **only if** any of the following are true:
 
 - A tool in section 1 has `streak ≥ 3` — suggest investigating that tool or temporarily disabling the MCP server if applicable.
-- Section 3 reports any skill in the "Unused (≥30d)" list that has never been used since its creation — suggest `/skill-archive` as a potential follow-up.
+- Section 3 reports any skill in the "Unused (≥30d)" list that has never been used since its creation — suggest the `skill_unused` flow in `/apply-drift-fix` as a potential follow-up (there is no `/skill-archive` command). Caveat: the usage log only captures explicit Skill-tool calls; auto-triggered skills look unused here.
 - Section 4 has a task marked `⚠ drift` — suggest re-triggering it via `mcp__scheduled-tasks__update_scheduled_task` or investigating the cron.
 - Section 6 reports any cleanup rule with errors in the last 7 days — point at `hooks/cleanup-runner.js` or the rule's extracted script.
 

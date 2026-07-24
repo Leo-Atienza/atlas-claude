@@ -21,21 +21,23 @@
 
 | ID | Name | Path | Description |
 |----|------|------|-------------|
-| SK-121 | Testing Strategist | `skills/fullstack-dev/test-master/SKILL.md` | Testing strategies, patterns, and coverage optimization |
-| SK-122 | Debugging Expert | `skills/fullstack-dev/debugging-wizard/SKILL.md` | Systematic debugging methodology and root cause analysis |
 
 ## Workflow & System
 
 | ID | Name | Path | Description |
 |----|------|------|-------------|
 | SK-039 | Smart Swarm | `skills/smart-swarm/SKILL.md` | Auto-organize multi-agent teams based on 5D complexity scoring |
-| SK-040 | Dream Consolidation | `skills/dream/SKILL.md` | Multi-phase memory consolidation — orient, merge, prune knowledge |
+| SK-101 | Wiki Manager | `skills/wiki-manage/SKILL.md` | Karpathy LLM Wiki for `Documents/Wiki/` — ingest, query, lint, evolve, scaffold modes |
+| SK-140 | Skill Vet | `skills/skill-vet/SKILL.md` | Discover (skills.sh) → adversarially vet (3-gate default-refute: license/safety/non-redundancy) → safely vendor external skills. Encodes the scratch-dir-only clone rule + full registration checklist. Use for skills.sh sweeps. |
+| SK-144 | Claude Real Video | `skills/claude-real-video/SKILL.md` | Let the model actually watch a video → scene-aware deduped keyframes + transcript. Local `crv` CLI (ffmpeg + faster-whisper), no API keys; use `python -m claude_real_video …` if `crv` isn't on PATH. Auto-triggers on a shared video URL/file. |
+
+> SK-040 (Dream Consolidation) retired in v8.0.0 (2026-05-14, brain consolidation). Files preserved at `skills/_archived/dream/`.
 
 ## Research & Subagent Workflow
 
 | ID | Name | Path | Description |
 |----|------|------|-------------|
-| SK-076 | Deep Research | `skills/deep-research/SKILL.md` | Enterprise research pipeline: 8 phases, 3 modes, citation cascade (Local→Search→Fetch→Scholar), confidence-tagged assertions |
+| SK-076 | Enterprise Research | `skills/enterprise-research/SKILL.md` | Enterprise research pipeline: 8 phases, 3 modes, citation cascade (Local→Search→Fetch→Scholar), confidence-tagged assertions. Folder/name renamed from deep-research to avoid colliding with the built-in deep-research harness. |
 | SK-077 | Subagent-Driven Dev | `skills/subagent-driven-dev/SKILL.md` | Task dispatch → fresh subagent per task → two-stage review (spec + code quality) |
 
 ## Planning & Product (mattpocock)
@@ -50,5 +52,3 @@
 | ID | Name | Path | Description |
 |----|------|------|-------------|
 | SK-011 | MCP Server Builder | `skills/mcp-builder/SKILL.md` | Guide for creating MCP servers (Python FastMCP / Node TypeScript) |
-| SK-013 | Theme Factory | `skills/theme-factory/SKILL.md` | Apply themes to any artifact (10 presets + custom theming) |
-| SK-053 | Anti-Slop Writing | `skills/stop-slop/SKILL.md` | Remove AI writing patterns — banned phrases, scoring rubric |

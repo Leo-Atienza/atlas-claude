@@ -1,0 +1,9 @@
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["category", "confidence"],
+  "properties": {
+    "category": { "type": "string", "description": "the chosen category (or 'unclear')" },
+    "confidence": { "type": "number", "minimum": 0, "maximum": 1 }
+  }
+}

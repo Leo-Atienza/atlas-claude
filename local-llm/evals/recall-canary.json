@@ -1,0 +1,22 @@
+{
+  "note": "Recall canary suite (E1/E2). Each query should surface a page whose path contains `expect` within top-k. Covers every vault namespace. Also the weekly recall hit-rate metric feeding the A9 scorecard.",
+  "k": 5,
+  "cases": [
+    { "query": "make me a saas website", "expect": "web-dev/", "ns": "web-dev" },
+    { "query": "invent a brand new unique design language", "expect": "web-dev/design-synthesis", "ns": "web-dev" },
+    { "query": "coherent aesthetic systems gallery of costumes", "expect": "web-dev/design-language-library", "ns": "web-dev" },
+    { "query": "next.js security floor version pins stack", "expect": "web-dev/stack", "ns": "web-dev" },
+    { "query": "expo sdk version and google play store mandates", "expect": "app-dev/stack", "ns": "app-dev" },
+    { "query": "android 16kb page size requirement", "expect": "app-dev/stack", "ns": "app-dev" },
+    { "query": "mobile app native design tokens", "expect": "app-dev/", "ns": "app-dev" },
+    { "query": "prefer baking concepts into claude md over vendored skills", "expect": "prefer-claude-md-over-vendored-skills", "ns": "personal" },
+    { "query": "actively use the local ollama model for offloading", "expect": "use-local-llm-actively", "ns": "personal" },
+    { "query": "the web brain routes it does not mandate", "expect": "webdev-brain-routes-not-mandates", "ns": "personal" },
+    { "query": "agentic design patterns for LLM agents", "expect": "concept/agentic-patterns", "ns": "concept" },
+    { "query": "external memory personal knowledge management", "expect": "external-memory-pkm", "ns": "concept" },
+    { "query": "andrej karpathy", "expect": "entity/andrej-karpathy", "ns": "entity" },
+    { "query": "anthropic building effective agents article", "expect": "anthropic-building-effective-agents", "ns": "source" },
+    { "query": "obsidian as claude external memory synthesis", "expect": "obsidian-as-claude-external-memory", "ns": "synthesis" },
+    { "query": "mechanistic interpretability of neural networks", "expect": "mechanistic-interpretability", "ns": "concept" }
+  ]
+}

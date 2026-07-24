@@ -8,34 +8,33 @@
 
 | Goal | Use |
 |---|---|
-| Start a new project/feature | `/new` or `/flow:start [desc]` |
+| Start a new project/feature | `/new` |
 | Resume previous work | `/resume` or `/continue` |
 | Do a one-off task | `/task [desc]` or just describe it |
-| Fix a bug | `/flow:debug [desc]` |
-| Ship code (commit + push + PR) | `/ship` or `/flow:ship` |
+| Fix a bug | Describe it — observe → hypothesize → verify → fix (CLAUDE.md Debugging rule) |
+| Ship code (commit + push + PR) | `/ship` |
 | End my session | `/done` |
-| Consolidate memories | `/dream` |
-| Plan before building | `/flow:plan` then `/flow:go` |
-| Run a complex multi-agent task | `/flow:smart-swarm [desc]` |
-| Review code / PR | `/code-review:code-review` or `/flow:review` |
+| Plan before building | Plan mode for interactive approval, or a plan file in `plans/` for multi-phase work |
+| Run a complex multi-agent task | Workflow tool (say "use a workflow") or the CLAUDE.md council — the two orchestration lanes |
+| Review code / PR | `/code-review:code-review` (add "ultra" for the cloud multi-agent review) |
 | Check system health | `/health` |
-| Learn from a mistake | `/learn` |
+| Learn from a mistake | `/remember` (routes error entries to the vault per `config/routing-rules.yml`) |
 | Research a library/framework | Ask directly (Context7 + WebSearch auto-activate) |
 | Create a new skill | `/skill-creator` |
 | Schedule a recurring task | `/schedule` |
-| Add an article/note to my wiki | `/wiki-ingest [source]` (SK-101) |
-| Search my wiki | `/wiki-query [topic]` (SK-101) |
-| Check wiki health | `/wiki-lint` (SK-101) |
+| Add an article/paper/URL to my wiki | `/wiki-ingest <url-or-path>` |
+| **Ask my whole brain something** | `/recall <query>` — the single lookup front door: fused retrieval across vault + atlas-kg + graphify + catalog + session working set (v8.5). Comes up thin? `/deep-recall <query>` — full-vault semantic tier incl. session-log/transcripts. Interactive wiki synthesis: wiki-manage QUERY mode |
+| Wiki health check | `/wiki-lint` |
+| Convert a PowerPoint to PDF | `/pptx-to-pdf <file>` |
 | Start a new mobile app | `/new-mobile-app [name]` |
 | Start a new desktop app | `/new-desktop-app [name]` |
-| Join / compete in a hackathon | `/hackathon:init [event]` → `/hackathon:ideate` → `/hackathon:scope` → ... → `/hackathon:retro` |
-| Lock hackathon scope (HARD) | `/hackathon:scope` (amend requires 1-in-1-out: `/hackathon:scope --amend`) |
-| Brainstorm hackathon ideas | `/hackathon:ideate` |
+| Join / compete in a hackathon | Archived (seasonal) — restore `skills/_archived/hackathon/` (auto-offered on `.hackathon/` repos; see ARCHIVE-DIRECTORY §v10) |
 | Design an API | `/api-design [desc]` |
 | Design a database schema | `/db-schema [desc]` |
-| Build/dev/test a Tauri app | Tauri MCP + SK-088 |
+| Build/dev/test a Tauri app | Tauri MCP (archived SK-088 bundle restores on demand) |
 | Manage feature flags | Statsig MCP (needs `console-` API key — see `.mcp.json` `_activate`) |
 | Run mobile E2E tests | Maestro MCP (WSL + Maestro install — see `.mcp.json` `_activate`) |
+| Use shadcn/heroui/aceternity/magicui/iconify UI MCP | Auto-provisioned per-project into `.mcp.json` by `scripts/ensure-frontend-mcp.js` (SessionStart, frontend-detected) — demoted from global 2026-05-28 (jazzy-wren) to cut picker bloat; bundle in `templates/frontend-mcp.json`. Re-globalize one: `claude mcp add -s user <name> -- npx …` |
 | Publish to app stores | Expo skills (EAS Submit) |
 | Set up CI/CD with Claude | `claude /install-github-app` (claude-code-action) |
 
@@ -43,71 +42,51 @@
 
 ## Skill Quick Lookup
 
+> Routes only to **active** skills (canonical list: `skills/ACTIVE-DIRECTORY.md`). Archived skills (Vanguard, UX Design Stack, the native-mobile and animation bundles, …) still auto-activate via `skills/archived-skills-manifest.json` detection patterns, or restore with `mv skills/_archived/<name>/ skills/<name>/` — browse `skills/ARCHIVE-DIRECTORY.md`. (Stale routes to ~30 archived skills purged 2026-06-09.)
+
 | Task | Skill |
 |---|---|
 | **Web Frameworks** | |
-| Build a premium website | Vanguard (SK-083) — Render Tiers, CSS-First, streaming pipeline |
+| Build a premium website / any web UI | Impeccable (SK-102) — craft/teach flow; loads Frontend Design (SK-005) as its principles library |
 | Next.js best practices | Next.js Best Practices (SK-029) + Cache & PPR (SK-030) |
 | Upgrade Next.js | Next.js Upgrade Guide (SK-031) |
-| Advanced JS/TS patterns | Advanced JavaScript (SK-045) — TC39, V8, TypeScript |
-| CSS-first UI (zero-JS) | CSS-First UI Engine (SK-084) — Container Queries, :has(), @layer |
-| Streaming & cache architecture | Streaming & Cache (SK-085) — compositional cache, ViewTransition |
-| AI-powered UI | AI-Native UI (SK-086) — streamText, useChat, generative UI |
-| Modern build tooling | Build Pipeline (SK-087) — Biome 2.0, Lightning CSS, Turbopack |
-| Use new browser API | Web Platform APIs (SK-054) — popover, view transitions, WebGPU |
-| Fetch server data / cache | TanStack Query (SK-055) — caching, mutations, optimistic |
-| UX design intelligence | UX Design Stack (SK-006) — 67 styles, 161 palettes, BM25 search |
+| Strict TypeScript / generics | TypeScript Expert (SK-116) |
+| Tailwind v4 setup | Tailwind v4 Web Setup (SK-040) |
 | Web design review | Web Interface Guidelines (SK-034) |
-| **Animation & Motion** | |
-| Animate in React | Motion (SK-047) — springs, layout, gestures, exit |
-| Animate (non-React / timelines) | GSAP (SK-042/SK-044) — timelines, ScrollTrigger, SVG |
-| Smooth scroll | Lenis (SK-048) — momentum scroll + GSAP integration |
-| Batch stagger reveals / text effects | Anime.js (SK-093) — lightweight modular animation, WAAPI |
-| MPA page transitions | Barba.js (SK-094) — GSAP-orchestrated cross-page transitions |
-| Multi-library animation | Cinematic Web Engine (SK-096) — SALA, Layer Ownership, Motion Tokens |
-| **3D & Immersive** | |
-| Design-driven 3D | Spline (SK-095) — visual 3D editor → web runtime |
-| 3D with code (React) | Three.js / R3F (SK-007) — WebGL/WebGPU, Drei helpers |
+| AI-powered UI / LLM apps | Vercel AI SDK 7 (SK-129) — generateText/Object, Agent + tools (durable WorkflowAgent), useChat |
+| **Animation & 3D** | |
+| Animate (timelines, scroll) | GSAP (SK-042) — timelines, ScrollTrigger, SVG |
+| 3D with code (React) | Three.js / R3F (SK-007) — SSR-safe install, Drei helpers |
 | **Backend & Database** | |
-| Supabase integration | Supabase Expert (SK-124) — Auth, RLS, Storage, Edge Functions |
-| Stripe payments | Stripe Expert (SK-125) — Checkout, Subscriptions, Webhooks |
+| Database + ORM (Postgres) | Drizzle + Neon (SK-130) + Neon MCP |
+| Auth | Better Auth (SK-131) — email/OAuth/2FA/passkeys, edge-native |
 | SQL optimization | SQL Expert (SK-117) — strategic indexes, query planning |
 | PostgreSQL admin | PostgreSQL Expert (SK-123) — optimization, extensions |
 | API design | API Designer (SK-120) — REST, OpenAPI 3.1, RFC 7807 errors |
+| Supabase / Stripe integration | Context7 docs (no dedicated active skill; archived experts restorable from ARCHIVE-DIRECTORY) |
 | **Testing & Quality** | |
 | Unit/component test | Vitest (SK-056) + Testing Library |
-| E2E browser test | Playwright (SK-009) — Chromium/Firefox/WebKit |
-| AI-powered E2E test | E2E Testing (SK-027) — mobile and desktop |
-| Test-first development | TDD (SK-070) — red-green-refactor loop |
-| Testing strategy | Testing Strategist (SK-121) — patterns, coverage |
-| Debug systematically | Debugging Expert (SK-122) — root cause analysis |
-| Design QA pipeline | `/critique` → `/audit` → `/polish` (SK-078/079/080) |
+| E2E browser test | playwright-cli (anthropic-skills symlink) |
+| AI-powered E2E test | `mobile` MCP for device flows (e2e-testing skill archived — ARCHIVE-DIRECTORY §v10) |
+| Test-first development | `skills/RULES-TESTING.md` (tdd skill archived — restore on demand) |
+| Debug systematically | CLAUDE.md Debugging rule: observe → hypothesize → verify → fix |
+| Design QA pipeline | `design-polish` (SK-080) for final-pass craft work; wave-based audits follow CLAUDE.md Wave-Based Fixes (audit skill archived) |
+| Pre-flight UI diff vs design reference | Design Check (SK-127) — MANDATORY before UI work against Stitch/Figma/screenshot |
+| Verify before claiming "done" | Ship Verify (SK-128) — MANDATORY for build/deploy/ship claims |
 | **Native & Cross-Platform** | |
-| Build a premium mobile app | Universal Conductor (SK-058) — routes to all native skills |
-| Build a desktop app | Tauri Desktop (SK-088) — Rust backend, 30+ plugins |
-| Access device hardware | Hardware Bridge (SK-089) — camera, biometrics, NFC |
-| Build offline-first app | Local-First (SK-090) — CRDT sync, PowerSync, TinyBase |
-| On-device AI/ML | Edge Intelligence (SK-091) — llama.rn, MediaPipe, RAG |
-| Multi-platform monorepo | Monorepo (SK-092) — Turborepo mobile + desktop + web |
-| Native animations | Native Motion Engine (SK-097) — Reanimated 4, gestures |
-| Native rendering | Native Visual Canvas (SK-098) — Skia, R3F native, Rive |
-| Native transitions | Native Transition & Scroll (SK-099) — shared elements, FlashList |
-| Native design system | Native Sensory Design (SK-100) — haptics, sound, motion tokens |
+| Mobile screen design / review | Mobile App Design (SK-126) — HIG, Material 3, RN translation pitfalls |
+| Build/dev/test a Tauri app | Tauri MCP (archived Tauri Desktop bundle SK-088 restores on demand) |
+| Expo / React Native | expo-* + react-native symlinked skills (see `skills/SYMLINKS.md`) |
 | **Workflow & Tools** | |
-| Compete in a hackathon | Hackathon (`~/.claude/skills/hackathon/`) — 10-phase workflow, hard scope lock, 5 stack presets, `/hackathon:*` commands |
-| Map a codebase (graph) | Codebase Knowledge Graph (SK-081) — Router: CRG (code, MCP-native) / graphify (mixed corpora) |
-| Review with blast radius | Graph-Aware Code Review (SK-082) — dependency tracing |
-| Multi-agent orchestration | Smart Swarm (SK-039) — 5D complexity scoring |
-| Subagent task dispatch | Subagent-Driven Dev (SK-077) — fresh subagent + review |
-| Deep research pipeline | Deep Research (SK-076) — 8 phases, citation-backed |
-| Bug investigation | Triage Issue (SK-071) — root cause + TDD fix plans |
+| Compete in a hackathon | Archived (seasonal) — `skills/_archived/hackathon/`, auto-offered on `.hackathon/` repos |
+| Map a codebase (graph) | Graphify (SK-109) for mixed corpora; CRG MCP for code (`.code-review-graph/graph.db`) |
+| Multi-agent orchestration | Two lanes (CLAUDE.md): Workflow tool for deterministic fan-out; council (subagents/agent-teams) for high-stakes calls |
+| Deep research pipeline | deep-research skill — built-in fan-out + adversarial-verify harness |
 | Deploy to Vercel | Deploy to Vercel (SK-028) |
-| Build MCP server | MCP Server Builder (SK-011) — Python FastMCP / Node TS |
-| Apply themes | Theme Factory (SK-013) — 10 presets + custom |
-| Remove AI slop | Anti-Slop Writing (SK-053) — banned phrases, scoring |
+| Build MCP server | `anthropic-skills:mcp-builder` (ecosystem symlink; local link archived) |
+| Apply themes | theme-factory (anthropic-skills symlink) — 10 presets + custom |
 | Manage wiki | wiki-manage (SK-101) — ingest/query/lint Obsidian vault |
-| Consolidate memory | Dream (SK-040) — orient, merge, prune knowledge |
-| Frontend design system | Frontend Design (SK-005) — production-grade interfaces |
+| PowerPoint → PDF | PPTX → PDF (SK-132) — `/pptx-to-pdf`, COM/LibreOffice render |
 
 ---
 
@@ -118,48 +97,51 @@
 - `/commit-commands:commit-push-pr` — Commit, push, and open PR
 - `/commit-commands:clean_gone` — Clean local branches deleted on remote
 
-### Flow Workflow
-- `/flow:start [desc]` — Auto-detect depth, create project
-- `/flow:plan` → `/flow:go` — Plan then execute in waves
-- `/flow:quick [desc]` — Minimal ceremony, plan + execute
-- `/flow:auto [desc]` — Full autonomous pipeline: plan → go → review → ship
-- `/flow:smart-swarm [desc]` — Multi-agent swarm with complexity scoring
-- `/flow:swarm [desc]` — Swarm pipeline: plan → parallel swarm → review → ship
-- `/flow:debug "desc"` — Scientific debugging
-- `/flow:verify` — Goal-backward verification
-- `/flow:complete` — Archive milestone, retro, compound
-- `/flow:status` — Current position + next action
-- `/flow:map` — Parallel codebase mapping
-- `/flow:brainstorm` — Divergent idea generation
-- `/flow:compound` — Extract reusable solution patterns
-- `/flow:discover` — External + internal research
-- `/flow:ground` — Ground plans in codebase reality
-- `/flow:retro` — Retrospective on completed work
-- `/flow:review` — Code review workflow
-- `/flow:ship` — Ship code (commit + push + PR)
-- `/flow:team` — Multi-agent team coordination
-- `/flow:test` — Test execution workflow
-
 ### Session
 - `/done` — Wrap up, reflect, end session
 - `/resume` — Restore interrupted session
+- `/continue` — Resume from a handoff file (manual)
+- `/compact` — Prepare session state for context compaction
 - `/handoff` — Build, test, commit, push, create handoff doc
-- `/audit` — Systematic codebase audit with wave-based fixes
 - `/health` — System + project integrity check
+- `/observe` — 7-section ATLAS dashboard (tool health, safety, skill usage, schedules, action graph, cleanup, delegation)
+- `/system-doctor` — Unified validator scoreboard (runs every validator in the `scripts/lib/validators.js` manifest)
+- `/system [list|show <name>|detect|deactivate|<name>]` — Capability Systems: list/inspect/detect/deactivate domain bundles (see `systems/REGISTRY.md`)
+- `/system:activate <name>` — Activate a Capability System for this folder (marker + digest + knowledge view; persists across sessions here, sliding 14d TTL)
+- `/system:new <name>` — Scaffold a new Capability System overlay manifest (the extensibility recipe)
+- `/apply-drift-fix` — Read latest drift proposal and route to action
+- `/review-proposals` — Review the sous-chef's proposal queue (`proposals/`), the ONLY self-modification path — approve/reject/defer each (A4, v9)
+- `/verified-deploy` — Deploy with auto production verification
+- `/skill-review` — Review skill improvement candidates
 - `/claude-md-management:revise-claude-md` — Update CLAUDE.md
 
-### Hackathon (end-to-end workflow)
-- `/hackathon:init [event-name] [--team] [--duration Nh]` — Event setup + reverse-engineered timeline
-- `/hackathon:ideate` — Generate 5-10 scored ideas, tag stack preset per idea
-- `/hackathon:scope` — Lock demo moment + MUST-HAVES + 60s pitch (HARD LOCK — no silent creep)
-- `/hackathon:scope --amend` — Change scope via forced 1-in-1-out feature trade
-- `/hackathon:scaffold [--stack <preset>]` — Live URL in <15 min (5 presets: web-ai / saas / mobile / data-viz / agent)
-- `/hackathon:team` — Split MUST-HAVES across teammates (only when `--team` set on init)
-- `/hackathon:build [feature]` — Demo-moment-first atomic commits, 30-min stuck rule, 2hr checkpoints
-- `/hackathon:polish` — Visual QA + three-states (loading/empty/error) + Sentry + Lighthouse
-- `/hackathon:demo` — Screenshots + video script + README.md + frozen deploy
-- `/hackathon:pitch` — 60s speaker notes + Q&A prep + live-demo storyboard + fallbacks
-- `/hackathon:retro` — Post-event learnings → G-PAT / G-FAIL + skill self-updates
+### Memory & Knowledge (one read door, one write door — v10 U3)
+- `/recall [query]` — **the** lookup front door: unified retrieval across ALL knowledge layers (vault, atlas-kg, graphify, hot/index catalog, session working set) with deterministic rank fusion + Ollama semantic layer; `--json`, `--no-semantic` flags (v8.5)
+- `/deep-recall [query]` — deep tier: semantic search over the ENTIRE vault incl. session-log/handoffs/transcripts (the tier /recall deliberately skips); use when /recall comes up thin
+- `/remember [fact]` — **the** capture door: routes a fact/error/preference to the right vault location per `config/routing-rules.yml` (error entries follow `scripts/progressive-learning/KNOWLEDGE-WRITE.md`)
+- `/reflect` — Capture session knowledge into `wiki/engineering/*` + `wiki/personal/*`
+- `/analyze-mistakes` — Audit recent failures and error patterns from `wiki/engineering/errors.md`
+
+> Retired in v8.0.0 (2026-05-14, brain consolidation): "dream", "memory-rebuild", "memory-promote-to-wiki" (files at `~/.claude/_retired_commands/`). Retired in v10 (2026-07-20, → `skills/_archived/retired-commands/`): init-memory (targeted the retired memory dir), learn (→ /remember), memory-search + wiki-query (→ /recall), memory-review (→ /reflect + /review-proposals), memory-health (→ /wiki-lint), parallel-audit (audit skill archived).
+
+### App-dev shortcuts
+- `/new` — Start something new (auto-routes by intent)
+- `/new-web` — New web project
+- `/new-mobile-app` — Scaffold Expo + Supabase mobile project
+- `/new-desktop-app` — Scaffold Tauri desktop project
+
+### Archived workflow families (v10, 2026-07-20)
+The `flow:*` (19 commands) and `hackathon:*` (10 commands) families are archived as bundles under `skills/_archived/{flow,hackathon}/commands/` — zero / 1 use across all sessions. The manifest hook auto-offers a restore when a repo contains `.flow/state.yaml` or `.hackathon/`; manual restore recipes in `ARCHIVE-DIRECTORY.md` §v10.
+
+### Locally-authored namespaced commands
+
+These are local command files at `commands/<namespace>/...` using `:`-separated namespaces (NOT shipped by any enabled plugin — none of `cctools`/`infra-showcase` appear in `settings.json#enabledPlugins` or the plugin registry). They are real and dispatchable; the namespace is organizational only.
+
+- `/cctools/aichat:recover-context` — Strategically explore the most recent parent session from the session lineage to reconstruct the last task's context (uses `session-searcher` sub-agent or `aichat:session-search` skill).
+- `/cctools/voice:speak` — Enable, disable, or configure voice (TTS) feedback during sessions.
+- `/infra-showcase:dev-docs` — Create a comprehensive strategic plan with structured task breakdown for infra showcase work.
+- `/infra-showcase:dev-docs-update` — Update dev documentation before context compaction.
+- `/infra-showcase:route-research-for-testing` — Map edited routes and launch tests for the touched paths.
 
 ---
 
@@ -197,11 +179,11 @@ Every generator has a validator. Always run both.
 | Language/Framework | Skill ID | Key Enforcements |
 |---|---|---|
 | TypeScript | SK-116 | Strict TS, proper generics, type safety |
-| React/Next.js | SK-118 + SK-119 + Context7 | Server components, hooks patterns |
+| React/Next.js | SK-029 + SK-030 + vercel-react-best-practices + Context7 | Server components, hooks patterns |
 | SQL/PostgreSQL | SK-117 + SK-123 | EXPLAIN before optimizing, strategic indexes |
 | API Design | SK-120 | REST principles, OpenAPI 3.1, RFC 7807 errors |
-| Supabase | SK-124 + Context7 | Auth, RLS, Edge Functions, TypeScript types |
-| Stripe | SK-125 | Checkout, Subscriptions, Webhooks |
+| Supabase | Context7 (`resolve-library-id` → `get-library-docs`) | Auth, RLS, Edge Functions, TypeScript types (archived Supabase Expert restorable) |
+| Stripe | Context7 | Checkout, Subscriptions, Webhooks (archived Stripe Expert restorable) |
 
 ---
 
@@ -231,11 +213,13 @@ Every generator has a validator. Always run both.
 - `prepare_database_migration` → `complete_database_migration` — safe migration with temp branch
 - `describe_table_schema` — schema exploration
 
-### Claude Preview MCP
-- `preview_start` → `preview_screenshot` — visual verification
-- `preview_inspect` — CSS property verification (more accurate than screenshots)
-- `preview_snapshot` — accessibility tree for text/structure
-- `preview_click` / `preview_fill` — interact with running app
+### Claude Browser MCP (`mcp__Claude_Browser__*`)
+_Renamed 2026-07 from `Claude_Preview`; `preview_start`/`preview_logs`/`preview_stop` survive, the read/interact verbs were renamed._
+- `preview_start` → `computer` (`action:"screenshot"`) — visual verification
+- `javascript_tool` — evaluate JS / read computed CSS (more accurate than screenshots; was `preview_eval`/`preview_inspect`)
+- `read_page` — accessibility tree for text/structure (was `preview_snapshot`)
+- `computer` (`left_click`) / `form_input` — interact with running app (was `preview_click`/`preview_fill`)
+- `read_console_messages` / `read_network_requests` — console + network reads (was `preview_console_logs`/`preview_network`)
 
 ### Vercel MCP
 - List deployments, read build logs, manage env vars, inspect domains
@@ -246,10 +230,11 @@ Every generator has a validator. Always run both.
 - Run full Google Lighthouse audit on any URL (runs locally, no API key)
 - Returns: Performance, Accessibility, SEO, Best Practices scores + specific recommendations
 - Includes axe-core accessibility violations
-- Use after deployment for quality metrics, or in design-audit (SK-078) for runtime data
+- Use after deployment for quality metrics, or in the design QA pipeline (`/audit` SK-111 + design-polish SK-080) for runtime data
 
 ### Firecrawl MCP
 - Extract clean LLM-ready markdown from any webpage (strips nav, ads, scripts)
+- **Second choice since v8.20.0**: crawl4ai `crwl` covers scrape/crawl free with no credit ceiling — `"$HOME/AppData/Roaming/Python/Python313/Scripts/crwl.exe" <url> -o markdown`; reach for Firecrawl when crawl4ai is unavailable or for `firecrawl_search` (no local equivalent)
 - **Prefer over** Chrome MCP `get_page_text` for research/content extraction
 - **Prefer** Chrome MCP for interactive page testing
 - Free tier: 500 credits; self-hostable for unlimited free usage
@@ -285,13 +270,13 @@ Every generator has a validator. Always run both.
 | Context7 | Standalone MCP | Via MCP_DOCKER |
 | Browser | Chrome MCP (interactive) | Preview MCP (headless testing) |
 | Code search | Grep/Glob (local) | GitHub `search_code` (cross-repo) |
-| Web research | Firecrawl (clean extraction) | Chrome MCP (interactive), WebFetch (raw HTTP) |
+| Web research | crawl4ai `crwl` CLI (free local extraction, no credit ceiling — v8.20.0) | Firecrawl MCP (500 credits; unique: `firecrawl_search`), Chrome MCP (interactive), WebFetch (raw HTTP) |
 | Component generation | 21st.dev Magic (AI text-to-component) | shadcn + manual composition |
 | Component docs | shadcn + HeroUI + Aceternity MCPs | Context7 (Mantine, Chakra, Ark, Base UI, etc.) |
-| Performance audit | Lighthouse MCP (runtime) | SK-078 Design Audit (static code analysis) |
+| Performance audit | Lighthouse MCP (runtime) | `/audit` (SK-111) static review |
 | Deployment mgmt | Vercel MCP (reads) | `vercel` CLI (deploys), Netlify MCP (Netlify sites) |
 | Feature flags | Statsig MCP (free 50M events) | ConfigCat (10 flags free), LaunchDarkly (paid) |
-| Visual regression | Claude Preview screenshots (manual) | Lighthouse visual-diff snapshots |
+| Visual regression | Claude Browser screenshots (manual) | Lighthouse visual-diff snapshots |
 | Desktop build | Tauri MCP (execution) + SK-088 (knowledge) | Electron MCP (if Electron project) |
 | Mobile E2E | Maestro MCP (auto-heal YAML) | mobile MCP + manual scripts |
 
@@ -332,11 +317,17 @@ Every generator has a validator. Always run both.
 |---|---|
 | `CLAUDE.md` | Master instructions (self-contained) |
 | `settings.json` | Hooks, permissions, env vars |
-| `skills/ACTIVE-DIRECTORY.md` | Active skill index (76 skills: 15 Core + 61 Available) |
+| `skills/ACTIVE-DIRECTORY.md` | Active skill index (53 skills: tier split lives in the directory header) |
 | `skills/ARCHIVE-DIRECTORY.md` | Archived skill index (7 bundles) |
 | `hooks/post-tool-monitor.js` | Central PostToolUse telemetry hub |
 | `hooks/context-guard.js` | PreToolUse context + security enforcer |
 | `hooks/context-thresholds.json` | Shared threshold config (single source of truth) |
+| `hooks/lib/{slug,session,git,ollama}.js` | v8.5 shared libs — canonical slugs/matching keys, session-state readers, git snapshot, ONE Ollama wrapper + system-wide circuit breaker (`cache/ollama-breaker.json`) |
+| `scripts/recall.js` + `scripts/recall-embed-index.js` | `/recall` engine + its semantic index builder (refreshed weekly by weekly-graph-sync) |
+| `systems/` + `systems/registry.json` | Capability Systems overlay manifests + derived machine index (v8.6) |
+| `scripts/{validate-systems,systems-registry,knowledge-view}.js` + `scripts/lib/system-manifest.js` | Systems validator · registry regen · per-domain knowledge views · shared manifest parser (v8.6) |
+| `hooks/system-detect.js` | SessionStart Capability-System proposer (`SYSTEM:` advisory, bounded scoring, 24h throttle) (v8.6) |
+| `scripts/prune-dead-scheduled-tasks.js` | Manual maintenance CLI — the **only** way to delete dead scheduler entries (the `scheduled-tasks` MCP exposes no delete). Dry-run by default; `--apply` rewrites scheduler state after backing it up to `cache/`. Run `--apply` with the Claude desktop app CLOSED (the app overwrites scheduler state on its next write). Fail-closed. |
 
 ## External Token Optimization Tools
 

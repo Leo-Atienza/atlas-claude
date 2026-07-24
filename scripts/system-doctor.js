@@ -17,7 +17,7 @@
  * Wired into:
  *   - /system-doctor slash command (commands/system-doctor.md)
  *   - weekly-validator-sweep scheduled task
- *   - session-start.sh §7l (when ATLAS_HEALTH_BLOCK=1)
+ *   - SessionStart surfacing via hooks/system-doctor-advisory.js (snapshot-driven; ATLAS_HEALTH_BLOCK retired v8.14)
  */
 
 'use strict';
@@ -29,8 +29,7 @@ const { spawnSync } = require('child_process');
 const HOME = require('os').homedir();
 const SCRIPTS_DIR = path.join(HOME, '.claude', 'scripts');
 
-// Validator list lives in scripts/lib/validators.js — single source of truth
-// shared with scripts/test-validators.js so they can never drift apart.
+// Validator list is shared with system-snapshot.js — single source of truth.
 const VALIDATORS = require('./lib/validators');
 
 const args = process.argv.slice(2);
@@ -67,8 +66,11 @@ function summaryLine(r) {
   if (r.id === 'commands')            return `ghosts=${s.counts?.ghosts ?? '?'} undocumented=${s.counts?.undocumented ?? '?'}`;
   if (r.id === 'hooks')               return `orphans=${s.counts?.orphans ?? '?'}/${s.counts?.hooks ?? '?'}`;
   if (r.id === 'knowledge')           return s.skipped ? 'skipped' : `total=${s.counts?.actual_total ?? '?'} drift=${s.drift?.total_drift ? 'yes' : 'no'}`;
-  if (r.id === 'skill-counts')        return s.system_version ? `${s.system_version} active (fs total ${s.filesystem_unlimited?.total ?? '?'})` : 'parsed';
+  if (r.id === 'skill-counts')        return s.system_version ? `${s.system_version} active (fs ${s.filesystem_unlimited?.total ?? '?'}, unregistered=${s.registry_reconciliation?.unregistered?.length ?? 0})` : 'parsed';
+  if (r.id === 'skill-collisions')    return `conformance=${s.counts?.conformance_errors ?? '?'} collisions=${s.counts?.collisions ?? '?'} broad=${s.counts?.broad_scope ?? '?'}`;
   if (r.id === 'references')           return `broken=${s.counts?.broken ?? '?'}/${s.counts?.checked ?? '?'}`;
+  if (r.id === 'systems')             return s.skipped ? 'skipped (no systems/)' : `systems=${s.counts?.active ?? '?'}/${s.counts?.systems ?? '?'} dangling=${s.counts?.dangling_refs ?? '?'} drift=${s.counts?.registry_drift ?? '?'}`;
+  if (r.id === 'brain-coverage')      return s.skipped ? 'skipped (no vault)' : `unreachable=${s.counts?.unreachable ?? '?'}/${s.counts?.assets ?? '?'} brains=${s.counts?.brains ?? '?'} allowlisted=${s.counts?.allowlisted ?? '?'}`;
   return r.ok ? 'ok' : 'fail';
 }
 

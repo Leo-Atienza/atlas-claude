@@ -48,7 +48,7 @@ function resolveRef(raw) {
     .replace(/^~\/\.claude\//, '')
     .replace(/^\$\{?HOME\}?\/\.claude\//, '')
     .replace(/^\$\{?CLAUDE_DIR\}?\//, '')
-    .replace(/^[/]?[cC]:?\/Users\/[^/]+\/\.claude\//, '')
+    .replace(/^[/]?[cC]:?\/Users\/<user>\/\.claude\//, '')
     .replace(/^\.\//, '');
   // Require the result to land in an executable dir and end in a script ext.
   const m = s.match(/(?:^|\/)((?:hooks|scripts|commands)\/[\w./-]+\.(?:js|py|sh))$/);
@@ -69,7 +69,7 @@ function extractFromText(text) {
   //    inside "cctools-safety-hooks/"; the trailing (?![A-Za-z0-9]) again guards
   //    against ".js"-in-".json". Both guards prevent false RED in system-doctor.
   const reBased =
-    /["'`]?((?:(?<![\w-])(?:hooks|scripts|commands)\/|~\/\.claude\/|\$\{?HOME\}?\/\.claude\/|\$\{?CLAUDE_DIR\}?\/|[/]?[cC]:?\/Users\/[^/]+\/\.claude\/)[\w./-]+\.(?:js|py|sh))(?![A-Za-z0-9])/g;
+    /["'`]?((?:(?<![\w-])(?:hooks|scripts|commands)\/|~\/\.claude\/|\$\{?HOME\}?\/\.claude\/|\$\{?CLAUDE_DIR\}?\/|[/]?[cC]:?\/Users\/<user>\/\.claude\/)[\w./-]+\.(?:js|py|sh))(?![A-Za-z0-9])/g;
   let m;
   while ((m = reExec.exec(text))) out.add(m[1]);
   while ((m = reBased.exec(text))) out.add(m[1]);

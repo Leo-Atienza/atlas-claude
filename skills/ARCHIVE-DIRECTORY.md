@@ -2,6 +2,7 @@
 
 > Archived skills organized by domain bundle. Load from the relevant page when needed.
 > If a task requires an archived skill, read the page → find the SKILL.md path → load it.
+> Note: table rows count skill IDs (a bundle row like DV-001–DV-031 = 31 IDs, 1 dir); on-disk `_archived/` dirs are fewer (45). The `archive-counts` validator reconciles dirs↔doc; don't compare row count to dir count.
 
 | ID | Name | Purpose | Bundle | Page |
 |----|------|---------|--------|------|
@@ -11,6 +12,7 @@
 | SK-004 | Spreadsheet Tools | Open/edit/create spreadsheets; CSV conversion | Dormant — Document & Media Tools | 7 |
 | SK-008 | Remotion Video | Programmatic video creation with React | Dormant — Document & Media Tools | 7 |
 | SK-052 | LinkedIn Publisher | Compose and publish LinkedIn posts via API | Dormant — Document & Media Tools | 7 |
+<!-- SK-040 (Dream Consolidation, deprecated 2026-05-14 with v8.0.0 brain consolidation) — ID reassigned to active "Tailwind v4 Web Setup" (2026-05-15). Original archive entry removed to clear cross-listed-skills validator. -->
 | SK-057 | L100 Web Orchestrator | Superseded by SK-083 Vanguard Web Architecture | Web (archived) | N/A |
 | DV-001–DV-031 | CC-DevOps Suite (31 skills) | Terraform, Ansible, K8s, Helm, Docker, CI/CD generators | Infra & DevOps | 1 |
 | FS-029 | Cloud Architect | Multi-cloud architecture patterns | Infra & DevOps | 1 |
@@ -106,12 +108,10 @@
 | SK-074 | Grill Me | Interview-driven plan/design validation | Workflow & Meta | 6 |
 | SK-075 | Canvas Design | Visual art creation via design philosophy | Dormant — Document & Media | 7 |
 | SK-076b | Design Taste Frontend | Senior UI/UX bias-overriding design enforcer | Workflow & Meta | 6 |
-| SK-006 | UX Design Intelligence | UX strategy, 67 design styles, 161 palettes, BM25 search | Web (archived) | N/A |
-| SK-031 | Next.js Upgrade Guide | Upgrade Next.js to latest with migration steps | Web (archived) | N/A |
-| SK-034 | Web Interface Guidelines | Web design compliance review | Web (archived) | N/A |
-| SK-040 | Dream Consolidation | Multi-phase memory consolidation — orient, merge, prune | Workflow & Meta | 6 |
-| SK-044 | GSAP Advanced (ScrollTrigger) | ScrollTrigger, Flip, Draggable, SplitText | Web (archived) | N/A |
-| SK-077 | Subagent-Driven Dev | Task dispatch → fresh subagent → two-stage review | Workflow & Meta | 6 |
+| SK-006 | UX Design Intelligence | UX strategy, 67 design styles, 161 palettes, BM25 search — superseded 2026-06-11 by SK-133 ui-ux-catalog (fresh v2.5.0 vendoring) | Web (archived) | N/A |
+<!-- Removed 2026-05-02: SK-031, SK-034, SK-040, SK-077 — these are listed as Available skills in ACTIVE-DIRECTORY.md (status reconciled in audit synthetic-leaf, Wave 1 / T1.4). -->
+<!-- Removed 2026-06-11: SK-044 GSAP Advanced — restored to ACTIVE-DIRECTORY (v8.7.0 Design Excellence); see the dated restore note below. -->
+
 | SK-084 | CSS-First UI Engine | Container Queries, :has(), @layer, Popover+Anchor, OKLCH | Web (archived) | N/A |
 | SK-085 | Streaming & Cache Architecture | Compositional cache, Activity, ViewTransition | Web (archived) | N/A |
 | SK-087 | Modern Build Pipeline | Biome 2.0, Lightning CSS, Turbopack | Web (archived) | N/A |
@@ -133,11 +133,57 @@
 | FS-033 | Testing Strategist | Testing strategies and patterns | Enterprise | 3 |
 | FS-035 | Debugging Expert | Systematic debugging | Enterprise | 3 |
 | FS-052 | PostgreSQL Expert | PostgreSQL optimization and admin | Data & ML | 4 |
+| SK-118 | Next.js Developer | Vendored `fullstack-dev/nextjs-developer` (Next 14-era) — deprecated from active registry 2026-06-09; superseded by native SK-029/030/031 (Next 16) | Enterprise | 3 |
+| SK-119 | React Expert | Vendored `fullstack-dev/react-expert` — deprecated 2026-06-09; superseded by symlinked vercel-react-best-practices + vercel-composition-patterns | Enterprise | 3 |
+| SK-121 | Testing Strategist | Vendored `fullstack-dev/test-master` — deprecated 2026-06-09; superseded by native SK-056 vitest-testing + symlinked tdd (SK-070). Same content as FS-033 | Enterprise | 3 |
+| SK-122 | Debugging Expert | Vendored `fullstack-dev/debugging-wizard` — deprecated 2026-06-09; superseded by `/flow:debug` + CLAUDE.md debugging rules. Same content as FS-035 | Enterprise | 3 |
+<!-- SK-118/119/121/122 deprecated 2026-06-09 (skills-consolidation Phase 4): vendored fullstack-dev bundle rows removed from ACTIVE-DIRECTORY (45→41). No `_archived/` dirs — the vendored SKILL.md files stay in the bundle; only the registry rows moved. SK-116/117/120/123 remain active (TS reference + /api-design + /db-schema Read-targets). -->
+
 
 ## Wave 1 bulk archive (2026-04-27)
 
 Per `plans/i-want-you-to-bright-acorn.md` — 45 skills moved to `skills/_archived/` to bring active count from 63 → 18 (target ≤25). Restore any with `mv skills/_archived/<name>/ skills/<name>/`.
 
-advanced-javascript, ai-native-ui, anime-js, app-l100, barba-js, brand-guidelines, cinematic-web-engine, codebase-knowledge-graph, context-router, crossplatform-monorepo, css-first-ui, design-audit, design-critique, dev-cycle, device-hardware-bridge, discovery-doc, docx, edge-intelligence, graph-aware-review, gsap-advanced, lenis-smooth-scroll, linkedin-poster, local-first-architecture, modern-build-pipeline, motion-animation, motion-native, nano-banana, playwright, pptx, project-init, remotion, sensory-native, spline-3d, streaming-cache, tanstack-ecosystem, taste-skill, tauri-desktop, threejs, transition-native, ui-design-stack, visual-native, web-l100, web-platform-apis, wiki-manage, xlsx
+advanced-javascript, ai-native-ui, anime-js, app-l100, barba-js, brand-guidelines, cinematic-web-engine, codebase-knowledge-graph, context-router, crossplatform-monorepo, css-first-ui, design-audit, design-critique, dev-cycle, device-hardware-bridge, discovery-doc, docx, edge-intelligence, graph-aware-review, linkedin-poster, local-first-architecture, modern-build-pipeline, motion-native, nano-banana, playwright, pptx, project-init, remotion, sensory-native, spline-3d, stop-slop, streaming-cache, tanstack-ecosystem, taste-skill, tauri-desktop, theme-factory, threejs, transition-native, ui-design-stack, visual-native, web-l100, web-platform-apis, xlsx
 
-Active (18): audit, canvas-design, deep-research, design-polish, dream, flow, graphify, gsap, hackathon, handoff, impeccable, pdf, self-evolve, smart-swarm, stop-slop, subagent-driven-dev, theme-factory, vitest-testing
+Active (10): canvas-design, design-polish, dream, graphify, gsap, handoff, impeccable, self-evolve, vitest-testing, wiki-manage
+<!-- 2026-07-20 (v10): audit, enterprise-research, flow, hackathon, smart-swarm, subagent-driven-dev returned to _archived/ — see the v10 section below. -->
+
+## v10 inventory & disposition archive (2026-07-20, CP-1-approved)
+
+Evidence: `node scripts/usage-report.js` (fused ledger) + all-session transcript search — zero invocations each unless noted. Every entry has a detection pattern in `archived-skills-manifest.json` (consumer: `hooks/archived-skill-offer.js`).
+
+| ID | Name | Archived dir | Notes / restore |
+|----|------|--------------|-----------------|
+| — | Flow workflow system | `_archived/flow/` | Whole family bundled: skill + `commands/` (19 flow:* files + team/smart-swarm) + `agents/` (15 flow-* + smart-swarm-coordinator). 0 uses ever, 0 transcript hits. Restore: mv the bundle back (`skills/flow`, `commands/flow`, `agents/`). Detection: `.flow/state.yaml` |
+| SK-108 | Hackathon Workflow | `_archived/hackathon/` | Skill + its 10 `commands/`. 1 use (hackathon:scope) >45d — seasonal park. Detection: `.hackathon/` dir |
+| SK-039 | Smart Swarm | `_archived/smart-swarm/` | Workflow tool + CLAUDE.md council are the two kept orchestration lanes |
+| SK-077 | Subagent-Driven Dev | `_archived/subagent-driven-dev/` | Dispatch-and-review is a Workflow one-liner now |
+| SK-076 | Enterprise Research | `_archived/enterprise-research/` | Built-in deep-research harness is canonical |
+| SK-111 | Audit | `_archived/audit/` | Whole-codebase wave audit — past "audits" used the CLAUDE.md ATLAS self-audit procedure instead |
+| SK-070 | TDD (mattpocock) | `_archived/tdd` (symlink) | Ecosystem symlink — link archived, target intact in `~/.agents/skills/tdd` |
+| SK-071 | Triage Issue | `_archived/triage-issue` (symlink) | Same — target `~/.agents/skills/triage-issue` |
+| SK-027 | E2E Testing (AI-Powered) | `_archived/e2e-testing` (symlink) | Same — target `~/.agents/skills/e2e-testing`; `/new-mobile-app` repointed to the `mobile` MCP |
+| SK-011 | MCP Server Builder | `_archived/mcp-builder` (symlink) | Same — target `~/.agents/skills/mcp-builder`; `anthropic-skills:mcp-builder` symlink listing remains the live copy |
+| — | Retired ghost commands | `_archived/retired-commands/` | init-memory (targets the v8.0.0-retired memory dir), memory-health (→ /wiki-lint), memory-review, memory-search (→ /recall), learn (→ /remember), wiki-query (→ /recall; wiki-manage QUERY mode stays for interactive use), parallel-audit (audit skill archived), skill-usage-audit-task/ (scheduler entry deleted v10 U5-4 — absorbed into monthly-evolution-report step 3 since 2026-06-09) |
+| — | Parked agent packs | `_archived/agents-parked/` | context-engineering-kit (fpf/sdd/code-review agents), infra-showcase (11 agents), compound-engineering wrong-stack members (dhh-rails, kieran-rails, kieran-python, lint/Ruby, every-style-editor, ankane-readme-writer, schema-drift-detector, data-migration-expert, deployment-verification-agent, figma-design-sync) |
+| — | Pack companion skills | `_archived/context-engineering-kit-skills/`, `_archived/infra-showcase-skills/` | The packs' skills/plugins dirs, parked with their agents |
+
+> Note: `theme-factory` archived 2026-04-30 — appended to wave-1 list 2026-05-02 (audit synthetic-leaf / Wave 1 T1.5).
+> Note: `wiki-manage` restored from wave-1 archive 2026-05-02 — `mv skills/_archived/wiki-manage/ skills/wiki-manage/` per the Karpathy LLM Wiki revival decision.
+> Note: `stop-slop` (SK-053) archived 2026-05-28 — ~60d on disk, 0 invocations (drift-proposer `skill_unused`). `mv skills/stop-slop/ skills/_archived/stop-slop/`.
+> Note: `canvas-design` archived 2026-07-02 (v8.14.0 audit) — redundant with the `anthropic-skills:canvas-design` ecosystem symlink (same upstream skill); SYS-DSGN manifest repointed to the symlinked copy. Restore: `mv skills/_archived/canvas-design/ skills/canvas-design/`. Resolves the June-audit deferred decision.
+> Note: `gsap-advanced` (SK-044) restored 2026-06-11 — `mv skills/_archived/gsap-advanced/ skills/gsap-advanced/` per the v8.7.0 Design Excellence upgrade (ScrollTrigger for storytelling-scroll archetypes; HTML-comment header converted to YAML frontmatter on restore). Removed from the wave-1 list below.
+> Note: `ui-design-stack` (in the wave-1 list) — its Part-B catalog data (styles/palettes/pairings CSVs) was superseded 2026-06-11 by SK-133 `ui-ux-catalog` (fresh v2.5.0 vendoring, pinned + vetted). Do not restore ui-design-stack for catalog purposes.
+> Note: `lenis-smooth-scroll` (SK-048) restored 2026-06-11 — `mv skills/_archived/lenis-smooth-scroll/ skills/lenis-smooth-scroll/` per v8.8.0 Apple-Tier Scroll Storytelling (foundation of the scroll-story stack; un-dangles gsap-advanced's existing cross-ref; HTML-comment header converted to YAML on restore). Removed from the wave-1 list below.
+> Note: `motion-animation` (SK-047) restored 2026-06-11 — `mv skills/_archived/motion-animation/ skills/motion-animation/` per v8.9.0 Animation Craft (spring-physics React interactions; content refreshed v11 → Motion v12 / `motion` package on restore; YAML frontmatter conversion). Removed from the wave-1 list below.
+> Note: filesystem `_archived/` holds **45** dirs vs the **43** in the wave-1 list above. The extra two are accounted for elsewhere: `pdf` (pre-wave-1 list below) and `dream` (SK-040 Dream Consolidation, deprecated 2026-05-14 with v8.0.0 — see the top-of-file comment). No orphans — the count gap is expected, not drift.
+> Note (v10, 2026-07-20): 14 dirs/links added by the v10 disposition — flow, hackathon, smart-swarm, subagent-driven-dev, enterprise-research, audit, tdd, triage-issue, e2e-testing, mcp-builder, retired-commands, agents-parked, context-engineering-kit-skills, infra-showcase-skills — all rowed in the v10 section above; `f1b-description-originals-2026-07-16` left for `plans/archive/` the same day (it was a backup dir, not a skill).
+> Note: `skills/_external/` (vendored Obsidian bundle: defuddle, json-canvas, obsidian-bases, obsidian-cli, obsidian-markdown) is a separate vendored namespace, excluded from both active and archive counts.
+
+## Pre-wave-1 archived skills (legacy SK-* slugs)
+
+Slugs of skills archived before the Wave 1 bulk move. These appear in the upper tables under SK-001..SK-008 / SK-052 IDs but the table cells use display names (e.g. "PDF Tools") rather than directory slugs. Listed here so audit tooling can reconcile filesystem `_archived/<slug>/` against the doc.
+
+docx, pdf, pptx, xlsx, remotion, linkedin-poster, nano-banana
+

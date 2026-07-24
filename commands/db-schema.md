@@ -19,8 +19,8 @@ Skip questions if the domain is obvious from context or arguments.
 
 1. Read `skills/fullstack-dev/postgres-pro/SKILL.md` -- Postgres patterns
 2. Read `skills/fullstack-dev/sql-pro/SKILL.md` -- SQL optimization
-3. If Supabase: read `skills/fullstack-dev/supabase-pro/SKILL.md` -- RLS, Auth
-4. If Prisma in use: check Prisma MCP for schema sync
+3. If Supabase: apply RLS policies (see Step 3c) + use the Supabase MCP for migrations/types (re-add per-project -- see `INSTALLED.md`)
+4. If Drizzle in use: read `skills/drizzle-neon/SKILL.md` -- SQL-first schema, migrations (push vs generate), RSC patterns
 
 ## Step 3 -- Design the schema
 
@@ -77,10 +77,10 @@ Detect available tools and use the best one:
 3. Verify with `describe_table_schema`
 4. Use `complete_database_migration` to merge to main
 
-### Prisma MCP
-1. Update `schema.prisma` to match design
-2. Run `npx prisma migrate dev --name <migration-name>`
-3. Run `npx prisma generate` for client types
+### Drizzle (preferred ORM -- see `skills/drizzle-neon/SKILL.md`)
+1. Define/update the schema in `src/db/schema.ts` (type-inferred columns)
+2. Generate the migration: `npx drizzle-kit generate` (or `npx drizzle-kit push` for rapid dev)
+3. Apply it: `npx drizzle-kit migrate` -- client types are inferred from the schema, no separate generate step
 
 ### Raw SQL (fallback)
 1. Write migration file: `migrations/YYYYMMDD_<name>.sql`

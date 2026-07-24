@@ -1,0 +1,53 @@
+# app-quality.yml — ATLAS v9 D8 (Wave 6). Drop into .github/workflows/.
+# Expo/RN CI: lint → tsc → jest → Android-emulator Maestro smoke. iOS lives on
+# macOS runners for release branches only (macOS = 10x private-minute multiplier).
+#
+# FREE-TIER (verified 2026-07-12): public repos unlimited (incl. macOS). Private:
+# 2,000 min/mo, macOS 10x ⇒ ~200 real macOS min — so keep iOS CI to release
+# branches / public repos. Android emulator runs on ubuntu (KVM), 1x.
+name: app-quality
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  static:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Lint + typecheck
+        run: npx eslint . && npx tsc --noEmit
+      - name: Unit tests (jest-expo)
+        run: npm test -- --ci
+
+  android-e2e:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Enable KVM
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules && sudo udevadm trigger --name-match=kvm
+      - name: Android emulator + Maestro smoke
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 35   # Play target floor (v9 Wave 0); NOT API 36 (not mandated)
+          arch: x86_64
+          script: |
+            npx expo prebuild --platform android --no-install
+            ./android/gradlew -p android :app:assembleDebug
+            curl -Ls https://get.maestro.mobile.dev | bash
+            $HOME/.maestro/bin/maestro test .maestro/smoke.yaml

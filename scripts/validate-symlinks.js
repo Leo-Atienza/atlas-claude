@@ -23,15 +23,26 @@ const SKILLS_DIR = path.join(HOME, '.claude', 'skills');
 const SYMLINKS_FILE = path.join(SKILLS_DIR, 'SYMLINKS.md');
 
 function extractSymlinkNames(text) {
-  // Match table rows of form `| <name> | ... |` where name is a kebab-case slug
   const names = new Set();
-  const ROW_RE = /^\|\s*([a-z][a-z0-9-]+)\s*\|/gm;
-  let m;
-  while ((m = ROW_RE.exec(text)) !== null) {
-    const candidate = m[1].trim();
-    // Skip table header words
-    if (/^(name|skill|target|path|source|description|notes|expo|skill-id)$/i.test(candidate)) continue;
-    names.add(candidate);
+  // Primary: the "## Linked Skills" comma-separated prose list (current SYMLINKS.md format).
+  const section = text.match(/^## Linked Skills\s*\n([\s\S]*?)(?=\n## |$(?![\s\S]))/m);
+  if (section) {
+    for (const tok of section[1].split(/[,\n]/)) {
+      const candidate = tok.trim();
+      if (/^[a-z][a-z0-9-]+$/.test(candidate)) names.add(candidate);
+    }
+  }
+  // Legacy fallback: `| <name> | ... |` table rows — only if the prose list yielded nothing.
+  // (v8.14 audit: the file never matched this format, so the validator silently checked an
+  // empty set and trivially passed — the names.size-on-Array bug masked the 0 as "?".)
+  if (names.size === 0) {
+    const ROW_RE = /^\|\s*([a-z][a-z0-9-]+)\s*\|/gm;
+    let m;
+    while ((m = ROW_RE.exec(text)) !== null) {
+      const candidate = m[1].trim();
+      if (/^(name|skill|target|path|source|description|notes|expo|skill-id)$/i.test(candidate)) continue;
+      names.add(candidate);
+    }
   }
   return [...names];
 }
@@ -59,10 +70,13 @@ function main() {
   const results = names.map(checkSymlink);
   const broken = results.filter(r => r.broken || !r.isSymlink || !r.exists);
 
+  // Honesty guard (KNOWLEDGE-144): SYMLINKS.md exists to list links — extracting zero
+  // names means parser/format drift, not a clean system. Never trivially pass on ∅.
   const result = {
-    ok: broken.length === 0,
-    counts: { listed: names.size, broken: broken.length },
+    ok: broken.length === 0 && names.length > 0,
+    counts: { listed: names.length, broken: broken.length },
     broken,
+    ...(names.length === 0 ? { reason: 'extracted 0 names from SYMLINKS.md — parser/format drift' } : {}),
     source: SYMLINKS_FILE,
   };
   process.stdout.write(JSON.stringify(result, null, 2) + '\n');

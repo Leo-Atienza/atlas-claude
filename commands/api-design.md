@@ -19,7 +19,7 @@ Execute autonomously. Design the API, generate code, validate.
 
 1. Read `skills/fullstack-dev/api-designer/SKILL.md` -- API design patterns
 2. If GraphQL: read `skills/fullstack-dev/graphql-architect/SKILL.md`
-3. If Supabase backend: read `skills/fullstack-dev/supabase-pro/SKILL.md`
+3. If Supabase backend: use the Supabase MCP for RLS + type generation (re-add per-project — see `INSTALLED.md`)
 4. If consuming external API: configure OpenAPI MCP with spec URL
 
 ## Step 3 -- Design the API spec (if creating new API)

@@ -1,0 +1,8 @@
+[
+  {
+    "name": "First Load JS (app shell)",
+    "path": ".next/static/chunks/**/*.js",
+    "limit": "200 KB",
+    "gzip": true
+  }
+]

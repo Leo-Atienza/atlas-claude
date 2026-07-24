@@ -18,7 +18,7 @@ const fs = require('fs');
 const path = require('path');
 const {
   paths, loadThresholds, readJsonSafe, appendLine, readStdin, blockTool,
-  isHookEnabled,
+  isHookEnabled, logDenial,
 } = require('./lib');
 
 // Hook profile gate — exit early if disabled by ATLAS_HOOK_PROFILE
@@ -114,10 +114,13 @@ readStdin((data) => {
         const check = actionGraph.isDuplicateRead(sessionId, filePath);
         if (check.duplicate) {
           process.stdout.write(JSON.stringify({
-            additionalContext:
-              `ACTION GRAPH: ${filePath} was already read in this session ` +
-              `(call #${check.lastCallN}, ×${check.retrievedCount}, ~${check.approxTokensSaved} tokens still in context). ` +
-              `Reference the earlier read instead of re-loading unless you believe the file changed on disk.`,
+            hookSpecificOutput: {
+              hookEventName: 'PreToolUse',
+              additionalContext:
+                `ACTION GRAPH: ${filePath} was already read in this session ` +
+                `(call #${check.lastCallN}, ×${check.retrievedCount}, ~${check.approxTokensSaved} tokens still in context). ` +
+                `Reference the earlier read instead of re-loading unless you believe the file changed on disk.`,
+            },
           }));
           process.exit(0);
         }
@@ -132,12 +135,14 @@ readStdin((data) => {
     } else {
       const filePath = toolInput.file_path || '';
       if (filePath && SENSITIVE_PATH_RE.test(filePath)) {
+        logDenial('context-guard', toolName, `Sensitive file path detected: ${filePath}`);
         blockTool(`Sensitive file path detected: ${filePath}`);
         process.exit(0);
       }
 
       const content = extractContent(toolInput);
       if (content && SECRET_CONTENT_RE.test(content)) {
+        logDenial('context-guard', toolName, 'Potential secret detected in file content');
         blockTool('Potential secret detected in file content');
         process.exit(0);
       }
@@ -161,7 +166,10 @@ readStdin((data) => {
   // Stale metrics — warn but don't block
   if (metrics.timestamp && (now - metrics.timestamp) > STALE_SECONDS) {
     process.stdout.write(JSON.stringify({
-      additionalContext: `CONTEXT GUARD: Metrics stale (>${STALE_SECONDS}s old). Context usage unknown. Last reading: ${metrics.remaining_percentage || '?'}% remaining.`,
+      hookSpecificOutput: {
+        hookEventName: 'PreToolUse',
+        additionalContext: `CONTEXT GUARD: Metrics stale (>${STALE_SECONDS}s old). Context usage unknown. Last reading: ${metrics.remaining_percentage || '?'}% remaining.`,
+      },
     }));
     process.exit(0);
   }

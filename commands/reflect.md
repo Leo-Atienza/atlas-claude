@@ -19,16 +19,16 @@ This is the evolution mechanism. You are always growing.
 </objective>
 
 <constants>
-KNOWLEDGE_DIR   = ~/.claude/topics/KNOWLEDGE-DIRECTORY.md
+KNOWLEDGE_DIR   = <your-vault-path>/wiki/engineering/_index.md
 KNOWLEDGE_PAGES:
-  PAGE_1 = ~/.claude/topics/KNOWLEDGE-PAGE-1-patterns.md     (G-PAT)
-  PAGE_2 = ~/.claude/topics/KNOWLEDGE-PAGE-2-solutions.md    (G-SOL)
-  PAGE_3 = ~/.claude/topics/KNOWLEDGE-PAGE-3-errors.md       (G-ERR)
-  PAGE_4 = ~/.claude/topics/KNOWLEDGE-PAGE-4-preferences.md  (G-PREF)
-  PAGE_5 = ~/.claude/topics/KNOWLEDGE-PAGE-5-failed-approaches.md (G-FAIL)
-GLOBAL_MEMORY   = ~/.claude/projects/&lt;your-cwd-slug&gt;/memory  (slug pattern in commands/continue.md)
+  patterns    = <your-vault-path>/wiki/engineering/patterns.md     (G-PAT)
+  solutions   = <your-vault-path>/wiki/engineering/solutions.md    (G-SOL)
+  errors      = <your-vault-path>/wiki/engineering/errors.md       (G-ERR)
+  preferences = <your-vault-path>/wiki/engineering/preferences.md  (G-PREF)
+  failures    = <your-vault-path>/wiki/engineering/failures.md     (G-FAIL)
+GLOBAL_PERSONAL = <your-vault-path>/wiki/personal/
 
-LOCAL_MEMORY = <cwd>/.claude/memory  (only if not already in ~/.claude)
+LOCAL_MEMORY = <cwd>/.claude/memory  (per-project Progressive Learning; only if not already in ~/.claude)
 </constants>
 
 <process>
@@ -67,6 +67,7 @@ Capture a usage profile for this session to build a heat map over time:
 - **Agents spawned**: {count and types, e.g., 3x Explore, 1x Plan}
 - **Primary domain**: {e.g., frontend, backend, devops, config, debugging}
 - **Complexity**: {trivial | low | medium | high}
+- **Delegation self-check** (v9 B8): {which sub-tasks this session SHOULD have gone to `local_llm_agent` but didn't? — file/grep summaries, classification, extraction, boilerplate, bounded single-doc Q&A. If any, note them so the delegation reflex sharpens; the `/observe` §7 Delegation panel shows the running rate.}
 ```
 
 This profile gets written to the session entry (Phase 5). After 10+ sessions, patterns emerge showing which tools provide real value.
@@ -86,10 +87,10 @@ Glob: <cwd>/.claude/memory/INDEX.md
 
 ## Phase 3 — Duplicate & Conflict Detection
 
-For EACH new learning, check existing KNOWLEDGE-DIRECTORY.md entries:
+For EACH new learning, scan existing entries in the relevant vault engineering file (`<your-vault-path>/wiki/engineering/<type>.md`):
 
-1. **Scan by name and tags** — look for entries about the same topic
-2. **If duplicate found**: Update the EXISTING entry in its Knowledge Page instead of creating a new one. Bump the date in KNOWLEDGE-DIRECTORY.md.
+1. **Scan by name and tags** — look for entries about the same topic via `grep "^## KNOWLEDGE-" <your-vault-path>/wiki/engineering/<type>.md`
+2. **If duplicate found**: Update the EXISTING H2 entry inline instead of creating a new one. Bump the `**Date**` line.
 3. **If contradiction found**: Update the existing entry with the corrected information. Add a note: `**Updated {date}**: {what changed and why}`. Flag the update in the session report.
 4. **If no conflict** — proceed to write
 
@@ -119,7 +120,7 @@ If a previously captured mistake (G-ERR-xxx) was **almost repeated** but caught 
 
 If a LOCAL pattern (L-PAT-xxx) from a previous project proved useful in a different project:
 - Promote it to GLOBAL (G-) scope
-- Add entry to KNOWLEDGE-DIRECTORY.md and the relevant Knowledge Page
+- Add entry to the relevant `<your-vault-path>/wiki/engineering/<type>.md`
 - Add `**Promoted from**: {original_L_ID} in {project}` to the entry
 
 ## Phase 4 — Generate IDs and Write Topic Files
@@ -128,23 +129,23 @@ For each NEW learning (not a duplicate, not a conflict):
 
 ### a. Get Next ID
 
-Read KNOWLEDGE-DIRECTORY.md → find the highest ID number in the relevant category → increment by 1.
+Allocate per the canonical protocol — `~/.claude/scripts/progressive-learning/KNOWLEDGE-WRITE.md` §1: the global numeric max across all 5 vault files, incremented by 1: `grep -h "^## KNOWLEDGE-" <your-vault-path>/wiki/engineering/*.md | sed -E 's/^## (KNOWLEDGE-[0-9]+).*/\1/' | sort -V | tail -1`.
 
-### b. Append to Knowledge Page
+### b. Append to vault engineering file
 
-Append entry to the relevant Knowledge Page (or local INDEX.md for L- entries):
+Append entry to the relevant monolithic vault file (or local INDEX.md for L- entries):
 
-- G-PAT → KNOWLEDGE-PAGE-1-patterns.md
-- G-SOL → KNOWLEDGE-PAGE-2-solutions.md
-- G-ERR → KNOWLEDGE-PAGE-3-errors.md
-- G-PREF → KNOWLEDGE-PAGE-4-preferences.md
-- G-FAIL → KNOWLEDGE-PAGE-5-failed-approaches.md
+- G-PAT → <your-vault-path>/wiki/engineering/patterns.md
+- G-SOL → <your-vault-path>/wiki/engineering/solutions.md
+- G-ERR → <your-vault-path>/wiki/engineering/errors.md
+- G-PREF → <your-vault-path>/wiki/engineering/preferences.md
+- G-FAIL → <your-vault-path>/wiki/engineering/failures.md
 
-Entry format:
+Entry format (canonical: `KNOWLEDGE-WRITE.md` §3 — header is `## KNOWLEDGE-NNN:`, category in the **Type** field):
 
 ```markdown
 ## {ID}: {Name}
-**Date**: {YYYY-MM-DD} | **Tags**: #{tag1} #{tag2} #{tag3}
+**Date**: {YYYY-MM-DD} | **Type**: {pattern|solution|error|preference|failure} | **Tags**: #{tag1} #{tag2} #{tag3}
 
 {Full explanation with context.
 For Solutions: include complete code snippets with fences and language tags.
@@ -158,13 +159,9 @@ For Preferences: describe the preference, how it was confirmed, how to apply it.
 ---
 ```
 
-### c. Update KNOWLEDGE-DIRECTORY.md
+### c. Update engineering/_index.md (auto-maintained — usually no manual edit needed)
 
-Add a new row to the appropriate category table:
-
-```
-| {ID} | {Name} | #{tags} | {YYYY-MM-DD} |
-```
+The `<your-vault-path>/wiki/engineering/_index.md` is a folder-summary index regenerated by `scripts/wiki-hot-refresh.js` (session-start §6a) / the `wiki-manage` skill. Add manual notes only if you're publishing a notable cross-file synthesis. The new H2 entries inside each `<type>.md` are surfaced automatically. (`regen-index.py` was retired to `_archived/` in v8.0.0.)
 
 ### d. Store in Memory Graph (if MCP available)
 
@@ -198,7 +195,7 @@ If Memory Graph is NOT available, skip silently — file-based system is the pri
 
 ## Phase 5 — Session Summary (internal)
 
-No session files are written — knowledge lives in the Knowledge Pages and KNOWLEDGE-DIRECTORY.md. This phase prepares the report shown in Phase 9.
+No session files are written — knowledge lives in the vault engineering files at `<your-vault-path>/wiki/engineering/<type>.md`. This phase prepares the report shown in Phase 9.
 
 Gather:
 - **Summary**: 2-3 sentence session summary
@@ -220,8 +217,9 @@ If the current working directory is NOT `~/.claude` and is a real project:
 ## Phase 8 — Clear Flags
 
 ```bash
-rm -f ~/.claude/.pending-reflection 2>/dev/null
-rm -f ~/.claude/.reflect-trigger 2>/dev/null
+# mv-to-trash, not rm — the rm command is hard-blocked by the safety hook (v8.14 fix)
+mv ~/.claude/.pending-reflection /c/tmp/trash/.pending-reflection-$(date +%s) 2>/dev/null || true
+mv ~/.claude/.reflect-trigger /c/tmp/trash/.reflect-trigger-$(date +%s) 2>/dev/null || true
 ```
 
 ## Phase 9 — Report to User
@@ -253,7 +251,7 @@ Session: Quick Q&A about {topic}
 </process>
 
 <quality_gates>
-- No duplicate entries in KNOWLEDGE-DIRECTORY.md — always check before writing
+- No duplicate `## KNOWLEDGE-NNN` entries in the vault engineering files — always grep before writing
 - Contradictions are updated in-place with a note, never silently overwritten
 - Knowledge Page entries contain enough detail to be immediately actionable
 - Sensitive data is ALWAYS filtered before writing

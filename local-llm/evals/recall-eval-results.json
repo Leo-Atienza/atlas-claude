@@ -1,0 +1,79 @@
+{
+  "date": "2026-07-12",
+  "incumbent": "embeddinggemma:300m",
+  "candidate": "embeddinggemma:300m",
+  "cap": 1500,
+  "overall": {
+    "inc": {
+      "hit": 15,
+      "n": 16
+    },
+    "cand": {
+      "hit": 15,
+      "n": 16
+    }
+  },
+  "per_ns": {
+    "inc": {
+      "web-dev": {
+        "hit": 4,
+        "n": 4
+      },
+      "app-dev": {
+        "hit": 2,
+        "n": 3
+      },
+      "personal": {
+        "hit": 3,
+        "n": 3
+      },
+      "concept": {
+        "hit": 3,
+        "n": 3
+      },
+      "entity": {
+        "hit": 1,
+        "n": 1
+      },
+      "source": {
+        "hit": 1,
+        "n": 1
+      },
+      "synthesis": {
+        "hit": 1,
+        "n": 1
+      }
+    },
+    "cand": {
+      "web-dev": {
+        "hit": 4,
+        "n": 4
+      },
+      "app-dev": {
+        "hit": 2,
+        "n": 3
+      },
+      "personal": {
+        "hit": 3,
+        "n": 3
+      },
+      "concept": {
+        "hit": 3,
+        "n": 3
+      },
+      "entity": {
+        "hit": 1,
+        "n": 1
+      },
+      "source": {
+        "hit": 1,
+        "n": 1
+      },
+      "synthesis": {
+        "hit": 1,
+        "n": 1
+      }
+    }
+  },
+  "verdict": "ADOPT"
+}

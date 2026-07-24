@@ -4,14 +4,14 @@
 Desktop apps with local AI: document analyzer, code assistant, image processor, local knowledge base, privacy-focused AI assistant, research tool.
 
 ## Stack
-- Tauri 2.0 (Rust backend)
+- Tauri 2.x (Rust backend; CLI 2.11 current)
 - React + Zustand v5 (frontend)
 - llama.cpp via Rust bindings (local LLM inference)
 - sqlite-vec (vector storage and search)
 - Tauri plugins: fs, dialog, store, updater, shell
 
 ## Skills to Load
-SK-058 (Universal Conductor), SK-088 (Tauri Desktop), SK-091 (Edge Intelligence), SK-090 (Local-First)
+Live tooling: the `tauri-mcp` server + `/new-desktop-app`. Archived (restore from `skills/_archived/` if this archetype needs them): SK-088 (Tauri Desktop), SK-090 (Local-First), SK-091 (Edge Intelligence). SK-058 (Universal Conductor) is retired (no archive copy).
 
 ## Architecture
 ```

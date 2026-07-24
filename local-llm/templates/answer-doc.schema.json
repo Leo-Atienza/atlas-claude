@@ -1,0 +1,10 @@
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["found", "answer", "source_quote"],
+  "properties": {
+    "found": { "type": "boolean", "description": "true only if the document supports the answer" },
+    "answer": { "type": "string", "description": "the answer, or 'INSUFFICIENT' when found is false" },
+    "source_quote": { "type": "string", "description": "verbatim supporting sentence from the document, or '' " }
+  }
+}

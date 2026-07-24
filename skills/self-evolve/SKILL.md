@@ -13,18 +13,20 @@ The system's meta-skill. When Claude detects it lacks a capability needed for th
 Activate self-evolve when ANY of these occur:
 
 1. **Missing tool**: A task requires an integration or tool that isn't available (e.g., "connect to Jira" but no Jira MCP)
-2. **Repeated pattern**: The same multi-step workflow has been executed 3+ times across sessions — check `~/.claude/logs/failures.jsonl` and `~/.claude/topics/KNOWLEDGE-DIRECTORY.md` for patterns
+2. **Repeated pattern**: The same multi-step workflow has been executed 3+ times across sessions — check `~/.claude/logs/failures.jsonl` and `<your-vault-path>/wiki/engineering/_index.md` for patterns
 3. **Explicit request**: User says "can you learn to do X", "there should be a skill for this", "add a tool for X"
 4. **Tool failure**: A tool call fails because the capability doesn't exist, not because of a bug
 5. **Inefficiency signal**: Claude catches itself doing >5 manual steps that could be automated
 
 ## Decision Tree
 
+**Step 0 — check the parked-capabilities registry FIRST:** `INSTALLED.md` § "Parked capabilities" holds pre-vetted, license-checked, install-ready capabilities with explicit adoption triggers (local image gen via ComfyUI, local TTS via OmniVoice, crawl4ai-as-MCP, MCP-description compression, no-code scrapers, local video gen). If the detected gap matches a row, propose THAT (install + register only — the research is done, don't redo it). Same file records outright-rejected tools — don't re-research those either.
+
 ```
 ┌─ Is the gap about a TOOL or INTEGRATION?
-│  YES → Search MCP registry
+│  YES → Check INSTALLED.md § Parked capabilities (step 0) → then search MCP registry
 │  │  ├─ mcp-find "{keyword}" → found free server?
-│  │  │  YES → Show user: name, capabilities, source → on approval: mcp-add → register in REGISTRY.md
+│  │  │  YES → Show user: name, capabilities, source → on approval: mcp-add → document in INSTALLED.md
 │  │  │  NO  → Can a skill wrap existing CLI tools?
 │  │  │       YES → Create skill (see Skill Creation Protocol)
 │  │  │       NO  → Inform user, suggest alternatives or manual install
@@ -36,7 +38,7 @@ Activate self-evolve when ANY of these occur:
 │  │     1. Capture the workflow steps from conversation history
 │  │     2. Abstract into reusable instructions
 │  │     3. Write SKILL.md with proper frontmatter
-│  │     4. Register in REGISTRY.md
+│  │     4. Register in ACTIVE-DIRECTORY.md (protocol step 3)
 │  │
 │  NO ↓
 │
@@ -60,7 +62,7 @@ Activate self-evolve when ANY of these occur:
 2. **Evaluate**: Check each result for:
    - Free tier available (no API key required, or user has the key)
    - Relevant to the task at hand
-   - Not redundant with existing MCP servers (check REGISTRY.md MCP Servers section)
+   - Not redundant with existing MCP servers (check INSTALLED.md + the connected-server list)
 
 3. **Propose**: Show the user:
    ```
@@ -79,10 +81,7 @@ Activate self-evolve when ANY of these occur:
 
 5. **Verify**: Make a test call to confirm tools are working
 
-6. **Register**: Add entry to `~/.claude/skills/REGISTRY.md` under MCP Servers:
-   ```
-   | MCP-NNN | {name} | {purpose} | {access method} |
-   ```
+6. **Register**: Document the server in `~/.claude/INSTALLED.md` (dated entry: name, purpose, access method). `skills/REGISTRY.md` was retired — the live skill index is `ACTIVE-DIRECTORY.md`.
 
 7. **Log**: Update `~/.claude/SYSTEM_CHANGELOG.md`
 
@@ -98,11 +97,10 @@ Activate self-evolve when ANY of these occur:
    - Step-by-step "Process" section
    - Expected "Output Format"
 
-3. **Register**: Append to `~/.claude/skills/REGISTRY.md` Standalone Skills table:
-   ```
-   | SK-NNN | {name} | {purpose} | `skills/{name}/SKILL.md` |
-   ```
-   Use the next available SK number (check last entry).
+3. **Register** (v8.14: REGISTRY.md never existed — real surfaces below, same set skill-vet SK-140 uses):
+   - `skills/ACTIVE-DIRECTORY.md` — add the `| SK-NNN | {name} | {purpose} | skills/{name}/SKILL.md |` row + bump the header total (next free SK number = last entry + 1)
+   - `SYSTEM_VERSION.md` — `Skills (in ACTIVE-DIRECTORY)` row count
+   - `ARCHITECTURE.md` + `REFERENCE.md` + README badges — count mentions (the `skill-counts` validator cross-checks all surfaces; run `node scripts/system-doctor.js` after)
 
 4. **Changelog**: Update `~/.claude/SYSTEM_CHANGELOG.md`
 
@@ -114,7 +112,7 @@ Activate self-evolve when ANY of these occur:
 - **NEVER** add MCP servers that require authentication tokens the user hasn't provided
 - **ALWAYS** verify free tier availability before suggesting
 - **ALWAYS** show the user what will be added and get confirmation for MCP servers
-- **ALWAYS** check REGISTRY.md for duplicates before creating (grep for similar names/purposes)
+- **ALWAYS** check ACTIVE-DIRECTORY.md + ARCHIVE-DIRECTORY.md for duplicates before creating (grep for similar names/purposes)
 - **MAX 1** auto-created skill per session unless user explicitly requests more
 - Skills are local files only — no external downloads or binary installations
 - If uncertain whether something is free, ASK the user

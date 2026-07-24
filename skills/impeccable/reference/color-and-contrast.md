@@ -41,6 +41,18 @@ This rule is about **visual weight**, not pixel count:
 
 The common mistake: using the accent color everywhere because it's "the brand color." Accent colors work *because* they're rare. Overuse kills their power.
 
+### Live preview & export: Realtime Colors
+
+Once you've designed the palette here (OKLCH, tinted neutrals, roles) — **NOT before** — you can hand the user an instant live preview of it on a real UI template, and pull framework exports, via [Realtime Colors](https://www.realtimecolors.com/). This is a **preview/export tool, not a palette source**: never use it to *pick* colors (auto-generated palettes are the AI-slop the audit bans) — only to *visualize and export the palette you already designed*.
+
+Build the share link by mapping your tokens to its 5 visible roles (hex, no `#`, hyphen-joined, in this order): **text – background – primary – secondary – accent**:
+
+```
+https://www.realtimecolors.com/?colors=<text>-<bg>-<primary>-<secondary>-<accent>&fonts=<Heading>-<Body>
+```
+
+e.g. `?colors=0f1a17-f7faf9-0f7a68-d6ece7-c2703d&fonts=Clash+Display-Cabinet+Grotesk` (spaces in a font name → `+`). The example deliberately models the rules above: tinted neutrals rather than pure gray, a brand hue that is **not** reflex-blue, and two faces that clear `reflex_fonts_to_reject`. That view also exports CSS variables, Tailwind config, and shadcn/DaisyUI/MUI presets — a quick cross-check, but impeccable's `@theme` token emit stays authoritative.
+
 ## Contrast & Accessibility
 
 ### WCAG Requirements
@@ -53,6 +65,19 @@ The common mistake: using the accent color everywhere because it's "the brand co
 | Non-essential decorations | None | None |
 
 **The gotcha**: Placeholder text still needs 4.5:1. That light gray placeholder you see everywhere? Usually fails WCAG.
+
+### The opacity-muting trap (muted text on light / warm paper)
+
+The most common way "muted" text gets built — taking the ink color and lowering its **opacity** (`text-base-content/55`, `oklch(var(--bc) / 0.5)`, `rgba(…, .6)`) — is also the most common way it silently fails AA. On a near-white or warm-paper background, **alpha loses contrast faster than a darker solid hue does**: muting ink to `/0.50`–`/0.66` routinely lands at 3:1–4:1 even though it "looks readable," because the background bleeds through. It passes the eye and fails the meter.
+
+Practical rules for any text-led / editorial UI on light paper:
+
+- **Set a hard floor.** Never render normal-size body or meta text below ≈`/0.70` of the ink (≈4.9:1 on a 97%-L paper). Reserve `/0.55`–`/0.60` strictly for genuinely decorative meta that no one needs to read. Headings/titles stay at full ink.
+- **Prefer a darker hue over more transparency.** If muted text is too weak, darken the token (drop its lightness, or use a darker slate) rather than nudging opacity up — alpha is the lossier lever.
+- **Watch colored status/label text most.** Small uppercase tracked labels in a semantic color (a `warning` ochre, an `info` slate) are the lowest-contrast text on most pages. A "muted ochre" at ~62%-L on paper fails; darken the *token* (e.g. 62%→53% L) and the dot (if `currentColor`) and the label both clear AA at once.
+- **Verify against every surface the text sits on.** A value that passes on `base-100` can fail on the lighter `base-200`/card surface. Check both.
+
+This is the concrete form of "Alpha Is A Design Smell" (below) for the muted-text case, and it's invisible to the aesthetic to fix — you're changing numbers, not the design language.
 
 ### Dangerous Color Combinations
 
@@ -71,9 +96,18 @@ Pure gray (`oklch(50% 0 0)`) and pure black (`#000`) don't exist in nature—rea
 
 ### Testing
 
-Don't trust your eyes. Use tools:
+Don't trust your eyes — and don't trust a spec sheet either: on a real client build a gray was asserted AA-passing in five separate specs and measured 4.21:1 on one of its two grounds. Compute every shipped pair from the real tokens:
 
-- [WebAIM Contrast Checker](https://webaim.org/resources/contrastchecker/)
+```bash
+node ~/.claude/skills/impeccable/scripts/check-contrast.mjs --init --css src/index.css  # once: scaffold contrast-pairs.json
+node ~/.claude/skills/impeccable/scripts/check-contrast.mjs                             # every build: nonzero exit on any failure
+```
+
+Enumerate **pairs, not colours** (both grounds for every ink — the failure above passed on one ground and failed on the other), and record catastrophic combos in `banned` (legal CSS, visually broken — e.g. a dark ink on a full-bleed accent field at 2.05:1). Wire it as `npm run check:contrast` so it runs in CI. Handles OKLCH and `light-dark()` — pairs must pass in BOTH schemes.
+
+Secondary tools:
+
+- [WebAIM Contrast Checker](https://webaim.org/resources/contrastchecker/) for one-off checks
 - Browser DevTools → Rendering → Emulate vision deficiencies
 - [Polypane](https://polypane.app/) for real-time testing
 
@@ -99,6 +133,35 @@ Use two layers: primitive tokens (`--blue-500`) and semantic tokens (`--color-pr
 ## Alpha Is A Design Smell
 
 Heavy use of transparency (rgba, hsla) usually means an incomplete palette. Alpha creates unpredictable contrast, performance overhead, and inconsistency. Define explicit overlay colors for each context instead. Exception: focus rings and interactive states where see-through is needed.
+
+## @theme token hierarchy (Tailwind v4)
+
+The two-layer hierarchy above generalizes to three tiers inside a Tailwind v4 `@theme` block:
+
+1. **Brand primitives** — raw OKLCH values, named `--color-brand-*`. The only tier where literal `oklch(...)` appears.
+2. **Semantic roles** — `--color-surface`, `--color-text-muted`, `--color-accent`. These reference primitives, never raw values. Components consume semantic utilities (`bg-surface`), never raw palette classes (`bg-blue-500`).
+3. **Component tokens** — only when a specific component genuinely needs an override. Don't pre-create them.
+
+Naming rules:
+
+- Namespace prefixes drive utility generation: `--color-*` → color utilities, `--radius-*` → radius scale, `--font-*` → font families.
+- Every surface token gets a `-foreground` partner (`primary`/`primary-foreground`, `muted`/`muted-foreground`) so each contrast decision is made once, at the token level.
+- Dark mode re-assigns the same token names in a `.dark { }` block — semantic tier only; primitives stay put (matching the Token Hierarchy rule above).
+
+**Alpha ramp from one token.** Instead of hand-picking tints, fan a single brand token into a full transparency ramp with `color-mix()` inside `@theme`:
+
+```css
+@theme {
+  --color-primary-50:  color-mix(in oklab, var(--color-primary) 5%, transparent);
+  --color-primary-100: color-mix(in oklab, var(--color-primary) 10%, transparent);
+  --color-primary-200: color-mix(in oklab, var(--color-primary) 20%, transparent);
+  /* ...continue the scale as needed */
+}
+```
+
+This is the sanctioned exception to "Alpha Is A Design Smell" above: the ramp is explicit, defined once, and derived from the palette — not scattered ad-hoc rgba calls.
+
+Token architecture adapted from wshobson/agents tailwind-design-system @ cf6059d (MIT).
 
 ---
 

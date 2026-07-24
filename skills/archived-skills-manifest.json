@@ -1,7 +1,79 @@
 {
-  "_description": "Detection patterns for archived skills. Used by skill-watcher hook and usage-audit scheduled task.",
-  "_updated": "2026-03-27",
+  "_description": "Detection patterns for archived skills. Consumer: hooks/archived-skill-offer.js (SessionStart — evaluates detect_files as literal paths / dir-prefix '**' patterns and detect_packages against package.json; detect_keywords are prompt-time router signals only, surfaced via ARCHIVE-DIRECTORY.md). One advisory per cwd per 24h, never auto-restores.",
+  "_updated": "2026-07-20",
   "skills": {
+    "V10-FLOW": {
+      "name": "flow",
+      "category": "workflow",
+      "detect_files": [".flow/state.yaml", ".flow"],
+      "detect_packages": [],
+      "detect_keywords": ["flow:start", "flow workflow", ".flow state"],
+      "restore_hint": "bundle: skills/_archived/flow/ holds the skill + commands/ + agents/ — move all three back"
+    },
+    "V10-HACKATHON": {
+      "name": "hackathon",
+      "category": "workflow",
+      "detect_files": [".hackathon", ".hackathon/scope.md"],
+      "detect_packages": [],
+      "detect_keywords": ["hackathon"],
+      "restore_hint": "bundle: skills/_archived/hackathon/ holds the skill + its commands/"
+    },
+    "V10-SMART-SWARM": {
+      "name": "smart-swarm",
+      "category": "workflow",
+      "detect_files": [],
+      "detect_packages": [],
+      "detect_keywords": ["smart swarm", "agent swarm", "multi-agent team"]
+    },
+    "V10-SUBAGENT-DD": {
+      "name": "subagent-driven-dev",
+      "category": "workflow",
+      "detect_files": [],
+      "detect_packages": [],
+      "detect_keywords": ["subagent-driven"]
+    },
+    "V10-ENTERPRISE-RESEARCH": {
+      "name": "enterprise-research",
+      "category": "research",
+      "detect_files": [],
+      "detect_packages": [],
+      "detect_keywords": ["enterprise research", "8-phase research"]
+    },
+    "V10-TDD": {
+      "name": "tdd",
+      "category": "workflow",
+      "detect_files": [],
+      "detect_packages": [],
+      "detect_keywords": ["red-green-refactor", "test-first"]
+    },
+    "V10-TRIAGE-ISSUE": {
+      "name": "triage-issue",
+      "category": "workflow",
+      "detect_files": [],
+      "detect_packages": [],
+      "detect_keywords": ["triage issue", "triage this bug"]
+    },
+    "V10-E2E-TESTING": {
+      "name": "e2e-testing",
+      "category": "testing",
+      "detect_files": [".maestro", "maestro"],
+      "detect_packages": ["detox"],
+      "detect_keywords": ["e2e test", "maestro", "detox"]
+    },
+    "V10-MCP-BUILDER": {
+      "name": "mcp-builder",
+      "category": "tooling",
+      "detect_files": [],
+      "detect_packages": ["@modelcontextprotocol/sdk", "fastmcp"],
+      "detect_keywords": ["build an mcp server", "mcp server"]
+    },
+    "V10-AUDIT": {
+      "name": "audit",
+      "category": "workflow",
+      "detect_files": [],
+      "detect_packages": [],
+      "detect_keywords": ["audit the codebase", "wave-based audit"]
+    },
     "DV-001": {
       "name": "terraform-generator",
       "category": "devops",
@@ -435,6 +507,41 @@
       "detect_files": ["**/*.vue"],
       "detect_packages": ["vue"],
       "detect_keywords": ["vue"]
+    },
+    "SK-088": {
+      "name": "tauri-desktop",
+      "category": "native",
+      "detect_files": ["tauri.conf.json", "src-tauri/**", "Cargo.toml"],
+      "detect_packages": ["@tauri-apps/api", "@tauri-apps/cli"],
+      "detect_keywords": ["tauri", "desktop app", "system tray"]
+    },
+    "SK-089": {
+      "name": "device-hardware-bridge",
+      "category": "native",
+      "detect_files": [],
+      "detect_packages": ["react-native-vision-camera", "expo-camera", "expo-barcode-scanner", "expo-local-authentication", "react-native-nfc-manager"],
+      "detect_keywords": ["camera", "barcode", "biometric", "nfc", "face id", "touch id", "vision camera"]
+    },
+    "SK-090": {
+      "name": "local-first-architecture",
+      "category": "native",
+      "detect_files": [],
+      "detect_packages": ["@powersync/react-native", "@powersync/web", "tinybase", "@legendapp/state", "electric-sql"],
+      "detect_keywords": ["local-first", "offline-first", "crdt", "sync engine", "offline sync"]
+    },
+    "SK-091": {
+      "name": "edge-intelligence",
+      "category": "native",
+      "detect_files": [],
+      "detect_packages": ["llama.rn", "onnxruntime-react-native", "react-native-mediapipe"],
+      "detect_keywords": ["on-device ai", "local llm", "edge ai", "on-device ml", "mediapipe", "llama.rn", "sqlite-vec"]
+    },
+    "SK-092": {
+      "name": "crossplatform-monorepo",
+      "category": "native",
+      "detect_files": ["turbo.json", "apps/mobile/**", "apps/desktop/**", "packages/shared/**"],
+      "detect_packages": ["turbo"],
+      "detect_keywords": ["monorepo", "cross-platform", "shared packages", "turborepo"]
     }
   }
 }

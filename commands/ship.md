@@ -1,7 +1,7 @@
 # /ship — Commit, push, and open PR
 
 Check context:
-1. If inside a `.flow/` project → run `/flow:ship` (handles commit + push + PR + optional feature video)
+1. Follow the standard workflow below (commit + push + PR)
 2. Otherwise → run `/commit-commands:commit-push-pr`
 
 Both handle the full sequence:

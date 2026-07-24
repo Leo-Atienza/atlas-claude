@@ -1,6 +1,7 @@
 # Archive — Bundle 1: Infrastructure & DevOps
 
 > Load these skills when working on infrastructure, CI/CD, containers, or cloud architecture.
+> **Path note (2026-06-09):** rows pointing into vendored bundles are historical records — bundle reorganizations mean many paths no longer resolve as written, and the `cc-devops/` suite was removed from disk entirely. To load a bundle skill, locate its current path first: `find ~/.claude/skills/<bundle> -name SKILL.md | grep <slug>`. Rows pointing at `skills/_archived/<slug>/` resolve as written.
 
 ## CC-DevOps Suite (31 generators/validators)
 

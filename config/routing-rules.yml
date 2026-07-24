@@ -1,0 +1,141 @@
+# ATLAS Routing Rules — where new facts go
+#
+# AUTO-GENERATED from commands/remember.md by scripts/sync-routing.js.
+# DO NOT HAND-EDIT. Edit the JSON block in commands/remember.md instead,
+# then run: node ~/.claude/scripts/sync-routing.js
+#
+# Read by /remember and the context-router skill. Each rule has a `match`
+# (regex patterns or content-type keywords) and a `route` (target system +
+# suggested file/path). First match wins. Default route at the bottom.
+
+version: 1
+updated: 2026-04-30
+
+rules:
+
+  - name: user-correction
+    match:
+      keywords: [don't, stop, no not that, never do, always, prefer, I want you to, from now on]
+      intent: user is correcting or stating a behavioral preference
+    route:
+      system: personal
+      type: feedback
+      namespace_dir: feedback
+      path: Documents/Wiki/wiki/personal/feedback/${slug}.md
+      reason: Behavioral feedback — must inform future sessions, not just this one.
+
+  - name: user-profile
+    match:
+      keywords: [I'm a, my role, my background, I work on, I use, I know]
+      intent: facts about the user themselves — role, expertise, stack
+    route:
+      system: personal
+      type: profile-update
+      namespace_dir: personal
+      path: Documents/Wiki/wiki/personal/profile.md
+      reason: Append/update the single profile.md page rather than creating per-fact files.
+
+  - name: pattern-or-architecture
+    match:
+      keywords: [pattern, architecture, approach worked, use this when, good way to, standard practice]
+      intent: reusable technical pattern, applicable across projects
+    route:
+      system: engineering
+      type: G-PAT
+      path: Documents/Wiki/wiki/engineering/patterns.md
+      reason: "Cross-project pattern. Confidence tag required: HIGH/MEDIUM/LOW. Append as new ## KNOWLEDGE-NNN H2 entry."
+      domain: "If cache/active-system-<cwd_slug>.json exists (cwd_slug via hooks/lib/slug.js cwdSlug), stamp `**Domain**: <primary.domain>` on the entry metadata line. An explicit user-stated domain overrides the marker."
+
+  - name: solution-snippet
+    match:
+      keywords: [solution, fix is, the way to do this, code that worked, snippet, example]
+      intent: specific solution worth reusing — typically with code
+    route:
+      system: engineering
+      type: G-SOL
+      path: Documents/Wiki/wiki/engineering/solutions.md
+      domain: "If cache/active-system-<cwd_slug>.json exists, stamp `**Domain**: <primary.domain>` on the entry metadata line. Explicit user domain overrides."
+
+  - name: error-or-mistake
+    match:
+      keywords: [mistake, got wrong, bug I introduced, wrong assumption, near miss, broke because]
+      intent: thing that went wrong + the lesson
+    route:
+      system: engineering
+      type: G-ERR
+      path: Documents/Wiki/wiki/engineering/errors.md
+      reason: Errors are gold. Capture root cause AND fix to prevent re-occurrence.
+      domain: "If cache/active-system-<cwd_slug>.json exists, stamp `**Domain**: <primary.domain>` on the entry metadata line. Explicit user domain overrides."
+
+  - name: failed-approach
+    match:
+      keywords: [tried, didn't work, doesn't work because, abandoned, rolled back]
+      intent: approach attempted that did not work — capture WHY
+    route:
+      system: engineering
+      type: G-FAIL
+      path: Documents/Wiki/wiki/engineering/failures.md
+      reason: Failed approaches prevent retrying dead ends.
+      domain: "If cache/active-system-<cwd_slug>.json exists, stamp `**Domain**: <primary.domain>` on the entry metadata line. Explicit user domain overrides."
+
+  - name: work-style-preference
+    match:
+      keywords: [I prefer, my style, I like to, I always, tab vs space, naming convention]
+      intent: user's working style — distinct from behavioral feedback
+    route:
+      system: engineering
+      type: G-PREF
+      path: Documents/Wiki/wiki/engineering/preferences.md
+      reason: Work-style preference (vs feedback memory which captures corrections).
+
+  - name: relationship-or-decision
+    match:
+      keywords: [depends on, uses, owned by, decided to, rejected, chose, blocked by]
+      intent: architectural decision or cross-project relationship not in git/code
+    route:
+      system: atlas-kg
+      cli: node ~/.claude/hooks/atlas-kg.js add <subject> <predicate> <object>
+      reason: Triple-store fact. Must NOT be derivable from git log or filesystem.
+
+  - name: external-source-or-research
+    match:
+      keywords: [paper, article, blog post, talk, research, ingest, from <url>]
+      intent: knowledge sourced from outside the codebase, worth keeping long-term
+    route:
+      system: wiki
+      skill: wiki-manage
+      mode: ingest
+      path: Documents/Wiki/raw/{articles|papers|clips}/YYYY-MM-DD-{slug}.md
+      reason: Wiki owns external compiled knowledge per Karpathy LLM-wiki pattern.
+
+  - name: concept-or-entity
+    match:
+      keywords: [concept of, entity, person, company, tool called, framework named]
+      intent: domain concept or named entity worth a wiki page
+    route:
+      system: wiki
+      skill: wiki-manage
+      mode: ingest
+      path: Documents/Wiki/wiki/{entity|concept}/${slug}.md
+
+  - name: session-state-or-todo
+    match:
+      keywords: [where we left off, next step, still pending, open question, blocker, in progress]
+      intent: ephemeral session state — should survive to next session, not forever
+    route:
+      system: handoff
+      writer: session-stop.sh
+      path: cache/session-hot/${cwd_slug}.md (L1) + handoffs/${cwd_slug}.md (L2)
+      reason: Session-scoped only. Decays via handoff prune (14d) and session-hot rewrite.
+
+  - name: default
+    match:
+      intent: uncategorized — ask the user, don't guess
+    route:
+      system: ask
+      reason: "Routing failed all rules. Surface to user: 'I'm not sure where this goes — memory, knowledge, wiki, or KG?'"
+
+# Notes:
+# - Rules are ordered. First match wins. Move more-specific rules above more-general ones.
+# - `${slug}` is a kebab-case slug derived from the fact's first 4-6 words.
+# - `${cwd_slug}` follows session-stop.sh convention: replace [/\:] with _, collapse repeats.

@@ -1,0 +1,11 @@
+{
+  "_comment": "Canonical frontend MCP server bundle — the single source of truth for scripts/ensure-frontend-mcp.js, which merges these into a frontend project's own .mcp.json (project scope) so they auto-load there. Demoted from GLOBAL user scope on 2026-05-28 (jazzy-wren audit) to cut global tool-surface/picker bloat while keeping them available exactly where they're used. To re-globalize any one: claude mcp add -s user <name> -- npx ...",
+  "mcpServers": {
+    "shadcn": { "type": "stdio", "command": "npx", "args": ["shadcn@latest", "mcp"], "env": {} },
+    "heroui": { "type": "stdio", "command": "npx", "args": ["-y", "@heroui/mcp@latest"], "env": {} },
+    "aceternity": { "type": "stdio", "command": "npx", "args": ["-y", "aceternityui-mcp"], "env": {} },
+    "magicuidesign-mcp": { "type": "stdio", "command": "npx", "args": ["-y", "@magicuidesign/mcp@latest"], "env": {} },
+    "iconify": { "type": "stdio", "command": "npx", "args": ["-y", "iconify-mcp-server@latest"], "env": {} },
+    "chrome-devtools": { "type": "stdio", "command": "npx", "args": ["-y", "chrome-devtools-mcp@latest"], "env": {} }
+  }
+}

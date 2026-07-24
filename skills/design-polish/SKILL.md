@@ -7,6 +7,8 @@ description: "Final quality pass fixing alignment, spacing, consistency, and mic
 
 Load the `frontend-design` skill (SK-005) — it contains design principles and anti-patterns to check against.
 
+Also run the deterministic detector pass: `skills/impeccable/reference/audit-rules.md` (47 rules + copy-pasteable grep sheet). Mechanical hits found there are fix-first items before any manual polish below.
+
 ---
 
 Perform a meticulous final pass to catch all the small details that separate good work from great work. The difference between shipped and polished.
@@ -113,6 +115,8 @@ Every interactive element needs ALL states: Default, Hover, Focus, Active, Disab
 - [ ] No layout shift on load
 - [ ] Respects reduced motion preference
 - [ ] Code clean (no TODOs, console.logs, commented code)
+- [ ] audit-rules grep sheet: zero detector hits (impeccable/reference/audit-rules.md)
+- [ ] Cross-browser + feel pass (animated/public builds): `verify-browsers.mjs` exits 0 — Chromium/Firefox/WebKit render clean, motion observed, reduced-motion content visible (impeccable/reference/cross-browser-and-feel.md)
 
 ## Final Verification
 
